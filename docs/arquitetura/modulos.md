@@ -121,7 +121,7 @@ agent      →  core, contracts, money
 adapters   →  contracts, money            ← nunca core
 payments   →  contracts, money            ← idem: PSP é adapter
 ui         →  contracts, money
-api/worker →  core, contracts, adapters   ← adapters só na composição
+api/worker →  core, contracts, adapters, db  ← adapters e db SÓ na composição
 mobile/web →  contracts, ui, money        ← nunca core, nunca db
 ```
 

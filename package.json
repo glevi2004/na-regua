@@ -1,0 +1,38 @@
+{
+  "name": "na-regua",
+  "private": true,
+  "version": "0.0.0",
+  "description": "ERP operavel por aplicativo e por assistente de IA no WhatsApp",
+  "packageManager": "pnpm@11.7.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "boundaries": "depcruise --config .dependency-cruiser.cjs apps packages",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "infra:up": "docker compose -f infra/docker-compose.yml up -d --wait",
+    "infra:down": "docker compose -f infra/docker-compose.yml down",
+    "infra:reset": "docker compose -f infra/docker-compose.yml down -v && pnpm infra:up",
+    "infra:logs": "docker compose -f infra/docker-compose.yml logs -f",
+    "infra:ps": "docker compose -f infra/docker-compose.yml ps",
+    "infra:psql": "docker compose -f infra/docker-compose.yml exec postgres psql -U naregua -d naregua",
+    "infra:redis": "docker compose -f infra/docker-compose.yml exec redis redis-cli"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "dependency-cruiser": "^16.9.0",
+    "prettier": "^3.4.2",
+    "tsx": "^4.19.2",
+    "turbo": "^2.3.3",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

@@ -1,0 +1,13 @@
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.jks binary
+*.p12 binary
+
+pnpm-lock.yaml linguist-generated=true -diff
+docs/assets/*.md linguist-generated=true -diff

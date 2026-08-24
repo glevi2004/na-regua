@@ -107,18 +107,21 @@ Esta tabela é a fonte da verdade. O arquivo de configuração do
 | `packages/agent` | ✅ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ |
 | `packages/fiscal` `whatsapp` `banking` `billing` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
 | `packages/ui` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | — |
-| `apps/api` `apps/worker` | ✅ | ❌ | ✅ | ❌ | ✅ | ✅ ¹ | ❌ |
+| `apps/api` `apps/worker` | ✅ | ❌ | ✅ | ✅ ¹ | ✅ | ✅ ¹ | ❌ |
 | `apps/mobile` `apps/web` | ✅ | ❌ | ✅ | ❌ | ❌ ² | ❌ | ✅ |
 
-¹ Apenas na **composição** (a raiz que instancia e injeta os adapters em `core`).
-Nunca dentro de um handler de rota.
+¹ Apenas na **raiz de composição** — o arquivo que instancia a conexão de banco e
+os adapters e os injeta em `core`. Nunca dentro de um handler de rota, de um
+consumidor de fila ou de um caso de uso. É a única exceção, e existe porque
+alguém precisa montar o grafo de dependências; se ela vazar para além do
+`composition.ts`, vira a proibição nº 1.
 ² Os apps de interface falam com a API por HTTP, não importam `core` diretamente.
 
 ### As quatro proibições que mais importam
 
 | # | Proibição | Por que existe |
 |---|---|---|
-| 1 | **`apps/*` não importa `db`** | Se um handler consulta o banco direto, a regra de negócio migra para a rota e o WhatsApp deixa de aplicá-la |
+| 1 | **Nenhum handler importa `db`** | Se um handler consulta o banco direto, a regra de negócio migra para a rota e o WhatsApp deixa de aplicá-la. Só a raiz de composição vê `db` |
 | 2 | **`apps/*` não importa `domain`** | Cálculo chamado direto pelo app é cálculo que o agente não faz igual |
 | 3 | **`domain` não importa nada com I/O** | Regra que toca rede ou banco não é testável em milissegundos, e por isso deixa de ser testada |
 | 4 | **Adapter não importa `core`** | A seta tem que apontar para dentro; adapter que conhece `core` não é substituível |

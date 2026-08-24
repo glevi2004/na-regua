@@ -132,7 +132,7 @@ evento, fila e chave de tradução.
 | Tabela e coluna no banco | `snake_case`, tabela no **plural** | `sale_items`, `net_amount` |
 | Variável de ambiente | `SCREAMING_SNAKE_CASE` | `DATABASE_URL`, `WHATSAPP_API_TOKEN` |
 | Endpoint HTTP | `kebab-case`, recurso no **plural** | `POST /v1/sales`, `GET /v1/bank-accounts` |
-| Fila / job | `kebab-case` com prefixo de domínio | `invoice:issue`, `whatsapp:send` |
+| Fila / job | `kebab-case`, `<domínio>-<ação>` | `invoice-issue`, `whatsapp-send` |
 | Evento de domínio | `PascalCase` no passado | `SaleRegistered`, `InvoiceIssued` |
 | Constante | `SCREAMING_SNAKE_CASE` | `MAX_DISCOUNT_RATE` |
 | Booleano | prefixo `is` / `has` / `can` | `isOverdue`, `hasInventory` |
@@ -162,3 +162,5 @@ Nomes que geram ambiguidade e não devem aparecer:
   `cfop`, `nfce`) — traduzir seria pior.
 - **Toda tabela de negócio tem `company_id`** — ver
   [`dados.md`](../arquitetura/dados.md#multi-tenant).
+- **Nome de fila nunca usa `:`** — o BullMQ reserva o caractere como separador
+  de chave no Redis e recusa o nome em tempo de execução.

@@ -47,18 +47,18 @@ sequenceDiagram
             C->>DB: grava AuditLog (autor, canal, antes/depois)
         end
 
-        C->>Q: enfileira invoice:issue
+        C->>Q: enfileira invoice-issue
         C-->>A: venda registrada
         A-->>M: 201 Created
         Note over M: RNF-003: ≤ 1,5 s<br/>sem esperar a SEFAZ — RNF-004
     end
 
-    Q->>W: consome invoice:issue
+    Q->>W: consome invoice-issue
     W->>FI: emite NFC-e
     alt autorizada
         FI-->>W: chave de acesso + XML
         W->>DB: grava nota, XML e estado "autorizada"
-        W->>Q: enfileira whatsapp:send (DANFE ao cliente)
+        W->>Q: enfileira whatsapp-send (DANFE ao cliente)
     else SEFAZ indisponível
         W->>DB: marca "em contingência" (RF-052)
         Note over W: retransmite quando voltar — RF-053
