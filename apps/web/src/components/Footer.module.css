@@ -1,0 +1,141 @@
+.footer {
+  padding-top: 60px;
+  background: var(--dark-bg);
+  color: var(--dark-text);
+}
+
+.inner {
+  display: grid;
+  gap: 40px;
+  padding-bottom: 46px;
+}
+
+/* --- Bloco institucional --- */
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brandMark {
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+  background: var(--brand-gradient);
+}
+
+.brandName {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  /* Unico lugar onde o gradiente aparece no texto da marca */
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.aboutText {
+  margin-top: 16px;
+  max-width: 42ch;
+  font-size: 14.5px;
+  color: var(--dark-text-muted);
+}
+
+.social {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 22px;
+}
+
+.socialLink {
+  display: inline-flex;
+  padding: 7px 15px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--dark-border);
+  font-size: 13px;
+  color: var(--dark-text-muted);
+  transition: border-color var(--transition), color var(--transition),
+    transform var(--transition);
+}
+
+.socialLink:hover {
+  border-color: var(--brand-accent);
+  color: var(--brand-accent);
+  transform: translateY(-2px);
+}
+
+/* --- Colunas de links --- */
+
+.columns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 30px;
+}
+
+.columnTitle {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--dark-text);
+}
+
+.columnList {
+  display: grid;
+  gap: 11px;
+  margin-top: 16px;
+}
+
+.columnLink {
+  font-size: 14.5px;
+  color: var(--dark-text-muted);
+  transition: color var(--transition);
+}
+
+.columnLink:hover {
+  color: var(--brand-accent);
+}
+
+/* --- Rodape inferior --- */
+
+.bottom {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-block: 22px;
+  border-top: 1px solid var(--dark-border);
+  font-size: 13px;
+  color: var(--dark-text-muted);
+}
+
+.legal {
+  display: flex;
+  gap: 20px;
+}
+
+.legal a {
+  transition: color var(--transition);
+}
+
+.legal a:hover {
+  color: var(--brand-accent);
+}
+
+@media (min-width: 760px) {
+  .columns {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 980px) {
+  .inner {
+    grid-template-columns: 1fr 1.25fr;
+    gap: 70px;
+  }
+}

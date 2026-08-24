@@ -1,0 +1,359 @@
+/* Cartao base compartilhado pelas tres previas */
+.card {
+  display: grid;
+  gap: 14px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+/* --- Vendas --- */
+
+.scanBar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius);
+  color: var(--brand-primary);
+  background: var(--bg-muted);
+}
+
+.scanText {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.scanPulse {
+  width: 8px;
+  height: 8px;
+  margin-left: auto;
+  border-radius: 50%;
+  background: var(--brand-accent);
+  animation: pulse 1.8s var(--ease) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.78);
+  }
+}
+
+.cart {
+  display: grid;
+  gap: 2px;
+}
+
+.cartRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 12px;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition);
+}
+
+.cartRow:hover {
+  background: var(--bg-muted);
+}
+
+.cartName {
+  display: grid;
+  min-width: 0;
+}
+
+.cartName strong {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.cartName span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.cartValue {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.totalBox {
+  display: grid;
+  gap: 8px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--bg-muted);
+}
+
+.totalLine {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.negative {
+  color: var(--brand-accent-dark);
+}
+
+.totalMain {
+  padding-top: 9px;
+  border-top: 1px solid var(--border);
+  font-size: 15px;
+  color: var(--text);
+}
+
+.totalMain strong {
+  font-family: var(--font-display);
+  font-size: 19px;
+  color: var(--brand-primary);
+}
+
+.payRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.payChip {
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.payActive {
+  border-color: transparent;
+  background: var(--brand-primary);
+  color: var(--text-on-brand);
+  font-weight: 600;
+}
+
+.fiscalNote {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--brand-accent-dark);
+}
+
+/* --- Financeiro --- */
+
+.cardHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.cardLabel {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.cardValue {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--brand-primary);
+}
+
+.trendChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: var(--radius-full);
+  background: var(--brand-accent-soft);
+  color: var(--brand-accent-dark);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.areaChart {
+  width: 100%;
+  height: 118px;
+}
+
+.bills {
+  display: grid;
+  gap: 2px;
+}
+
+.billRow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 11px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-muted);
+}
+
+.billDot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.dotDue {
+  background: var(--brand-highlight);
+}
+
+.dotSoon {
+  background: var(--brand-accent);
+}
+
+.dotOk {
+  background: var(--border-strong);
+}
+
+.billName {
+  display: grid;
+  min-width: 0;
+}
+
+.billName strong {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.billName span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.billValue {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* --- Assistente --- */
+
+.chatHead {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chatAvatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--brand-gradient);
+  color: #fff;
+}
+
+.chatTitle {
+  display: grid;
+}
+
+.chatTitle strong {
+  font-family: var(--font-display);
+  font-size: 15px;
+  color: var(--text);
+}
+
+.chatTitle span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.chat {
+  display: grid;
+  gap: 10px;
+}
+
+.bubble {
+  max-width: 86%;
+  padding: 12px 15px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.bubbleUser {
+  justify-self: end;
+  border-radius: var(--radius) var(--radius) 4px var(--radius);
+  background: var(--brand-primary);
+  color: var(--text-on-brand);
+}
+
+.bubbleBot {
+  justify-self: start;
+  border-radius: var(--radius) var(--radius) var(--radius) 4px;
+  background: var(--bg-muted);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.answerList {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.answerList li {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.answerList strong {
+  color: var(--brand-primary);
+}
+
+.confirm {
+  font-size: 14px;
+}
+
+.confirmActions {
+  display: flex;
+  gap: 8px;
+  margin-top: 11px;
+}
+
+.confirmYes,
+.confirmNo {
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.confirmYes {
+  background: var(--brand-accent);
+  color: #06312e;
+}
+
+.confirmNo {
+  border: 1px solid var(--border-strong);
+  color: var(--text-secondary);
+}
