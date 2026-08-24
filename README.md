@@ -64,6 +64,7 @@ na-regua/
 │   ├── whatsapp/     adapter do provedor de WhatsApp
 │   ├── banking/      adapter Open Finance
 │   ├── billing/      adapter de assinatura SaaS
+│   ├── payments/     adapter de PSP — Pix, link de pagamento
 │   ├── money/        tipo Money — centavos, sem float
 │   └── ui/           tokens e componentes compartilhados
 ├── docs/             documentação (ver índice abaixo)
@@ -88,6 +89,7 @@ Cada módulo documenta a si mesmo no próprio README:
 | `packages/whatsapp` | adapter de mensageria | [README](packages/whatsapp/README.md) |
 | `packages/banking` | adapter Open Finance | [README](packages/banking/README.md) |
 | `packages/billing` | adapter de assinatura | [README](packages/billing/README.md) |
+| `packages/payments` | adapter de PSP (Pix, link de pagamento) | [README](packages/payments/README.md) |
 | `packages/money` | valores monetários | [README](packages/money/README.md) |
 | `packages/ui` | design system | [README](packages/ui/README.md) |
 | `infra` | infraestrutura e deploy | [README](infra/README.md) |

@@ -39,6 +39,7 @@ Público: desenvolvedores.
 | [`arquitetura/dados.md`](arquitetura/dados.md) | Modelo de dados, estratégia multi-tenant, RLS, migrations e auditoria |
 | [`arquitetura/seguranca.md`](arquitetura/seguranca.md) | Autenticação, autorização, gestão de segredos e conformidade com a LGPD |
 | [`arquitetura/modulos.md`](arquitetura/modulos.md) | Tabela-índice de todos os módulos, com fronteiras e donos |
+| [`arquitetura/integracoes/`](arquitetura/integracoes/) | Avaliação e desenho de cada provedor externo — uma página por fornecedor |
 
 ### 🔧 Engenharia — *como trabalhamos*
 Público: desenvolvedores. **Leitura obrigatória antes do primeiro commit.**
@@ -74,10 +75,14 @@ Público: todo o time.
 
 | Arquivo | O que é |
 |---|---|
-| [`assets/ZapGestor_Apresentacao.pdf`](assets/ZapGestor_Apresentacao.pdf) | Apresentação comercial original — fonte primária do escopo de produto |
+| [`assets/ZapGestor_Apresentacao.pdf`](assets/ZapGestor_Apresentacao.pdf) · [md](assets/zapgestor-apresentacao.md) | Apresentação comercial — fonte primária do escopo de produto |
+| [`assets/PagMaxx-Documentacao-da-API.pdf`](assets/PagMaxx-Documentacao-da-API.pdf) · [md](assets/pagmaxx-api.md) | Documentação da API do PSP — avaliada em [`integracoes/pagmaxx.md`](arquitetura/integracoes/pagmaxx.md) |
+| [`assets/Pro Comércio KV Rebranding.pdf`](assets/) · [md](assets/pro-comercio-rebranding.md) | Identidade visual ProComércio — paleta, fontes e marcas derivadas. Ver [DEC-001](decisoes/README.md#dec-001) |
 
-Para converter o PDF em Markdown:
-`python scripts/pdf_to_md.py docs/assets/ZapGestor_Apresentacao.pdf docs/assets/apresentacao.md`
+Os `.md` ao lado de cada PDF são conversões geradas por
+`scripts/pdf_to_md.py <entrada.pdf> <saida.md>` (requer `pypdf`). São **fonte
+bruta**, não documentação: extraem texto sem layout. A leitura curada de cada um
+está no documento que o referencia.
 
 ## Convenções de escrita
 

@@ -111,8 +111,12 @@ O que o produto conscientemente **não** se propõe a ser:
 - Não é um **marketplace** no MVP — está no [roadmap](escopo-mvp.md#roadmap).
 - Não é um **sistema contábil**. Gera dado fiscal correto e exportável para o
   contador; não substitui o contador.
-- Não é um **meio de pagamento**. Registra pagamentos, integra com PSP, mas não
-  processa dinheiro por conta própria.
+- Não é uma **instituição de pagamento**. O sistema gera cobrança Pix e link de
+  pagamento através de um PSP ([PagMaxx](../arquitetura/integracoes/pagmaxx.md)),
+  e registra o que passa pela maquininha da lojista — mas não custodia dinheiro
+  nem substitui a adquirente dela. O limite exato entre "gerar cobrança" e
+  "processar pagamento" tem consequência regulatória e está em
+  [DEC-015](../decisoes/README.md#dec-015).
 
 ## Documentos relacionados
 

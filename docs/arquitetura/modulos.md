@@ -32,6 +32,7 @@ flowchart TB
         WAP["whatsapp"]:::t2
         BNK["banking"]:::t2
         BIL["billing"]:::t2
+        PAY["payments"]:::t2
     end
     subgraph compartilhado["packages/ — interface"]
         UI["ui"]:::t3
@@ -89,7 +90,8 @@ externo ainda não escolhido.
 | `packages/fiscal` | `InvoiceIssuer` | NFC-e / NFS-e | [DEC-004](../decisoes/README.md#dec-004) | 🟠 2 | [README](../../packages/fiscal/README.md) |
 | `packages/whatsapp` | `MessageSender` | WhatsApp | [DEC-003](../decisoes/README.md#dec-003) | 🟠 2 | [README](../../packages/whatsapp/README.md) |
 | `packages/banking` | `BankStatementProvider` | Open Finance | [DEC-005](../decisoes/README.md#dec-005) | 🟠 2 | [README](../../packages/banking/README.md) |
-| `packages/billing` | `SubscriptionProvider` | Cobrança SaaS | [DEC-010](../decisoes/README.md#dec-010) | 🟠 2 | [README](../../packages/billing/README.md) |
+| `packages/billing` | `SubscriptionProvider` | Cobrança SaaS (PagMaxx `/subscriptions`) | [DEC-010](../decisoes/README.md#dec-010) | 🟠 2 | [README](../../packages/billing/README.md) |
+| `packages/payments` | `PaymentGateway` | PSP — Pix, link de pagamento, estorno ([PagMaxx](integracoes/pagmaxx.md)) | [DEC-006](../decisoes/README.md#dec-006) | 🟠 2 | [README](../../packages/payments/README.md) |
 
 ### Interface
 
@@ -117,6 +119,7 @@ db         →  contracts, money
 core       →  domain, contracts, db, money
 agent      →  core, contracts, money
 adapters   →  contracts, money            ← nunca core
+payments   →  contracts, money            ← idem: PSP é adapter
 ui         →  contracts, money
 api/worker →  core, contracts, adapters   ← adapters só na composição
 mobile/web →  contracts, ui, money        ← nunca core, nunca db
@@ -133,6 +136,7 @@ A pergunta mais frequente do dia a dia:
 | Validação do corpo de uma requisição | `contracts` | dentro do handler |
 | Consulta SQL / migration | `db` | `core`, `apps/*` |
 | Chamada ao provedor fiscal | `fiscal` | `core` |
+| Cobrança Pix ou link de pagamento | `payments` | `core` |
 | Interpretação de mensagem em linguagem natural | `agent` | `core` |
 | Rota HTTP, autenticação, montagem de contexto | `apps/api` | `core` |
 | Job agendado, consumidor de fila | `apps/worker` | `apps/api` |
@@ -171,7 +175,7 @@ scaffold gerado pelo Next.js e pelo Expo.
 
 | Estado | Módulos |
 |---|---|
-| 🔴 Vazio (só README) | `api` `worker` `core` `domain` `contracts` `db` `agent` `fiscal` `whatsapp` `banking` `billing` `money` `ui` `infra` |
+| 🔴 Vazio (só README) | `api` `worker` `core` `domain` `contracts` `db` `agent` `fiscal` `whatsapp` `banking` `billing` `payments` `money` `ui` `infra` |
 | 🟡 Scaffold | `web` (Next.js), `mobile` (Expo) |
 | 🟢 Implementado | — |
 
@@ -184,3 +188,4 @@ primeiro, porque destravam as três trilhas ao mesmo tempo.
 - [Princípios](principios.md) — as regras que definem estas fronteiras
 - [Visão geral](visao-geral.md) — como os módulos se compõem em containers
 - [Task Ledger](../processo/task-ledger.md) — quem implementa o quê
+- [Integrações](integracoes/) — avaliação de cada provedor externo
