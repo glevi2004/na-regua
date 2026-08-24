@@ -1,0 +1,51 @@
+# Dependencias
+node_modules/
+
+# Build / saida
+dist/
+build/
+out/
+web-build/
+.next/
+next-env.d.ts
+
+# Expo
+.expo/
+expo-env.d.ts
+.metro-health-check*
+
+# Nativo (gerado)
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*
+
+# Variaveis de ambiente
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.*
+yarn-debug.*
+yarn-error.*
+.pnpm-debug.*
+
+# TypeScript
+*.tsbuildinfo
+
+# Cache de ferramentas
+.turbo/
+.cache/
+coverage/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
+
+# Editor (mantemos .vscode/settings.json versionado)
+.idea/
+*.swp
