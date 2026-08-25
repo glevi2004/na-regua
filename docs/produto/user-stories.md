@@ -28,21 +28,21 @@ erro. Uma história sem caminho de erro não está pronta para ser pega — ver
 
 ## Índice de épicos
 
-| Épico | Tema | Histórias | Prioridade dominante |
-|---|---|---|---|
-| [E1](#e1--onboarding--empresa) | Onboarding & Empresa | US-001–004 | MUST |
-| [E2](#e2--clientes--crm) | Clientes / CRM | US-005–008 | MUST |
-| [E3](#e3--produtos--estoque) | Produtos & Estoque | US-009–013 | MUST |
-| [E4](#e4--vendas--pdv) | Vendas & PDV | US-014–021 | MUST |
-| [E5](#e5--emissão-fiscal) | Emissão Fiscal | US-022–025 | MUST |
-| [E6](#e6--contas-a-pagar) | Contas a Pagar | US-026–029 | MUST |
-| [E7](#e7--contas-a-receber) | Contas a Receber | US-030–034 | MUST |
-| [E8](#e8--bancos--conciliação) | Bancos & Conciliação | US-035–038 | SHOULD |
-| [E9](#e9--plano-de-contas--relatórios) | Plano de Contas & Relatórios | US-039–042 | SHOULD |
-| [E10](#e10--agenda) | Agenda | US-043–045 | COULD |
-| [E11](#e11--assistente-whatsapp) | Assistente WhatsApp | US-046–053 | MUST |
-| [E12](#e12--assinatura--cobrança-saas) | Assinatura & Cobrança SaaS | US-054–058 | MUST |
-| [E13](#e13--plataforma) | Plataforma | US-059–064 | MUST |
+| Épico                                  | Tema                         | Histórias  | Prioridade dominante |
+| -------------------------------------- | ---------------------------- | ---------- | -------------------- |
+| [E1](#e1--onboarding--empresa)         | Onboarding & Empresa         | US-001–004 | MUST                 |
+| [E2](#e2--clientes--crm)               | Clientes / CRM               | US-005–008 | MUST                 |
+| [E3](#e3--produtos--estoque)           | Produtos & Estoque           | US-009–013 | MUST                 |
+| [E4](#e4--vendas--pdv)                 | Vendas & PDV                 | US-014–021 | MUST                 |
+| [E5](#e5--emissão-fiscal)              | Emissão Fiscal               | US-022–025 | MUST                 |
+| [E6](#e6--contas-a-pagar)              | Contas a Pagar               | US-026–029 | MUST                 |
+| [E7](#e7--contas-a-receber)            | Contas a Receber             | US-030–034 | MUST                 |
+| [E8](#e8--bancos--conciliação)         | Bancos & Conciliação         | US-035–038 | SHOULD               |
+| [E9](#e9--plano-de-contas--relatórios) | Plano de Contas & Relatórios | US-039–042 | SHOULD               |
+| [E10](#e10--agenda)                    | Agenda                       | US-043–045 | COULD                |
+| [E11](#e11--assistente-whatsapp)       | Assistente WhatsApp          | US-046–053 | MUST                 |
+| [E12](#e12--assinatura--cobrança-saas) | Assinatura & Cobrança SaaS   | US-054–058 | MUST                 |
+| [E13](#e13--plataforma)                | Plataforma                   | US-059–064 | MUST                 |
 
 ---
 
@@ -52,6 +52,7 @@ erro. Uma história sem caminho de erro não está pronta para ser pega — ver
 > ([M3](visao.md#métricas-de-sucesso)).
 
 #### US-001 — Cadastrar a empresa
+
 **Como** lojista, **quero** cadastrar minha empresa pelo CNPJ **para** começar a
 usar o sistema sem digitar tudo à mão.
 `MUST` · P1 · `apps/web` `apps/mobile` `packages/core` `packages/db` · RF-001, RF-002
@@ -62,6 +63,7 @@ usar o sistema sem digitar tudo à mão.
 - **DADO** que a consulta ao CNPJ está indisponível **QUANDO** confirmo **ENTÃO** posso preencher manualmente e seguir
 
 #### US-002 — Configurar dados fiscais
+
 **Como** lojista, **quero** informar meu regime tributário e certificado digital
 **para** conseguir emitir nota fiscal.
 `MUST` · P1 · `apps/web` `packages/core` `packages/fiscal` · RF-003, RF-004
@@ -72,6 +74,7 @@ usar o sistema sem digitar tudo à mão.
 - **DADO** um certificado a menos de 30 dias do vencimento **QUANDO** acesso o sistema **ENTÃO** sou avisado
 
 #### US-003 — Convidar funcionário
+
 **Como** lojista, **quero** convidar um funcionário e definir o que ele pode
 fazer **para** delegar o atendimento sem expor meus números.
 `MUST` · P1 · `apps/web` `packages/core` `packages/db` · RF-005, RF-006
@@ -81,6 +84,7 @@ fazer **para** delegar o atendimento sem expor meus números.
 - **DADO** que removo o acesso de um funcionário **QUANDO** confirmo **ENTÃO** a sessão dele é encerrada e o histórico de ações dele permanece
 
 #### US-004 — Configurar a loja
+
 **Como** lojista, **quero** configurar formas de pagamento, taxas de cartão e
 limite de desconto **para** que os cálculos reflitam meu negócio.
 `MUST` · P1 · `apps/web` `packages/core` `packages/domain` · RF-007, RF-008
@@ -94,6 +98,7 @@ limite de desconto **para** que os cálculos reflitam meu negócio.
 ## E2 — Clientes / CRM
 
 #### US-005 — Cadastro rápido de cliente
+
 **Como** lojista, **quero** cadastrar um cliente só com nome e telefone **para**
 não travar o atendimento.
 `MUST` · P1 P2 · `apps/mobile` `packages/core` `packages/contracts` · RF-009, RF-010
@@ -103,6 +108,7 @@ não travar o atendimento.
 - **DADO** que informo CPF **QUANDO** salvo **ENTÃO** o CPF é validado e usado na nota fiscal
 
 #### US-006 — Histórico do cliente
+
 **Como** lojista, **quero** ver o que um cliente já comprou **para** atender
 melhor e sugerir a recompra.
 `MUST` · P1 P2 · `apps/mobile` `apps/web` `packages/core` · RF-011, RF-012
@@ -112,6 +118,7 @@ melhor e sugerir a recompra.
 - **DADO** um funcionário `staff` **QUANDO** abre o histórico **ENTÃO** vê os itens mas não a margem
 
 #### US-007 — Saldo em carteira (fiado)
+
 **Como** lojista, **quero** controlar o fiado do cliente **para** parar de
 anotar no caderno.
 `MUST` · P1 · `apps/mobile` `packages/core` `packages/domain` `packages/money` · RF-013, RF-014
@@ -121,6 +128,7 @@ anotar no caderno.
 - **DADO** um cliente com saldo devedor **QUANDO** inicio uma nova venda para ele **ENTÃO** sou avisado do saldo antes de fechar
 
 #### US-008 — Vincular WhatsApp do cliente
+
 **Como** lojista, **quero** que o número de WhatsApp do cliente fique ligado ao
 cadastro **para** cobrar e enviar comprovante direto da conversa.
 `MUST` · P1 P4 · `packages/core` `packages/whatsapp` · RF-015, RF-016
@@ -137,6 +145,7 @@ cadastro **para** cobrar e enviar comprovante direto da conversa.
 ## E3 — Produtos & Estoque
 
 #### US-009 — Cadastrar produto com código de barras
+
 **Como** lojista, **quero** cadastrar produto bipando o código de barras
 **para** não digitar código errado.
 `MUST` · P1 · `apps/mobile` `packages/core` `packages/db` · RF-017, RF-018, RF-019
@@ -146,6 +155,7 @@ cadastro **para** cobrar e enviar comprovante direto da conversa.
 - **DADO** um produto sem código de barras **QUANDO** salvo **ENTÃO** o sistema gera um código interno
 
 #### US-010 — Definir preço e custo
+
 **Como** lojista, **quero** informar custo e preço de venda **para** saber a
 margem de cada produto.
 `MUST` · P1 · `apps/mobile` `apps/web` `packages/domain` `packages/money` · RF-020, RF-021
@@ -155,6 +165,7 @@ margem de cada produto.
 - **DADO** um valor monetário **QUANDO** é armazenado **ENTÃO** é gravado em centavos, sem ponto flutuante
 
 #### US-011 — Consultar estoque
+
 **Como** funcionário, **quero** consultar o estoque de um produto **para**
 responder ao cliente sem chamar a dona.
 `MUST` · P2 · `apps/mobile` `packages/core` · RF-022
@@ -163,6 +174,7 @@ responder ao cliente sem chamar a dona.
 - **DADO** um produto sem controle de estoque **QUANDO** consulto **ENTÃO** vejo "sem controle de estoque", não zero
 
 #### US-012 — Ajustar estoque
+
 **Como** lojista, **quero** ajustar o saldo de um produto **para** corrigir
 divergência de inventário.
 `MUST` · P1 · `apps/mobile` `packages/core` · RF-023, RF-024
@@ -172,6 +184,7 @@ divergência de inventário.
 - **DADO** uma venda registrada **QUANDO** ela é fechada **ENTÃO** o estoque baixa automaticamente
 
 #### US-013 — Alerta de estoque baixo
+
 **Como** lojista, **quero** ser avisado quando um produto estiver acabando
 **para** repor antes de perder venda.
 `SHOULD` · P1 · `apps/worker` `packages/core` `packages/whatsapp` · RF-025, RF-026
@@ -187,6 +200,7 @@ divergência de inventário.
 > [fluxo de venda](../arquitetura/fluxos.md#venda-completa).
 
 #### US-014 — Montar carrinho com leitor de código de barras
+
 **Como** funcionário, **quero** bipar os produtos **para** fechar a venda sem
 digitar.
 `MUST` · P1 P2 · `apps/mobile` `packages/core` · RF-027, RF-028
@@ -197,6 +211,7 @@ digitar.
 - **DADO** que bipo vários itens em sequência **QUANDO** cada leitura ocorre **ENTÃO** o retorno é imediato, sem esperar rede ([RNF-051](requisitos-nao-funcionais.md))
 
 #### US-015 — Adicionar produto por busca
+
 **Como** funcionário, **quero** buscar o produto por nome **para** vender item
 sem código de barras.
 `MUST` · P1 P2 · `apps/mobile` `packages/core` · RF-029
@@ -205,6 +220,7 @@ sem código de barras.
 - **DADO** que a busca não encontra nada **QUANDO** termino de digitar **ENTÃO** posso cadastrar o produto ali mesmo
 
 #### US-016 — Aplicar desconto
+
 **Como** lojista, **quero** dar desconto no item ou na venda **para** fechar a
 negociação.
 `MUST` · P1 P2 · `apps/mobile` `packages/domain` · RF-030, RF-031
@@ -214,6 +230,7 @@ negociação.
 - **DADO** um desconto maior que o total **QUANDO** aplico **ENTÃO** é recusado
 
 #### US-017 — Selecionar cliente na venda
+
 **Como** funcionário, **quero** vincular a venda a um cliente **para** manter o
 histórico e permitir fiado.
 `MUST` · P1 P2 · `apps/mobile` `packages/core` · RF-032, RF-033
@@ -222,6 +239,7 @@ histórico e permitir fiado.
 - **DADO** uma venda sem cliente **QUANDO** fecho **ENTÃO** ela é registrada como consumidor não identificado, exceto se o pagamento for `wallet`
 
 #### US-018 — Pagamento com forma única
+
 **Como** funcionário, **quero** registrar o pagamento **para** fechar a venda.
 `MUST` · P1 P2 · `apps/mobile` `packages/core` `packages/domain` · RF-034, RF-035, RF-036
 
@@ -231,6 +249,7 @@ histórico e permitir fiado.
 - **DADO** uma falha ao fechar **QUANDO** tento de novo **ENTÃO** não é criada uma venda duplicada ([RNF-043](requisitos-nao-funcionais.md))
 
 #### US-019 — Pagamento misto e parcelado
+
 **Como** funcionário, **quero** dividir o pagamento entre formas e parcelar
 **para** atender como o cliente pode pagar.
 `MUST` · P1 P2 · `apps/mobile` `packages/domain` `packages/money` · RF-037, RF-038, RF-039
@@ -241,6 +260,7 @@ histórico e permitir fiado.
 - **DADO** uma divisão com dízima (R$ 100 em 3x) **QUANDO** as parcelas são criadas **ENTÃO** a soma delas é exatamente o total, com o resto na primeira parcela
 
 #### US-020 — Ver o líquido da venda
+
 **Como** lojista, **quero** ver quanto sobra depois de imposto e taxa **para**
 saber o lucro real.
 `MUST` · P1 · `apps/mobile` `packages/domain` · RF-040, RF-041, RF-042
@@ -250,6 +270,7 @@ saber o lucro real.
 - **DADO** um `staff` **QUANDO** fecha a venda **ENTÃO** vê o total, mas não custo, imposto nem margem
 
 #### US-021 — Cancelar ou devolver venda
+
 **Como** lojista, **quero** cancelar ou devolver uma venda **para** corrigir
 erro sem apagar histórico.
 `MUST` · P1 · `apps/mobile` `packages/core` `packages/fiscal` · RF-043, RF-044
@@ -266,6 +287,7 @@ erro sem apagar histórico.
 > Depende de [DEC-004](../decisoes/README.md#dec-004) (provedor fiscal).
 
 #### US-022 — Emitir NFC-e na venda
+
 **Como** lojista, **quero** emitir a nota ao fechar a venda **para** ficar em
 dia com o fisco sem passo extra.
 `MUST` · P1 P2 · `apps/api` `apps/worker` `packages/fiscal` · RF-045, RF-046, RF-047
@@ -276,6 +298,7 @@ dia com o fisco sem passo extra.
 - **DADO** uma emissão bem-sucedida **QUANDO** ela ocorre **ENTÃO** o XML é guardado pelo prazo legal ([RNF-037](requisitos-nao-funcionais.md))
 
 #### US-023 — Enviar a nota ao cliente
+
 **Como** lojista, **quero** enviar o DANFE ao cliente **para** não precisar
 imprimir.
 `MUST` · P1 P4 · `packages/whatsapp` `packages/fiscal` · RF-048, RF-049
@@ -284,6 +307,7 @@ imprimir.
 - **DADO** um cliente sem WhatsApp **QUANDO** a venda fecha **ENTÃO** vejo o QR Code na tela para o cliente fotografar
 
 #### US-024 — Cancelar nota fiscal
+
 **Como** lojista, **quero** cancelar uma nota emitida por engano **para**
 corrigir dentro do prazo.
 `MUST` · P1 · `packages/fiscal` `packages/core` · RF-050, RF-051
@@ -292,6 +316,7 @@ corrigir dentro do prazo.
 - **DADO** uma nota fora do prazo **QUANDO** tento cancelar **ENTÃO** sou informado do prazo e orientado a emitir devolução
 
 #### US-025 — Emitir em contingência
+
 **Como** lojista, **quero** continuar vendendo com a SEFAZ fora do ar **para**
 não parar a loja.
 `MUST` · P1 P2 · `apps/worker` `packages/fiscal` · RF-052, RF-053, RF-054
@@ -305,6 +330,7 @@ não parar a loja.
 ## E6 — Contas a Pagar
 
 #### US-026 — Lançar conta a pagar
+
 **Como** lojista, **quero** registrar uma conta a pagar **para** não esquecer de
 pagar.
 `MUST` · P1 · `apps/web` `apps/mobile` `packages/core` · RF-055, RF-056
@@ -314,6 +340,7 @@ pagar.
 - **DADO** uma conta com anexo (boleto/nota) **QUANDO** salvo **ENTÃO** o arquivo fica associado à conta
 
 #### US-027 — Conta recorrente
+
 **Como** lojista, **quero** cadastrar contas que se repetem **para** não lançar
 aluguel e luz todo mês.
 `SHOULD` · P1 · `apps/worker` `packages/core` · RF-057, RF-058
@@ -323,6 +350,7 @@ aluguel e luz todo mês.
 - **DADO** que encerro a recorrência **QUANDO** confirmo **ENTÃO** as ocorrências futuras não pagas são removidas e as pagas permanecem
 
 #### US-028 — Dar baixa em conta paga
+
 **Como** lojista, **quero** marcar a conta como paga **para** o caixa refletir a
 realidade.
 `MUST` · P1 · `apps/mobile` `packages/core` `packages/money` · RF-059, RF-060
@@ -332,6 +360,7 @@ realidade.
 - **DADO** uma baixa feita por engano **QUANDO** estorno **ENTÃO** a conta volta ao estado anterior com registro do estorno
 
 #### US-029 — Ver contas a vencer
+
 **Como** lojista, **quero** ver o que vence nos próximos dias **para** me
 organizar.
 `MUST` · P1 · `apps/mobile` `apps/web` `packages/core` · RF-061, RF-062
@@ -344,6 +373,7 @@ organizar.
 ## E7 — Contas a Receber
 
 #### US-030 — Receber gerado pela venda
+
 **Como** lojista, **quero** que a venda gere o recebível sozinha **para** não
 lançar duas vezes.
 `MUST` · P1 · `packages/core` `packages/domain` · RF-063, RF-064
@@ -353,6 +383,7 @@ lançar duas vezes.
 - **DADO** uma venda em `wallet` **QUANDO** ela fecha **ENTÃO** o recebível fica em aberto vinculado ao cliente
 
 #### US-031 — Lançar recebimento avulso
+
 **Como** lojista, **quero** lançar um valor a receber fora de venda **para**
 registrar entradas diversas.
 `SHOULD` · P1 · `apps/web` `packages/core` · RF-065
@@ -361,6 +392,7 @@ registrar entradas diversas.
 - **DADO** um recebível avulso **QUANDO** classifico numa conta contábil **ENTÃO** ele entra no DRE naquela linha
 
 #### US-032 — Dar baixa em recebimento
+
 **Como** lojista, **quero** marcar o que recebi **para** saber quem ainda deve.
 `MUST` · P1 · `apps/mobile` `packages/core` · RF-066, RF-067
 
@@ -369,6 +401,7 @@ registrar entradas diversas.
 - **DADO** uma baixa por engano **QUANDO** estorno **ENTÃO** o saldo do cliente é restaurado
 
 #### US-033 — Enviar cobrança
+
 **Como** lojista, **quero** cobrar o cliente pelo WhatsApp **para** receber sem
 constrangimento.
 `MUST` · P1 P4 · `packages/whatsapp` `packages/core` · RF-068, RF-069, RF-070
@@ -379,6 +412,7 @@ constrangimento.
 - **DADO** que o cliente paga **QUANDO** dou baixa **ENTÃO** nenhuma cobrança futura daquele recebível é disparada
 
 #### US-034 — Ver inadimplentes
+
 **Como** lojista, **quero** ver quem está devendo **para** priorizar a cobrança.
 `MUST` · P1 · `apps/mobile` `apps/web` `packages/core` · RF-071, RF-072
 
@@ -392,6 +426,7 @@ constrangimento.
 > Depende de [DEC-005](../decisoes/README.md#dec-005) (provedor Open Finance).
 
 #### US-035 — Cadastrar conta bancária
+
 **Como** lojista, **quero** cadastrar minhas contas **para** separar o dinheiro
 por origem.
 `SHOULD` · P1 · `apps/web` `packages/core` · RF-073
@@ -400,6 +435,7 @@ por origem.
 - **DADO** uma conta com saldo inicial **QUANDO** salvo **ENTÃO** o saldo é o ponto de partida do extrato interno
 
 #### US-036 — Conectar via Open Finance
+
 **Como** lojista, **quero** conectar minha conta bancária **para** o extrato
 entrar sozinho.
 `SHOULD` · P1 · `packages/banking` `apps/worker` · RF-074, RF-075
@@ -409,6 +445,7 @@ entrar sozinho.
 - **DADO** transações já importadas **QUANDO** a importação roda de novo **ENTÃO** nada é duplicado
 
 #### US-037 — Importar extrato manualmente
+
 **Como** lojista, **quero** subir um OFX/CSV **para** conciliar mesmo sem Open
 Finance.
 `SHOULD` · P1 · `apps/web` `packages/banking` · RF-076, RF-077
@@ -417,6 +454,7 @@ Finance.
 - **DADO** um arquivo inválido **QUANDO** importo **ENTÃO** vejo o erro e nada é importado parcialmente
 
 #### US-038 — Conciliar transação
+
 **Como** lojista, **quero** casar o extrato com meus lançamentos **para** ter
 certeza de que os números batem.
 `SHOULD` · P1 · `apps/web` `packages/core` · RF-078, RF-079, RF-080
@@ -431,6 +469,7 @@ certeza de que os números batem.
 ## E9 — Plano de Contas & Relatórios
 
 #### US-039 — Plano de contas padrão
+
 **Como** lojista, **quero** um plano de contas pronto **para** não ter que
 inventar um.
 `SHOULD` · P1 · `packages/db` `packages/core` · RF-081, RF-082
@@ -439,6 +478,7 @@ inventar um.
 - **DADO** que eu quero ajustar **QUANDO** edito o plano **ENTÃO** posso renomear e criar contas, sem apagar conta que já tem lançamento
 
 #### US-040 — Classificar lançamento
+
 **Como** lojista, **quero** classificar entradas e saídas **para** ver onde o
 dinheiro está indo.
 `SHOULD` · P1 · `apps/web` `packages/core` · RF-083, RF-084
@@ -448,6 +488,7 @@ dinheiro está indo.
 - **DADO** um fornecedor recorrente **QUANDO** lanço de novo **ENTÃO** a classificação anterior é sugerida
 
 #### US-041 — DRE simplificado
+
 **Como** lojista, **quero** ver receita, custo, despesa e resultado do período
 **para** saber se o mês fechou no azul.
 `SHOULD` · P1 · `apps/web` `packages/core` · RF-085, RF-086
@@ -457,6 +498,7 @@ dinheiro está indo.
 - **DADO** um período sem movimento **QUANDO** abro **ENTÃO** vejo zeros explícitos, não erro
 
 #### US-042 — Exportar para o contador
+
 **Como** lojista, **quero** exportar o mês fechado **para** mandar ao meu
 contador.
 `SHOULD` · P1 P3 · `apps/web` `packages/core` · RF-087, RF-088
@@ -469,6 +511,7 @@ contador.
 ## E10 — Agenda
 
 #### US-043 — Criar compromisso
+
 **Como** lojista, **quero** anotar compromissos **para** não esquecer entrega e
 visita de fornecedor.
 `COULD` · P1 · `apps/mobile` `packages/core` · RF-089, RF-090
@@ -477,6 +520,7 @@ visita de fornecedor.
 - **DADO** um compromisso ligado a um cliente **QUANDO** abro o cliente **ENTÃO** vejo os compromissos dele
 
 #### US-044 — Receber lembrete
+
 **Como** lojista, **quero** ser lembrado antes da hora **para** não perder o
 compromisso.
 `COULD` · P1 · `apps/worker` `packages/whatsapp` · RF-091, RF-092
@@ -485,6 +529,7 @@ compromisso.
 - **DADO** um compromisso cancelado **QUANDO** o horário do lembrete chega **ENTÃO** nada é enviado
 
 #### US-045 — Ver a agenda do dia
+
 **Como** lojista, **quero** ver o dia de hoje **para** me organizar de manhã.
 `COULD` · P1 · `apps/mobile` `packages/agent` · RF-093
 
@@ -500,6 +545,7 @@ compromisso.
 > [DEC-008](../decisoes/README.md#dec-008) e [DEC-011](../decisoes/README.md#dec-011).
 
 #### US-046 — Vincular o número da loja
+
 **Como** lojista, **quero** ligar meu WhatsApp ao sistema **para** operar por
 mensagem.
 `MUST` · P1 · `packages/whatsapp` `packages/core` · RF-094, RF-095
@@ -509,6 +555,7 @@ mensagem.
 - **DADO** uma mensagem de um número não vinculado **QUANDO** ela chega **ENTÃO** o assistente não executa nada e não vaza informação
 
 #### US-047 — Consultar por mensagem
+
 **Como** lojista, **quero** perguntar em linguagem natural **para** saber meus
 números sem abrir o app.
 `MUST` · P1 · `packages/agent` `packages/core` · RF-096, RF-097
@@ -519,6 +566,7 @@ números sem abrir o app.
 - **DADO** qualquer consulta **QUANDO** ela é respondida **ENTÃO** os dados vêm do mesmo caso de uso que o app usa, nunca de uma consulta paralela
 
 #### US-048 — Cadastrar cliente por mensagem
+
 **Como** lojista, **quero** cadastrar cliente pela conversa **para** não parar o
 atendimento.
 `MUST` · P1 · `packages/agent` `packages/core` · RF-098, RF-099
@@ -528,6 +576,7 @@ atendimento.
 - **DADO** um telefone já cadastrado **QUANDO** confirmo **ENTÃO** sou avisado do duplicado e escolho o que fazer
 
 #### US-049 — Lançar venda por mensagem
+
 **Como** lojista, **quero** registrar a venda pela conversa **para** não
 retrabalhar o que já negociei ali.
 `MUST` · P1 · `packages/agent` `packages/core` `packages/domain` · RF-100, RF-101, RF-102
@@ -538,6 +587,7 @@ retrabalhar o que já negociei ali.
 - **DADO** uma venda sem produto cadastrado **QUANDO** confirmo **ENTÃO** posso registrar como item avulso com descrição e valor
 
 #### US-050 — Confirmar ação sensível
+
 **Como** lojista, **quero** confirmar antes que algo mexa em dinheiro **para**
 não criar lançamento errado por engano.
 `MUST` · P1 · `packages/agent` · RF-103, RF-104
@@ -548,6 +598,7 @@ não criar lançamento errado por engano.
 - **DADO** que respondo algo ambíguo a uma confirmação **QUANDO** o assistente lê **ENTÃO** ele trata como "não" e pergunta de novo
 
 #### US-051 — Manter o contexto da conversa
+
 **Como** lojista, **quero** que o assistente lembre do que falamos **para** não
 repetir tudo a cada mensagem.
 `MUST` · P1 · `packages/agent` · RF-105, RF-106
@@ -557,6 +608,7 @@ repetir tudo a cada mensagem.
 - **DADO** o contexto de uma empresa **QUANDO** outra empresa conversa **ENTÃO** nunca há vazamento entre conversas
 
 #### US-052 — Enviar cobrança por mensagem
+
 **Como** lojista, **quero** disparar a cobrança pela conversa **para** cobrar no
 momento em que lembro.
 `MUST` · P1 · `packages/agent` `packages/whatsapp` · RF-107
@@ -565,6 +617,7 @@ momento em que lembro.
 - **DADO** um cliente sem dívida **QUANDO** peço **ENTÃO** o assistente informa que não há o que cobrar
 
 #### US-053 — Receber relatório por mensagem
+
 **Como** lojista, **quero** pedir relatórios pela conversa **para** acompanhar o
 negócio de onde eu estiver.
 `SHOULD` · P1 · `packages/agent` `packages/core` · RF-108, RF-109
@@ -579,6 +632,7 @@ negócio de onde eu estiver.
 > Depende de [DEC-010](../decisoes/README.md#dec-010) e [DEC-012](../decisoes/README.md#dec-012).
 
 #### US-054 — Período de teste
+
 **Como** lojista, **quero** testar antes de pagar **para** ter certeza de que
 serve para mim.
 `MUST` · P1 · `packages/billing` `packages/core` · RF-110, RF-111
@@ -588,6 +642,7 @@ serve para mim.
 - **DADO** o trial expirado sem plano **QUANDO** acesso **ENTÃO** continuo podendo **ler e exportar** meus dados, mas não criar novos lançamentos
 
 #### US-055 — Escolher plano e pagar
+
 **Como** lojista, **quero** assinar um plano **para** continuar usando.
 `MUST` · P1 · `apps/web` `packages/billing` · RF-112, RF-113
 
@@ -596,6 +651,7 @@ serve para mim.
 - **DADO** uma assinatura ativa **QUANDO** troco de plano **ENTÃO** a diferença é tratada conforme a regra do plano, sem cobrança duplicada
 
 #### US-056 — Aplicar cupom
+
 **Como** lojista, **quero** usar um cupom **para** aproveitar uma promoção.
 `SHOULD` · P1 · `packages/billing` · RF-114, RF-115
 
@@ -603,6 +659,7 @@ serve para mim.
 - **DADO** um cupom expirado, inválido ou já usado **QUANDO** aplico **ENTÃO** vejo o motivo exato da recusa
 
 #### US-057 — Aviso de inadimplência
+
 **Como** lojista, **quero** ser avisado antes de perder o acesso **para** ter
 chance de regularizar.
 `MUST` · P1 · `apps/worker` `packages/billing` `packages/whatsapp` · RF-116
@@ -611,6 +668,7 @@ chance de regularizar.
 - **DADO** que pago dentro do prazo **QUANDO** o pagamento é confirmado **ENTÃO** os avisos param e nada é bloqueado
 
 #### US-058 — Bloqueio por inadimplência
+
 **Como** administradora da plataforma, **quero** que o acesso seja restrito
 após o prazo **para** proteger a receita sem sequestrar dados do cliente.
 `MUST` · P5 P1 · `packages/billing` `apps/api` · RF-117, RF-118
@@ -624,6 +682,7 @@ após o prazo **para** proteger a receita sem sequestrar dados do cliente.
 ## E13 — Plataforma
 
 #### US-059 — Fazer login
+
 **Como** usuário, **quero** entrar no sistema com segurança **para** acessar os
 dados da minha empresa.
 `MUST` · P1 P2 · `apps/api` `apps/web` `apps/mobile` · RF-119, RF-120
@@ -634,6 +693,7 @@ dados da minha empresa.
 - **DADO** um usuário em mais de uma empresa **QUANDO** entro **ENTÃO** escolho qual empresa operar
 
 #### US-060 — Isolamento entre empresas
+
 **Como** lojista, **quero** garantia de que ninguém vê meus dados **para**
 confiar o negócio ao sistema.
 `MUST` · P1 · `packages/db` `apps/api` · RF-121, RF-122
@@ -643,6 +703,7 @@ confiar o negócio ao sistema.
 - **DADO** qualquer caso de uso **QUANDO** ele roda **ENTÃO** o isolamento é imposto no banco (RLS), não apenas na aplicação
 
 #### US-061 — Trilha de auditoria
+
 **Como** lojista, **quero** saber quem fez o quê **para** resolver divergência
 com meu funcionário.
 `MUST` · P1 · `packages/db` `packages/core` · RF-123, RF-124
@@ -652,6 +713,7 @@ com meu funcionário.
 - **DADO** uma ação feita pelo assistente **QUANDO** consulto **ENTÃO** vejo o usuário humano que confirmou, não "sistema"
 
 #### US-062 — Exportar todos os dados
+
 **Como** lojista, **quero** baixar tudo que é meu **para** não ficar refém do
 sistema.
 `MUST` · P1 · `apps/web` `apps/worker` · RF-125, RF-126
@@ -660,6 +722,7 @@ sistema.
 - **DADO** uma conta bloqueada por inadimplência **QUANDO** solicito **ENTÃO** a exportação continua disponível
 
 #### US-063 — Exclusão de dados pessoais (LGPD)
+
 **Como** cliente final, **quero** pedir a exclusão dos meus dados **para**
 exercer meu direito.
 `MUST` · P4 P1 · `packages/core` `packages/db` · RF-127, RF-128
@@ -669,6 +732,7 @@ exercer meu direito.
 - **DADO** um pedido de exclusão **QUANDO** é processado **ENTÃO** fica registrado quando e por quem
 
 #### US-064 — Diagnosticar falha de integração
+
 **Como** administradora da plataforma, **quero** entender por que uma
 integração falhou **para** resolver o chamado sem pedir print ao cliente.
 `MUST` · P5 · `apps/api` `apps/worker` · RF-129, RF-130, RF-131
@@ -681,10 +745,10 @@ integração falhou **para** resolver o chamado sem pedir print ao cliente.
 
 ## Rastreabilidade
 
-| De | Para | Onde |
-|---|---|---|
-| História → requisito | `US-xxx` → `RF-xxx` | linha de metadados de cada história |
-| Requisito → história | `RF-xxx` → `US-xxx` | [`requisitos-funcionais.md`](requisitos-funcionais.md) |
-| Requisito → módulo | `RF-xxx` → `packages/*` | [`requisitos-funcionais.md`](requisitos-funcionais.md) |
-| História → tarefa | `US-xxx` → `NR-xxx` | [`task-ledger.md`](../processo/task-ledger.md) |
-| Tarefa → código | `NR-xxx` → branch, PR, commit | [`git-workflow.md`](../engenharia/git-workflow.md) |
+| De                   | Para                          | Onde                                                   |
+| -------------------- | ----------------------------- | ------------------------------------------------------ |
+| História → requisito | `US-xxx` → `RF-xxx`           | linha de metadados de cada história                    |
+| Requisito → história | `RF-xxx` → `US-xxx`           | [`requisitos-funcionais.md`](requisitos-funcionais.md) |
+| Requisito → módulo   | `RF-xxx` → `packages/*`       | [`requisitos-funcionais.md`](requisitos-funcionais.md) |
+| História → tarefa    | `US-xxx` → `NR-xxx`           | [`task-ledger.md`](../processo/task-ledger.md)         |
+| Tarefa → código      | `NR-xxx` → branch, PR, commit | [`git-workflow.md`](../engenharia/git-workflow.md)     |

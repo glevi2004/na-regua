@@ -1,6 +1,6 @@
 packages:
-  - "apps/*"
-  - "packages/*"
+  - 'apps/*'
+  - 'packages/*'
 # Scripts de postinstall aprovados um a um. pnpm bloqueia por padrao — um
 # postinstall arbitrario e vetor de supply chain (RNF-029).
 #   esbuild          binario nativo usado por tsx e vitest

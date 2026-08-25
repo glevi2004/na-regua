@@ -12,9 +12,9 @@ decisão tomada por omissão, dentro de um PR, por quem estava com pressa.
 
 Duas coisas diferentes, deliberadamente separadas:
 
-| | Resolve-se com | Formato |
-|---|---|---|
-| **Decisão** `DEC-xxx` | uma **escolha** entre opções | Ver [decisões](#decisões-em-aberto) |
+|                        | Resolve-se com                    | Formato                               |
+| ---------------------- | --------------------------------- | ------------------------------------- |
+| **Decisão** `DEC-xxx`  | uma **escolha** entre opções      | Ver [decisões](#decisões-em-aberto)   |
 | **Pergunta** `QST-xxx` | uma **informação** que alguém tem | Ver [perguntas](#perguntas-em-aberto) |
 
 ### Ciclo de vida de uma decisão
@@ -42,13 +42,13 @@ PR**, e a linha sai da tabela de abertas.
 
 ## Painel
 
-| Estado | Qtd | Quais |
-|---|--:|---|
-| 🔴 Aberta | 10 | DEC-003, 004, 005, 007, 008, 009, 011, 012, 013, 015 |
-| 🟡 Em análise | 4 | DEC-001, 002, 006, 010 |
-| ⚪ Adiada | 1 | DEC-014 |
-| 🟢 Decidida | 0 | — |
-| ❓ Pergunta aberta | 12 | QST-001 a QST-012 |
+| Estado             | Qtd | Quais                                                |
+| ------------------ | --: | ---------------------------------------------------- |
+| 🔴 Aberta          |  10 | DEC-003, 004, 005, 007, 008, 009, 011, 012, 013, 015 |
+| 🟡 Em análise      |   4 | DEC-001, 002, 006, 010                               |
+| ⚪ Adiada          |   1 | DEC-014                                              |
+| 🟢 Decidida        |   0 | —                                                    |
+| ❓ Pergunta aberta |  12 | QST-001 a QST-012                                    |
 
 **Bloqueando o MVP agora:** DEC-002, DEC-003, DEC-004, DEC-008, DEC-009.
 Essas cinco travam trabalho de implementação já na Sprint 1.
@@ -59,35 +59,35 @@ Essas cinco travam trabalho de implementação já na Sprint 1.
 
 ### DEC-001 — Nome do produto
 
-| | |
-|---|---|
-| **Status** | 🟡 Em análise |
-| **Dono** | Produto / fundadores |
-| **Prazo** | Antes de qualquer material público ou publicação em loja de apps |
+|              |                                                                     |
+| ------------ | ------------------------------------------------------------------- |
+| **Status**   | 🟡 Em análise                                                       |
+| **Dono**     | Produto / fundadores                                                |
+| **Prazo**    | Antes de qualquer material público ou publicação em loja de apps    |
 | **Bloqueia** | README, marca, domínio, nome nas app stores, escopo dos pacotes npm |
 
 **Contexto.** Existem três nomes em circulação:
 
-| Nome | Origem |
-|---|---|
-| `na-regua` | nome do repositório |
-| **ZapGestor** | [apresentação comercial](../assets/zapgestor-apresentacao.md) — e a própria apresentação diz que é **nome de trabalho**, listando ContaZap, Fechou.AI e Zaply Gestão como alternativas |
+| Nome            | Origem                                                                                                                                                                                                     |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `na-regua`      | nome do repositório                                                                                                                                                                                        |
+| **ZapGestor**   | [apresentação comercial](../assets/zapgestor-apresentacao.md) — e a própria apresentação diz que é **nome de trabalho**, listando ContaZap, Fechou.AI e Zaply Gestão como alternativas                     |
 | **ProComércio** | [material de rebranding](../assets/pro-comercio-rebranding.md) com identidade completa: paleta (`#1E2A78` `#39C8BD` `#6D33DD`), fontes (BC Alphapipe, BD Colonius) e **cinco paletas de marcas derivadas** |
 
-**O que o material de rebranding sugere.** O texto fala em *"diferentes e
+**O que o material de rebranding sugere.** O texto fala em _"diferentes e
 complementares soluções para negócios, que se conectam em um único
-ecossistema"*, e traz cinco paletas derivadas. A leitura provável é que
+ecossistema"_, e traz cinco paletas derivadas. A leitura provável é que
 **ProComércio é a marca guarda-chuva** e este ERP é **uma** das soluções dela —
 não que o ERP se chame ProComércio. Isso é inferência a partir de um KV de uma
 página, não um fato → [QST-011](#qst-011).
 
 **Opções**
 
-| Opção | Consequência |
-|---|---|
+| Opção                                                   | Consequência                                                   |
+| ------------------------------------------------------- | -------------------------------------------------------------- |
 | ProComércio como guarda-chuva + nome próprio para o ERP | Precisa definir o nome do ERP; usa uma das 5 paletas derivadas |
-| ProComércio é o nome do ERP | Marca já pronta; abandona ZapGestor |
-| Manter ZapGestor | Contradiz o investimento já feito no rebranding |
+| ProComércio é o nome do ERP                             | Marca já pronta; abandona ZapGestor                            |
+| Manter ZapGestor                                        | Contradiz o investimento já feito no rebranding                |
 
 **Recomendação.** Responder [QST-011](#qst-011) primeiro. Enquanto isso a
 documentação usa **ZapGestor** como nome de trabalho e o escopo dos pacotes é
@@ -98,11 +98,11 @@ marca, para que a decisão não force renomear pacote nenhum.
 
 ### DEC-002 — Estratégia multi-tenant
 
-| | |
-|---|---|
-| **Status** | 🟡 Em análise |
-| **Dono** | Trilha 1 — Núcleo & Dados |
-| **Prazo** | **Sprint 1** — bloqueia o início de `packages/db` |
+|              |                                                                                                                                   |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**   | 🟡 Em análise                                                                                                                     |
+| **Dono**     | Trilha 1 — Núcleo & Dados                                                                                                         |
+| **Prazo**    | **Sprint 1** — bloqueia o início de `packages/db`                                                                                 |
 | **Bloqueia** | `NR-020` em diante · [RF-121](../produto/requisitos-funcionais.md), [RF-122](../produto/requisitos-funcionais.md) · todo o schema |
 
 **Contexto.** Herdada da apresentação comercial ("estrutura do banco de dados por
@@ -122,11 +122,11 @@ aplicação não é isolamento.
 
 ### DEC-003 — Provedor de WhatsApp
 
-| | |
-|---|---|
-| **Status** | 🔴 Aberta |
-| **Dono** | Trilha 2 — Plataforma & Integrações |
-| **Prazo** | **Sprint 2** |
+|              |                                                                                                                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**   | 🔴 Aberta                                                                                                                                                                       |
+| **Dono**     | Trilha 2 — Plataforma & Integrações                                                                                                                                             |
+| **Prazo**    | **Sprint 2**                                                                                                                                                                    |
 | **Bloqueia** | `packages/whatsapp` · [RF-015](../produto/requisitos-funcionais.md), RF-016, RF-048, RF-068, RF-094, RF-095 · todo o [E11](../produto/user-stories.md#e11--assistente-whatsapp) |
 
 **Opções:** Meta Cloud API direto · BSP (Twilio, Z-API, 360dialog, Gupshup) ·
@@ -146,11 +146,11 @@ BSP entrega mais rápido, Meta sai mais barato em escala. A porta
 
 ### DEC-004 — Provedor de emissão fiscal
 
-| | |
-|---|---|
-| **Status** | 🔴 Aberta |
-| **Dono** | Trilha 2 — Plataforma & Integrações |
-| **Prazo** | **Sprint 2** |
+|              |                                                                                                                                  |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**   | 🔴 Aberta                                                                                                                        |
+| **Dono**     | Trilha 2 — Plataforma & Integrações                                                                                              |
+| **Prazo**    | **Sprint 2**                                                                                                                     |
 | **Bloqueia** | `packages/fiscal` · [RF-045 a RF-054](../produto/requisitos-funcionais.md) · [E5](../produto/user-stories.md#e5--emissão-fiscal) |
 
 **Opções:** provedor de API fiscal (Focus NFe, NFe.io, PlugNotas, eNotas, Tecnospeed)
@@ -170,12 +170,12 @@ NFC-e (MVP) e cobertura de NFS-e nas cidades-alvo.
 
 ### DEC-005 — Provedor de Open Finance
 
-| | |
-|---|---|
-| **Status** | 🔴 Aberta |
-| **Dono** | Trilha 2 — Plataforma & Integrações |
-| **Prazo** | Sprint 4 — só bloqueia [E8](../produto/user-stories.md#e8--bancos--conciliação), que é `SHOULD` |
-| **Bloqueia** | `packages/banking` · [RF-074 a RF-077](../produto/requisitos-funcionais.md) |
+|              |                                                                                                 |
+| ------------ | ----------------------------------------------------------------------------------------------- |
+| **Status**   | 🔴 Aberta                                                                                       |
+| **Dono**     | Trilha 2 — Plataforma & Integrações                                                             |
+| **Prazo**    | Sprint 4 — só bloqueia [E8](../produto/user-stories.md#e8--bancos--conciliação), que é `SHOULD` |
+| **Bloqueia** | `packages/banking` · [RF-074 a RF-077](../produto/requisitos-funcionais.md)                     |
 
 **Opções:** agregador (Pluggy, Belvo, Klavi) · integração direta · **apenas
 importação de OFX/CSV no MVP**.
@@ -189,11 +189,11 @@ mesma porta `BankStatementProvider`.
 
 ### DEC-006 — PSP / adquirente
 
-| | |
-|---|---|
-| **Status** | 🟡 Em análise — candidato avaliado |
-| **Dono** | Produto + Trilha 2 |
-| **Prazo** | Sprint 2 |
+|              |                                                                                     |
+| ------------ | ----------------------------------------------------------------------------------- |
+| **Status**   | 🟡 Em análise — candidato avaliado                                                  |
+| **Dono**     | Produto + Trilha 2                                                                  |
+| **Prazo**    | Sprint 2                                                                            |
 | **Bloqueia** | `packages/payments` · [RF-007](../produto/requisitos-funcionais.md), RF-038, RF-063 |
 
 **Candidato: PagMaxx.** Avaliação completa em
@@ -215,11 +215,11 @@ metade conversacional do produto — mas precisa estar claro antes de assinar.
 
 ### DEC-007 — Modelo de LLM e mecanismo de recuperação de informação
 
-| | |
-|---|---|
-| **Status** | 🔴 Aberta |
-| **Dono** | Trilha 2 — Plataforma & Integrações |
-| **Prazo** | **Sprint 3** |
+|              |                                                                                                                                |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------ |
+| **Status**   | 🔴 Aberta                                                                                                                      |
+| **Dono**     | Trilha 2 — Plataforma & Integrações                                                                                            |
+| **Prazo**    | **Sprint 3**                                                                                                                   |
 | **Bloqueia** | `packages/agent` · [RF-096 a RF-109](../produto/requisitos-funcionais.md) · [RNF-072](../produto/requisitos-nao-funcionais.md) |
 
 **Contexto.** Herdada da apresentação ("como será a busca de informações por trás
@@ -227,7 +227,7 @@ da IA"). São duas decisões que costumam ser confundidas:
 
 1. **Qual modelo** — custo por interação, latência
    ([RNF-006](../produto/requisitos-nao-funcionais.md): ≤ 5 s), qualidade em
-   português, e se aceita *tool calling* confiável.
+   português, e se aceita _tool calling_ confiável.
 2. **Como o agente acessa o dado** — e aqui a arquitetura já respondeu: **tools
    tipadas geradas de `contracts`, chamando casos de uso de `core`**. Não é RAG
    sobre texto: é chamada de função sobre dado estruturado.
@@ -245,11 +245,11 @@ financeiro.
 
 ### DEC-008 — Autenticação e vínculo do número de WhatsApp
 
-| | |
-|---|---|
-| **Status** | 🔴 Aberta |
-| **Dono** | Trilha 2 + Trilha 1 |
-| **Prazo** | **Sprint 1** |
+|              |                                                                                                                                               |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**   | 🔴 Aberta                                                                                                                                     |
+| **Dono**     | Trilha 2 + Trilha 1                                                                                                                           |
+| **Prazo**    | **Sprint 1**                                                                                                                                  |
 | **Bloqueia** | [RF-005](../produto/requisitos-funcionais.md), RF-119, RF-120 · api, web, mobile · [E11](../produto/user-stories.md#e11--assistente-whatsapp) |
 
 **Duas perguntas juntas, porque a segunda depende da primeira:**
@@ -273,11 +273,11 @@ acima de certo valor exige confirmação por um segundo canal?
 
 ### DEC-009 — Hospedagem e alvo de deploy
 
-| | |
-|---|---|
-| **Status** | 🔴 Aberta |
-| **Dono** | Trilha 2 — Plataforma & Integrações |
-| **Prazo** | **Sprint 1** — os workflows de deploy estão como esqueleto até isto fechar |
+|              |                                                                                                                        |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| **Status**   | 🔴 Aberta                                                                                                              |
+| **Dono**     | Trilha 2 — Plataforma & Integrações                                                                                    |
+| **Prazo**    | **Sprint 1** — os workflows de deploy estão como esqueleto até isto fechar                                             |
 | **Bloqueia** | `infra/` · [`ci-cd.md`](../engenharia/ci-cd.md) · [RNF-009](../produto/requisitos-nao-funcionais.md), RNF-013, RNF-064 |
 
 **Opções:** PaaS (Railway, Render, Fly.io) · nuvem gerenciada (AWS, GCP) ·
@@ -297,11 +297,11 @@ na fatura.
 
 ### DEC-010 — Cobrança de mensalidade, inadimplência e bloqueio
 
-| | |
-|---|---|
-| **Status** | 🟡 Em análise — candidato avaliado |
-| **Dono** | Produto |
-| **Prazo** | Sprint 3 |
+|              |                                                                                                                                                |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**   | 🟡 Em análise — candidato avaliado                                                                                                             |
+| **Dono**     | Produto                                                                                                                                        |
+| **Prazo**    | Sprint 3                                                                                                                                       |
 | **Bloqueia** | `packages/billing` · [RF-110 a RF-118](../produto/requisitos-funcionais.md) · [E12](../produto/user-stories.md#e12--assinatura--cobrança-saas) |
 
 **Contexto.** Herdada da apresentação: como cobrar, como avisar da inadimplência,
@@ -314,12 +314,12 @@ Pix, com ciclos numerados, `external_reference` próprio e histórico de cobran�
 
 **Ainda em aberto (produto, não técnico):**
 
-| Ponto | Pergunta |
-|---|---|
-| Preço | Quanto custa a mensalidade e quantos planos existem? → [QST-002](#qst-002) |
-| Trial | Quantos dias e com quais limites? |
-| Tolerância | Quantos dias entre o vencimento e a restrição? |
-| Restrição | Confirmado que restringe **escrita** mantendo leitura e exportação? |
+| Ponto      | Pergunta                                                                   |
+| ---------- | -------------------------------------------------------------------------- |
+| Preço      | Quanto custa a mensalidade e quantos planos existem? → [QST-002](#qst-002) |
+| Trial      | Quantos dias e com quais limites?                                          |
+| Tolerância | Quantos dias entre o vencimento e a restrição?                             |
+| Restrição  | Confirmado que restringe **escrita** mantendo leitura e exportação?        |
 
 **Recomendação.** Manter o estado `Restrita` como desenhado em
 [`fluxos.md`](../arquitetura/fluxos.md#assinatura-e-bloqueio-por-inadimplência):
@@ -331,11 +331,11 @@ e transforma inadimplente em detrator.
 
 ### DEC-011 — Memória e contexto da conversa
 
-| | |
-|---|---|
-| **Status** | 🔴 Aberta |
-| **Dono** | Trilha 2 |
-| **Prazo** | Sprint 3 |
+|              |                                                                                                                                    |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**   | 🔴 Aberta                                                                                                                          |
+| **Dono**     | Trilha 2                                                                                                                           |
+| **Prazo**    | Sprint 3                                                                                                                           |
 | **Bloqueia** | [RF-105](../produto/requisitos-funcionais.md), RF-106 · [US-051](../produto/user-stories.md#us-051--manter-o-contexto-da-conversa) |
 
 **Contexto.** Herdada da apresentação: "como manter o contexto da conversa" e
@@ -355,11 +355,11 @@ dado de lojista é outra, e exige base legal e consentimento próprios
 
 ### DEC-012 — Criação de usuário e cupons
 
-| | |
-|---|---|
-| **Status** | 🔴 Aberta |
-| **Dono** | Produto |
-| **Prazo** | Sprint 3 |
+|              |                                                                                                                    |
+| ------------ | ------------------------------------------------------------------------------------------------------------------ |
+| **Status**   | 🔴 Aberta                                                                                                          |
+| **Dono**     | Produto                                                                                                            |
+| **Prazo**    | Sprint 3                                                                                                           |
 | **Bloqueia** | [RF-114](../produto/requisitos-funcionais.md), RF-115 · [US-056](../produto/user-stories.md#us-056--aplicar-cupom) |
 
 Herdada da apresentação. **Decidir:** há autocadastro ou só por convite? Existe
@@ -370,11 +370,11 @@ grátis? Cumulativo? Quem emite?
 
 ### DEC-013 — Idioma da descrição dos commits
 
-| | |
-|---|---|
-| **Status** | 🔴 Aberta |
-| **Dono** | Time |
-| **Prazo** | **Antes do primeiro commit de feature** |
+|              |                                                                                   |
+| ------------ | --------------------------------------------------------------------------------- |
+| **Status**   | 🔴 Aberta                                                                         |
+| **Dono**     | Time                                                                              |
+| **Prazo**    | **Antes do primeiro commit de feature**                                           |
 | **Bloqueia** | [`git-workflow.md`](../engenharia/git-workflow.md) e a configuração do commitlint |
 
 Tipos e escopos são palavras-chave em inglês em qualquer cenário. A dúvida é só
@@ -388,12 +388,12 @@ depois (histórico inteiro fica misto).
 
 ### DEC-014 — Versionamento: tag única vs. tag por aplicação
 
-| | |
-|---|---|
-| **Status** | ⚪ Adiada — revisar quando houver deploy em produção |
-| **Dono** | Trilha 2 |
-| **Prazo** | Antes do primeiro deploy de produção |
-| **Bloqueia** | Nada hoje |
+|              |                                                      |
+| ------------ | ---------------------------------------------------- |
+| **Status**   | ⚪ Adiada — revisar quando houver deploy em produção |
+| **Dono**     | Trilha 2                                             |
+| **Prazo**    | Antes do primeiro deploy de produção                 |
+| **Bloqueia** | Nada hoje                                            |
 
 Pré-MVP usa **tag única `v0.x.y`** no monorepo. Quando os deploys de `api`,
 `web` e `mobile` deixarem de ser sincronizados, migrar para tags por aplicação
@@ -403,22 +403,22 @@ Pré-MVP usa **tag única `v0.x.y`** no monorepo. Quando os deploys de `api`,
 
 ### DEC-015 — Modelo de conta no PSP: uma por lojista vs. split na conta da plataforma
 
-| | |
-|---|---|
-| **Status** | 🔴 Aberta |
-| **Dono** | Produto + jurídico |
-| **Prazo** | Antes de fechar contrato com o PSP |
+|              |                                                                                                                                             |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**   | 🔴 Aberta                                                                                                                                   |
+| **Dono**     | Produto + jurídico                                                                                                                          |
+| **Prazo**    | Antes de fechar contrato com o PSP                                                                                                          |
 | **Bloqueia** | `packages/payments` · onboarding ([E1](../produto/user-stories.md#e1--onboarding--empresa)) · [M3](../produto/visao.md#métricas-de-sucesso) |
 
 **Contexto.** Descoberto na avaliação da
 [PagMaxx](../arquitetura/integracoes/pagmaxx.md#5-uma-conta-pagmaxx-por-lojista--atrito-de-onboarding):
-*"cada estabelecimento opera com suas próprias credenciais"*, com credenciamento
+_"cada estabelecimento opera com suas próprias credenciais"_, com credenciamento
 por envio de documentos e aprovação humana.
 
-| Opção | Prós | Contras |
-|---|---|---|
-| **Conta por lojista** | Dinheiro vai direto ao lojista; responsabilidade regulatória fica com ele | KYC com aprovação humana no onboarding — atrito contra [M3](../produto/visao.md#métricas-de-sucesso) |
-| **Split na conta da plataforma** | Onboarding quase instantâneo | O dinheiro passa por nós — muda a natureza regulatória do negócio e exige análise jurídica |
+| Opção                            | Prós                                                                      | Contras                                                                                              |
+| -------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **Conta por lojista**            | Dinheiro vai direto ao lojista; responsabilidade regulatória fica com ele | KYC com aprovação humana no onboarding — atrito contra [M3](../produto/visao.md#métricas-de-sucesso) |
+| **Split na conta da plataforma** | Onboarding quase instantâneo                                              | O dinheiro passa por nós — muda a natureza regulatória do negócio e exige análise jurídica           |
 
 **Recomendação.** Conta por lojista, com o credenciamento **fora do caminho
 crítico** do onboarding: a lojista vende, registra e emite nota desde o primeiro
@@ -434,20 +434,20 @@ Exige validação jurídica junto com [QST-004](#qst-004).
 Resolvem-se com informação, não com escolha. Uma pergunta respondida vira
 atualização de documento — e às vezes abre uma `DEC`.
 
-| ID | Pergunta | Para quem | Por que importa | Prazo |
-|---|---|---|---|---|
-| <a id="qst-001"></a>**QST-001** | Quantos lojistas se espera nos primeiros 12 meses? | Produto | Dimensiona [RNF-016/017](../produto/requisitos-nao-funcionais.md) e o custo de [DEC-009](#dec-009) | Sprint 1 |
-| <a id="qst-002"></a>**QST-002** | Qual o preço da mensalidade e quantos planos? | Produto | [RNF-072](../produto/requisitos-nao-funcionais.md) e [RNF-074](../produto/requisitos-nao-funcionais.md) são percentuais dela — sem o valor, não há como verificar | Sprint 1 |
-| <a id="qst-003"></a>**QST-003** | Existe lojista-piloto comprometido em usar o MVP? | Produto | Sem piloto não há como validar o [critério de saída do MVP](../produto/escopo-mvp.md#critérios-de-saída-do-mvp) | Sprint 1 |
-| <a id="qst-004"></a>**QST-004** | Quem é controlador e quem é operador de dados na LGPD? | Jurídico | Define quem responde por vazamento e o que vai no contrato — ver [`seguranca.md`](../arquitetura/seguranca.md#lgpd) | Sprint 2 |
-| <a id="qst-005"></a>**QST-005** | Qual contador valida o formato de exportação? | Produto | [RF-087](../produto/requisitos-funcionais.md) sem validação real vira retrabalho | Sprint 4 |
-| <a id="qst-006"></a>**QST-006** | As [personas](../produto/personas.md) foram validadas com lojistas reais? | Produto | Hoje são inferência a partir da apresentação comercial | Sprint 2 |
-| <a id="qst-007"></a>**QST-007** | As metas [M1–M7](../produto/visao.md#métricas-de-sucesso) são realistas? | Produto | São hipóteses; meta errada leva a decisão errada | Sprint 2 |
-| <a id="qst-008"></a>**QST-008** | Os alvos numéricos dos [RNFs](../produto/requisitos-nao-funcionais.md) batem com o aparelho e a internet do público-alvo? | Produto + Trilha 3 | Calibrados por estimativa, não por medição | Sprint 3 |
-| <a id="qst-009"></a>**QST-009** | A PagMaxx pode estender o escopo da API Key para Pix, links e assinaturas? | PagMaxx | Hoje essas rotas exigem guardar **e-mail e senha** da conta — ver [a ressalva](../arquitetura/integracoes/pagmaxx.md#3-autenticação-server-to-server-é-incompleta) | Antes do contrato |
-| <a id="qst-010"></a>**QST-010** | A PagMaxx tem ou terá API de captura presencial (maquininha, TEF, tap-on-phone)? | PagMaxx | Mudaria completamente o desenho do PDV — ver [a lacuna](../arquitetura/integracoes/pagmaxx.md#a-lacuna-não-há-api-de-venda-presencial) | Antes do contrato |
-| <a id="qst-011"></a>**QST-011** | ProComércio é a marca guarda-chuva e este ERP é uma das soluções dela, ou é o nome do próprio ERP? | Produto / fundadores | Resolve [DEC-001](#dec-001) e define qual das 5 paletas derivadas o produto usa | Sprint 1 |
-| <a id="qst-012"></a>**QST-012** | Já existe conta PagMaxx ativa e acesso ao ambiente de homologação? | Produto | Sem homologação não há como testar `packages/payments` | Sprint 2 |
+| ID                              | Pergunta                                                                                                                  | Para quem            | Por que importa                                                                                                                                                    | Prazo             |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
+| <a id="qst-001"></a>**QST-001** | Quantos lojistas se espera nos primeiros 12 meses?                                                                        | Produto              | Dimensiona [RNF-016/017](../produto/requisitos-nao-funcionais.md) e o custo de [DEC-009](#dec-009)                                                                 | Sprint 1          |
+| <a id="qst-002"></a>**QST-002** | Qual o preço da mensalidade e quantos planos?                                                                             | Produto              | [RNF-072](../produto/requisitos-nao-funcionais.md) e [RNF-074](../produto/requisitos-nao-funcionais.md) são percentuais dela — sem o valor, não há como verificar  | Sprint 1          |
+| <a id="qst-003"></a>**QST-003** | Existe lojista-piloto comprometido em usar o MVP?                                                                         | Produto              | Sem piloto não há como validar o [critério de saída do MVP](../produto/escopo-mvp.md#critérios-de-saída-do-mvp)                                                    | Sprint 1          |
+| <a id="qst-004"></a>**QST-004** | Quem é controlador e quem é operador de dados na LGPD?                                                                    | Jurídico             | Define quem responde por vazamento e o que vai no contrato — ver [`seguranca.md`](../arquitetura/seguranca.md#lgpd)                                                | Sprint 2          |
+| <a id="qst-005"></a>**QST-005** | Qual contador valida o formato de exportação?                                                                             | Produto              | [RF-087](../produto/requisitos-funcionais.md) sem validação real vira retrabalho                                                                                   | Sprint 4          |
+| <a id="qst-006"></a>**QST-006** | As [personas](../produto/personas.md) foram validadas com lojistas reais?                                                 | Produto              | Hoje são inferência a partir da apresentação comercial                                                                                                             | Sprint 2          |
+| <a id="qst-007"></a>**QST-007** | As metas [M1–M7](../produto/visao.md#métricas-de-sucesso) são realistas?                                                  | Produto              | São hipóteses; meta errada leva a decisão errada                                                                                                                   | Sprint 2          |
+| <a id="qst-008"></a>**QST-008** | Os alvos numéricos dos [RNFs](../produto/requisitos-nao-funcionais.md) batem com o aparelho e a internet do público-alvo? | Produto + Trilha 3   | Calibrados por estimativa, não por medição                                                                                                                         | Sprint 3          |
+| <a id="qst-009"></a>**QST-009** | A PagMaxx pode estender o escopo da API Key para Pix, links e assinaturas?                                                | PagMaxx              | Hoje essas rotas exigem guardar **e-mail e senha** da conta — ver [a ressalva](../arquitetura/integracoes/pagmaxx.md#3-autenticação-server-to-server-é-incompleta) | Antes do contrato |
+| <a id="qst-010"></a>**QST-010** | A PagMaxx tem ou terá API de captura presencial (maquininha, TEF, tap-on-phone)?                                          | PagMaxx              | Mudaria completamente o desenho do PDV — ver [a lacuna](../arquitetura/integracoes/pagmaxx.md#a-lacuna-não-há-api-de-venda-presencial)                             | Antes do contrato |
+| <a id="qst-011"></a>**QST-011** | ProComércio é a marca guarda-chuva e este ERP é uma das soluções dela, ou é o nome do próprio ERP?                        | Produto / fundadores | Resolve [DEC-001](#dec-001) e define qual das 5 paletas derivadas o produto usa                                                                                    | Sprint 1          |
+| <a id="qst-012"></a>**QST-012** | Já existe conta PagMaxx ativa e acesso ao ambiente de homologação?                                                        | Produto              | Sem homologação não há como testar `packages/payments`                                                                                                             | Sprint 2          |
 
 ---
 
@@ -457,8 +457,8 @@ Nenhuma ainda. Quando a primeira `DEC` fechar, ela vira uma ADR em
 [`adr/`](adr/) e aparece aqui:
 
 | ADR | Decisão | Data |
-|---|---|---|
-| — | — | — |
+| --- | ------- | ---- |
+| —   | —       | —    |
 
 ## Documentos relacionados
 

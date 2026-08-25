@@ -34,16 +34,16 @@ Detalhes em [Visão do produto](docs/produto/visao.md) e
 
 ## Stack
 
-| Camada | Tecnologia |
-|---|---|
-| Monorepo | pnpm workspaces + Turborepo |
-| API | Node.js + TypeScript + Fastify |
-| Filas / jobs | BullMQ + Redis |
-| Banco | PostgreSQL + Drizzle ORM (com RLS) |
-| Validação / contratos | Zod |
-| Mobile | Expo / React Native |
-| Web | Next.js |
-| CI/CD | GitHub Actions |
+| Camada                | Tecnologia                         |
+| --------------------- | ---------------------------------- |
+| Monorepo              | pnpm workspaces + Turborepo        |
+| API                   | Node.js + TypeScript + Fastify     |
+| Filas / jobs          | BullMQ + Redis                     |
+| Banco                 | PostgreSQL + Drizzle ORM (com RLS) |
+| Validação / contratos | Zod                                |
+| Mobile                | Expo / React Native                |
+| Web                   | Next.js                            |
+| CI/CD                 | GitHub Actions                     |
 
 ## Estrutura do monorepo
 
@@ -74,25 +74,25 @@ na-regua/
 
 Cada módulo documenta a si mesmo no próprio README:
 
-| Módulo | Responsabilidade | Doc |
-|---|---|---|
-| `apps/api` | REST, webhooks, runtime do agente | [README](apps/api/README.md) |
-| `apps/worker` | filas e jobs agendados | [README](apps/worker/README.md) |
-| `apps/mobile` | app do lojista | [README](apps/mobile/README.md) |
-| `apps/web` | backoffice, catálogo, landing | [README](apps/web/README.md) |
-| `packages/core` | casos de uso | [README](packages/core/README.md) |
-| `packages/domain` | regras de negócio puras | [README](packages/domain/README.md) |
-| `packages/contracts` | schemas e tipos compartilhados | [README](packages/contracts/README.md) |
-| `packages/db` | schema, migrations, RLS | [README](packages/db/README.md) |
-| `packages/agent` | runtime do assistente | [README](packages/agent/README.md) |
-| `packages/fiscal` | adapter fiscal | [README](packages/fiscal/README.md) |
-| `packages/whatsapp` | adapter de mensageria | [README](packages/whatsapp/README.md) |
-| `packages/banking` | adapter Open Finance | [README](packages/banking/README.md) |
-| `packages/billing` | adapter de assinatura | [README](packages/billing/README.md) |
-| `packages/payments` | adapter de PSP (Pix, link de pagamento) | [README](packages/payments/README.md) |
-| `packages/money` | valores monetários | [README](packages/money/README.md) |
-| `packages/ui` | design system | [README](packages/ui/README.md) |
-| `infra` | infraestrutura e deploy | [README](infra/README.md) |
+| Módulo               | Responsabilidade                        | Doc                                    |
+| -------------------- | --------------------------------------- | -------------------------------------- |
+| `apps/api`           | REST, webhooks, runtime do agente       | [README](apps/api/README.md)           |
+| `apps/worker`        | filas e jobs agendados                  | [README](apps/worker/README.md)        |
+| `apps/mobile`        | app do lojista                          | [README](apps/mobile/README.md)        |
+| `apps/web`           | backoffice, catálogo, landing           | [README](apps/web/README.md)           |
+| `packages/core`      | casos de uso                            | [README](packages/core/README.md)      |
+| `packages/domain`    | regras de negócio puras                 | [README](packages/domain/README.md)    |
+| `packages/contracts` | schemas e tipos compartilhados          | [README](packages/contracts/README.md) |
+| `packages/db`        | schema, migrations, RLS                 | [README](packages/db/README.md)        |
+| `packages/agent`     | runtime do assistente                   | [README](packages/agent/README.md)     |
+| `packages/fiscal`    | adapter fiscal                          | [README](packages/fiscal/README.md)    |
+| `packages/whatsapp`  | adapter de mensageria                   | [README](packages/whatsapp/README.md)  |
+| `packages/banking`   | adapter Open Finance                    | [README](packages/banking/README.md)   |
+| `packages/billing`   | adapter de assinatura                   | [README](packages/billing/README.md)   |
+| `packages/payments`  | adapter de PSP (Pix, link de pagamento) | [README](packages/payments/README.md)  |
+| `packages/money`     | valores monetários                      | [README](packages/money/README.md)     |
+| `packages/ui`        | design system                           | [README](packages/ui/README.md)        |
+| `infra`              | infraestrutura e deploy                 | [README](infra/README.md)              |
 
 Visão geral em [Arquitetura › Módulos](docs/arquitetura/modulos.md).
 
@@ -112,49 +112,54 @@ pnpm test             # testes dos pacotes afetados
 ## Documentação
 
 ### Produto
-| Doc | Para quê |
-|---|---|
-| [Visão](docs/produto/visao.md) | problema, público, proposta de valor e métricas de sucesso |
-| [Personas](docs/produto/personas.md) | quem usa o sistema e o que cada um espera |
-| [User Stories](docs/produto/user-stories.md) | épicos e histórias com critérios de aceite |
-| [Requisitos Funcionais](docs/produto/requisitos-funcionais.md) | o que o sistema faz (RF-xxx) |
-| [Requisitos Não Funcionais](docs/produto/requisitos-nao-funcionais.md) | como o sistema se comporta (RNF-xxx) |
-| [Escopo do MVP](docs/produto/escopo-mvp.md) | dentro/fora do MVP e roadmap |
-| [Glossário](docs/produto/glossario.md) | linguagem ubíqua PT-BR ↔ termos de código |
+
+| Doc                                                                    | Para quê                                                   |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------- |
+| [Visão](docs/produto/visao.md)                                         | problema, público, proposta de valor e métricas de sucesso |
+| [Personas](docs/produto/personas.md)                                   | quem usa o sistema e o que cada um espera                  |
+| [User Stories](docs/produto/user-stories.md)                           | épicos e histórias com critérios de aceite                 |
+| [Requisitos Funcionais](docs/produto/requisitos-funcionais.md)         | o que o sistema faz (RF-xxx)                               |
+| [Requisitos Não Funcionais](docs/produto/requisitos-nao-funcionais.md) | como o sistema se comporta (RNF-xxx)                       |
+| [Escopo do MVP](docs/produto/escopo-mvp.md)                            | dentro/fora do MVP e roadmap                               |
+| [Glossário](docs/produto/glossario.md)                                 | linguagem ubíqua PT-BR ↔ termos de código                  |
 
 ### Arquitetura
-| Doc | Para quê |
-|---|---|
-| [Visão geral](docs/arquitetura/visao-geral.md) | contexto e containers (C4 níveis 1 e 2) |
-| [Princípios](docs/arquitetura/principios.md) | regra de dependência e arquitetura hexagonal |
-| [Fluxos](docs/arquitetura/fluxos.md) | sequências de venda, cobrança, WhatsApp e conciliação |
-| [Dados](docs/arquitetura/dados.md) | modelo, multi-tenant, RLS e migrations |
-| [Segurança](docs/arquitetura/seguranca.md) | autenticação, autorização, segredos e LGPD |
-| [Módulos](docs/arquitetura/modulos.md) | índice de todos os módulos e suas fronteiras |
+
+| Doc                                            | Para quê                                              |
+| ---------------------------------------------- | ----------------------------------------------------- |
+| [Visão geral](docs/arquitetura/visao-geral.md) | contexto e containers (C4 níveis 1 e 2)               |
+| [Princípios](docs/arquitetura/principios.md)   | regra de dependência e arquitetura hexagonal          |
+| [Fluxos](docs/arquitetura/fluxos.md)           | sequências de venda, cobrança, WhatsApp e conciliação |
+| [Dados](docs/arquitetura/dados.md)             | modelo, multi-tenant, RLS e migrations                |
+| [Segurança](docs/arquitetura/seguranca.md)     | autenticação, autorização, segredos e LGPD            |
+| [Módulos](docs/arquitetura/modulos.md)         | índice de todos os módulos e suas fronteiras          |
 
 ### Engenharia
-| Doc | Para quê |
-|---|---|
-| [Setup](docs/engenharia/setup.md) | do zero até rodar o projeto |
-| [Git workflow](docs/engenharia/git-workflow.md) | branches, commits, PR, merge e release |
-| [Code style](docs/engenharia/code-style.md) | lint, formatação, nomenclatura e fronteiras |
-| [Fluxo de trabalho](docs/engenharia/fluxo-de-trabalho.md) | ciclo diário, review, DoR/DoD |
-| [Ambientes](docs/engenharia/ambientes.md) | dev/staging/prod e variáveis de ambiente |
-| [Testes](docs/engenharia/testes.md) | estratégia de testes por camada |
-| [CI/CD](docs/engenharia/ci-cd.md) | pipelines, gates e deploy |
+
+| Doc                                                       | Para quê                                    |
+| --------------------------------------------------------- | ------------------------------------------- |
+| [Setup](docs/engenharia/setup.md)                         | do zero até rodar o projeto                 |
+| [Git workflow](docs/engenharia/git-workflow.md)           | branches, commits, PR, merge e release      |
+| [Code style](docs/engenharia/code-style.md)               | lint, formatação, nomenclatura e fronteiras |
+| [Fluxo de trabalho](docs/engenharia/fluxo-de-trabalho.md) | ciclo diário, review, DoR/DoD               |
+| [Ambientes](docs/engenharia/ambientes.md)                 | dev/staging/prod e variáveis de ambiente    |
+| [Testes](docs/engenharia/testes.md)                       | estratégia de testes por camada             |
+| [CI/CD](docs/engenharia/ci-cd.md)                         | pipelines, gates e deploy                   |
 
 ### Processo
-| Doc | Para quê |
-|---|---|
-| [Task Ledger](docs/processo/task-ledger.md) | backlog dos 3 desenvolvedores |
-| [Importação Monday](docs/processo/monday-import.csv) | CSV para importar o ledger no Monday |
-| [Rituais](docs/processo/rituais.md) | cerimônias, Definition of Ready e Done |
+
+| Doc                                                  | Para quê                               |
+| ---------------------------------------------------- | -------------------------------------- |
+| [Task Ledger](docs/processo/task-ledger.md)          | backlog dos 3 desenvolvedores          |
+| [Importação Monday](docs/processo/monday-import.csv) | CSV para importar o ledger no Monday   |
+| [Rituais](docs/processo/rituais.md)                  | cerimônias, Definition of Ready e Done |
 
 ### Decisões
-| Doc | Para quê |
-|---|---|
-| [Decisões e perguntas em aberto](docs/decisoes/README.md) | o que ainda bloqueia trabalho |
-| [ADRs](docs/decisoes/adr/) | decisões já tomadas e seu porquê |
+
+| Doc                                                       | Para quê                         |
+| --------------------------------------------------------- | -------------------------------- |
+| [Decisões e perguntas em aberto](docs/decisoes/README.md) | o que ainda bloqueia trabalho    |
+| [ADRs](docs/decisoes/adr/)                                | decisões já tomadas e seu porquê |
 
 ## Contribuindo
 

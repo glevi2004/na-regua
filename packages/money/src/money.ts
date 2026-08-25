@@ -117,8 +117,9 @@ export class Money {
     const absRemainder = remainder < 0n ? -remainder : remainder
     const step = remainder < 0n ? -1n : 1n
 
-    return Array.from({ length: parts }, (_, i) =>
-      new Money(base + (BigInt(i) < absRemainder ? step : 0n), this.currency),
+    return Array.from(
+      { length: parts },
+      (_, i) => new Money(base + (BigInt(i) < absRemainder ? step : 0n), this.currency),
     )
   }
 

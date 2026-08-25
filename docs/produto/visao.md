@@ -26,10 +26,10 @@ A conversa vira venda, e a venda não vira dado.
 Um ERP completo cujo **canal principal de operação é a conversa**. O lojista
 pede por mensagem o que faria por formulário:
 
-> — *cadastra o cliente João, telefone 11 98888-7777*
-> — *lança uma venda pro João: 2 camisetas M a 49,90, pagou no Pix*
-> — *quanto tenho a receber essa semana?*
-> — *manda a cobrança pro João*
+> — _cadastra o cliente João, telefone 11 98888-7777_
+> — _lança uma venda pro João: 2 camisetas M a 49,90, pagou no Pix_
+> — _quanto tenho a receber essa semana?_
+> — _manda a cobrança pro João_
 
 E o aplicativo continua existindo para o que é melhor na tela: bipar código de
 barras no balcão, conferir relatório, revisar o fechamento do dia.
@@ -54,13 +54,13 @@ com múltiplas filiais e estoque distribuído. Ver
 
 ## Proposta de valor
 
-| Para o lojista | O que muda |
-|---|---|
-| Não precisa aprender um sistema | Fala com o assistente como fala com um funcionário |
-| Não precisa parar de vender | Registra a venda na mesma conversa em que ela aconteceu |
-| Sabe o lucro real | Custo, imposto e tarifa de cartão são calculados na venda, não no fim do mês |
-| Cobra sem constrangimento | O sistema dispara a cobrança, com o histórico correto |
-| Fica em dia com o fisco | Emissão de NFC-e/NFS-e no momento da venda |
+| Para o lojista                  | O que muda                                                                   |
+| ------------------------------- | ---------------------------------------------------------------------------- |
+| Não precisa aprender um sistema | Fala com o assistente como fala com um funcionário                           |
+| Não precisa parar de vender     | Registra a venda na mesma conversa em que ela aconteceu                      |
+| Sabe o lucro real               | Custo, imposto e tarifa de cartão são calculados na venda, não no fim do mês |
+| Cobra sem constrangimento       | O sistema dispara a cobrança, com o histórico correto                        |
+| Fica em dia com o fisco         | Emissão de NFC-e/NFS-e no momento da venda                                   |
 
 ## Diferencial
 
@@ -78,15 +78,15 @@ decisão de engenharia sustentando uma decisão de produto.
 > revisados com dados reais depois dos primeiros clientes — ver
 > [QST-007](../decisoes/README.md#qst-007).
 
-| # | Métrica | Por que importa | Alvo inicial |
-|---|---|---|---|
-| M1 | % de lojistas ativos após 30 dias | Mede se a adoção sobrevive à novidade — é o problema que mata ERPs de SMB | ≥ 60% |
-| M2 | % de vendas lançadas via WhatsApp | Valida a tese central do produto | ≥ 40% |
-| M3 | Tempo até a primeira venda registrada | Mede o atrito de onboarding | ≤ 15 min |
-| M4 | Vendas registradas por lojista/semana | Distingue uso real de uso cerimonial | ≥ 20 |
-| M5 | % de intenções atendidas sem correção humana | Qualidade do assistente | ≥ 85% |
-| M6 | Churn mensal | Saúde do negócio | ≤ 5% |
-| M7 | Custo de IA por lojista/mês | Viabilidade da margem — ver [RNF-072](requisitos-nao-funcionais.md) | ≤ 15% da mensalidade |
+| #   | Métrica                                      | Por que importa                                                           | Alvo inicial         |
+| --- | -------------------------------------------- | ------------------------------------------------------------------------- | -------------------- |
+| M1  | % de lojistas ativos após 30 dias            | Mede se a adoção sobrevive à novidade — é o problema que mata ERPs de SMB | ≥ 60%                |
+| M2  | % de vendas lançadas via WhatsApp            | Valida a tese central do produto                                          | ≥ 40%                |
+| M3  | Tempo até a primeira venda registrada        | Mede o atrito de onboarding                                               | ≤ 15 min             |
+| M4  | Vendas registradas por lojista/semana        | Distingue uso real de uso cerimonial                                      | ≥ 20                 |
+| M5  | % de intenções atendidas sem correção humana | Qualidade do assistente                                                   | ≥ 85%                |
+| M6  | Churn mensal                                 | Saúde do negócio                                                          | ≤ 5%                 |
+| M7  | Custo de IA por lojista/mês                  | Viabilidade da margem — ver [RNF-072](requisitos-nao-funcionais.md)       | ≤ 15% da mensalidade |
 
 ## Princípios de produto
 

@@ -15,142 +15,142 @@ evento, fila e chave de tradução.
 
 ## Cadastros
 
-| PT-BR | Código (inglês) | Observações |
-|---|---|---|
-| Empresa / Loja (o tenant) | `Company` | Unidade de isolamento multi-tenant. Nunca `Store`, `Tenant` nem `Organization` no domínio |
-| Usuário | `User` | Pessoa que faz login |
-| Papel / Perfil de acesso | `Role` | `owner`, `staff`, `accountant`, `platform_admin` |
-| Cliente | `Customer` | Cliente da loja. Nunca `Client` (reservado para clientes HTTP) |
-| Fornecedor | `Supplier` | |
-| Produto | `Product` | |
-| Variação (tamanho, cor) | `ProductVariant` | |
-| Código de barras | `barcode` | EAN/GTIN |
-| Categoria | `Category` | |
-| Unidade de medida | `UnitOfMeasure` | `un`, `kg`, `m`, `cx` |
-| Estoque | `Inventory` | Saldo. Movimentação é `InventoryMovement` |
+| PT-BR                     | Código (inglês)  | Observações                                                                               |
+| ------------------------- | ---------------- | ----------------------------------------------------------------------------------------- |
+| Empresa / Loja (o tenant) | `Company`        | Unidade de isolamento multi-tenant. Nunca `Store`, `Tenant` nem `Organization` no domínio |
+| Usuário                   | `User`           | Pessoa que faz login                                                                      |
+| Papel / Perfil de acesso  | `Role`           | `owner`, `staff`, `accountant`, `platform_admin`                                          |
+| Cliente                   | `Customer`       | Cliente da loja. Nunca `Client` (reservado para clientes HTTP)                            |
+| Fornecedor                | `Supplier`       |                                                                                           |
+| Produto                   | `Product`        |                                                                                           |
+| Variação (tamanho, cor)   | `ProductVariant` |                                                                                           |
+| Código de barras          | `barcode`        | EAN/GTIN                                                                                  |
+| Categoria                 | `Category`       |                                                                                           |
+| Unidade de medida         | `UnitOfMeasure`  | `un`, `kg`, `m`, `cx`                                                                     |
+| Estoque                   | `Inventory`      | Saldo. Movimentação é `InventoryMovement`                                                 |
 
 ## Vendas
 
-| PT-BR | Código (inglês) | Observações |
-|---|---|---|
-| Venda | `Sale` | Documento fechado. Nunca `Order` no MVP |
-| Item da venda | `SaleItem` | |
-| Carrinho | `Cart` | Venda ainda em montagem, antes de fechar |
-| Desconto | `Discount` | |
-| Acréscimo | `Surcharge` | |
-| Devolução | `SaleReturn` | |
-| Cancelamento | `SaleCancellation` | Distinto de devolução: cancela antes da liquidação |
-| Forma de pagamento | `PaymentMethod` | `debit`, `credit`, `pix`, `cash`, `wallet` |
-| Pagamento | `Payment` | Um `Sale` pode ter vários (venda dividida) |
-| Parcela | `Installment` | |
-| Carteira / fiado | `wallet` | Crédito do cliente na loja |
-| Tarifa de cartão | `CardFee` | O que a adquirente retém |
-| Valor líquido | `netAmount` | Bruto − imposto − tarifa. O que de fato entra |
-| Valor bruto | `grossAmount` | |
-| Custo | `costAmount` | |
-| Margem | `margin` | |
+| PT-BR              | Código (inglês)    | Observações                                        |
+| ------------------ | ------------------ | -------------------------------------------------- |
+| Venda              | `Sale`             | Documento fechado. Nunca `Order` no MVP            |
+| Item da venda      | `SaleItem`         |                                                    |
+| Carrinho           | `Cart`             | Venda ainda em montagem, antes de fechar           |
+| Desconto           | `Discount`         |                                                    |
+| Acréscimo          | `Surcharge`        |                                                    |
+| Devolução          | `SaleReturn`       |                                                    |
+| Cancelamento       | `SaleCancellation` | Distinto de devolução: cancela antes da liquidação |
+| Forma de pagamento | `PaymentMethod`    | `debit`, `credit`, `pix`, `cash`, `wallet`         |
+| Pagamento          | `Payment`          | Um `Sale` pode ter vários (venda dividida)         |
+| Parcela            | `Installment`      |                                                    |
+| Carteira / fiado   | `wallet`           | Crédito do cliente na loja                         |
+| Tarifa de cartão   | `CardFee`          | O que a adquirente retém                           |
+| Valor líquido      | `netAmount`        | Bruto − imposto − tarifa. O que de fato entra      |
+| Valor bruto        | `grossAmount`      |                                                    |
+| Custo              | `costAmount`       |                                                    |
+| Margem             | `margin`           |                                                    |
 
 ## Financeiro
 
-| PT-BR | Código (inglês) | Observações |
-|---|---|---|
-| Contas a receber | `Receivable` | |
-| Contas a pagar | `Payable` | |
-| Vencimento | `dueDate` | |
-| Liquidação / baixa | `Settlement` | Ato de marcar como pago. Verbo: `settle` |
-| Inadimplência | `overdue` | Estado, não entidade |
-| Banco / conta bancária | `BankAccount` | |
-| Transação bancária | `BankTransaction` | Linha do extrato |
-| Extrato | `BankStatement` | |
-| Conciliação bancária | `Reconciliation` | Verbo: `reconcile` |
-| Plano de contas | `ChartOfAccounts` | |
-| Conta contábil | `LedgerAccount` | |
-| Centro de custo | `CostCenter` | |
-| Lançamento | `Entry` | |
-| Fluxo de caixa | `CashFlow` | |
+| PT-BR                  | Código (inglês)   | Observações                              |
+| ---------------------- | ----------------- | ---------------------------------------- |
+| Contas a receber       | `Receivable`      |                                          |
+| Contas a pagar         | `Payable`         |                                          |
+| Vencimento             | `dueDate`         |                                          |
+| Liquidação / baixa     | `Settlement`      | Ato de marcar como pago. Verbo: `settle` |
+| Inadimplência          | `overdue`         | Estado, não entidade                     |
+| Banco / conta bancária | `BankAccount`     |                                          |
+| Transação bancária     | `BankTransaction` | Linha do extrato                         |
+| Extrato                | `BankStatement`   |                                          |
+| Conciliação bancária   | `Reconciliation`  | Verbo: `reconcile`                       |
+| Plano de contas        | `ChartOfAccounts` |                                          |
+| Conta contábil         | `LedgerAccount`   |                                          |
+| Centro de custo        | `CostCenter`      |                                          |
+| Lançamento             | `Entry`           |                                          |
+| Fluxo de caixa         | `CashFlow`        |                                          |
 
 ## Fiscal
 
-| PT-BR | Código (inglês) | Observações |
-|---|---|---|
-| Nota fiscal | `Invoice` | Genérico |
-| NFC-e (consumidor) | `ConsumerInvoice` | Mantém a sigla `nfce` em campos técnicos |
-| NFS-e (serviço) | `ServiceInvoice` | Sigla `nfse` em campos técnicos |
-| Emissão | `issue` | `issueInvoice()` |
-| Cancelamento de nota | `cancelInvoice` | Prazo legal distinto do cancelamento de venda |
-| Contingência | `contingency` | Emissão offline quando a SEFAZ cai |
-| Chave de acesso | `accessKey` | 44 dígitos |
-| DANFE | `danfe` | Representação impressa |
-| Regime tributário | `TaxRegime` | `simples_nacional`, `lucro_presumido`, `lucro_real` |
-| NCM | `ncm` | |
-| CFOP | `cfop` | |
-| CST / CSOSN | `cst` / `csosn` | |
-| Imposto | `Tax` | |
-| Alíquota | `taxRate` | |
+| PT-BR                | Código (inglês)   | Observações                                         |
+| -------------------- | ----------------- | --------------------------------------------------- |
+| Nota fiscal          | `Invoice`         | Genérico                                            |
+| NFC-e (consumidor)   | `ConsumerInvoice` | Mantém a sigla `nfce` em campos técnicos            |
+| NFS-e (serviço)      | `ServiceInvoice`  | Sigla `nfse` em campos técnicos                     |
+| Emissão              | `issue`           | `issueInvoice()`                                    |
+| Cancelamento de nota | `cancelInvoice`   | Prazo legal distinto do cancelamento de venda       |
+| Contingência         | `contingency`     | Emissão offline quando a SEFAZ cai                  |
+| Chave de acesso      | `accessKey`       | 44 dígitos                                          |
+| DANFE                | `danfe`           | Representação impressa                              |
+| Regime tributário    | `TaxRegime`       | `simples_nacional`, `lucro_presumido`, `lucro_real` |
+| NCM                  | `ncm`             |                                                     |
+| CFOP                 | `cfop`            |                                                     |
+| CST / CSOSN          | `cst` / `csosn`   |                                                     |
+| Imposto              | `Tax`             |                                                     |
+| Alíquota             | `taxRate`         |                                                     |
 
 ## Assistente / IA
 
-| PT-BR | Código (inglês) | Observações |
-|---|---|---|
-| Assistente | `Agent` | Nunca `Bot`, `Chatbot` nem `Assistant` |
-| Conversa | `Conversation` | Fio de mensagens com um número |
-| Mensagem | `Message` | |
-| Intenção | `Intent` | |
-| Ferramenta (do agente) | `Tool` | Caso de uso exposto ao agente |
-| Chamada de ferramenta | `ToolCall` | |
-| Confirmação | `Confirmation` | Aprovação explícita para ação sensível |
-| Memória / contexto | `ConversationContext` | |
-| Modelo (LLM) | `Model` | |
+| PT-BR                  | Código (inglês)       | Observações                            |
+| ---------------------- | --------------------- | -------------------------------------- |
+| Assistente             | `Agent`               | Nunca `Bot`, `Chatbot` nem `Assistant` |
+| Conversa               | `Conversation`        | Fio de mensagens com um número         |
+| Mensagem               | `Message`             |                                        |
+| Intenção               | `Intent`              |                                        |
+| Ferramenta (do agente) | `Tool`                | Caso de uso exposto ao agente          |
+| Chamada de ferramenta  | `ToolCall`            |                                        |
+| Confirmação            | `Confirmation`        | Aprovação explícita para ação sensível |
+| Memória / contexto     | `ConversationContext` |                                        |
+| Modelo (LLM)           | `Model`               |                                        |
 
 ## Plataforma
 
-| PT-BR | Código (inglês) | Observações |
-|---|---|---|
-| Assinatura | `Subscription` | |
-| Plano | `Plan` | |
-| Mensalidade | `subscriptionFee` | |
-| Cupom | `Coupon` | |
-| Bloqueio por inadimplência | `suspension` | Estado da `Subscription` |
-| Período de teste | `trial` | |
-| Agenda | `Schedule` | |
-| Compromisso | `Appointment` | |
-| Auditoria | `AuditLog` | |
-| Anexo | `Attachment` | |
-| Webhook | `Webhook` | Mantém em inglês também em PT-BR |
-| Fila | `Queue` | |
-| Job agendado | `ScheduledJob` | |
+| PT-BR                      | Código (inglês)   | Observações                      |
+| -------------------------- | ----------------- | -------------------------------- |
+| Assinatura                 | `Subscription`    |                                  |
+| Plano                      | `Plan`            |                                  |
+| Mensalidade                | `subscriptionFee` |                                  |
+| Cupom                      | `Coupon`          |                                  |
+| Bloqueio por inadimplência | `suspension`      | Estado da `Subscription`         |
+| Período de teste           | `trial`           |                                  |
+| Agenda                     | `Schedule`        |                                  |
+| Compromisso                | `Appointment`     |                                  |
+| Auditoria                  | `AuditLog`        |                                  |
+| Anexo                      | `Attachment`      |                                  |
+| Webhook                    | `Webhook`         | Mantém em inglês também em PT-BR |
+| Fila                       | `Queue`           |                                  |
+| Job agendado               | `ScheduledJob`    |                                  |
 
 ---
 
 ## Convenções de nomenclatura
 
-| Elemento | Convenção | Exemplo |
-|---|---|---|
-| Tipo / classe / schema Zod | `PascalCase` | `SaleItem`, `CreateSaleInput` |
-| Função / variável / propriedade | `camelCase` | `netAmount`, `issueInvoice()` |
-| Arquivo e pasta | `kebab-case` | `sale-item.ts`, `chart-of-accounts/` |
-| Tabela e coluna no banco | `snake_case`, tabela no **plural** | `sale_items`, `net_amount` |
-| Variável de ambiente | `SCREAMING_SNAKE_CASE` | `DATABASE_URL`, `WHATSAPP_API_TOKEN` |
-| Endpoint HTTP | `kebab-case`, recurso no **plural** | `POST /v1/sales`, `GET /v1/bank-accounts` |
-| Fila / job | `kebab-case`, `<domínio>-<ação>` | `invoice-issue`, `whatsapp-send` |
-| Evento de domínio | `PascalCase` no passado | `SaleRegistered`, `InvoiceIssued` |
-| Constante | `SCREAMING_SNAKE_CASE` | `MAX_DISCOUNT_RATE` |
-| Booleano | prefixo `is` / `has` / `can` | `isOverdue`, `hasInventory` |
+| Elemento                        | Convenção                           | Exemplo                                   |
+| ------------------------------- | ----------------------------------- | ----------------------------------------- |
+| Tipo / classe / schema Zod      | `PascalCase`                        | `SaleItem`, `CreateSaleInput`             |
+| Função / variável / propriedade | `camelCase`                         | `netAmount`, `issueInvoice()`             |
+| Arquivo e pasta                 | `kebab-case`                        | `sale-item.ts`, `chart-of-accounts/`      |
+| Tabela e coluna no banco        | `snake_case`, tabela no **plural**  | `sale_items`, `net_amount`                |
+| Variável de ambiente            | `SCREAMING_SNAKE_CASE`              | `DATABASE_URL`, `WHATSAPP_API_TOKEN`      |
+| Endpoint HTTP                   | `kebab-case`, recurso no **plural** | `POST /v1/sales`, `GET /v1/bank-accounts` |
+| Fila / job                      | `kebab-case`, `<domínio>-<ação>`    | `invoice-issue`, `whatsapp-send`          |
+| Evento de domínio               | `PascalCase` no passado             | `SaleRegistered`, `InvoiceIssued`         |
+| Constante                       | `SCREAMING_SNAKE_CASE`              | `MAX_DISCOUNT_RATE`                       |
+| Booleano                        | prefixo `is` / `has` / `can`        | `isOverdue`, `hasInventory`               |
 
 ## Termos proibidos no código
 
 Nomes que geram ambiguidade e não devem aparecer:
 
-| Não use | Use | Por quê |
-|---|---|---|
-| `Client` para cliente da loja | `Customer` | `Client` é cliente HTTP/SDK |
-| `Order` | `Sale` | Não existe pedido separado de venda no MVP |
-| `Bot`, `Chatbot` | `Agent` | O produto não é um bot de atendimento |
-| `Tenant`, `Organization` | `Company` | Um nome só para a mesma coisa |
-| `price` sem qualificador | `salePrice`, `costPrice` | Ambíguo entre custo e venda |
-| `amount` sem qualificador em dinheiro | `grossAmount`, `netAmount`, ... | Ambíguo sobre o que está incluso |
-| `date` para data com hora | `...At` (`createdAt`) | `date` implica dia sem hora |
-| `data`, `info`, `manager`, `helper`, `util` | nome do que a coisa é | Não significam nada |
+| Não use                                     | Use                             | Por quê                                    |
+| ------------------------------------------- | ------------------------------- | ------------------------------------------ |
+| `Client` para cliente da loja               | `Customer`                      | `Client` é cliente HTTP/SDK                |
+| `Order`                                     | `Sale`                          | Não existe pedido separado de venda no MVP |
+| `Bot`, `Chatbot`                            | `Agent`                         | O produto não é um bot de atendimento      |
+| `Tenant`, `Organization`                    | `Company`                       | Um nome só para a mesma coisa              |
+| `price` sem qualificador                    | `salePrice`, `costPrice`        | Ambíguo entre custo e venda                |
+| `amount` sem qualificador em dinheiro       | `grossAmount`, `netAmount`, ... | Ambíguo sobre o que está incluso           |
+| `date` para data com hora                   | `...At` (`createdAt`)           | `date` implica dia sem hora                |
+| `data`, `info`, `manager`, `helper`, `util` | nome do que a coisa é           | Não significam nada                        |
 
 ## Regras que valem em todo o código
 

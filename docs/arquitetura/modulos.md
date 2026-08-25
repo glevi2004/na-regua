@@ -62,49 +62,49 @@ flowchart TB
 
 ### Aplicações
 
-| Módulo | Responsabilidade | Depende de | Trilha | Doc |
-|---|---|---|---|---|
-| `apps/api` | REST, webhooks e runtime do agente. Autentica, monta contexto, chama casos de uso | `core` `contracts` `agent` + adapters (composição) | 🟠 2 | [README](../../apps/api/README.md) |
-| `apps/worker` | Filas e jobs agendados: emissão fiscal, cobrança, lembrete, importação bancária | `core` `contracts` + adapters (composição) | 🟠 2 | [README](../../apps/worker/README.md) |
-| `apps/mobile` | PDV do lojista: código de barras, venda, consulta. Opera com rede instável | `contracts` `ui` + API por HTTP | 🟢 3 | [README](../../apps/mobile/README.md) |
-| `apps/web` | Backoffice, relatórios, conciliação, catálogo público e landing | `contracts` `ui` + API por HTTP | 🟢 3 | [README](../../apps/web/README.md) |
+| Módulo        | Responsabilidade                                                                  | Depende de                                         | Trilha | Doc                                   |
+| ------------- | --------------------------------------------------------------------------------- | -------------------------------------------------- | ------ | ------------------------------------- |
+| `apps/api`    | REST, webhooks e runtime do agente. Autentica, monta contexto, chama casos de uso | `core` `contracts` `agent` + adapters (composição) | 🟠 2   | [README](../../apps/api/README.md)    |
+| `apps/worker` | Filas e jobs agendados: emissão fiscal, cobrança, lembrete, importação bancária   | `core` `contracts` + adapters (composição)         | 🟠 2   | [README](../../apps/worker/README.md) |
+| `apps/mobile` | PDV do lojista: código de barras, venda, consulta. Opera com rede instável        | `contracts` `ui` + API por HTTP                    | 🟢 3   | [README](../../apps/mobile/README.md) |
+| `apps/web`    | Backoffice, relatórios, conciliação, catálogo público e landing                   | `contracts` `ui` + API por HTTP                    | 🟢 3   | [README](../../apps/web/README.md)    |
 
 ### Núcleo
 
-| Módulo | Responsabilidade | Depende de | Trilha | Doc |
-|---|---|---|---|---|
-| `packages/core` | **Casos de uso.** Toda operação de negócio, com transação, autorização e auditoria | `domain` `contracts` `db` `money` | 🔵 1 | [README](../../packages/core/README.md) |
-| `packages/domain` | **Regras puras.** Precificação, imposto, tarifa de cartão, parcelamento, margem | `money` | 🔵 1 | [README](../../packages/domain/README.md) |
-| `packages/contracts` | **Contrato único.** Schemas Zod que servem HTTP, tipos e tools do agente | `money` | 🔵 1 | [README](../../packages/contracts/README.md) |
-| `packages/db` | Schema Drizzle, migrations, políticas RLS, repositórios | `contracts` `money` | 🔵 1 | [README](../../packages/db/README.md) |
-| `packages/money` | Tipo `Money` — inteiro em centavos, divisão sem perda de resto | — | 🔵 1 | [README](../../packages/money/README.md) |
+| Módulo               | Responsabilidade                                                                   | Depende de                        | Trilha | Doc                                          |
+| -------------------- | ---------------------------------------------------------------------------------- | --------------------------------- | ------ | -------------------------------------------- |
+| `packages/core`      | **Casos de uso.** Toda operação de negócio, com transação, autorização e auditoria | `domain` `contracts` `db` `money` | 🔵 1   | [README](../../packages/core/README.md)      |
+| `packages/domain`    | **Regras puras.** Precificação, imposto, tarifa de cartão, parcelamento, margem    | `money`                           | 🔵 1   | [README](../../packages/domain/README.md)    |
+| `packages/contracts` | **Contrato único.** Schemas Zod que servem HTTP, tipos e tools do agente           | `money`                           | 🔵 1   | [README](../../packages/contracts/README.md) |
+| `packages/db`        | Schema Drizzle, migrations, políticas RLS, repositórios                            | `contracts` `money`               | 🔵 1   | [README](../../packages/db/README.md)        |
+| `packages/money`     | Tipo `Money` — inteiro em centavos, divisão sem perda de resto                     | —                                 | 🔵 1   | [README](../../packages/money/README.md)     |
 
 ### Adaptadores
 
 Cada um implementa uma **porta declarada por `core`** e isola um provedor
 externo ainda não escolhido.
 
-| Módulo | Porta que implementa | Provedor | Decisão | Trilha | Doc |
-|---|---|---|---|---|---|
-| `packages/agent` | Runtime do assistente: tools, memória, confirmações | LLM | [DEC-007](../decisoes/README.md#dec-007) | 🟠 2 | [README](../../packages/agent/README.md) |
-| `packages/fiscal` | `InvoiceIssuer` | NFC-e / NFS-e | [DEC-004](../decisoes/README.md#dec-004) | 🟠 2 | [README](../../packages/fiscal/README.md) |
-| `packages/whatsapp` | `MessageSender` | WhatsApp | [DEC-003](../decisoes/README.md#dec-003) | 🟠 2 | [README](../../packages/whatsapp/README.md) |
-| `packages/banking` | `BankStatementProvider` | Open Finance | [DEC-005](../decisoes/README.md#dec-005) | 🟠 2 | [README](../../packages/banking/README.md) |
-| `packages/billing` | `SubscriptionProvider` | Cobrança SaaS (PagMaxx `/subscriptions`) | [DEC-010](../decisoes/README.md#dec-010) | 🟠 2 | [README](../../packages/billing/README.md) |
-| `packages/payments` | `PaymentGateway` | PSP — Pix, link de pagamento, estorno ([PagMaxx](integracoes/pagmaxx.md)) | [DEC-006](../decisoes/README.md#dec-006) | 🟠 2 | [README](../../packages/payments/README.md) |
+| Módulo              | Porta que implementa                                | Provedor                                                                  | Decisão                                  | Trilha | Doc                                         |
+| ------------------- | --------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------- | ------ | ------------------------------------------- |
+| `packages/agent`    | Runtime do assistente: tools, memória, confirmações | LLM                                                                       | [DEC-007](../decisoes/README.md#dec-007) | 🟠 2   | [README](../../packages/agent/README.md)    |
+| `packages/fiscal`   | `InvoiceIssuer`                                     | NFC-e / NFS-e                                                             | [DEC-004](../decisoes/README.md#dec-004) | 🟠 2   | [README](../../packages/fiscal/README.md)   |
+| `packages/whatsapp` | `MessageSender`                                     | WhatsApp                                                                  | [DEC-003](../decisoes/README.md#dec-003) | 🟠 2   | [README](../../packages/whatsapp/README.md) |
+| `packages/banking`  | `BankStatementProvider`                             | Open Finance                                                              | [DEC-005](../decisoes/README.md#dec-005) | 🟠 2   | [README](../../packages/banking/README.md)  |
+| `packages/billing`  | `SubscriptionProvider`                              | Cobrança SaaS (PagMaxx `/subscriptions`)                                  | [DEC-010](../decisoes/README.md#dec-010) | 🟠 2   | [README](../../packages/billing/README.md)  |
+| `packages/payments` | `PaymentGateway`                                    | PSP — Pix, link de pagamento, estorno ([PagMaxx](integracoes/pagmaxx.md)) | [DEC-006](../decisoes/README.md#dec-006) | 🟠 2   | [README](../../packages/payments/README.md) |
 
 ### Interface
 
-| Módulo | Responsabilidade | Depende de | Trilha | Doc |
-|---|---|---|---|---|
-| `packages/ui` | Tokens de design e componentes compartilhados entre web e mobile | `contracts` `money` | 🟢 3 | [README](../../packages/ui/README.md) |
+| Módulo        | Responsabilidade                                                 | Depende de          | Trilha | Doc                                   |
+| ------------- | ---------------------------------------------------------------- | ------------------- | ------ | ------------------------------------- |
+| `packages/ui` | Tokens de design e componentes compartilhados entre web e mobile | `contracts` `money` | 🟢 3   | [README](../../packages/ui/README.md) |
 
 ### Infraestrutura
 
-| Diretório | Responsabilidade | Doc |
-|---|---|---|
-| `infra/` | Docker Compose local, IaC, deploy | [README](../../infra/README.md) |
-| `scripts/` | Utilitários de repositório | — |
+| Diretório  | Responsabilidade                  | Doc                             |
+| ---------- | --------------------------------- | ------------------------------- |
+| `infra/`   | Docker Compose local, IaC, deploy | [README](../../infra/README.md) |
+| `scripts/` | Utilitários de repositório        | —                               |
 
 ## Quem pode importar quem
 
@@ -129,20 +129,20 @@ mobile/web →  contracts, ui, money        ← nunca core, nunca db
 
 A pergunta mais frequente do dia a dia:
 
-| Se você está escrevendo… | Vai em | Nunca em |
-|---|---|---|
-| Cálculo de imposto, tarifa, margem, parcela | `domain` | `core`, `apps/*` |
-| "Registrar venda" ponta a ponta | `core` | `apps/api` |
-| Validação do corpo de uma requisição | `contracts` | dentro do handler |
-| Consulta SQL / migration | `db` | `core`, `apps/*` |
-| Chamada ao provedor fiscal | `fiscal` | `core` |
-| Cobrança Pix ou link de pagamento | `payments` | `core` |
-| Interpretação de mensagem em linguagem natural | `agent` | `core` |
-| Rota HTTP, autenticação, montagem de contexto | `apps/api` | `core` |
-| Job agendado, consumidor de fila | `apps/worker` | `apps/api` |
-| Tela, navegação, estado de interface | `apps/mobile`, `apps/web` | `packages/*` |
-| Componente visual reutilizável | `ui` | apps individualmente |
-| Manipulação de valor monetário | `money` | qualquer outro lugar |
+| Se você está escrevendo…                       | Vai em                    | Nunca em             |
+| ---------------------------------------------- | ------------------------- | -------------------- |
+| Cálculo de imposto, tarifa, margem, parcela    | `domain`                  | `core`, `apps/*`     |
+| "Registrar venda" ponta a ponta                | `core`                    | `apps/api`           |
+| Validação do corpo de uma requisição           | `contracts`               | dentro do handler    |
+| Consulta SQL / migration                       | `db`                      | `core`, `apps/*`     |
+| Chamada ao provedor fiscal                     | `fiscal`                  | `core`               |
+| Cobrança Pix ou link de pagamento              | `payments`                | `core`               |
+| Interpretação de mensagem em linguagem natural | `agent`                   | `core`               |
+| Rota HTTP, autenticação, montagem de contexto  | `apps/api`                | `core`               |
+| Job agendado, consumidor de fila               | `apps/worker`             | `apps/api`           |
+| Tela, navegação, estado de interface           | `apps/mobile`, `apps/web` | `packages/*`         |
+| Componente visual reutilizável                 | `ui`                      | apps individualmente |
+| Manipulação de valor monetário                 | `money`                   | qualquer outro lugar |
 
 **Teste rápido:** se o código precisa rodar igual pelo app **e** pelo WhatsApp,
 ele pertence a `core` ou `domain`. Se ele só faz sentido numa tela ou numa rota,
@@ -155,17 +155,26 @@ saiba onde procurar:
 
 ```markdown
 # <módulo>
+
 <uma linha do que é>
 
-## Responsabilidade         o que faz — e o que explicitamente NÃO faz
-## Fronteiras               o que expõe (API pública) e o que consome
-## Dependências             permitidas e proibidas
-## Estrutura                organização interna de pastas
-## Conceitos principais     tipos e modelos centrais
-## Decisões                 escolhas locais e links para ADRs
-## Testes                   o que se testa aqui e como
-## Variáveis de ambiente    as que este módulo lê
-## Desenvolvimento          como rodar e desenvolver
+## Responsabilidade o que faz — e o que explicitamente NÃO faz
+
+## Fronteiras o que expõe (API pública) e o que consome
+
+## Dependências permitidas e proibidas
+
+## Estrutura organização interna de pastas
+
+## Conceitos principais tipos e modelos centrais
+
+## Decisões escolhas locais e links para ADRs
+
+## Testes o que se testa aqui e como
+
+## Variáveis de ambiente as que este módulo lê
+
+## Desenvolvimento como rodar e desenvolver
 ```
 
 ## Estado atual
@@ -173,11 +182,11 @@ saiba onde procurar:
 Nenhum módulo tem implementação. `apps/web` e `apps/mobile` têm apenas o
 scaffold gerado pelo Next.js e pelo Expo.
 
-| Estado | Módulos |
-|---|---|
+| Estado               | Módulos                                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | 🔴 Vazio (só README) | `api` `worker` `core` `domain` `contracts` `db` `agent` `fiscal` `whatsapp` `banking` `billing` `payments` `money` `ui` `infra` |
-| 🟡 Scaffold | `web` (Next.js), `mobile` (Expo) |
-| 🟢 Implementado | — |
+| 🟡 Scaffold          | `web` (Next.js), `mobile` (Expo)                                                                                                |
+| 🟢 Implementado      | —                                                                                                                               |
 
 A ordem de implementação está no
 [Task Ledger](../processo/task-ledger.md). Resumo: `money` e `contracts`

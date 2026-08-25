@@ -16,23 +16,23 @@ Decisões afetadas: [DEC-006](../../decisoes/README.md#dec-006) (PSP) e
 
 Gateway REST/JSON sobre HTTPS, prefixo `/api`, compatível com PCI-DSS.
 
-| Ambiente | Base URL |
-|---|---|
+| Ambiente    | Base URL                              |
+| ----------- | ------------------------------------- |
 | Homologação | `https://api.homolog.pagmaxx.com/api` |
-| Produção | `https://api.prod.pagmaxx.com/api` |
+| Produção    | `https://api.prod.pagmaxx.com/api`    |
 
-| Serviço | Endpoints | Serve a |
-|---|---|---|
-| Cartão de crédito | `/payments/pay`, `/payments/pay-secure` | venda online |
-| Estorno / cancelamento | `/payments/void` | [RF-043](../../produto/requisitos-funcionais.md) |
-| Pix | `/payments/pix/sale`, `/payments/pix/get-sale/{id}` | [RF-034](../../produto/requisitos-funcionais.md), cobrança |
-| Link de pagamento | `/payment-link/*` (legado), `/payment-links` (com split) | [RF-068](../../produto/requisitos-funcionais.md) cobrança por WhatsApp |
-| Tokenização | `/payments/tokenize-card` (`slugToken`) | cartão salvo, recorrência |
-| 3D Secure 2.x | `/payments/3ds/*` | antifraude, transfere responsabilidade ao emissor |
-| Simulação de taxa | `/payments/simulate-fee` | [RF-007](../../produto/requisitos-funcionais.md), [RF-040](../../produto/requisitos-funcionais.md) tarifa e líquido |
-| Assinaturas | `/subscriptions/*` | [E12](../../produto/user-stories.md#e12--assinatura--cobrança-saas) mensalidade |
-| Credenciamento | `/customer/documents/`, `/partners/{id}/documents` | onboarding/KYC do lojista |
-| Webhooks | POST na URL cadastrada | atualização de estado |
+| Serviço                | Endpoints                                                | Serve a                                                                                                             |
+| ---------------------- | -------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Cartão de crédito      | `/payments/pay`, `/payments/pay-secure`                  | venda online                                                                                                        |
+| Estorno / cancelamento | `/payments/void`                                         | [RF-043](../../produto/requisitos-funcionais.md)                                                                    |
+| Pix                    | `/payments/pix/sale`, `/payments/pix/get-sale/{id}`      | [RF-034](../../produto/requisitos-funcionais.md), cobrança                                                          |
+| Link de pagamento      | `/payment-link/*` (legado), `/payment-links` (com split) | [RF-068](../../produto/requisitos-funcionais.md) cobrança por WhatsApp                                              |
+| Tokenização            | `/payments/tokenize-card` (`slugToken`)                  | cartão salvo, recorrência                                                                                           |
+| 3D Secure 2.x          | `/payments/3ds/*`                                        | antifraude, transfere responsabilidade ao emissor                                                                   |
+| Simulação de taxa      | `/payments/simulate-fee`                                 | [RF-007](../../produto/requisitos-funcionais.md), [RF-040](../../produto/requisitos-funcionais.md) tarifa e líquido |
+| Assinaturas            | `/subscriptions/*`                                       | [E12](../../produto/user-stories.md#e12--assinatura--cobrança-saas) mensalidade                                     |
+| Credenciamento         | `/customer/documents/`, `/partners/{id}/documents`       | onboarding/KYC do lojista                                                                                           |
+| Webhooks               | POST na URL cadastrada                                   | atualização de estado                                                                                               |
 
 ## O que está bom
 
@@ -40,13 +40,13 @@ Gateway REST/JSON sobre HTTPS, prefixo `/api`, compatível com PCI-DSS.
 
 Raro numa API brasileira desse porte, e resolve requisitos nossos direto:
 
-| Recurso | Atende |
-|---|---|
-| `X-Pagmaxx-Signature` — HMAC-SHA256 hex sobre o **corpo bruto** | [RNF-028](../../produto/requisitos-nao-funcionais.md) |
-| `X-Pagmaxx-Event-Id` estável, para descartar entrega repetida | [RNF-043](../../produto/requisitos-nao-funcionais.md) idempotência |
-| Reentrega até 5× com espera crescente em falha de rede ou 5xx | [RNF-011](../../produto/requisitos-nao-funcionais.md) |
-| Painel com últimas entregas, motivo da falha e reenvio manual | Diagnóstico — [RF-129](../../produto/requisitos-funcionais.md) |
-| Orientação explícita: responder rápido e processar em fila | Casa com o nosso `apps/worker` |
+| Recurso                                                         | Atende                                                             |
+| --------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `X-Pagmaxx-Signature` — HMAC-SHA256 hex sobre o **corpo bruto** | [RNF-028](../../produto/requisitos-nao-funcionais.md)              |
+| `X-Pagmaxx-Event-Id` estável, para descartar entrega repetida   | [RNF-043](../../produto/requisitos-nao-funcionais.md) idempotência |
+| Reentrega até 5× com espera crescente em falha de rede ou 5xx   | [RNF-011](../../produto/requisitos-nao-funcionais.md)              |
+| Painel com últimas entregas, motivo da falha e reenvio manual   | Diagnóstico — [RF-129](../../produto/requisitos-funcionais.md)     |
+| Orientação explícita: responder rápido e processar em fila      | Casa com o nosso `apps/worker`                                     |
 
 A própria documentação recomenda o padrão que já é o nosso: validar assinatura
 sobre o corpo bruto, responder 200, enfileirar.
@@ -60,12 +60,17 @@ não um detalhe.
 ### `simulate-fee` entrega exatamente o cálculo que o produto promete
 
 ```json
-{ "status_code": 200, "content": {
-  "amount": 100.00, "cardBrand": "VISA",
-  "installmentOptions": [
-    { "installments": 1, "feePercent": 3.49, "feeAmount": 3.49, "netAmount": 96.51 },
-    { "installments": 3, "feePercent": 6.89, "feeAmount": 6.89, "netAmount": 93.11 }
-  ] } }
+{
+  "status_code": 200,
+  "content": {
+    "amount": 100.0,
+    "cardBrand": "VISA",
+    "installmentOptions": [
+      { "installments": 1, "feePercent": 3.49, "feeAmount": 3.49, "netAmount": 96.51 },
+      { "installments": 3, "feePercent": 6.89, "feeAmount": 6.89, "netAmount": 93.11 }
+    ]
+  }
+}
 ```
 
 É a tabela de tarifa por bandeira e parcelamento que
@@ -88,7 +93,7 @@ um segundo fornecedor.
 > [!WARNING]
 > **Este é o achado mais importante da avaliação.**
 
-A PagMaxx é um gateway *card-not-present*: PAN digitado, cartão tokenizado, 3DS,
+A PagMaxx é um gateway _card-not-present_: PAN digitado, cartão tokenizado, 3DS,
 link de pagamento, Pix. Não há na documentação **nenhuma** API de maquininha,
 terminal, TEF, tap-on-phone ou captura presencial.
 
@@ -98,15 +103,15 @@ crédito acontece na maquininha que a lojista já tem.
 
 ### Consequência
 
-| Forma de pagamento | Quem processa | O que o sistema faz |
-|---|---|---|
-| Dinheiro | ninguém | apenas registra |
-| Débito presencial | maquininha da lojista | **apenas registra** + calcula tarifa por tabela |
-| Crédito presencial | maquininha da lojista | **apenas registra** + calcula tarifa e parcelas |
-| Carteira (fiado) | ninguém | registra e gera recebível |
-| **Pix** | **PagMaxx** | gera cobrança, confirma por webhook |
-| **Cobrança a distância** | **PagMaxx** | link de pagamento enviado por WhatsApp |
-| **Mensalidade SaaS** | **PagMaxx** | assinatura recorrente |
+| Forma de pagamento       | Quem processa         | O que o sistema faz                             |
+| ------------------------ | --------------------- | ----------------------------------------------- |
+| Dinheiro                 | ninguém               | apenas registra                                 |
+| Débito presencial        | maquininha da lojista | **apenas registra** + calcula tarifa por tabela |
+| Crédito presencial       | maquininha da lojista | **apenas registra** + calcula tarifa e parcelas |
+| Carteira (fiado)         | ninguém               | registra e gera recebível                       |
+| **Pix**                  | **PagMaxx**           | gera cobrança, confirma por webhook             |
+| **Cobrança a distância** | **PagMaxx**           | link de pagamento enviado por WhatsApp          |
+| **Mensalidade SaaS**     | **PagMaxx**           | assinatura recorrente                           |
 
 Isso **não invalida** a escolha — na verdade encaixa bem, porque a metade
 conversacional do produto (mandar cobrança pelo WhatsApp) é exatamente onde o
@@ -118,7 +123,7 @@ link de pagamento e o Pix brilham. Mas muda duas coisas:
    para as transações que passam pela PagMaxx.
 2. **O não-objetivo da visão precisa ser revisto.** Hoje
    [`visao.md`](../../produto/visao.md#não-objetivos) diz "não é um meio de
-   pagamento". Com Pix e link de pagamento, o produto passa a *processar*
+   pagamento". Com Pix e link de pagamento, o produto passa a _processar_
    dinheiro do lojista, não só registrar. Isso tem consequência regulatória e de
    responsabilidade → [DEC-015](../../decisoes/README.md#dec-015).
 
@@ -144,8 +149,8 @@ de string — nunca `parseFloat` seguido de aritmética. Fora do
 
 ### 2. A resposta de `simulate-fee` não tem contrato estável
 
-A própria documentação avisa: *"como `content` é repassado pela adquirente,
-trate-o de forma defensiva: os nomes e a estrutura dos campos podem variar"*.
+A própria documentação avisa: _"como `content` é repassado pela adquirente,
+trate-o de forma defensiva: os nomes e a estrutura dos campos podem variar"_.
 O mesmo vale para `/payments/pay` e `/payment-link/*` — "os campos fora de
 `_pagmaxx` são repassados integralmente pela adquirente".
 
@@ -163,9 +168,9 @@ testável; a API é fonte de dados, não parte do caminho crítico.
 
 ### 3. Autenticação server-to-server é incompleta
 
-| Método | Onde funciona |
-|---|---|
-| `X-API-Key` | apenas `pay-secure`, `tokenize-card`, `3ds/*` |
+| Método                            | Onde funciona                                                                     |
+| --------------------------------- | --------------------------------------------------------------------------------- |
+| `X-API-Key`                       | apenas `pay-secure`, `tokenize-card`, `3ds/*`                                     |
 | Bearer JWT via **e-mail + senha** | todo o resto: `void`, `pix/*`, `payment-link*`, `simulate-fee`, `subscriptions/*` |
 
 Ou seja: para gerar uma cobrança Pix, precisamos guardar **a senha de uma conta
@@ -175,16 +180,16 @@ o raio de estrago é maior que o necessário.
 
 Não impede a integração, mas é um agravante de
 [RNF-022](../../produto/requisitos-nao-funcionais.md) e vira
-[QST-009](../../decisoes/README.md#qst-009): *dá para estender o escopo da API
-Key para Pix, links e assinaturas?*
+[QST-009](../../decisoes/README.md#qst-009): _dá para estender o escopo da API
+Key para Pix, links e assinaturas?_
 
 ### 4. Limites de requisição obrigam cache de token
 
-| Rota | Limite |
-|---|---|
-| `/auth/token` | **5 req/min** |
-| `/auth/refresh` | 20 req/min |
-| `/payments/simulate-fee` | 100 req/min |
+| Rota                     | Limite        |
+| ------------------------ | ------------- |
+| `/auth/token`            | **5 req/min** |
+| `/auth/refresh`          | 20 req/min    |
+| `/payments/simulate-fee` | 100 req/min   |
 
 Com um token por empresa, 5/min é apertado. O adapter precisa de cache de token
 com renovação antecipada e serialização por empresa — buscar token por
@@ -192,8 +197,8 @@ requisição estoura o limite no primeiro pico.
 
 ### 5. Uma conta PagMaxx por lojista → atrito de onboarding
 
-*"Cada estabelecimento (EC) opera com suas próprias credenciais e só enxerga as
-próprias transações."* Somado aos endpoints de credenciamento (envio de
+_"Cada estabelecimento (EC) opera com suas próprias credenciais e só enxerga as
+próprias transações."_ Somado aos endpoints de credenciamento (envio de
 documento, status `AGUARDANDO_ENVIO` / `ENVIADO` / `RECUSADO`), isso significa
 KYC por lojista, com aprovação humana.
 
@@ -208,14 +213,14 @@ dinheiro e a responsabilidade regulatória → [DEC-015](../../decisoes/README.m
 
 ### 6. Detalhes que geram bug se ignorados
 
-| Detalhe | Tratamento |
-|---|---|
-| `payment.approved` **não é disparado**; quem confirma é `payment.authorized` | Só `authorized` libera a baixa |
-| `type` pode vir **nulo** para status não mapeado | Ignorar o evento; nunca adivinhar pelo campo legado `data` |
-| `event` e `data` são legados, sem padronização | Usar `type` + `payment` / `payout` |
-| Webhook exige URL **HTTPS pública**; `localhost` é recusado | Túnel no desenvolvimento local — ver [setup](../../engenharia/setup.md) |
-| Nunca correlacionar por nome, valor ou horário | `payment.id`, `subscription_id` + `subscription_cycle`, `external_reference` |
-| Eventos de liquidação (`payout.*`) são **opt-in** no portal | Ativar — são eles que fecham a conciliação |
+| Detalhe                                                                      | Tratamento                                                                   |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `payment.approved` **não é disparado**; quem confirma é `payment.authorized` | Só `authorized` libera a baixa                                               |
+| `type` pode vir **nulo** para status não mapeado                             | Ignorar o evento; nunca adivinhar pelo campo legado `data`                   |
+| `event` e `data` são legados, sem padronização                               | Usar `type` + `payment` / `payout`                                           |
+| Webhook exige URL **HTTPS pública**; `localhost` é recusado                  | Túnel no desenvolvimento local — ver [setup](../../engenharia/setup.md)      |
+| Nunca correlacionar por nome, valor ou horário                               | `payment.id`, `subscription_id` + `subscription_cycle`, `external_reference` |
+| Eventos de liquidação (`payout.*`) são **opt-in** no portal                  | Ativar — são eles que fecham a conciliação                                   |
 
 ---
 
@@ -224,7 +229,7 @@ dinheiro e a responsabilidade regulatória → [DEC-015](../../decisoes/README.m
 ### Novo módulo: `packages/payments`
 
 A arquitetura atual não tem adapter de PSP — a premissa era que o sistema apenas
-*registrava* pagamentos. Com Pix e link de pagamento, ele passa a *processá-los*.
+_registrava_ pagamentos. Com Pix e link de pagamento, ele passa a _processá-los_.
 
 ```ts
 // packages/core — a porta, declarada por core
@@ -236,7 +241,8 @@ export interface PaymentGateway {
   fetchFeeTable(brandSample: BrandSample[]): Promise<CardFeeTable>
 }
 
-export interface SubscriptionProvider {   // packages/billing
+export interface SubscriptionProvider {
+  // packages/billing
   createSubscription(input: SubscriptionInput): Promise<Subscription>
   cancelSubscription(publicId: string): Promise<void>
   listCharges(publicId: string): Promise<SubscriptionCharge[]>
@@ -285,22 +291,22 @@ salto de valor concreto sobre [US-033](../../produto/user-stories.md#us-033--env
 
 Detalhadas em [`ambientes.md`](../../engenharia/ambientes.md).
 
-| Variável | Uso |
-|---|---|
-| `PAGMAXX_BASE_URL` | homologação ou produção |
-| `PAGMAXX_API_KEY` | `pay-secure`, tokenização, 3DS |
-| `PAGMAXX_ACCOUNT_EMAIL` | JWT — enquanto QST-009 não for resolvida |
-| `PAGMAXX_ACCOUNT_PASSWORD` | idem, em gerenciador de segredos |
-| `PAGMAXX_WEBHOOK_SECRET` | validação do HMAC |
+| Variável                   | Uso                                      |
+| -------------------------- | ---------------------------------------- |
+| `PAGMAXX_BASE_URL`         | homologação ou produção                  |
+| `PAGMAXX_API_KEY`          | `pay-secure`, tokenização, 3DS           |
+| `PAGMAXX_ACCOUNT_EMAIL`    | JWT — enquanto QST-009 não for resolvida |
+| `PAGMAXX_ACCOUNT_PASSWORD` | idem, em gerenciador de segredos         |
+| `PAGMAXX_WEBHOOK_SECRET`   | validação do HMAC                        |
 
 ## Recomendação
 
-| Pergunta | Resposta |
-|---|---|
-| Adotar a PagMaxx como PSP? | **Sim**, para Pix, link de pagamento, cartão online e estorno |
-| Adotar para a mensalidade SaaS? | **Sim** — `/subscriptions/*` cobre E12 sem outro fornecedor |
-| Resolve o cartão presencial do balcão? | **Não.** Isso continua na maquininha da lojista; o sistema registra e calcula por tabela |
-| Bloqueia algum trabalho hoje? | Não. `PaymentGateway` e `SubscriptionProvider` podem ser escritas e testadas com adapter falso |
+| Pergunta                               | Resposta                                                                                       |
+| -------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Adotar a PagMaxx como PSP?             | **Sim**, para Pix, link de pagamento, cartão online e estorno                                  |
+| Adotar para a mensalidade SaaS?        | **Sim** — `/subscriptions/*` cobre E12 sem outro fornecedor                                    |
+| Resolve o cartão presencial do balcão? | **Não.** Isso continua na maquininha da lojista; o sistema registra e calcula por tabela       |
+| Bloqueia algum trabalho hoje?          | Não. `PaymentGateway` e `SubscriptionProvider` podem ser escritas e testadas com adapter falso |
 
 **Antes de fechar o contrato**, resolver
 [QST-009](../../decisoes/README.md#qst-009) (escopo da API Key),

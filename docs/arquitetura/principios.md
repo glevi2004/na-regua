@@ -97,18 +97,18 @@ Esta tabela é a fonte da verdade. O arquivo de configuração do
 `dependency-cruiser` a traduz em código — ver
 [`code-style.md`](../engenharia/code-style.md#fronteiras-de-dependência).
 
-| De ↓ / Pode importar → | `money` | `domain` | `contracts` | `db` | `core` | adapters | `ui` |
-|---|:--:|:--:|:--:|:--:|:--:|:--:|:--:|
-| `packages/money` | — | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `packages/domain` | ✅ | — | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `packages/contracts` | ✅ | ❌ | — | ❌ | ❌ | ❌ | ❌ |
-| `packages/db` | ✅ | ❌ | ✅ | — | ❌ | ❌ | ❌ |
-| `packages/core` | ✅ | ✅ | ✅ | ✅ | — | ❌ | ❌ |
-| `packages/agent` | ✅ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ |
-| `packages/fiscal` `whatsapp` `banking` `billing` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ |
-| `packages/ui` | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ | — |
-| `apps/api` `apps/worker` | ✅ | ❌ | ✅ | ✅ ¹ | ✅ | ✅ ¹ | ❌ |
-| `apps/mobile` `apps/web` | ✅ | ❌ | ✅ | ❌ | ❌ ² | ❌ | ✅ |
+| De ↓ / Pode importar →                           | `money` | `domain` | `contracts` | `db` | `core` | adapters | `ui` |
+| ------------------------------------------------ | :-----: | :------: | :---------: | :--: | :----: | :------: | :--: |
+| `packages/money`                                 |    —    |    ❌    |     ❌      |  ❌  |   ❌   |    ❌    |  ❌  |
+| `packages/domain`                                |   ✅    |    —     |     ❌      |  ❌  |   ❌   |    ❌    |  ❌  |
+| `packages/contracts`                             |   ✅    |    ❌    |      —      |  ❌  |   ❌   |    ❌    |  ❌  |
+| `packages/db`                                    |   ✅    |    ❌    |     ✅      |  —   |   ❌   |    ❌    |  ❌  |
+| `packages/core`                                  |   ✅    |    ✅    |     ✅      |  ✅  |   —    |    ❌    |  ❌  |
+| `packages/agent`                                 |   ✅    |    ❌    |     ✅      |  ❌  |   ✅   |    ❌    |  ❌  |
+| `packages/fiscal` `whatsapp` `banking` `billing` |   ✅    |    ❌    |     ✅      |  ❌  |   ❌   |    ❌    |  ❌  |
+| `packages/ui`                                    |   ✅    |    ❌    |     ✅      |  ❌  |   ❌   |    ❌    |  —   |
+| `apps/api` `apps/worker`                         |   ✅    |    ❌    |     ✅      | ✅ ¹ |   ✅   |   ✅ ¹   |  ❌  |
+| `apps/mobile` `apps/web`                         |   ✅    |    ❌    |     ✅      |  ❌  |  ❌ ²  |    ❌    |  ✅  |
 
 ¹ Apenas na **raiz de composição** — o arquivo que instancia a conexão de banco e
 os adapters e os injeta em `core`. Nunca dentro de um handler de rota, de um
@@ -119,12 +119,12 @@ alguém precisa montar o grafo de dependências; se ela vazar para além do
 
 ### As quatro proibições que mais importam
 
-| # | Proibição | Por que existe |
-|---|---|---|
-| 1 | **Nenhum handler importa `db`** | Se um handler consulta o banco direto, a regra de negócio migra para a rota e o WhatsApp deixa de aplicá-la. Só a raiz de composição vê `db` |
-| 2 | **`apps/*` não importa `domain`** | Cálculo chamado direto pelo app é cálculo que o agente não faz igual |
-| 3 | **`domain` não importa nada com I/O** | Regra que toca rede ou banco não é testável em milissegundos, e por isso deixa de ser testada |
-| 4 | **Adapter não importa `core`** | A seta tem que apontar para dentro; adapter que conhece `core` não é substituível |
+| #   | Proibição                             | Por que existe                                                                                                                               |
+| --- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | **Nenhum handler importa `db`**       | Se um handler consulta o banco direto, a regra de negócio migra para a rota e o WhatsApp deixa de aplicá-la. Só a raiz de composição vê `db` |
+| 2   | **`apps/*` não importa `domain`**     | Cálculo chamado direto pelo app é cálculo que o agente não faz igual                                                                         |
+| 3   | **`domain` não importa nada com I/O** | Regra que toca rede ou banco não é testável em milissegundos, e por isso deixa de ser testada                                                |
+| 4   | **Adapter não importa `core`**        | A seta tem que apontar para dentro; adapter que conhece `core` não é substituível                                                            |
 
 ## Princípios
 
@@ -140,9 +140,9 @@ tem `if` de regra de negócio, a regra está no lugar errado.
 ```ts
 // apps/api — o handler não decide nada
 app.post('/v1/sales', async (req, reply) => {
-  const input = CreateSaleInput.parse(req.body)      // contracts
-  const ctx = buildContext(req)                       // quem, qual company, qual canal
-  const sale = await registerSale(deps, ctx, input)   // core decide tudo
+  const input = CreateSaleInput.parse(req.body) // contracts
+  const ctx = buildContext(req) // quem, qual company, qual canal
+  const sale = await registerSale(deps, ctx, input) // core decide tudo
   return reply.code(201).send(sale)
 })
 ```
@@ -211,8 +211,8 @@ Dinheiro é `Money` (inteiro em centavos), nunca `number` com decimal
 ([RNF-044](../produto/requisitos-nao-funcionais.md)).
 
 ```ts
-0.1 + 0.2 === 0.3          // false — e é assim que o caixa não fecha
-Money.cents(10).add(Money.cents(20)).equals(Money.cents(30))  // true
+0.1 + 0.2 === 0.3 // false — e é assim que o caixa não fecha
+Money.cents(10).add(Money.cents(20)).equals(Money.cents(30)) // true
 ```
 
 Divisão de parcelas distribui o resto de forma que a soma seja exatamente o
@@ -262,9 +262,9 @@ type ExecutionContext = {
   userId: UserId
   role: Role
   channel: 'app' | 'whatsapp' | 'api' | 'job'
-  requestId: string          // correlaciona logs — RNF-058
-  idempotencyKey?: string    // escrita com valor — RNF-043
-  now: Date                  // injetado, nunca lido de dentro
+  requestId: string // correlaciona logs — RNF-058
+  idempotencyKey?: string // escrita com valor — RNF-043
+  now: Date // injetado, nunca lido de dentro
 }
 
 type UseCase<I, O> = (deps: Deps, ctx: ExecutionContext, input: I) => Promise<O>
@@ -275,14 +275,14 @@ pode depender do dia em que a suíte roda.
 
 ## Como isso é verificado
 
-| Regra | Verificação | Bloqueia PR? |
-|---|---|---|
-| Matriz de imports | `dependency-cruiser` na CI | ✅ |
-| `domain` sem I/O | Regra de import proibido | ✅ |
-| Nenhuma rota sem schema `contracts` | Revisão + teste de contrato | ✅ |
-| Dinheiro sem `Money` | Regra de lint | ✅ |
-| `companyId` vindo do cliente | Teste automatizado por rota | ✅ |
-| Caso de uso fora de `core` | Revisão de PR | 👤 humano |
+| Regra                               | Verificação                 | Bloqueia PR? |
+| ----------------------------------- | --------------------------- | ------------ |
+| Matriz de imports                   | `dependency-cruiser` na CI  | ✅           |
+| `domain` sem I/O                    | Regra de import proibido    | ✅           |
+| Nenhuma rota sem schema `contracts` | Revisão + teste de contrato | ✅           |
+| Dinheiro sem `Money`                | Regra de lint               | ✅           |
+| `companyId` vindo do cliente        | Teste automatizado por rota | ✅           |
+| Caso de uso fora de `core`          | Revisão de PR               | 👤 humano    |
 
 Detalhes de configuração em
 [`code-style.md`](../engenharia/code-style.md#fronteiras-de-dependência).

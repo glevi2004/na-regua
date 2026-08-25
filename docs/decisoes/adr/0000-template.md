@@ -14,12 +14,12 @@ substituida_por: null
 > livre. **ADR é imutável:** uma vez aceita, não se reescreve. Se a decisão
 > mudar, escreve-se uma nova ADR que substitui esta, e as duas ficam.
 
-| | |
-|---|---|
-| **Status** | Proposta · Aceita · Substituída por [ADR-NNNN](.) · Descartada |
-| **Data** | AAAA-MM-DD |
-| **Decisores** | quem participou |
-| **Decisão de origem** | [DEC-NNN](../README.md#dec-nnn) |
+|                       |                                                                |
+| --------------------- | -------------------------------------------------------------- |
+| **Status**            | Proposta · Aceita · Substituída por [ADR-NNNN](.) · Descartada |
+| **Data**              | AAAA-MM-DD                                                     |
+| **Decisores**         | quem participou                                                |
+| **Decisão de origem** | [DEC-NNN](../README.md#dec-nnn)                                |
 
 ## Contexto
 
@@ -27,19 +27,21 @@ Qual é a situação que exige uma decisão? Que forças estão em conflito —
 custo, prazo, risco, competência do time?
 
 **Escreva no presente e sem otimismo retrospectivo.** O valor de uma ADR é
-alguém, daqui a um ano, entender por que a escolha fazia sentido *com a
-informação daquele momento*. Inclua o que não se sabia.
+alguém, daqui a um ano, entender por que a escolha fazia sentido _com a
+informação daquele momento_. Inclua o que não se sabia.
 
 ## Opções consideradas
 
 ### Opção A — nome
+
 Descrição em uma linha.
 
 | Prós | Contras |
-|---|---|
-| | |
+| ---- | ------- |
+|      |         |
 
 ### Opção B — nome
+
 Idem. **Liste opções que foram de fato consideradas.** Uma ADR com uma opção
 plausível e duas de palha não documenta uma decisão, documenta uma justificativa.
 
@@ -53,13 +55,16 @@ explicitamente o que foi **abdicado** ao escolher.
 ## Consequências
 
 ### Positivas
+
 - O que fica mais fácil
 
 ### Negativas
+
 - O que fica mais difícil. **Toda decisão tem custo**; ADR sem consequência
   negativa não foi honesta.
 
 ### Neutras
+
 - O que muda sem ser melhor nem pior
 
 ## Impacto na documentação

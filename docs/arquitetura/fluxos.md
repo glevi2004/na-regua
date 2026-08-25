@@ -133,13 +133,13 @@ sequenceDiagram
 
 A regra que separa consulta de ação:
 
-| Tipo de intenção | Confirmação | Exemplo |
-|---|---|---|
-| Leitura | ❌ não pede | "quanto vendi hoje?" |
-| Criação de valor | ✅ obrigatória | lançar venda, lançar conta |
+| Tipo de intenção   | Confirmação    | Exemplo                        |
+| ------------------ | -------------- | ------------------------------ |
+| Leitura            | ❌ não pede    | "quanto vendi hoje?"           |
+| Criação de valor   | ✅ obrigatória | lançar venda, lançar conta     |
 | Alteração de valor | ✅ obrigatória | mudar preço, alterar recebível |
 | Exclusão / estorno | ✅ obrigatória | cancelar venda, estornar baixa |
-| Envio a terceiro | ✅ obrigatória | enviar cobrança ao cliente |
+| Envio a terceiro   | ✅ obrigatória | enviar cobrança ao cliente     |
 
 Uma confirmação pendente expira. Resposta ambígua conta como **não** — o custo
 de errar para o lado do "não" é uma pergunta repetida; para o lado do "sim" é um

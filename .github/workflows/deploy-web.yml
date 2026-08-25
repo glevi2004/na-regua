@@ -1,0 +1,42 @@
+name: Deploy — web
+
+# ESQUELETO. Nao faz deploy de nada ainda.
+#
+# O alvo de hospedagem e DEC-009 (docs/decisoes/README.md#dec-009) e ainda
+# esta em aberto. Este arquivo existe desabilitado de proposito: a alternativa
+# era deixar o repositorio sem nenhum caminho de deploy desenhado, o que e pior
+# — quando a decisao fechar, preenche-se os passos marcados.
+
+on:
+  workflow_dispatch:
+    inputs:
+      ambiente:
+        description: Ambiente de destino
+        required: true
+        type: choice
+        options: [staging, production]
+  push:
+    tags: ['v*']
+
+concurrency:
+  group: deploy-web-${{ github.event.inputs.ambiente || 'production' }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy da web
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.ambiente || 'production' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bloqueado por DEC-009
+        run: |
+          echo "::warning::Deploy nao configurado — DEC-009 (hospedagem) em aberto."
+          echo "Quando a decisao fechar, implementar aqui:"
+          echo "  1. build de apps/web"
+          echo "  2. publicar no alvo escolhido"
+          echo "  3. configurar variaveis de ambiente"
+          echo "  4. apontar o dominio"
+          echo "  5. reversao automatica se /health nao passar em 2 min (RNF-064)"
+          exit 1

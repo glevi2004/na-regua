@@ -20,7 +20,11 @@ export type RedisHealth = {
 let redis: Redis | undefined
 
 export function getRedis(url = process.env.REDIS_URL ?? 'redis://localhost:6379'): Redis {
-  redis ??= new Redis(url, { maxRetriesPerRequest: 1, lazyConnect: true, retryStrategy: () => null })
+  redis ??= new Redis(url, {
+    maxRetriesPerRequest: 1,
+    lazyConnect: true,
+    retryStrategy: () => null,
+  })
   return redis
 }
 

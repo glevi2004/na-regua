@@ -105,15 +105,15 @@ flowchart TB
 
 ### Por que estes containers
 
-| Container | Existe porque | Alternativa descartada |
-|---|---|---|
-| `apps/api` | Um único ponto de entrada para app, web e webhooks, com autenticação e contexto de tenant em um lugar só | Um serviço por domínio — complexidade de operação que 3 devs e zero clientes não pagam |
-| `apps/worker` | Emissão fiscal não pode bloquear a venda ([RNF-004](../produto/requisitos-nao-funcionais.md)); cobrança e lembrete são agendados | Fazer tudo síncrono na API — quebra RNF-003 e RNF-004 |
-| `apps/mobile` | O PDV é no balcão, com código de barras e rede instável ([RNF-051](../produto/requisitos-nao-funcionais.md)) | Web responsiva — não resolve leitor nativo nem operação offline |
-| `apps/web` | Backoffice, relatório e conciliação são trabalho de tela grande | Só mobile — conciliar extrato no celular é hostil |
-| PostgreSQL | Dado financeiro exige transação e integridade; RLS dá isolamento no banco ([RNF-021](../produto/requisitos-nao-funcionais.md)) | NoSQL — sem transação multi-tabela, a atomicidade de RNF-046 vira código de aplicação |
-| Redis | Fila para emissão, mensagens e jobs; cache de leitura quente | Fila no próprio Postgres — viável, mas piora o pico de mensagens de RNF-018 |
-| Object storage | XML fiscal por 5 anos ([RNF-037](../produto/requisitos-nao-funcionais.md)), anexos e exportações | Guardar no banco — caro e pesado para backup |
+| Container      | Existe porque                                                                                                                    | Alternativa descartada                                                                 |
+| -------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `apps/api`     | Um único ponto de entrada para app, web e webhooks, com autenticação e contexto de tenant em um lugar só                         | Um serviço por domínio — complexidade de operação que 3 devs e zero clientes não pagam |
+| `apps/worker`  | Emissão fiscal não pode bloquear a venda ([RNF-004](../produto/requisitos-nao-funcionais.md)); cobrança e lembrete são agendados | Fazer tudo síncrono na API — quebra RNF-003 e RNF-004                                  |
+| `apps/mobile`  | O PDV é no balcão, com código de barras e rede instável ([RNF-051](../produto/requisitos-nao-funcionais.md))                     | Web responsiva — não resolve leitor nativo nem operação offline                        |
+| `apps/web`     | Backoffice, relatório e conciliação são trabalho de tela grande                                                                  | Só mobile — conciliar extrato no celular é hostil                                      |
+| PostgreSQL     | Dado financeiro exige transação e integridade; RLS dá isolamento no banco ([RNF-021](../produto/requisitos-nao-funcionais.md))   | NoSQL — sem transação multi-tabela, a atomicidade de RNF-046 vira código de aplicação  |
+| Redis          | Fila para emissão, mensagens e jobs; cache de leitura quente                                                                     | Fila no próprio Postgres — viável, mas piora o pico de mensagens de RNF-018            |
+| Object storage | XML fiscal por 5 anos ([RNF-037](../produto/requisitos-nao-funcionais.md)), anexos e exportações                                 | Guardar no banco — caro e pesado para backup                                           |
 
 ### O runtime do agente mora na API
 
@@ -152,25 +152,25 @@ validações e a auditoria.
 
 ## Decisões estruturais tomadas
 
-| Decisão | Escolha | Por quê |
-|---|---|---|
-| Organização do código | Monorepo | Contrato compartilhado entre 4 apps; mudança em `contracts` precisa ser atômica |
-| Gerenciador de pacotes | pnpm + Turborepo | Cache de tarefas e execução por pacote afetado; `node-linker=hoisted` por causa do Metro/Expo |
-| Linguagem | TypeScript em todo o stack | Um tipo de venda compartilhado entre backend, app e agente |
-| Estilo de API | REST | Público e superfície pequenos; GraphQL não se paga aqui |
-| ORM | Drizzle | SQL explícito e tipado, essencial para trabalhar com RLS sem surpresa |
-| Isolamento | RLS no PostgreSQL | Isolamento que não depende de o desenvolvedor lembrar do `WHERE` |
-| Validação | Zod em `contracts` | O mesmo schema serve a HTTP, tipos e tools do agente |
+| Decisão                | Escolha                    | Por quê                                                                                       |
+| ---------------------- | -------------------------- | --------------------------------------------------------------------------------------------- |
+| Organização do código  | Monorepo                   | Contrato compartilhado entre 4 apps; mudança em `contracts` precisa ser atômica               |
+| Gerenciador de pacotes | pnpm + Turborepo           | Cache de tarefas e execução por pacote afetado; `node-linker=hoisted` por causa do Metro/Expo |
+| Linguagem              | TypeScript em todo o stack | Um tipo de venda compartilhado entre backend, app e agente                                    |
+| Estilo de API          | REST                       | Público e superfície pequenos; GraphQL não se paga aqui                                       |
+| ORM                    | Drizzle                    | SQL explícito e tipado, essencial para trabalhar com RLS sem surpresa                         |
+| Isolamento             | RLS no PostgreSQL          | Isolamento que não depende de o desenvolvedor lembrar do `WHERE`                              |
+| Validação              | Zod em `contracts`         | O mesmo schema serve a HTTP, tipos e tools do agente                                          |
 
 ## Decisões estruturais ainda em aberto
 
 Estas **não** estão decididas e não devem ser assumidas em código:
 
-| Tema | Decisão | Impacto se decidida errado |
-|---|---|---|
-| Estratégia multi-tenant | [DEC-002](../decisoes/README.md#dec-002) | Muda todo o `db` e o contexto de `core` |
-| Hospedagem e deploy | [DEC-009](../decisoes/README.md#dec-009) | Define `infra/` e os workflows de deploy |
-| Autenticação | [DEC-008](../decisoes/README.md#dec-008) | Afeta api, web, mobile e o vínculo do WhatsApp |
+| Tema                            | Decisão                                  | Impacto se decidida errado                       |
+| ------------------------------- | ---------------------------------------- | ------------------------------------------------ |
+| Estratégia multi-tenant         | [DEC-002](../decisoes/README.md#dec-002) | Muda todo o `db` e o contexto de `core`          |
+| Hospedagem e deploy             | [DEC-009](../decisoes/README.md#dec-009) | Define `infra/` e os workflows de deploy         |
+| Autenticação                    | [DEC-008](../decisoes/README.md#dec-008) | Afeta api, web, mobile e o vínculo do WhatsApp   |
 | LLM e recuperação de informação | [DEC-007](../decisoes/README.md#dec-007) | Define o runtime do `agent` e o custo por tenant |
 
 ## Documentos relacionados
