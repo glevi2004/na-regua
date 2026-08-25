@@ -5,14 +5,26 @@
 > mesmas regras de negócio.
 
 > [!NOTE]
-> **Nome do produto ainda não é definitivo.** O repositório se chama `na-regua`
-> e a apresentação comercial usa `ZapGestor`. A documentação usa **ZapGestor**
-> provisoriamente. Ver [DEC-001](docs/decisoes/README.md#dec-001).
+> **O nome do produto ainda não está definido.** Circulam três: `na-regua`
+> (repositório), **ZapGestor** (apresentação comercial, que a própria
+> apresentação declara ser nome de trabalho) e **ProComércio** (material de
+> rebranding, com identidade visual completa e cinco marcas derivadas).
+> A documentação usa **ZapGestor** provisoriamente, e o escopo dos pacotes é
+> `@na-regua/*` — atrelado ao repositório, que não muda com a marca, para que a
+> decisão não force renomear pacote nenhum. Ver
+> [DEC-001](docs/decisoes/README.md#dec-001) e [QST-011](docs/decisoes/README.md#qst-011).
 
-**Status:** pré-MVP. Estrutura do monorepo criada; implementação dos módulos
-ainda por fazer. Consulte o [Task Ledger](docs/processo/task-ledger.md) para o
-que está em andamento e as [Decisões em aberto](docs/decisoes/README.md) para o
-que ainda bloqueia trabalho.
+**Status:** pré-MVP.
+
+|                |                                                                                                       |
+| -------------- | ----------------------------------------------------------------------------------------------------- |
+| ✅ Funcionando | workspace, ambiente local (Postgres + Redis), CI, hooks, [`packages/money`](packages/money/README.md) |
+| 🟡 Scaffold    | `api` (com `/health` real), `worker` (filas registradas), `web`, `mobile`                             |
+| 🔴 A fazer     | todos os demais módulos — **o banco ainda não tem schema**                                            |
+
+**51 dos 152 dias-desenvolvedor do backlog estão bloqueados por 10 decisões em
+aberto.** Decidir é hoje a atividade de maior retorno do projeto. Ver
+[Decisões](docs/decisoes/README.md) e [Task Ledger](docs/processo/task-ledger.md).
 
 ---
 
@@ -99,15 +111,35 @@ Visão geral em [Arquitetura › Módulos](docs/arquitetura/modulos.md).
 ## Começando
 
 ```bash
-pnpm install          # instala todo o workspace
-pnpm dev              # sobe api, worker, web e mobile
-pnpm test             # testes dos pacotes afetados
+pnpm install     # instala o workspace inteiro
+pnpm setup       # cria o .env e sobe Postgres + Redis, esperando ficarem saudáveis
+pnpm dev         # sobe api (:3333), worker e web (:3000)
 ```
 
-> [!WARNING]
-> **O workspace da raiz ainda não foi configurado** (tarefa `NR-001`). Hoje cada
-> app roda isoladamente com `npm` dentro da própria pasta. Ver
-> [Setup do ambiente](docs/engenharia/setup.md) para o procedimento atual.
+Confira que subiu inteiro:
+
+```bash
+curl -s localhost:3333/health | jq
+# { "status": "ok", "checks": { "database": { "ok": true, ... }, "redis": { "ok": true, ... } } }
+```
+
+O aplicativo mobile roda à parte: `pnpm --filter @na-regua/mobile dev`.
+
+| Comando            | O quê                                               |
+| ------------------ | --------------------------------------------------- |
+| `pnpm test`        | testes                                              |
+| `pnpm typecheck`   | checagem de tipos                                   |
+| `pnpm boundaries`  | **verifica a matriz de dependências entre módulos** |
+| `pnpm infra:psql`  | abre o `psql` no banco local                        |
+| `pnpm infra:reset` | apaga os volumes e recria o banco                   |
+
+Passo a passo completo e problemas comuns:
+[Setup do ambiente](docs/engenharia/setup.md).
+
+> [!NOTE]
+> **Nenhuma credencial é necessária para desenvolver.** Todos os provedores
+> externos rodam em modo `fake` até as decisões de fornecedor fecharem — ver
+> [Ambientes](docs/engenharia/ambientes.md#modo-fake).
 
 ## Documentação
 
