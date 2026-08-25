@@ -1,0 +1,147 @@
+.header {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 100;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(14px);
+  border-bottom: 1px solid transparent;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.scrolled {
+  border-bottom-color: var(--border);
+  box-shadow: var(--shadow-sm);
+}
+
+.inner {
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+/* --- Marca (placeholder de texto, sem logo) --- */
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: auto;
+}
+
+.brandMark {
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+  background: var(--brand-gradient);
+  flex: none;
+}
+
+.brandName {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--brand-primary);
+}
+
+/* --- Navegacao (desktop) --- */
+
+.nav {
+  display: none;
+  align-items: center;
+  gap: 4px;
+}
+
+.navLink {
+  position: relative;
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  font-size: 15px;
+  color: var(--text-secondary);
+  transition: color var(--transition), background-color var(--transition);
+}
+
+.navLink:hover {
+  color: var(--brand-primary);
+  background: var(--brand-primary-soft);
+}
+
+.actions {
+  display: none;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+
+.login {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  transition: color var(--transition);
+}
+
+.login:hover {
+  color: var(--brand-accent-dark);
+}
+
+/* --- Botao do menu mobile --- */
+
+.menuButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  margin-left: auto;
+  border-radius: var(--radius-sm);
+  color: var(--brand-primary);
+  transition: background-color var(--transition);
+}
+
+.menuButton:hover {
+  background: var(--brand-primary-soft);
+}
+
+/* --- Painel mobile --- */
+
+.mobilePanel {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 18px 20px 26px;
+}
+
+.mobileNav {
+  display: grid;
+  gap: 2px;
+}
+
+.mobileLink {
+  padding: 13px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 16px;
+  color: var(--text);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.mobileLink:hover {
+  background: var(--brand-primary-soft);
+  color: var(--brand-primary);
+}
+
+.mobileCta {
+  width: 100%;
+  margin-top: 14px;
+}
+
+@media (min-width: 900px) {
+  .nav,
+  .actions {
+    display: flex;
+  }
+
+  .menuButton,
+  .mobilePanel {
+    display: none;
+  }
+}

@@ -1,0 +1,174 @@
+.shell {
+  display: grid;
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+/* --------------------------------------------------------------------- *
+ * Painel de marca (gradiente)
+ * No mobile vira uma faixa compacta no topo.
+ * --------------------------------------------------------------------- */
+
+.brandPanel {
+  position: relative;
+  padding: 22px 20px;
+  background: var(--brand-gradient);
+  color: #fff;
+  overflow: hidden;
+}
+
+/* Brilho suave para o gradiente nao ficar chapado */
+.brandPanel::after {
+  content: "";
+  position: absolute;
+  inset: -30% -20% auto -20%;
+  height: 70%;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0) 70%
+  );
+  pointer-events: none;
+}
+
+.brandInner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 26px;
+  height: 100%;
+  max-width: 430px;
+  margin-inline: auto;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brandMark {
+  width: 26px;
+  height: 26px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.9);
+  flex: none;
+}
+
+.brandName {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+
+/* O bloco de argumentos some no mobile para nao empurrar o formulario */
+.pitch {
+  display: none;
+}
+
+.pitchTitle {
+  font-size: clamp(26px, 2.6vw, 34px);
+  font-weight: 600;
+  color: #fff;
+}
+
+.highlights {
+  display: grid;
+  gap: 20px;
+  margin-top: 34px;
+}
+
+.highlight {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.highlightIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.highlightText {
+  display: grid;
+  gap: 3px;
+}
+
+.highlightText strong {
+  font-family: var(--font-display);
+  font-size: 15.5px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.highlightText span {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.footNote {
+  display: none;
+  font-size: 13.5px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* --------------------------------------------------------------------- *
+ * Painel do formulario
+ * --------------------------------------------------------------------- */
+
+.formPanel {
+  display: flex;
+  justify-content: center;
+  padding: 34px 20px 56px;
+}
+
+.formInner {
+  width: 100%;
+  max-width: 430px;
+}
+
+/* --------------------------------------------------------------------- *
+ * Responsivo
+ * --------------------------------------------------------------------- */
+
+@media (min-width: 900px) {
+  .shell {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .brandPanel {
+    display: flex;
+    align-items: center;
+    padding: 56px 48px;
+  }
+
+  .brandInner {
+    grid-template-rows: auto 1fr auto;
+    gap: 40px;
+  }
+
+  .pitch,
+  .footNote {
+    display: block;
+  }
+
+  .formPanel {
+    align-items: center;
+    padding: 56px 48px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .shell {
+    grid-template-columns: 1.05fr 1fr;
+  }
+}

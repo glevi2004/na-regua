@@ -1,0 +1,274 @@
+/* Variante escura do painel — testada aqui como preview dentro da landing */
+.section {
+  padding-block: 80px;
+  background:
+    radial-gradient(
+      60% 50% at 50% 0%,
+      rgba(109, 51, 221, 0.22) 0%,
+      rgba(109, 51, 221, 0) 70%
+    ),
+    var(--dark-bg);
+  color: var(--dark-text);
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding-block: 112px;
+  }
+}
+
+.head {
+  max-width: 680px;
+  margin-bottom: 44px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brand-accent);
+}
+
+.title {
+  margin-top: 14px;
+  font-size: clamp(28px, 4.4vw, 42px);
+  color: var(--dark-text);
+}
+
+.titleAccent {
+  color: var(--brand-accent);
+}
+
+.lead {
+  margin-top: 16px;
+  font-size: 17px;
+  color: var(--dark-text-muted);
+}
+
+/* --- Moldura do painel --- */
+
+.frame {
+  display: grid;
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius-lg);
+  background: var(--dark-surface);
+  overflow: hidden;
+  box-shadow: 0 40px 80px -40px rgba(0, 0, 0, 0.7);
+}
+
+.sidebar {
+  display: none;
+  align-content: start;
+  gap: 4px;
+  padding: 20px 14px;
+  border-right: 1px solid var(--dark-border);
+  background: rgba(0, 0, 0, 0.18);
+}
+
+.sidebarBrand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 18px;
+  padding-inline: 10px;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+.sidebarMark {
+  width: 20px;
+  height: 20px;
+  border-radius: 7px;
+  background: var(--brand-gradient);
+}
+
+.sidebarItem {
+  padding: 9px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  color: var(--dark-text-muted);
+}
+
+.sidebarActive {
+  background: rgba(57, 200, 189, 0.14);
+  color: var(--brand-accent);
+  font-weight: 600;
+}
+
+/* --- Mesas --- */
+
+.board {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+}
+
+.mesa {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 18px;
+  border: 1px solid var(--dark-border);
+  border-radius: var(--radius);
+  background: var(--dark-surface-raised);
+  transition: border-color var(--transition), transform var(--transition);
+}
+
+.mesa:hover {
+  border-color: var(--brand-accent);
+  transform: translateY(-3px);
+}
+
+.mesaHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.mesaIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  background: rgba(57, 200, 189, 0.14);
+  color: var(--brand-accent);
+}
+
+.mesaTitle {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--dark-text);
+}
+
+.mesaChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 4px 9px;
+  border-radius: var(--radius-full);
+  background: rgba(57, 200, 189, 0.16);
+  color: var(--brand-accent);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.mesaChipWarn {
+  background: rgba(109, 51, 221, 0.24);
+  color: #c4a8ff;
+}
+
+.mesaValue {
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+.mesaLabel {
+  font-size: 12.5px;
+  color: var(--dark-text-muted);
+}
+
+.bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 62px;
+  margin-top: 14px;
+}
+
+.bar {
+  flex: 1;
+  border-radius: 4px 4px 2px 2px;
+  background: linear-gradient(180deg, var(--brand-accent) 0%, rgba(57, 200, 189, 0.2) 100%);
+}
+
+.bar:last-child {
+  background: linear-gradient(
+    180deg,
+    var(--brand-highlight) 0%,
+    rgba(109, 51, 221, 0.2) 100%
+  );
+}
+
+.rows {
+  display: grid;
+  gap: 1px;
+  margin-top: 14px;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid var(--dark-border);
+  font-size: 13px;
+  color: var(--dark-text-muted);
+}
+
+.row strong {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--dark-text);
+}
+
+.alert {
+  color: #c4a8ff;
+}
+
+/* --- CTA --- */
+
+.cta {
+  display: flex;
+  justify-content: center;
+  margin-top: 34px;
+}
+
+.ctaLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 13px 24px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--dark-border);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--dark-text);
+  transition: border-color var(--transition), color var(--transition),
+    transform var(--transition);
+}
+
+.ctaLink:hover {
+  border-color: var(--brand-accent);
+  color: var(--brand-accent);
+  transform: translateY(-2px);
+}
+
+@media (min-width: 700px) {
+  .board {
+    grid-template-columns: repeat(3, 1fr);
+    padding: 22px;
+  }
+}
+
+@media (min-width: 940px) {
+  .frame {
+    grid-template-columns: 190px 1fr;
+  }
+
+  .sidebar {
+    display: grid;
+  }
+}

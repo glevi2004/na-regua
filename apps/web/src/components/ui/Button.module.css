@@ -1,0 +1,81 @@
+.base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-display);
+  font-weight: 600;
+  white-space: nowrap;
+  border: 1px solid transparent;
+  transition: background-color var(--transition), border-color var(--transition),
+    color var(--transition), transform var(--transition);
+}
+
+.base:hover {
+  transform: translateY(-1px);
+}
+
+.base:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* --- Tamanhos --- */
+
+.md {
+  padding: 11px 20px;
+  font-size: 14.5px;
+}
+
+.sm {
+  padding: 7px 14px;
+  font-size: 13px;
+}
+
+.block {
+  width: 100%;
+}
+
+/* --- Variantes --- */
+
+.primary {
+  background: var(--brand-accent);
+  color: #06312e;
+}
+
+.primary:hover {
+  background: #4ad9cd;
+}
+
+.secondary {
+  background: var(--app-field);
+  border-color: var(--app-border);
+  color: var(--app-text);
+}
+
+.secondary:hover {
+  border-color: var(--app-accent);
+  color: var(--app-accent);
+}
+
+.ghost {
+  background: transparent;
+  color: var(--app-muted);
+}
+
+.ghost:hover {
+  background: var(--app-field);
+  color: var(--app-text);
+}
+
+.danger {
+  background: rgba(255, 118, 118, 0.14);
+  border-color: rgba(255, 118, 118, 0.3);
+  color: #ff9c9c;
+}
+
+.danger:hover {
+  background: rgba(255, 118, 118, 0.22);
+}

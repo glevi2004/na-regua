@@ -1,39 +1,134 @@
+/* ==========================================================================
+   Design tokens
+   Paleta do rebranding: principal (confianca), complementar (fluidez),
+   acessoria (inovacao). Nenhuma cor deve ser escrita direto nos componentes.
+   ========================================================================== */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Marca */
+  --brand-primary: #1e2a78;
+  --brand-primary-dark: #16205c;
+  --brand-primary-soft: #e9ebf7;
+  --brand-accent: #39c8bd;
+  --brand-accent-dark: #24a79d;
+  --brand-accent-soft: #e4f7f5;
+  --brand-highlight: #6d33dd;
+  --brand-highlight-soft: #efe8fd;
+
+  --brand-gradient: linear-gradient(
+    135deg,
+    #1e2a78 0%,
+    #39c8bd 50%,
+    #6d33dd 100%
+  );
+  --brand-gradient-subtle: linear-gradient(
+    135deg,
+    rgba(30, 42, 120, 0.06) 0%,
+    rgba(57, 200, 189, 0.06) 50%,
+    rgba(109, 51, 221, 0.06) 100%
+  );
+
+  /* Feedback de UI — deliberadamente FORA da paleta da marca, para que
+     erro/alerta nunca sejam confundidos com elementos institucionais. */
+  --danger: #d92d20;
+  --danger-text: #b42318;
+  --danger-bg: #fef3f2;
+  --danger-border: #fda29b;
+
+  --warning: #dc6803;
+  --warning-text: #b54708;
+  --warning-bg: #fffaeb;
+  --warning-border: #fec84b;
+
+  --success: #079455;
+  --success-text: #067647;
+  --success-bg: #ecfdf3;
+  --success-border: #75e0a7;
+
+  /* Superficies claras */
+  --bg: #ffffff;
+  --bg-muted: #f7f8fa;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --border: #e6e8ef;
+  --border-strong: #d3d7e3;
+
+  /* Texto */
+  --text: #131734;
+  --text-secondary: #4b5171;
+  --text-muted: #767c9b;
+  --text-on-brand: #ffffff;
+
+  /* Superficies escuras (painel) */
+  --dark-bg: #0e1330;
+  --dark-surface: #161c42;
+  --dark-surface-raised: #1d2452;
+  --dark-border: #2a3268;
+  --dark-text: #eef0fb;
+  --dark-text-muted: #9aa2ce;
+
+  /* Escala tipografica */
+  --font-display: var(--font-poppins), "Segoe UI", system-ui, sans-serif;
+  --font-body: var(--font-inter), "Segoe UI", system-ui, sans-serif;
+
+  /* Espacamento e forma */
+  --radius-sm: 8px;
+  --radius: 14px;
+  --radius-lg: 22px;
+  --radius-full: 999px;
+
+  --shadow-sm: 0 1px 2px rgba(19, 23, 52, 0.06);
+  --shadow: 0 8px 24px -12px rgba(19, 23, 52, 0.18);
+  --shadow-lg: 0 28px 60px -28px rgba(19, 23, 52, 0.32);
+
+  --container: 1180px;
+  --header-h: 72px;
+
+  /* Movimento — reforca a ideia de "fluidez" da cor complementar */
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --transition: 220ms var(--ease);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* ==========================================================================
+   Reset / base
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
 }
 
 html {
-  height: 100%;
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
+  scroll-behavior: smooth;
+  scroll-padding-top: calc(var(--header-h) + 16px);
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-* {
-  box-sizing: border-box;
-  padding: 0;
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  line-height: 1.14;
+  letter-spacing: -0.022em;
+  margin: 0;
+  color: var(--text);
+}
+
+p {
   margin: 0;
 }
 
@@ -42,8 +137,193 @@ a {
   text-decoration: none;
 }
 
-@media (prefers-color-scheme: dark) {
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+:focus-visible {
+  outline: 2px solid var(--brand-accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
   html {
-    color-scheme: dark;
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ==========================================================================
+   Utilitarios compartilhados
+   ========================================================================== */
+
+.container {
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  padding-inline: 20px;
+}
+
+.section {
+  padding-block: 72px;
+}
+
+@media (min-width: 768px) {
+  .section {
+    padding-block: 104px;
+  }
+}
+
+/* Rotulo pequeno acima dos titulos de secao */
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--brand-accent-dark);
+}
+
+.sectionTitle {
+  font-size: clamp(28px, 4.4vw, 42px);
+  margin-top: 14px;
+}
+
+.sectionLead {
+  margin-top: 16px;
+  max-width: 60ch;
+  color: var(--text-secondary);
+  font-size: 17px;
+}
+
+/* Texto com o gradiente da marca — usado com moderacao */
+.gradientText {
+  background: var(--brand-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Botoes */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 13px 22px;
+  border-radius: var(--radius-full);
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: transform var(--transition), box-shadow var(--transition),
+    background-color var(--transition), color var(--transition),
+    border-color var(--transition);
+}
+
+.btnPrimary {
+  background: var(--brand-primary);
+  color: var(--text-on-brand);
+  box-shadow: var(--shadow);
+}
+
+.btnPrimary:hover {
+  background: var(--brand-highlight);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.btnGhost {
+  background: transparent;
+  color: var(--brand-primary);
+  border: 1px solid var(--border-strong);
+}
+
+.btnGhost:hover {
+  border-color: var(--brand-accent);
+  color: var(--brand-accent-dark);
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   Tema do painel logado
+   As telas internas usam apenas os tokens --app-*, nunca as cores cruas.
+   Trocar o painel para tema claro = remapear so este bloco.
+   ========================================================================== */
+
+.appTheme {
+  --app-bg: var(--dark-bg);
+  --app-surface: var(--dark-surface);
+  --app-raised: var(--dark-surface-raised);
+  --app-border: var(--dark-border);
+  --app-text: var(--dark-text);
+  --app-muted: var(--dark-text-muted);
+  --app-accent: var(--brand-accent);
+  --app-accent-soft: rgba(57, 200, 189, 0.14);
+  --app-warn: #c4a8ff;
+  --app-warn-soft: rgba(109, 51, 221, 0.26);
+  --app-field: rgba(255, 255, 255, 0.04);
+  --app-field-hover: rgba(255, 255, 255, 0.07);
+
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+/* Linha de indicadores no topo das telas do painel */
+.statRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+/* Celula de tabela com titulo e um dado secundario embaixo */
+.cellStack {
+  display: grid;
+  line-height: 1.35;
+}
+
+.cellStack small {
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
+/* Duas colunas que viram uma so no mobile */
+.splitGrid {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 1000px) {
+  .splitGrid {
+    grid-template-columns: 1fr 1fr;
   }
 }

@@ -1,0 +1,286 @@
+/* Formularios de autenticacao — painel claro */
+
+.header {
+  margin-bottom: 26px;
+}
+
+.title {
+  font-size: clamp(25px, 4vw, 31px);
+  font-weight: 600;
+  color: var(--brand-primary);
+}
+
+.subtitle {
+  margin-top: 9px;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.footer {
+  margin-top: 24px;
+  text-align: center;
+  font-size: 14.5px;
+  color: var(--text-secondary);
+}
+
+.footer a {
+  font-weight: 600;
+  color: var(--brand-primary);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color var(--transition);
+}
+
+.footer a:hover {
+  color: var(--brand-highlight);
+}
+
+/* --- Caixa de mensagem --- */
+
+.alert {
+  display: flex;
+  gap: 10px;
+  padding: 13px 15px;
+  margin-bottom: 20px;
+  border: 1px solid;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.alert_error {
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+  color: var(--danger-text);
+}
+
+.alert_warning {
+  background: var(--warning-bg);
+  border-color: var(--warning-border);
+  color: var(--warning-text);
+}
+
+.alert_success {
+  background: var(--success-bg);
+  border-color: var(--success-border);
+  color: var(--success-text);
+}
+
+/* --- Campos --- */
+
+.field {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 17px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+
+.input::placeholder {
+  color: var(--text-muted);
+}
+
+.input:hover:not(:disabled) {
+  border-color: var(--text-muted);
+}
+
+/* Foco na cor complementar da marca */
+.input:focus {
+  outline: none;
+  border-color: var(--brand-accent);
+  box-shadow: 0 0 0 3px rgba(57, 200, 189, 0.22);
+}
+
+.input:disabled {
+  background: var(--bg-muted);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+/* Erro nunca usa cor de marca */
+.inputError {
+  border-color: var(--danger-border);
+}
+
+.inputError:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 3px rgba(217, 45, 32, 0.16);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--danger-text);
+}
+
+.error::before {
+  content: "!";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--danger);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.hint {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* --- Senha --- */
+
+.passwordWrap {
+  position: relative;
+  display: flex;
+}
+
+.passwordInput {
+  padding-right: 48px;
+}
+
+.toggle {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  transition: color var(--transition), background-color var(--transition);
+}
+
+.toggle:hover {
+  color: var(--brand-primary);
+  background: var(--brand-primary-soft);
+}
+
+/* --- Forca da senha --- */
+
+.strength {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.strengthBar {
+  display: flex;
+  gap: 4px;
+  flex: 1;
+}
+
+.strengthBar i {
+  height: 4px;
+  flex: 1;
+  border-radius: var(--radius-full);
+  background: var(--border);
+  transition: background-color var(--transition);
+}
+
+.strengthBar[data-score="1"] i:nth-child(1) {
+  background: var(--danger);
+}
+
+.strengthBar[data-score="2"] i:nth-child(-n + 2) {
+  background: var(--warning);
+}
+
+.strengthBar[data-score="3"] i {
+  background: var(--success);
+}
+
+.strengthLabel {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  min-width: 68px;
+  text-align: right;
+}
+
+/* --- Botao --- */
+
+.submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: 100%;
+  padding: 13px 22px;
+  margin-top: 6px;
+  border-radius: var(--radius-full);
+  background: var(--brand-primary);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  transition: background-color var(--transition), transform var(--transition),
+    box-shadow var(--transition);
+}
+
+.submit:hover:not(:disabled) {
+  background: var(--brand-primary-dark);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow);
+}
+
+.submit:disabled {
+  background: var(--border-strong);
+  color: var(--text-muted);
+  cursor: not-allowed;
+}
+
+.submitSecondary {
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  color: var(--brand-primary);
+}
+
+.submitSecondary:hover:not(:disabled) {
+  background: var(--brand-primary-soft);
+  border-color: var(--brand-accent);
+  box-shadow: none;
+}
+
+/* --- Spinner --- */
+
+.spinner {
+  display: inline-block;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 620ms linear infinite;
+  flex: none;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

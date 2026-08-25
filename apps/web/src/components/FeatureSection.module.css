@@ -1,0 +1,60 @@
+.muted {
+  background: var(--bg-muted);
+}
+
+.grid {
+  display: grid;
+  gap: 40px;
+  align-items: center;
+}
+
+.copy {
+  max-width: 58ch;
+}
+
+.bullets {
+  display: grid;
+  gap: 13px;
+  margin-top: 28px;
+}
+
+.bullet {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 15.5px;
+  color: var(--text-secondary);
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--brand-accent-soft);
+  color: var(--brand-accent-dark);
+}
+
+.visual {
+  min-width: 0;
+}
+
+@media (min-width: 940px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+  }
+
+  /* Alterna o lado da previa sem mexer na ordem do DOM (acessibilidade) */
+  .reverse .copy {
+    order: 2;
+  }
+
+  .reverse .visual {
+    order: 1;
+  }
+}
