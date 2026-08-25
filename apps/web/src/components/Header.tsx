@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { BRAND, nav } from "@/content/site";
 import { IconClose, IconMenu } from "./Icons";
@@ -42,12 +43,12 @@ export default function Header() {
         </nav>
 
         <div className={styles.actions}>
-          <a href="#planos" className={styles.login}>
+          <Link href="/entrar" className={styles.login}>
             Entrar
-          </a>
-          <a href="#planos" className="btn btnPrimary">
+          </Link>
+          <Link href="/criar-conta" className="btn btnPrimary">
             Comecar agora
-          </a>
+          </Link>
         </div>
 
         <button
@@ -79,13 +80,20 @@ export default function Header() {
             </a>
           ))}
         </nav>
-        <a
-          href="#planos"
+        <Link
+          href="/criar-conta"
           className={`btn btnPrimary ${styles.mobileCta}`}
           onClick={() => setOpen(false)}
         >
           Comecar agora
-        </a>
+        </Link>
+        <Link
+          href="/entrar"
+          className={`btn btnGhost ${styles.mobileCta}`}
+          onClick={() => setOpen(false)}
+        >
+          Entrar
+        </Link>
       </div>
     </header>
   );

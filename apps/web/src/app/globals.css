@@ -28,6 +28,23 @@
     rgba(109, 51, 221, 0.06) 100%
   );
 
+  /* Feedback de UI — deliberadamente FORA da paleta da marca, para que
+     erro/alerta nunca sejam confundidos com elementos institucionais. */
+  --danger: #d92d20;
+  --danger-text: #b42318;
+  --danger-bg: #fef3f2;
+  --danger-border: #fda29b;
+
+  --warning: #dc6803;
+  --warning-text: #b54708;
+  --warning-bg: #fffaeb;
+  --warning-border: #fec84b;
+
+  --success: #079455;
+  --success-text: #067647;
+  --success-bg: #ecfdf3;
+  --success-border: #75e0a7;
+
   /* Superficies claras */
   --bg: #ffffff;
   --bg-muted: #f7f8fa;
@@ -254,4 +271,59 @@ svg {
   border-color: var(--brand-accent);
   color: var(--brand-accent-dark);
   transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   Tema do painel logado
+   As telas internas usam apenas os tokens --app-*, nunca as cores cruas.
+   Trocar o painel para tema claro = remapear so este bloco.
+   ========================================================================== */
+
+.appTheme {
+  --app-bg: var(--dark-bg);
+  --app-surface: var(--dark-surface);
+  --app-raised: var(--dark-surface-raised);
+  --app-border: var(--dark-border);
+  --app-text: var(--dark-text);
+  --app-muted: var(--dark-text-muted);
+  --app-accent: var(--brand-accent);
+  --app-accent-soft: rgba(57, 200, 189, 0.14);
+  --app-warn: #c4a8ff;
+  --app-warn-soft: rgba(109, 51, 221, 0.26);
+  --app-field: rgba(255, 255, 255, 0.04);
+  --app-field-hover: rgba(255, 255, 255, 0.07);
+
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+/* Linha de indicadores no topo das telas do painel */
+.statRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+/* Celula de tabela com titulo e um dado secundario embaixo */
+.cellStack {
+  display: grid;
+  line-height: 1.35;
+}
+
+.cellStack small {
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
+/* Duas colunas que viram uma so no mobile */
+.splitGrid {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 1000px) {
+  .splitGrid {
+    grid-template-columns: 1fr 1fr;
+  }
 }

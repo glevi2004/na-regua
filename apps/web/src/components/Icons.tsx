@@ -252,3 +252,96 @@ export function IconBarcode({ size = 24, className }: IconProps) {
     </svg>
   );
 }
+
+export function IconCalendar({ size = 24, className }: IconProps) {
+  return (
+    <svg {...svgProps(size, className)}>
+      <rect x="4" y="5.5" width="16" height="14.5" rx="2.5" />
+      <path d="M4 10h16" />
+      <path d="M8.5 3.5v4" />
+      <path d="M15.5 3.5v4" />
+    </svg>
+  );
+}
+
+export function IconBank({ size = 24, className }: IconProps) {
+  return (
+    <svg {...svgProps(size, className)}>
+      <path d="M3.5 9.5 12 4.5l8.5 5" />
+      <path d="M5.5 9.5v8" />
+      <path d="M10 9.5v8" />
+      <path d="M14 9.5v8" />
+      <path d="M18.5 9.5v8" />
+      <path d="M3.5 20h17" />
+    </svg>
+  );
+}
+
+export function IconList({ size = 24, className }: IconProps) {
+  return (
+    <svg {...svgProps(size, className)}>
+      <path d="M9 6.5h11" />
+      <path d="M9 12h11" />
+      <path d="M9 17.5h11" />
+      <path d="M4.5 6.5h.01" />
+      <path d="M4.5 12h.01" />
+      <path d="M4.5 17.5h.01" />
+    </svg>
+  );
+}
+
+export function IconSettings({ size = 24, className }: IconProps) {
+  return (
+    <svg {...svgProps(size, className)}>
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 14.5a1.6 1.6 0 0 0 .32 1.77l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.6 1.6 0 0 0-1.77-.32 1.6 1.6 0 0 0-1 1.47V21a2 2 0 1 1-4 0v-.1a1.6 1.6 0 0 0-1.05-1.46 1.6 1.6 0 0 0-1.77.32l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.6 1.6 0 0 0 .32-1.77 1.6 1.6 0 0 0-1.47-1H3a2 2 0 1 1 0-4h.1a1.6 1.6 0 0 0 1.46-1.05 1.6 1.6 0 0 0-.32-1.77l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.6 1.6 0 0 0 1.77.32H9a1.6 1.6 0 0 0 1-1.47V3a2 2 0 1 1 4 0v.1a1.6 1.6 0 0 0 1 1.47 1.6 1.6 0 0 0 1.77-.32l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.6 1.6 0 0 0-.32 1.77V9a1.6 1.6 0 0 0 1.47 1H21a2 2 0 1 1 0 4h-.1a1.6 1.6 0 0 0-1.47 1Z" />
+    </svg>
+  );
+}
+
+export function IconPlus({ size = 24, className }: IconProps) {
+  return (
+    <svg {...svgProps(size, className)}>
+      <path d="M12 5.5v13" />
+      <path d="M5.5 12h13" />
+    </svg>
+  );
+}
+
+export function IconFilter({ size = 24, className }: IconProps) {
+  return (
+    <svg {...svgProps(size, className)}>
+      <path d="M4 6h16l-6.2 7.3v5.2l-3.6 1.8v-7L4 6Z" />
+    </svg>
+  );
+}
+
+export function IconUpload({ size = 24, className }: IconProps) {
+  return (
+    <svg {...svgProps(size, className)}>
+      <path d="M12 15.5V4.5" />
+      <path d="M8 8.5 12 4.5l4 4" />
+      <path d="M4.5 15.5v2.5a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-2.5" />
+    </svg>
+  );
+}
+
+export function IconLogout({ size = 24, className }: IconProps) {
+  return (
+    <svg {...svgProps(size, className)}>
+      <path d="M14.5 5.5H17a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2.5" />
+      <path d="M10 8.5 6.5 12l3.5 3.5" />
+      <path d="M6.5 12H15" />
+    </svg>
+  );
+}
+
+export function IconTrash({ size = 24, className }: IconProps) {
+  return (
+    <svg {...svgProps(size, className)}>
+      <path d="M4.5 7h15" />
+      <path d="M9.5 7V5.5a1.5 1.5 0 0 1 1.5-1.5h2a1.5 1.5 0 0 1 1.5 1.5V7" />
+      <path d="M6.5 7l.8 12a2 2 0 0 0 2 1.9h5.4a2 2 0 0 0 2-1.9l.8-12" />
+    </svg>
+  );
+}

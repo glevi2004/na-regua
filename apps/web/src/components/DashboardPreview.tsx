@@ -121,7 +121,7 @@ export default function DashboardPreview() {
         </div>
 
         <div className={styles.cta}>
-          <Link href="/dashboard" className={styles.ctaLink}>
+          <Link href="/painel" className={styles.ctaLink}>
             Ver o painel completo
             <IconArrowRight size={18} />
           </Link>

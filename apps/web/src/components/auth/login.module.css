@@ -1,0 +1,54 @@
+.forgotRow {
+  display: flex;
+  justify-content: flex-end;
+  margin: -4px 0 20px;
+}
+
+.forgot {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--brand-primary);
+  transition: color var(--transition);
+}
+
+.forgot:hover {
+  color: var(--brand-accent-dark);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* --- Caixa de apoio a demonstracao (temporaria) --- */
+
+.demoBox {
+  margin-top: 30px;
+  padding: 15px 17px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-muted);
+}
+
+.demoTitle {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.demoText {
+  margin-top: 7px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.demoCode {
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: var(--brand-primary-soft);
+  color: var(--brand-primary);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 12.5px;
+}

@@ -1,0 +1,315 @@
+.card {
+  display: grid;
+  gap: 18px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+/* --- Resumo do plano --- */
+
+.planBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 15px 17px;
+  border-radius: var(--radius);
+  background: var(--brand-gradient-subtle);
+  border: 1px solid var(--border);
+}
+
+.planLabel {
+  display: block;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.planName {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--brand-primary);
+}
+
+.planPrice {
+  display: grid;
+  justify-items: end;
+}
+
+.planPrice strong {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--brand-primary);
+}
+
+.planPrice span {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* --- QR Code --- */
+
+.qrBox {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.qrImage {
+  width: 100%;
+  max-width: 230px;
+  height: auto;
+  border-radius: 10px;
+}
+
+.qrHint {
+  max-width: 34ch;
+  font-size: 13px;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--text-secondary);
+}
+
+.qrLoading {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  height: 230px;
+  align-content: center;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+/* --- Contador --- */
+
+.timer {
+  text-align: center;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.timer strong {
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+  color: var(--brand-primary);
+}
+
+.timerUrgent strong {
+  color: var(--warning-text);
+}
+
+/* --- Copia e cola --- */
+
+.copyBlock {
+  display: grid;
+  gap: 8px;
+}
+
+.copyLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+.copyRow {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.copyCode {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 13px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--bg-muted);
+  color: var(--text-secondary);
+  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-size: 12px;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copyButton {
+  flex: none;
+  padding: 0 18px;
+  border-radius: var(--radius-sm);
+  background: var(--brand-primary);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  font-weight: 600;
+  transition: background-color var(--transition);
+}
+
+.copyButton:hover {
+  background: var(--brand-primary-dark);
+}
+
+/* --- Aguardando --- */
+
+.waiting {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 13px;
+  border-radius: var(--radius-sm);
+  background: var(--brand-accent-soft);
+  color: var(--brand-accent-dark);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.inlineError {
+  font-size: 13px;
+  color: var(--danger-text);
+  text-align: center;
+}
+
+/* --- Avisos de expirado / erro --- */
+
+.notice {
+  display: grid;
+  gap: 7px;
+  padding: 18px;
+  border: 1px solid;
+  border-radius: var(--radius);
+}
+
+.notice strong {
+  font-family: var(--font-display);
+  font-size: 16px;
+}
+
+.notice p {
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.noticeWarn {
+  background: var(--warning-bg);
+  border-color: var(--warning-border);
+  color: var(--warning-text);
+}
+
+.noticeError {
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+  color: var(--danger-text);
+}
+
+.primaryButton {
+  width: 100%;
+  padding: 13px 22px;
+  border-radius: var(--radius-full);
+  background: var(--brand-primary);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  transition: background-color var(--transition), transform var(--transition);
+}
+
+.primaryButton:hover {
+  background: var(--brand-primary-dark);
+  transform: translateY(-1px);
+}
+
+/* --- Sucesso --- */
+
+.cardSuccess {
+  justify-items: center;
+  text-align: center;
+  padding: 40px 26px;
+}
+
+.successIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 66px;
+  height: 66px;
+  border-radius: 50%;
+  background: var(--success-bg);
+  border: 2px solid var(--success-border);
+  color: var(--success-text);
+  animation: pop 420ms var(--ease);
+}
+
+@keyframes pop {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.successTitle {
+  font-size: 23px;
+  color: var(--success-text);
+}
+
+.successText {
+  max-width: 38ch;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--text-secondary);
+}
+
+.successBar {
+  width: 100%;
+  max-width: 220px;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--border);
+  overflow: hidden;
+}
+
+.successBar span {
+  display: block;
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background: var(--success);
+  transform-origin: left;
+  animation: fill 1800ms linear forwards;
+}
+
+@keyframes fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* --- Botao temporario de demonstracao --- */
+
+.demoButton {
+  padding: 9px;
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 12.5px;
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.demoButton:hover {
+  color: var(--brand-primary);
+  border-color: var(--brand-accent);
+}

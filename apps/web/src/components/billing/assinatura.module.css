@@ -1,0 +1,32 @@
+.callout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  margin-bottom: 16px;
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius-lg);
+  background: var(--warning-bg);
+}
+
+.calloutTitle {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--warning-text);
+}
+
+.calloutText {
+  margin-top: 5px;
+  max-width: 52ch;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--warning-text);
+}
+
+.pixWrap {
+  max-width: 480px;
+  margin-bottom: 16px;
+}
