@@ -73,14 +73,14 @@ Base cadastral da empresa. Busca automática por CEP e CNPJ. Relatórios de fatu
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
 │  Empresa                                                                     │
-│  Cadastro da empresa · busca por CEP e CNPJ                                  │
+│  Cadastro da empresa ·                                  │
 ├──────────────────────────────────────────────────────────────────────────────┤
 │                                                                              │
 │  [ Dados ]  [ Comissões ]  [ Relatórios ]                                    │
 │                                                                              │
 │  ┌ Dados da empresa ─────────────────────────────────────────────────────┐   │
 │  │                                                                       │   │
-│  │  CNPJ *          [ 00.000.000/0001-00        ]  [ Buscar CNPJ ]       │   │
+│  │  CNPJ *          [ 00.000.000/0001-00        ]  [ Buscar CNPJ ]       │   │   Com o cnpj busca todos os outros dados (da onde? API?)
 │  │  Razão social    [ __________________________ ]                       │   │
 │  │  Nome fantasia   [ __________________________ ]                       │   │
 │  │                                                                       │   │
@@ -89,24 +89,17 @@ Base cadastral da empresa. Busca automática por CEP e CNPJ. Relatórios de fatu
 │  │                                                                       │   │
 │  │  DDD / celular   [ (  )  _____________ ]                              │   │
 │  │                                                                       │   │
-│  │  CEP *           [ ______-___ ]  [ Buscar CEP ]                       │   │
+│  │  CEP *           [ ______-___ ]  [ Buscar CEP ]                       │   │ Com o cnpj busca todos os outros dados (da onde? API?)
 │  │  Endereço        [ __________________________ ]  Nº [ ____ ]          │   │
 │  │  Complemento     [ ________________ ]  Bairro [ ________________ ]    │   │
 │  │  Cidade          [ ________________ ]  UF     [ __ ▼ ]                │   │
 │  │                                                                       │   │
 │  └───────────────────────────────────────────────────────────────────────┘   │
 │                                                                              │
-│  ┌ Comissões ────────────────────────────────────────────────────────────┐   │
-│  │  [ ] Comissões habilitadas                                            │   │
-│  │  Regra padrão  [ ____ % ]   por vendedor  [ gerenciar → ]             │   │
+│  ┌ Cupom atrelado as associações ────────────────────────────────────────┐   │
+│  │              │   │
 │  └───────────────────────────────────────────────────────────────────────┘   │
-│                                                                              │
-│  ┌ Relatórios ───────────────────────────────────────────────────────────┐   │
-│  │  Período  [ últimos 6 meses ▼ ]                                       │   │
-│  │                                                                       │   │
-│  │  [ Faturamento mês a mês ]   [ Ranking clientes ]                     │   │
-│  │  [ Ranking produtos ]        [ Gerar DRE ]                            │   │
-│  └───────────────────────────────────────────────────────────────────────┘   │
+│                                                                              │   │
 │                                                                              │
 │                                      [ Cancelar ]  [ Salvar empresa ]        │
 └──────────────────────────────────────────────────────────────────────────────┘
