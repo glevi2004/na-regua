@@ -26,7 +26,8 @@
     "infra:psql": "docker compose -f infra/docker-compose.yml exec postgres psql -U naregua -d naregua",
     "infra:redis": "docker compose -f infra/docker-compose.yml exec redis redis-cli",
     "prepare": "husky",
-    "commitlint": "commitlint"
+    "commitlint": "commitlint",
+    "ledger:csv": "node scripts/ledger-to-csv.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
