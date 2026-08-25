@@ -41,7 +41,7 @@ Refs: NR-042
 
 ### Branch
 
-`<tipo>/NR-<número>-<slug-kebab>` → `fix/NR-118-arredondamento-tarifa-cartao`
+`<tipo>/NR-<número>-<slug-kebab>` → `fix/NR-003-arredondamento-parcela`
 
 ### PR
 

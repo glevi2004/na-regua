@@ -28,10 +28,10 @@ nosso caso, e provavelmente não será tão cedo.
 
 ```
 feat/NR-042-carrinho-codigo-barras
-fix/NR-118-arredondamento-tarifa-cartao
+fix/NR-003-arredondamento-parcela
 chore/NR-007-workspace-pnpm
 docs/NR-002-base-de-documentacao
-hotfix/NR-203-webhook-whatsapp-500
+hotfix/NR-046-webhook-whatsapp-500
 ```
 
 | Parte    | Regra                                                            |
@@ -67,7 +67,7 @@ polui o histórico da branch e torna a revisão mais difícil.
 Sai da **tag de produção**, não da `main`:
 
 ```bash
-git switch -c hotfix/NR-203-webhook-500 v0.4.2
+git switch -c hotfix/NR-046-webhook-500 v0.4.2
 ```
 
 Volta para a `main` por PR normal, com a mesma revisão de sempre. Urgência não
@@ -153,7 +153,7 @@ fix(money): distribuir resto da divisão para a soma bater com o total
 Money.parse('100.00').allocate(3) devolvia 33.33 três vezes, perdendo um
 centavo. Agora o resto vai para as primeiras parcelas — RNF-045.
 
-Refs: NR-118
+Refs: NR-003
 ```
 
 ```
