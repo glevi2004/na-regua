@@ -1,3 +1,4 @@
+import CtaBuddy from '@/components/CtaBuddy'
 import DashboardPreview from '@/components/DashboardPreview'
 import FAQ from '@/components/FAQ'
 import FeatureSection from '@/components/FeatureSection'
@@ -76,6 +77,7 @@ export default function Home() {
         <Testimonials />
         <Pricing />
         <FAQ />
+        <CtaBuddy />
       </main>
 
       <Footer />

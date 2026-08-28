@@ -19,10 +19,22 @@
 }
 
 .brandMark {
-  width: 26px;
-  height: 26px;
-  border-radius: 9px;
+  /* 34px porque o Buddy e figura de corpo inteiro: menor que isso o rosto
+     e o "BUDDY" da camiseta viram uma mancha. */
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  /* Cor de espera enquanto a imagem carrega. */
   background: var(--brand-gradient);
+  overflow: hidden;
+  flex: none;
+}
+
+.brandImg {
+  /* O arquivo ja vem recortado em quadrado; `cover` fica como defesa caso
+     a arte seja trocada por uma versao em outra proporcao. */
+  object-fit: cover;
 }
 
 .brandName {

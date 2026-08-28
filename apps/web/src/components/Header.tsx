@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { BRAND, nav } from '@/content/site'
@@ -28,9 +29,10 @@ export default function Header() {
   return (
     <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
       <div className={`container ${styles.inner}`}>
-        {/* Placeholder de marca — o nome/logo ainda nao esta definido. */}
         <a href="#top" className={styles.brand} aria-label={`${BRAND}, inicio`}>
-          <span className={styles.brandMark} aria-hidden="true" />
+          <span className={styles.brandMark} aria-hidden="true">
+            <Image src="/buddy-azul.png" alt="" fill className={styles.brandImg} sizes="34px" />
+          </span>
           <span className={styles.brandName}>{BRAND}</span>
         </a>
 
