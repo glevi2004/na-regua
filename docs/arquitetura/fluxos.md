@@ -77,6 +77,11 @@ sequenceDiagram
    auditoria mudam juntos, ou nada muda.
 3. **A idempotência é verificada antes de qualquer cálculo.** Rede ruim gera
    reenvio; reenvio não pode gerar venda dupla.
+4. **Estado visível ao lojista é composto**, não um `status` na venda. Nota,
+   recebível e falha de job vivem nas tabelas deles — ver
+   [`dados.md`](dados.md#estados-da-venda).
+   Falha no `registerSale` = nenhuma linha; falha na SEFAZ/Pix depois = venda
+   existe com o estado filho explícito (RF-054, US-025).
 
 ## Venda pelo WhatsApp
 

@@ -31,24 +31,29 @@ evento, fila e chave de tradução.
 
 ## Vendas
 
-| PT-BR              | Código (inglês)    | Observações                                        |
-| ------------------ | ------------------ | -------------------------------------------------- |
-| Venda              | `Sale`             | Documento fechado. Nunca `Order` no MVP            |
-| Item da venda      | `SaleItem`         |                                                    |
-| Carrinho           | `Cart`             | Venda ainda em montagem, antes de fechar           |
-| Desconto           | `Discount`         |                                                    |
-| Acréscimo          | `Surcharge`        |                                                    |
-| Devolução          | `SaleReturn`       |                                                    |
-| Cancelamento       | `SaleCancellation` | Distinto de devolução: cancela antes da liquidação |
-| Forma de pagamento | `PaymentMethod`    | `debit`, `credit`, `pix`, `cash`, `wallet`         |
-| Pagamento          | `Payment`          | Um `Sale` pode ter vários (venda dividida)         |
-| Parcela            | `Installment`      |                                                    |
-| Carteira / fiado   | `wallet`           | Crédito do cliente na loja                         |
-| Tarifa de cartão   | `CardFee`          | O que a adquirente retém                           |
-| Valor líquido      | `netAmount`        | Bruto − imposto − tarifa. O que de fato entra      |
-| Valor bruto        | `grossAmount`      |                                                    |
-| Custo              | `costAmount`       |                                                    |
-| Margem             | `margin`           |                                                    |
+| PT-BR              | Código (inglês)    | Observações                                                 |
+| ------------------ | ------------------ | ----------------------------------------------------------- |
+| Venda              | `Sale`             | Documento fechado. Nunca `Order` no MVP                     |
+| Item da venda      | `SaleItem`         |                                                             |
+| Carrinho           | `Cart`             | Venda ainda em montagem, antes de fechar                    |
+| Desconto           | `Discount`         |                                                             |
+| Acréscimo          | `Surcharge`        |                                                             |
+| Devolução          | `SaleReturn`       |                                                             |
+| Cancelamento       | `SaleCancellation` | Distinto de devolução: cancela antes da liquidação          |
+| Forma de pagamento | `PaymentMethod`    | `debit`, `credit`, `pix`, `cash`, `wallet`                  |
+| Pagamento          | `Payment`          | Um `Sale` pode ter vários (venda dividida)                  |
+| Parcela            | `Installment`      |                                                             |
+| Plano de parcelas  | `InstallmentPlan`  | Valor, tarifa, líquido e vencimento de cada quota           |
+| Bandeira do cartão | `CardBrand`        | `visa`, `mastercard`, `elo`, `amex`, `hipercard`, `unknown` |
+| Tabela de tarifas  | `CardFeeTable`     | Lookup por bandeira e número de parcelas                    |
+| Totais da venda    | `SaleTotals`       | Bruto, custo, imposto, tarifa, líquido, margem              |
+| Carteira / fiado   | `wallet`           | Crédito do cliente na loja                                  |
+| Tarifa de cartão   | `CardFee`          | O que a adquirente retém                                    |
+| Valor líquido      | `netAmount`        | Bruto − imposto − tarifa. O que de fato entra               |
+| Valor bruto        | `grossAmount`      |                                                             |
+| Custo              | `costAmount`       |                                                             |
+| Margem em valor    | `marginAmount`     | Líquido − custo                                             |
+| Margem percentual  | `marginRate`       | Sobre o bruto, em pontos por cem                            |
 
 ## Financeiro
 
