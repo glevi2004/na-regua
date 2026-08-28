@@ -1,0 +1,147 @@
+.head {
+  max-width: 720px;
+}
+
+.cards {
+  display: grid;
+  gap: 16px;
+  margin-top: 46px;
+}
+
+.card {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 26px 24px 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition),
+    border-color var(--transition);
+}
+
+/* Fio de gradiente que aparece no hover — reforca a ideia de fluidez */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 3px;
+  background: var(--brand-gradient);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 320ms var(--ease);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  border-color: transparent;
+  box-shadow: var(--shadow-lg);
+}
+
+.card:hover::before {
+  transform: scaleX(1);
+}
+
+.cardIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  margin-bottom: 6px;
+  border-radius: var(--radius);
+  background: var(--brand-primary-soft);
+  color: var(--brand-primary);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.card:hover .cardIcon {
+  background: var(--brand-accent-soft);
+  color: var(--brand-accent-dark);
+}
+
+.cardTag {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.cardName {
+  font-size: 20px;
+}
+
+.cardText {
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+/* --- Faixa de segmentos --- */
+
+.verticals {
+  display: grid;
+  gap: 18px;
+  margin-top: 44px;
+  padding: 26px;
+  border-radius: var(--radius-lg);
+  background: var(--brand-gradient-subtle);
+  border: 1px solid var(--border);
+}
+
+.verticalsLabel {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.verticalsList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.vertical {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 16px;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--brand-primary);
+  transition: border-color var(--transition), color var(--transition),
+    transform var(--transition);
+}
+
+.vertical:hover {
+  border-color: var(--brand-accent);
+  color: var(--brand-accent-dark);
+  transform: translateY(-2px);
+}
+
+@media (min-width: 640px) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .verticals {
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: 28px;
+    padding: 24px 30px;
+  }
+}
+
+@media (min-width: 1000px) {
+  .cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

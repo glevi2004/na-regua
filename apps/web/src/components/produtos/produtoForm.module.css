@@ -1,0 +1,175 @@
+.form {
+  display: grid;
+  gap: 14px;
+}
+
+.inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inline > input {
+  flex: 1;
+  min-width: 0;
+}
+
+.erro {
+  display: block;
+  font-size: 12.5px;
+  color: var(--app-danger);
+}
+
+.aviso {
+  display: block;
+  font-size: 12.5px;
+  color: var(--app-warn);
+}
+
+/* --- Sugestoes de NCM --- */
+
+.sugestoes {
+  display: grid;
+  gap: 6px;
+  margin-top: 16px;
+}
+
+.sugestao {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  text-align: left;
+  transition: border-color var(--transition), background-color var(--transition);
+}
+
+.sugestao:hover {
+  border-color: var(--app-accent);
+  background: var(--app-field);
+}
+
+.sugestaoAtiva {
+  border-color: var(--app-accent);
+  background: var(--app-accent-soft);
+}
+
+.sugestao strong {
+  font-family: var(--font-display);
+  font-size: 14px;
+  color: var(--app-accent);
+}
+
+.sugestao span {
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+/* --- Margem calculada --- */
+
+.margemBox {
+  display: grid;
+  gap: 2px;
+  padding: 11px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  min-height: 46px;
+  align-content: center;
+}
+
+.margemBox strong {
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--app-accent);
+}
+
+.margemBox span {
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
+.margemNegativa strong {
+  color: var(--app-danger);
+}
+
+.margemVazia {
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+/* --- Imagem --- */
+
+.imagemBloco {
+  display: grid;
+  gap: 12px;
+}
+
+.imagemUpload {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 4px;
+  padding: 32px 20px;
+  border: 2px dashed var(--app-border);
+  border-radius: var(--radius);
+  background: var(--app-field);
+  color: var(--app-muted);
+  cursor: pointer;
+  transition: border-color var(--transition);
+}
+
+.imagemUpload:hover {
+  border-color: var(--app-accent);
+}
+
+.imagemUpload strong {
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  color: var(--app-text);
+}
+
+.imagemUpload span {
+  font-size: 12.5px;
+}
+
+.imagemInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.previaWrap {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+}
+
+.previa {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius);
+}
+
+/* --- Rodape --- */
+
+.rodape {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+@media (max-width: 560px) {
+  .inline,
+  .tagLinha,
+  .tagNovo {
+    flex-wrap: wrap;
+  }
+}

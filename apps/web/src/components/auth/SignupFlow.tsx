@@ -1,0 +1,361 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useState, type FormEvent } from "react";
+import {
+  createAccount,
+  createPixCharge,
+  fetchPixChargeStatus,
+} from "@/lib/auth-api";
+import { startSession } from "@/lib/session";
+import { saveSubscriptionStatus } from "@/lib/subscription-store";
+import {
+  maskPhone,
+  validateEmail,
+  validateName,
+  validatePassword,
+  validatePasswordConfirm,
+  validatePhone,
+  type FieldError,
+} from "@/lib/validation";
+import { plan } from "@/content/site";
+import {
+  Alert,
+  FormFooter,
+  FormHeader,
+  PasswordField,
+  SubmitButton,
+  TextField,
+} from "./Fields";
+import CouponInput from "./CouponInput";
+import CobrancaPix from "@/components/app/CobrancaPix";
+import SignupStepper from "./SignupStepper";
+import TermsCheckbox from "./TermsCheckbox";
+import styles from "./signup.module.css";
+
+/** Valor do plano em numero — a copy da landing traz "R$ 149". */
+const PLAN_AMOUNT = 149;
+
+export default function SignupFlow() {
+  const router = useRouter();
+  const [step, setStep] = useState(1);
+
+  /* Etapa 1 */
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [telefone, setTelefone] = useState("");
+  const [senha, setSenha] = useState("");
+  const [confirmacao, setConfirmacao] = useState("");
+
+  const [nomeError, setNomeError] = useState<FieldError>(null);
+  const [emailError, setEmailError] = useState<FieldError>(null);
+  const [telefoneError, setTelefoneError] = useState<FieldError>(null);
+  const [senhaError, setSenhaError] = useState<FieldError>(null);
+  const [confirmacaoError, setConfirmacaoError] = useState<FieldError>(null);
+
+  /* Etapa 2 */
+  const [cupom, setCupom] = useState("");
+  const [cupomValido, setCupomValido] = useState<string | null>(null);
+
+  /* Etapa 3 */
+  const [aceitou, setAceitou] = useState(false);
+  const [criando, setCriando] = useState(false);
+  const [erroCriacao, setErroCriacao] = useState<string | null>(null);
+
+  /* Envolvida em useCallback porque o CobrancaPix a usa como dependencia
+     de efeito: uma funcao nova a cada render regeraria a cobranca. */
+  const criarCobrancaAssinatura = useCallback(
+    (valor: number) => createPixCharge(plan.name, valor),
+    [],
+  );
+
+  const handleCupomValido = useCallback((code: string | null) => {
+    setCupomValido(code);
+  }, []);
+
+  /* ---------------------------------------------------------------- *
+   * Etapa 1 — dados da conta
+   * ---------------------------------------------------------------- */
+
+  function submitDados(event: FormEvent) {
+    event.preventDefault();
+
+    const erros = {
+      nome: validateName(nome),
+      email: validateEmail(email),
+      telefone: validatePhone(telefone),
+      senha: validatePassword(senha),
+      confirmacao: validatePasswordConfirm(senha, confirmacao),
+    };
+
+    setNomeError(erros.nome);
+    setEmailError(erros.email);
+    setTelefoneError(erros.telefone);
+    setSenhaError(erros.senha);
+    setConfirmacaoError(erros.confirmacao);
+
+    if (Object.values(erros).some(Boolean)) return;
+    setStep(2);
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Etapa 3 — cria a conta e segue para o pagamento
+   * ---------------------------------------------------------------- */
+
+  async function submitTermos(event: FormEvent) {
+    event.preventDefault();
+    if (!aceitou) return;
+
+    setErroCriacao(null);
+    setCriando(true);
+
+    /* SUBSTITUIR POR: POST /auth/signup */
+    const resultado = await createAccount({
+      nome,
+      email,
+      telefone,
+      senha,
+      cupom: cupomValido,
+    });
+
+    setCriando(false);
+
+    if (!resultado.ok) {
+      setErroCriacao(resultado.error);
+      return;
+    }
+
+    setStep(4);
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Etapa 4 — pagamento confirmado
+   * ---------------------------------------------------------------- */
+
+  const aoConfirmarPagamento = useCallback(() => {
+    saveSubscriptionStatus("active");
+
+    /* Abre a sessao para o proxy liberar /app/*. */
+    startSession({ nome, email, empresa: "Minha empresa" });
+
+    router.push("/app");
+  }, [router, nome, email]);
+
+  return (
+    <>
+      <SignupStepper current={step} />
+
+      {/* ============================ Etapa 1 ============================ */}
+      {step === 1 ? (
+        <>
+          <FormHeader
+            title="Criar conta"
+            subtitle="Comece pelos seus dados de acesso."
+          />
+
+          <form onSubmit={submitDados} noValidate>
+            <TextField
+              label="Nome completo"
+              value={nome}
+              onChange={(v) => {
+                setNome(v);
+                if (nomeError) setNomeError(validateName(v));
+              }}
+              onBlur={() => setNomeError(validateName(nome))}
+              error={nomeError}
+              placeholder="Maria Silva"
+              autoComplete="name"
+            />
+
+            <TextField
+              label="E-mail"
+              value={email}
+              onChange={(v) => {
+                setEmail(v);
+                if (emailError) setEmailError(validateEmail(v));
+              }}
+              onBlur={() => setEmailError(validateEmail(email))}
+              error={emailError}
+              type="email"
+              inputMode="email"
+              placeholder="voce@empresa.com.br"
+              autoComplete="email"
+            />
+
+            <TextField
+              label="Telefone / WhatsApp"
+              value={telefone}
+              onChange={(v) => {
+                const masked = maskPhone(v);
+                setTelefone(masked);
+                if (telefoneError) setTelefoneError(validatePhone(masked));
+              }}
+              onBlur={() => setTelefoneError(validatePhone(telefone))}
+              error={telefoneError}
+              type="tel"
+              inputMode="tel"
+              placeholder="(41) 99876-5432"
+              autoComplete="tel"
+              hint="E por aqui que o assistente vai falar com voce."
+            />
+
+            <PasswordField
+              label="Senha"
+              value={senha}
+              onChange={(v) => {
+                setSenha(v);
+                if (senhaError) setSenhaError(validatePassword(v));
+                if (confirmacaoError) {
+                  setConfirmacaoError(validatePasswordConfirm(v, confirmacao));
+                }
+              }}
+              onBlur={() => setSenhaError(validatePassword(senha))}
+              error={senhaError}
+              autoComplete="new-password"
+              showStrength
+            />
+
+            <PasswordField
+              label="Confirmar senha"
+              value={confirmacao}
+              onChange={(v) => {
+                setConfirmacao(v);
+                if (confirmacaoError) {
+                  setConfirmacaoError(validatePasswordConfirm(senha, v));
+                }
+              }}
+              onBlur={() =>
+                setConfirmacaoError(validatePasswordConfirm(senha, confirmacao))
+              }
+              error={confirmacaoError}
+              autoComplete="new-password"
+            />
+
+            <SubmitButton>Continuar</SubmitButton>
+          </form>
+
+          <FormFooter>
+            Ja tem conta? <Link href="/login">Entrar</Link>
+          </FormFooter>
+        </>
+      ) : null}
+
+      {/* ============================ Etapa 2 ============================ */}
+      {step === 2 ? (
+        <>
+          <FormHeader
+            title="Cupom de parceiro"
+            subtitle="Se alguem indicou o sistema, informe o cupom. E opcional."
+          />
+
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              setStep(3);
+            }}
+            noValidate
+          >
+            <CouponInput
+              value={cupom}
+              onChange={setCupom}
+              onValidChange={handleCupomValido}
+            />
+
+            <div className={styles.stepActions}>
+              <SubmitButton type="button" variant="secondary" onClick={() => setStep(1)}>
+                Voltar
+              </SubmitButton>
+              <SubmitButton>
+                {cupomValido ? "Continuar com cupom" : "Continuar sem cupom"}
+              </SubmitButton>
+            </div>
+          </form>
+        </>
+      ) : null}
+
+      {/* ============================ Etapa 3 ============================ */}
+      {step === 3 ? (
+        <>
+          <FormHeader
+            title="Termos de uso"
+            subtitle="Ultimo passo antes do pagamento."
+          />
+
+          {erroCriacao ? <Alert tone="error">{erroCriacao}</Alert> : null}
+
+          <div className={styles.resumo}>
+            <h2 className={styles.resumoTitle}>Resumo da conta</h2>
+            <dl className={styles.resumoList}>
+              <div>
+                <dt>Nome</dt>
+                <dd>{nome}</dd>
+              </div>
+              <div>
+                <dt>E-mail</dt>
+                <dd>{email}</dd>
+              </div>
+              <div>
+                <dt>Telefone</dt>
+                <dd>{telefone}</dd>
+              </div>
+              <div>
+                <dt>Cupom</dt>
+                <dd>{cupomValido ?? "Nenhum"}</dd>
+              </div>
+              <div>
+                <dt>Plano</dt>
+                <dd>
+                  {plan.name} · {plan.price}
+                  {plan.period}
+                </dd>
+              </div>
+            </dl>
+          </div>
+
+          <form onSubmit={submitTermos} noValidate>
+            <TermsCheckbox checked={aceitou} onChange={setAceitou} />
+
+            <div className={styles.stepActions}>
+              <SubmitButton
+                type="button"
+                variant="secondary"
+                onClick={() => setStep(2)}
+                disabled={criando}
+              >
+                Voltar
+              </SubmitButton>
+              <SubmitButton
+                loading={criando}
+                loadingLabel="Criando conta..."
+                disabled={!aceitou}
+              >
+                Criar conta
+              </SubmitButton>
+            </div>
+          </form>
+        </>
+      ) : null}
+
+      {/* ============================ Etapa 4 ============================ */}
+      {step === 4 ? (
+        <>
+          <FormHeader
+            title="Pagamento via Pix"
+            subtitle="Assim que o pagamento cair, seu painel abre automaticamente."
+          />
+
+          <CobrancaPix
+            titulo={plan.name}
+            subtitulo="Plano contratado"
+            amount={PLAN_AMOUNT}
+            criarCobranca={criarCobrancaAssinatura}
+            consultarStatus={fetchPixChargeStatus}
+            onPago={aoConfirmarPagamento}
+            textoSucesso="Sua assinatura esta ativa. Estamos abrindo seu painel..."
+          />
+        </>
+      ) : null}
+    </>
+  );
+}

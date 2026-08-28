@@ -1,0 +1,130 @@
+.section {
+  background: var(--bg-muted);
+}
+
+.head {
+  max-width: 640px;
+}
+
+.card {
+  display: grid;
+  gap: 0;
+  margin-top: 44px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.cardMain {
+  padding: 32px 28px;
+  background: var(--brand-gradient-subtle);
+  border-bottom: 1px solid var(--border);
+}
+
+.badge {
+  display: inline-flex;
+  padding: 6px 13px;
+  border-radius: var(--radius-full);
+  background: var(--brand-accent-soft);
+  color: var(--brand-accent-dark);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.planName {
+  margin-top: 16px;
+  font-size: 24px;
+  color: var(--brand-primary);
+}
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.price {
+  font-family: var(--font-display);
+  font-size: clamp(40px, 6vw, 52px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--brand-primary);
+}
+
+.period {
+  font-size: 15px;
+  color: var(--text-muted);
+}
+
+.cta {
+  width: 100%;
+  margin-top: 26px;
+}
+
+.note {
+  margin-top: 13px;
+  font-size: 13.5px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.secure {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.features {
+  display: grid;
+  gap: 14px;
+  padding: 30px 28px 34px;
+}
+
+.feature {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 21px;
+  height: 21px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--brand-primary);
+  color: #fff;
+}
+
+@media (min-width: 860px) {
+  .card {
+    grid-template-columns: 0.9fr 1.1fr;
+  }
+
+  .cardMain {
+    border-bottom: none;
+    border-right: 1px solid var(--border);
+    padding: 40px 36px;
+  }
+
+  .features {
+    padding: 40px 36px;
+    align-content: center;
+  }
+}

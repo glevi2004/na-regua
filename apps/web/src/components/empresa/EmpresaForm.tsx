@@ -1,0 +1,525 @@
+"use client";
+
+import { useState } from "react";
+import {
+  buscarCep,
+  buscarCnpj,
+  RAMOS_ATIVIDADE,
+  salvarEmpresa,
+  UFS,
+  type Certificado,
+} from "@/lib/empresa-api";
+import { empresa as empresaMock } from "@/lib/mock-data";
+import {
+  maskCelular,
+  maskCEP,
+  maskCNPJ,
+  validateCelular,
+  validateCEP,
+  validateCNPJ,
+  validateDDD,
+  validateRequired,
+  type FieldError,
+} from "@/lib/validation";
+import { Button } from "@/components/ui/Button";
+import { Card, Checkbox, Field, FormGrid, Input, PageHeader, Select } from "@/components/ui/UI";
+import Toast from "@/components/ui/Toast";
+import { Spinner } from "@/components/auth/Fields";
+import { IconSearch } from "@/components/Icons";
+import CertificadoDigital from "./CertificadoDigital";
+import ComandosWhatsApp from "@/components/app/ComandosWhatsApp";
+import styles from "./empresa.module.css";
+
+type Campos = {
+  cnpj: string;
+  razaoSocial: string;
+  nomeFantasia: string;
+  inscricaoEstadual: string;
+  inscricaoMunicipal: string;
+  ramoAtividade: string;
+  cep: string;
+  logradouro: string;
+  numero: string;
+  complemento: string;
+  bairro: string;
+  cidade: string;
+  uf: string;
+  ddd: string;
+  celular: string;
+};
+
+type Erros = Partial<Record<keyof Campos, FieldError>>;
+
+export default function EmpresaForm() {
+  /* Estado inicial vindo do mock. SUBSTITUIR POR: GET /empresa */
+  const [campos, setCampos] = useState<Campos>({
+    cnpj: empresaMock.cnpj,
+    razaoSocial: empresaMock.razaoSocial,
+    nomeFantasia: empresaMock.nomeFantasia,
+    inscricaoEstadual: empresaMock.inscricaoEstadual,
+    inscricaoMunicipal: empresaMock.inscricaoMunicipal,
+    ramoAtividade: empresaMock.ramoAtividade,
+    cep: empresaMock.endereco.cep,
+    logradouro: empresaMock.endereco.logradouro,
+    numero: empresaMock.endereco.numero,
+    complemento: empresaMock.endereco.complemento ?? "",
+    bairro: empresaMock.endereco.bairro,
+    cidade: empresaMock.endereco.cidade,
+    uf: empresaMock.endereco.uf,
+    ddd: empresaMock.ddd,
+    celular: empresaMock.celular,
+  });
+
+  const [erros, setErros] = useState<Erros>({});
+  const [conexoes, setConexoes] = useState(false);
+  const [certificado, setCertificado] = useState<Certificado | null>(null);
+
+  const [buscandoCep, setBuscandoCep] = useState(false);
+  const [buscandoCnpj, setBuscandoCnpj] = useState(false);
+  const [salvando, setSalvando] = useState(false);
+
+  const [avisoCep, setAvisoCep] = useState<string | null>(null);
+  const [avisoCnpj, setAvisoCnpj] = useState<string | null>(null);
+  const [toast, setToast] = useState<{ msg: string; tone: "success" | "error" } | null>(null);
+
+  function set<K extends keyof Campos>(campo: K, valor: string) {
+    setCampos((c) => ({ ...c, [campo]: valor }));
+    if (erros[campo]) setErros((e) => ({ ...e, [campo]: null }));
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Busca de CEP — dispara sozinha quando o CEP fica completo
+   * ---------------------------------------------------------------- */
+
+  async function preencherPorCep(cepFormatado: string) {
+    if (cepFormatado.replace(/\D/g, "").length !== 8) return;
+
+    setBuscandoCep(true);
+    setAvisoCep(null);
+
+    /* SUBSTITUIR POR: GET /enderecos/cep/:cep */
+    const resultado = await buscarCep(cepFormatado);
+    setBuscandoCep(false);
+
+    if (!resultado.ok) {
+      setAvisoCep(resultado.error);
+      return;
+    }
+
+    /* Numero e complemento continuam com quem preencheu — o CEP nao os
+       conhece, e sobrescrever apagaria o que a pessoa ja digitou. */
+    setCampos((c) => ({
+      ...c,
+      logradouro: resultado.endereco.logradouro,
+      bairro: resultado.endereco.bairro,
+      cidade: resultado.endereco.cidade,
+      uf: resultado.endereco.uf,
+    }));
+    setErros((e) => ({ ...e, logradouro: null, bairro: null, cidade: null }));
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Busca de CNPJ — acionada pelo botao
+   * ---------------------------------------------------------------- */
+
+  async function preencherPorCnpj() {
+    setAvisoCnpj(null);
+
+    const erroCnpj = validateCNPJ(campos.cnpj);
+    if (erroCnpj) {
+      setErros((e) => ({ ...e, cnpj: erroCnpj }));
+      return;
+    }
+
+    setBuscandoCnpj(true);
+
+    /* SUBSTITUIR POR: GET /empresas/cnpj/:cnpj */
+    const resultado = await buscarCnpj(campos.cnpj);
+    setBuscandoCnpj(false);
+
+    if (!resultado.ok) {
+      setAvisoCnpj(resultado.error);
+      return;
+    }
+
+    const d = resultado.dados;
+    setCampos((c) => ({
+      ...c,
+      razaoSocial: d.razaoSocial,
+      nomeFantasia: d.nomeFantasia,
+      ramoAtividade: d.ramoAtividade,
+      cep: d.cep,
+      logradouro: d.logradouro,
+      numero: d.numero,
+      bairro: d.bairro,
+      cidade: d.cidade,
+      uf: d.uf,
+    }));
+    setErros({});
+    setToast({ msg: "Dados publicos preenchidos a partir do CNPJ.", tone: "success" });
+  }
+
+  /* ---------------------------------------------------------------- *
+   * Gravacao
+   * ---------------------------------------------------------------- */
+
+  function validarTudo(): boolean {
+    const novos: Erros = {
+      cnpj: validateCNPJ(campos.cnpj),
+      razaoSocial: validateRequired(campos.razaoSocial, "a razao social"),
+      ramoAtividade: validateRequired(campos.ramoAtividade, "o ramo de atividade"),
+      cep: validateCEP(campos.cep),
+      logradouro: validateRequired(campos.logradouro, "o logradouro"),
+      numero: validateRequired(campos.numero, "o numero"),
+      bairro: validateRequired(campos.bairro, "o bairro"),
+      cidade: validateRequired(campos.cidade, "a cidade"),
+      uf: validateRequired(campos.uf, "a UF"),
+      ddd: validateDDD(campos.ddd),
+      celular: validateCelular(campos.celular),
+    };
+
+    setErros(novos);
+    return !Object.values(novos).some(Boolean);
+  }
+
+  async function salvar(event: React.FormEvent) {
+    event.preventDefault();
+
+    if (!validarTudo()) {
+      setToast({ msg: "Confira os campos destacados antes de salvar.", tone: "error" });
+      return;
+    }
+
+    setSalvando(true);
+
+    /* SUBSTITUIR POR: PUT /empresa */
+    const resultado = await salvarEmpresa({ ...campos, conexoesHabilitadas: conexoes });
+    setSalvando(false);
+
+    setToast(
+      resultado.ok
+        ? { msg: "Dados da empresa salvos.", tone: "success" }
+        : { msg: resultado.error, tone: "error" },
+    );
+  }
+
+  return (
+    <>
+      <PageHeader
+        title="Empresa"
+        subtitle="Dados cadastrais, endereco e certificado digital"
+        actions={
+          <Button onClick={salvar} disabled={salvando}>
+            {salvando ? (
+              <>
+                <Spinner size={15} />
+                Salvando...
+              </>
+            ) : (
+              "Salvar alteracoes"
+            )}
+          </Button>
+        }
+      />
+
+      <form onSubmit={salvar} noValidate className={styles.form}>
+        {/* ---------------- Identificacao ---------------- */}
+        <Card title="Identificacao">
+          <FormGrid>
+            <Field label="CNPJ" span={5} hint={erros.cnpj ?? undefined}>
+              <div className={styles.inline}>
+                <Input
+                  value={campos.cnpj}
+                  onChange={(e) => set("cnpj", maskCNPJ(e.target.value))}
+                  onBlur={() =>
+                    setErros((er) => ({ ...er, cnpj: validateCNPJ(campos.cnpj) }))
+                  }
+                  placeholder="00.000.000/0000-00"
+                  inputMode="numeric"
+                  aria-invalid={Boolean(erros.cnpj)}
+                />
+                <Button
+                  type="button"
+                  variant="secondary"
+                  onClick={preencherPorCnpj}
+                  disabled={buscandoCnpj}
+                >
+                  {buscandoCnpj ? <Spinner size={14} /> : <IconSearch size={15} />}
+                  Buscar dados
+                </Button>
+              </div>
+              {erros.cnpj ? (
+                <span className={styles.erro} role="alert">
+                  {erros.cnpj}
+                </span>
+              ) : null}
+              {avisoCnpj ? (
+                <span className={styles.erro} role="alert">
+                  {avisoCnpj}
+                </span>
+              ) : null}
+            </Field>
+
+            <Field label="Razao social" span={7}>
+              <Input
+                value={campos.razaoSocial}
+                onChange={(e) => set("razaoSocial", e.target.value)}
+                aria-invalid={Boolean(erros.razaoSocial)}
+              />
+              {erros.razaoSocial ? (
+                <span className={styles.erro} role="alert">
+                  {erros.razaoSocial}
+                </span>
+              ) : null}
+            </Field>
+
+            <Field label="Nome fantasia" span={6}>
+              <Input
+                value={campos.nomeFantasia}
+                onChange={(e) => set("nomeFantasia", e.target.value)}
+              />
+            </Field>
+
+            <Field label="Ramo de atividade" span={6}>
+              <Select
+                value={campos.ramoAtividade}
+                onChange={(e) => set("ramoAtividade", e.target.value)}
+                aria-invalid={Boolean(erros.ramoAtividade)}
+              >
+                <option value="">Selecione</option>
+                {RAMOS_ATIVIDADE.map((r) => (
+                  <option key={r} value={r}>
+                    {r}
+                  </option>
+                ))}
+              </Select>
+              {erros.ramoAtividade ? (
+                <span className={styles.erro} role="alert">
+                  {erros.ramoAtividade}
+                </span>
+              ) : null}
+            </Field>
+
+            <Field label="Inscricao estadual (IE)" span={6}>
+              <Input
+                value={campos.inscricaoEstadual}
+                onChange={(e) => set("inscricaoEstadual", e.target.value)}
+                placeholder="Isento, se nao houver"
+              />
+            </Field>
+
+            <Field label="Inscricao municipal (IM)" span={6}>
+              <Input
+                value={campos.inscricaoMunicipal}
+                onChange={(e) => set("inscricaoMunicipal", e.target.value)}
+              />
+            </Field>
+          </FormGrid>
+        </Card>
+
+        {/* ---------------- Endereco ---------------- */}
+        <Card title="Endereco">
+          <FormGrid>
+            <Field label="CEP" span={4}>
+              <div className={styles.inline}>
+                <Input
+                  value={campos.cep}
+                  onChange={(e) => {
+                    const mascarado = maskCEP(e.target.value);
+                    set("cep", mascarado);
+                    setAvisoCep(null);
+                    void preencherPorCep(mascarado);
+                  }}
+                  placeholder="00000-000"
+                  inputMode="numeric"
+                  aria-invalid={Boolean(erros.cep)}
+                />
+                {buscandoCep ? (
+                  <span className={styles.inlineSpinner}>
+                    <Spinner size={16} />
+                  </span>
+                ) : null}
+              </div>
+              {erros.cep ? (
+                <span className={styles.erro} role="alert">
+                  {erros.cep}
+                </span>
+              ) : null}
+              {avisoCep ? (
+                <span className={styles.erro} role="alert">
+                  {avisoCep}
+                </span>
+              ) : null}
+              {buscandoCep ? (
+                <span className={styles.dica}>Buscando endereco...</span>
+              ) : null}
+            </Field>
+
+            <Field label="Logradouro" span={8}>
+              <Input
+                value={campos.logradouro}
+                onChange={(e) => set("logradouro", e.target.value)}
+                aria-invalid={Boolean(erros.logradouro)}
+              />
+              {erros.logradouro ? (
+                <span className={styles.erro} role="alert">
+                  {erros.logradouro}
+                </span>
+              ) : null}
+            </Field>
+
+            <Field label="Numero" span={3}>
+              <Input
+                value={campos.numero}
+                onChange={(e) => set("numero", e.target.value)}
+                aria-invalid={Boolean(erros.numero)}
+              />
+              {erros.numero ? (
+                <span className={styles.erro} role="alert">
+                  {erros.numero}
+                </span>
+              ) : null}
+            </Field>
+
+            <Field label="Complemento" span={4}>
+              <Input
+                value={campos.complemento}
+                onChange={(e) => set("complemento", e.target.value)}
+                placeholder="Sala, loja, andar"
+              />
+            </Field>
+
+            <Field label="Bairro" span={5}>
+              <Input
+                value={campos.bairro}
+                onChange={(e) => set("bairro", e.target.value)}
+                aria-invalid={Boolean(erros.bairro)}
+              />
+              {erros.bairro ? (
+                <span className={styles.erro} role="alert">
+                  {erros.bairro}
+                </span>
+              ) : null}
+            </Field>
+
+            <Field label="Cidade" span={8}>
+              <Input
+                value={campos.cidade}
+                onChange={(e) => set("cidade", e.target.value)}
+                aria-invalid={Boolean(erros.cidade)}
+              />
+              {erros.cidade ? (
+                <span className={styles.erro} role="alert">
+                  {erros.cidade}
+                </span>
+              ) : null}
+            </Field>
+
+            <Field label="UF" span={4}>
+              <Select
+                value={campos.uf}
+                onChange={(e) => set("uf", e.target.value)}
+                aria-invalid={Boolean(erros.uf)}
+              >
+                <option value="">--</option>
+                {UFS.map((uf) => (
+                  <option key={uf} value={uf}>
+                    {uf}
+                  </option>
+                ))}
+              </Select>
+              {erros.uf ? (
+                <span className={styles.erro} role="alert">
+                  {erros.uf}
+                </span>
+              ) : null}
+            </Field>
+          </FormGrid>
+        </Card>
+
+        {/* ---------------- Contato e conexoes ---------------- */}
+        <Card title="Contato">
+          <FormGrid>
+            <Field label="DDD" span={2}>
+              <Input
+                value={campos.ddd}
+                onChange={(e) => set("ddd", e.target.value.replace(/\D/g, "").slice(0, 2))}
+                inputMode="numeric"
+                placeholder="41"
+                aria-invalid={Boolean(erros.ddd)}
+              />
+              {erros.ddd ? (
+                <span className={styles.erro} role="alert">
+                  {erros.ddd}
+                </span>
+              ) : null}
+            </Field>
+
+            <Field label="Celular / WhatsApp" span={5}>
+              <Input
+                value={campos.celular}
+                onChange={(e) => set("celular", maskCelular(e.target.value))}
+                inputMode="tel"
+                placeholder="99876-5432"
+                aria-invalid={Boolean(erros.celular)}
+              />
+              {erros.celular ? (
+                <span className={styles.erro} role="alert">
+                  {erros.celular}
+                </span>
+              ) : null}
+            </Field>
+          </FormGrid>
+
+          <div className={styles.conexoes}>
+            <Checkbox
+              label="Habilitar conexoes com outros usuarios"
+              checked={conexoes}
+              onChange={(e) => setConexoes(e.target.checked)}
+            />
+            <p className={styles.conexoesNota}>
+              Permite convidar outras pessoas para acessar esta empresa, cada
+              uma com o proprio login. Util para quem tem socio, gerente ou
+              contador acompanhando o negocio.
+            </p>
+          </div>
+        </Card>
+
+        {/* ---------------- Certificado ---------------- */}
+        <Card title="Certificado digital">
+          <CertificadoDigital certificado={certificado} onChange={setCertificado} />
+        </Card>
+
+        <ComandosWhatsApp
+          comandos={[
+            "Qual foi o faturamento mes a mes dos ultimos meses",
+            "Ranking dos clientes",
+            "Ranking dos produtos",
+            "Gerar DRE do mes",
+          ]}
+        />
+
+        <div className={styles.rodape}>
+          <Button type="submit" disabled={salvando}>
+            {salvando ? (
+              <>
+                <Spinner size={15} />
+                Salvando...
+              </>
+            ) : (
+              "Salvar alteracoes"
+            )}
+          </Button>
+        </div>
+      </form>
+
+      {toast ? (
+        <Toast
+          message={toast.msg}
+          tone={toast.tone}
+          onClose={() => setToast(null)}
+        />
+      ) : null}
+    </>
+  );
+}

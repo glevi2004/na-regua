@@ -1,0 +1,83 @@
+.root {
+  position: fixed;
+  inset: 0;
+  z-index: 250;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 9, 26, 0.74);
+  backdrop-filter: blur(3px);
+}
+
+.painel {
+  position: relative;
+  width: 100%;
+  max-width: 460px;
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-lg);
+  background: var(--app-surface);
+  color: var(--app-text);
+  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.9);
+}
+
+.painel:focus {
+  outline: none;
+}
+
+.cabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.titulo {
+  font-size: 19px;
+  color: var(--app-text);
+}
+
+.fechar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+  color: var(--app-muted);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.fechar:hover:not(:disabled) {
+  background: var(--app-field);
+  color: var(--app-text);
+}
+
+.descricao {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--app-muted);
+}
+
+.detalhe {
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--app-field);
+}
+
+.acoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 2px;
+}

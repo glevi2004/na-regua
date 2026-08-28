@@ -1,0 +1,92 @@
+/* Posicionamento sem transform horizontal, para nao conflitar com a
+   animacao de entrada (que usa translateY). */
+.toast {
+  position: fixed;
+  z-index: 300;
+  left: 16px;
+  right: 16px;
+  bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 13px 15px;
+  border: 1px solid;
+  border-radius: var(--radius);
+  box-shadow: 0 20px 40px -20px rgba(0, 0, 0, 0.55);
+  animation: subir 260ms var(--ease);
+}
+
+@keyframes subir {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.success {
+  background: var(--success-bg);
+  border-color: var(--success-border);
+  color: var(--success-text);
+}
+
+.error {
+  background: var(--danger-bg);
+  border-color: var(--danger-border);
+  color: var(--danger-text);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 50%;
+  color: #fff;
+}
+
+.success .icon {
+  background: var(--success);
+}
+
+.error .icon {
+  background: var(--danger);
+}
+
+.message {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  flex: none;
+  border-radius: var(--radius-sm);
+  color: inherit;
+  opacity: 0.7;
+  transition: opacity var(--transition);
+}
+
+.close:hover {
+  opacity: 1;
+}
+
+@media (min-width: 640px) {
+  .toast {
+    left: auto;
+    right: 24px;
+    bottom: 24px;
+    width: 100%;
+    max-width: 440px;
+  }
+}

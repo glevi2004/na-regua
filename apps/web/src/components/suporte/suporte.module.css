@@ -1,0 +1,386 @@
+/* ===================== Listagem ===================== */
+
+.lista {
+  display: grid;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  grid-template-areas: "protocolo principal naolidas status";
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  padding: 15px 8px;
+  border-top: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  text-align: left;
+  transition: background-color var(--transition);
+}
+
+.lista li:first-child .item {
+  border-top: none;
+}
+
+.item:hover {
+  background: var(--app-field);
+}
+
+.itemProtocolo {
+  grid-area: protocolo;
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--app-accent);
+  white-space: nowrap;
+}
+
+.itemPrincipal {
+  grid-area: principal;
+  display: grid;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.itemPrincipal strong {
+  font-size: 14.5px;
+  color: var(--app-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemPrincipal span {
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+.itemNaoLidas {
+  grid-area: naolidas;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: var(--radius-full);
+  background: var(--app-warn);
+  color: #3a2400;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.itemStatus {
+  grid-area: status;
+  justify-self: end;
+}
+
+@media (max-width: 620px) {
+  .item {
+    grid-template-columns: auto 1fr auto;
+    grid-template-areas:
+      "protocolo principal naolidas"
+      "status    status     status";
+    gap: 8px 12px;
+  }
+
+  .itemStatus {
+    justify-self: start;
+  }
+}
+
+/* ===================== Dialogo ===================== */
+
+.dialogRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 230;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.dialogBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 9, 26, 0.74);
+  backdrop-filter: blur(3px);
+}
+
+.dialogPainel {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 92vh;
+  overflow-y: auto;
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-lg);
+  background: var(--app-surface);
+  color: var(--app-text);
+  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.9);
+}
+
+.dialogPainel:focus {
+  outline: none;
+}
+
+.dialogLargo {
+  max-width: 600px;
+}
+
+.dialogTitulo {
+  font-size: 19px;
+  color: var(--app-text);
+}
+
+.dialogFechar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+  color: var(--app-muted);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.dialogFechar:hover {
+  background: var(--app-field);
+  color: var(--app-text);
+}
+
+.dialogAcoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+/* ===================== Detalhe ===================== */
+
+.detalheCabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.detalheTopo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.detalheProtocolo {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-accent);
+}
+
+.detalheTitulo {
+  font-size: 20px;
+  line-height: 1.3;
+  color: var(--app-text);
+}
+
+.detalheMeta {
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+/* ===================== Conversa ===================== */
+
+.conversa {
+  display: grid;
+  gap: 12px;
+  max-height: 46vh;
+  overflow-y: auto;
+  padding: 16px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius);
+  background: var(--app-field);
+}
+
+.mensagem {
+  display: flex;
+}
+
+.daPessoa {
+  justify-content: flex-end;
+}
+
+.doSuporte {
+  justify-content: flex-start;
+}
+
+.balao {
+  max-width: 84%;
+  display: grid;
+  gap: 5px;
+  padding: 12px 14px;
+}
+
+.daPessoa .balao {
+  border-radius: var(--radius) var(--radius) 4px var(--radius);
+  background: var(--app-accent);
+  color: #06312e;
+}
+
+.doSuporte .balao {
+  border-radius: var(--radius) var(--radius) var(--radius) 4px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-text);
+}
+
+.balaoAutor {
+  font-size: 11.5px;
+  opacity: 0.75;
+}
+
+.balaoTexto {
+  font-size: 14px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
+.balaoAnexo {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 3px;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+/* ===================== Resposta ===================== */
+
+.respostaForm {
+  display: grid;
+  gap: 10px;
+}
+
+.reabrirAviso {
+  padding: 11px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--app-muted);
+}
+
+.respostaBarra {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* ===================== Formulario ===================== */
+
+.formCampos {
+  display: grid;
+  gap: 14px;
+}
+
+.campo {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.campo > span {
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+.input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  color: var(--app-text);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--app-accent);
+}
+
+.input option {
+  background: var(--dark-surface);
+  color: var(--dark-text);
+}
+
+.textarea {
+  resize: vertical;
+  line-height: 1.55;
+}
+
+/* ===================== Anexo ===================== */
+
+.anexoUpload,
+.anexoBotao {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 15px;
+  border: 1px dashed var(--app-border);
+  border-radius: var(--radius-sm);
+  font-size: 13.5px;
+  color: var(--app-muted);
+  cursor: pointer;
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.anexoUpload:hover,
+.anexoBotao:hover {
+  border-color: var(--app-accent);
+  color: var(--app-accent);
+}
+
+.anexoInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.anexoEscolhido {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  font-size: 13px;
+  color: var(--app-text);
+}
+
+.anexoEscolhido button {
+  font-size: 12.5px;
+  color: var(--app-danger);
+}
+
+.erro {
+  padding: 10px 13px;
+  border: 1px solid var(--app-danger);
+  border-radius: var(--radius-sm);
+  background: var(--app-danger-soft);
+  color: var(--app-danger);
+  font-size: 13px;
+}

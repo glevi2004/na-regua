@@ -1,0 +1,183 @@
+/* --- Barra de busca e filtros --- */
+
+.toolbar {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.busca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-full);
+  color: var(--app-muted);
+  transition: border-color var(--transition);
+}
+
+.busca:focus-within {
+  border-color: var(--app-accent);
+}
+
+.busca input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  color: var(--app-text);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+}
+
+.busca input:focus {
+  outline: none;
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filtro {
+  padding: 7px 15px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  color: var(--app-muted);
+  transition: border-color var(--transition), color var(--transition),
+    background-color var(--transition);
+}
+
+.filtro:hover {
+  border-color: var(--app-accent);
+  color: var(--app-text);
+}
+
+.filtroAtivo {
+  background: var(--app-accent-soft);
+  border-color: transparent;
+  color: var(--app-accent);
+  font-weight: 600;
+}
+
+/* --- Lista --- */
+
+.lista {
+  display: grid;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "avatar principal status"
+    "avatar contato   status";
+  align-items: center;
+  gap: 4px 13px;
+  padding: 14px 12px;
+  border-top: 1px solid var(--app-border);
+  border-radius: var(--radius);
+  transition: background-color var(--transition);
+}
+
+.lista li:first-child .item {
+  border-top: none;
+}
+
+.item:hover {
+  background: var(--app-field);
+}
+
+.avatar {
+  grid-area: avatar;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--brand-gradient);
+  color: #fff;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.itemPrincipal {
+  grid-area: principal;
+  display: grid;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.itemPrincipal strong {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--app-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemPrincipal span {
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+.itemContato,
+.itemUltima {
+  grid-area: contato;
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+/* No mobile so o contato aparece embaixo do nome */
+.itemUltima {
+  display: none;
+}
+
+.itemStatus {
+  grid-area: status;
+  justify-self: end;
+}
+
+.emptyAcoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.comandosWrap {
+  margin-top: 14px;
+}
+
+@media (min-width: 860px) {
+  .toolbar {
+    grid-template-columns: minmax(0, 380px) 1fr;
+    align-items: center;
+  }
+
+  .filtros {
+    justify-content: flex-end;
+  }
+
+  .item {
+    grid-template-columns: auto minmax(0, 2fr) minmax(0, 1.2fr) minmax(0, 1.2fr) auto;
+    grid-template-areas: "avatar principal contato ultima status";
+  }
+
+  .itemContato {
+    grid-area: contato;
+  }
+
+  .itemUltima {
+    grid-area: ultima;
+    display: block;
+  }
+}

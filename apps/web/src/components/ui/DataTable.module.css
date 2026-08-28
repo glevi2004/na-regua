@@ -1,0 +1,105 @@
+.wrap {
+  width: 100%;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.empty {
+  padding: 28px 4px;
+  font-size: 14px;
+  color: var(--app-muted);
+}
+
+/* --- Empilhado (mobile primeiro) --- */
+
+.table thead {
+  display: none;
+}
+
+.table tr {
+  display: grid;
+  gap: 7px;
+  padding: 14px 0;
+  border-top: 1px solid var(--app-border);
+}
+
+.table tbody tr:first-child {
+  border-top: none;
+}
+
+.table td {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-size: 14px;
+  color: var(--app-text);
+}
+
+/* Titulo da coluna vira rotulo a esquerda no mobile */
+.table td::before {
+  content: attr(data-label);
+  flex: none;
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+.hideMobile {
+  display: none;
+}
+
+/* --- Tabela real a partir do tablet --- */
+
+@media (min-width: 860px) {
+  .table thead {
+    display: table-header-group;
+  }
+
+  .table tr {
+    display: table-row;
+    padding: 0;
+  }
+
+  .table th {
+    padding: 0 14px 11px;
+    text-align: left;
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--app-muted);
+    border-bottom: 1px solid var(--app-border);
+    white-space: nowrap;
+  }
+
+  .table td {
+    display: table-cell;
+    padding: 14px;
+    vertical-align: middle;
+    border-top: 1px solid var(--app-border);
+  }
+
+  .table td::before {
+    content: none;
+  }
+
+  .table tbody tr {
+    transition: background-color var(--transition);
+  }
+
+  .table tbody tr:hover {
+    background: var(--app-field);
+  }
+
+  .hideMobile {
+    display: table-cell;
+  }
+
+  .right {
+    text-align: right;
+  }
+}

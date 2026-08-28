@@ -1,0 +1,600 @@
+/* ===================== Filtros ===================== */
+
+.filtrosLinha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.filtro {
+  padding: 7px 15px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  color: var(--app-muted);
+  transition: border-color var(--transition), color var(--transition),
+    background-color var(--transition);
+}
+
+.filtro:hover {
+  border-color: var(--app-accent);
+  color: var(--app-text);
+}
+
+.filtroAtivo {
+  background: var(--app-accent-soft);
+  border-color: transparent;
+  color: var(--app-accent);
+  font-weight: 600;
+}
+
+.filtrosCampos {
+  display: grid;
+  gap: 10px;
+  align-items: end;
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.filtroCampo {
+  display: grid;
+  gap: 6px;
+}
+
+.filtroCampo span {
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+.filtroSelect {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  color: var(--app-text);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+}
+
+.filtroSelect:focus {
+  outline: none;
+  border-color: var(--app-accent);
+}
+
+.filtroSelect option {
+  background: var(--dark-surface);
+  color: var(--dark-text);
+}
+
+/* ===================== Lista de titulos ===================== */
+
+.titulos {
+  display: grid;
+}
+
+.titulo {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "principal valores"
+    "vencimento situacao"
+    "acoes acoes";
+  align-items: center;
+  gap: 8px 14px;
+  padding: 15px 0;
+  border-top: 1px solid var(--app-border);
+}
+
+.titulos li:first-child {
+  border-top: none;
+}
+
+.tituloPrincipal {
+  grid-area: principal;
+  display: grid;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.tituloPrincipal strong {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--app-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tituloPrincipal span {
+  font-size: 12.5px;
+  color: var(--app-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tituloVencimento {
+  grid-area: vencimento;
+  display: grid;
+  line-height: 1.35;
+}
+
+.tituloData {
+  font-family: var(--font-display);
+  font-size: 13px;
+  color: var(--app-text);
+}
+
+.tituloPrazo {
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
+.tituloSituacao {
+  grid-area: situacao;
+  justify-self: end;
+}
+
+.tituloValores {
+  grid-area: valores;
+  display: grid;
+  justify-items: end;
+  line-height: 1.35;
+}
+
+.tituloValores strong {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--app-text);
+  white-space: nowrap;
+}
+
+.tituloValores span {
+  font-size: 11.5px;
+  color: var(--app-muted);
+}
+
+.tituloAcoes {
+  grid-area: acoes;
+  display: flex;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.comandosWrap {
+  margin-top: 14px;
+}
+
+/* ===================== Plano de contas ===================== */
+
+.duasColunas {
+  display: grid;
+  gap: 14px;
+}
+
+.novoPlano {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.novoPlano > input {
+  flex: 1;
+  min-width: 0;
+}
+
+.planos,
+.custos {
+  display: grid;
+}
+
+.plano {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--app-border);
+}
+
+.planos li:first-child,
+.custos li:first-child {
+  border-top: none;
+}
+
+.planoNome {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.planoNome strong {
+  font-size: 14.5px;
+  font-weight: 500;
+  color: var(--app-text);
+}
+
+.planoValor {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--app-text);
+  white-space: nowrap;
+}
+
+/* --- Custos fixos --- */
+
+.custo {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "dia principal valor"
+    "dia acoes acoes";
+  align-items: center;
+  gap: 6px 12px;
+  padding: 13px 0;
+  border-top: 1px solid var(--app-border);
+}
+
+.custoDia {
+  grid-area: dia;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--app-accent);
+  white-space: nowrap;
+}
+
+.custoPrincipal {
+  grid-area: principal;
+  display: grid;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.custoPrincipal strong {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--app-text);
+}
+
+.custoPrincipal span {
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
+.custoValor {
+  grid-area: valor;
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--app-text);
+  white-space: nowrap;
+}
+
+.custoAcoes {
+  grid-area: acoes;
+  display: flex;
+  gap: 8px;
+}
+
+.custoBotao {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  color: var(--app-muted);
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.custoBotao:hover {
+  border-color: var(--app-accent);
+  color: var(--app-text);
+}
+
+.custoExcluir:hover {
+  border-color: var(--app-danger);
+  color: var(--app-danger);
+}
+
+/* ===================== Dialogos ===================== */
+
+.dialogRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 230;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.dialogBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 9, 26, 0.74);
+  backdrop-filter: blur(3px);
+}
+
+.dialogPainel {
+  position: relative;
+  width: 100%;
+  max-width: 440px;
+  max-height: 92vh;
+  overflow-y: auto;
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-lg);
+  background: var(--app-surface);
+  color: var(--app-text);
+  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.9);
+}
+
+.dialogPainel:focus {
+  outline: none;
+}
+
+.dialogLargo {
+  max-width: 600px;
+}
+
+.dialogCabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dialogTitulo {
+  font-size: 19px;
+  color: var(--app-text);
+}
+
+.dialogFechar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+  color: var(--app-muted);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.dialogFechar:hover:not(:disabled) {
+  background: var(--app-field);
+  color: var(--app-text);
+}
+
+.dialogAcoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+/* --- Baixa --- */
+
+.baixaAlvo {
+  display: grid;
+  gap: 3px;
+  line-height: 1.4;
+}
+
+.baixaAlvo strong {
+  font-size: 15px;
+  color: var(--app-text);
+}
+
+.baixaAlvo span {
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+.baixaSaldo {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--app-field);
+}
+
+.baixaSaldo span {
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+.baixaSaldo strong {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+.baixaModos {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-full);
+  background: var(--app-field);
+}
+
+.baixaModo {
+  flex: 1;
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  font-size: 13.5px;
+  color: var(--app-muted);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.baixaModoAtivo {
+  background: var(--app-accent);
+  color: #06312e;
+  font-weight: 600;
+}
+
+.baixaCampo {
+  display: grid;
+  gap: 7px;
+}
+
+.baixaCampo > span {
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+.baixaInput {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  color: var(--app-text);
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.baixaInput:focus {
+  outline: none;
+  border-color: var(--app-accent);
+}
+
+.baixaRestante {
+  font-size: 12.5px;
+  color: var(--app-warn);
+}
+
+.baixaErro {
+  padding: 11px 14px;
+  border: 1px solid var(--app-danger);
+  border-radius: var(--radius-sm);
+  background: var(--app-danger-soft);
+  color: var(--app-danger);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+/* --- Estorno --- */
+
+.estornoDetalhe {
+  display: grid;
+  gap: 3px;
+  line-height: 1.4;
+}
+
+.estornoDetalhe strong {
+  font-size: 14.5px;
+  color: var(--app-text);
+}
+
+.estornoDetalhe span {
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+.estornoValor {
+  margin-top: 4px;
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--app-text);
+}
+
+/* --- Formulario --- */
+
+.formCampos {
+  display: grid;
+  gap: 14px;
+}
+
+.formLinha {
+  display: grid;
+  gap: 14px;
+}
+
+.campo {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.campo > span {
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+.input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  color: var(--app-text);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--app-accent);
+}
+
+.input option {
+  background: var(--dark-surface);
+  color: var(--dark-text);
+}
+
+.campoErro {
+  font-size: 12.5px;
+  color: var(--app-danger);
+}
+
+/* ===================== Responsivo ===================== */
+
+@media (min-width: 620px) {
+  .formLinha {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 760px) {
+  .filtrosCampos {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) auto;
+  }
+}
+
+@media (min-width: 900px) {
+  .titulo {
+    grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) auto minmax(0, 1fr) auto;
+    grid-template-areas: "principal vencimento situacao valores acoes";
+  }
+
+  .tituloAcoes {
+    padding-top: 0;
+  }
+
+  .duasColunas {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    align-items: start;
+  }
+}

@@ -28,6 +28,7 @@ Público: todo o time, fundadores, stakeholders.
 | [`produto/requisitos-nao-funcionais.md`](produto/requisitos-nao-funcionais.md) | Catálogo `RNF-xxx` com métricas verificáveis                                 |
 | [`produto/escopo-mvp.md`](produto/escopo-mvp.md)                               | O que entra e o que **não** entra no MVP, e o roadmap depois dele            |
 | [`produto/glossario.md`](produto/glossario.md)                                 | Linguagem ubíqua: termo de negócio PT-BR ↔ identificador em inglês           |
+| [`produto/wireframes.md`](produto/wireframes.md)                               | Wireframes das 9 telas de módulo, derivados da apresentação comercial       |
 
 ### 🏛 Arquitetura — _como o sistema é construído_
 
