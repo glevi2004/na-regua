@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useState, type FormEvent } from "react";
-import { createAccount } from "@/lib/auth-api";
+import {
+  createAccount,
+  createPixCharge,
+  fetchPixChargeStatus,
+} from "@/lib/auth-api";
+import { startSession } from "@/lib/session";
 import { saveSubscriptionStatus } from "@/lib/subscription-store";
 import {
   maskPhone,
@@ -24,7 +29,7 @@ import {
   TextField,
 } from "./Fields";
 import CouponInput from "./CouponInput";
-import PixQRCodeCard from "./PixQRCodeCard";
+import CobrancaPix from "@/components/app/CobrancaPix";
 import SignupStepper from "./SignupStepper";
 import TermsCheckbox from "./TermsCheckbox";
 import styles from "./signup.module.css";
@@ -57,6 +62,13 @@ export default function SignupFlow() {
   const [aceitou, setAceitou] = useState(false);
   const [criando, setCriando] = useState(false);
   const [erroCriacao, setErroCriacao] = useState<string | null>(null);
+
+  /* Envolvida em useCallback porque o CobrancaPix a usa como dependencia
+     de efeito: uma funcao nova a cada render regeraria a cobranca. */
+  const criarCobrancaAssinatura = useCallback(
+    (valor: number) => createPixCharge(plan.name, valor),
+    [],
+  );
 
   const handleCupomValido = useCallback((code: string | null) => {
     setCupomValido(code);
@@ -123,8 +135,12 @@ export default function SignupFlow() {
 
   const aoConfirmarPagamento = useCallback(() => {
     saveSubscriptionStatus("active");
-    router.push("/painel");
-  }, [router]);
+
+    /* Abre a sessao para o proxy liberar /app/*. */
+    startSession({ nome, email, empresa: "Minha empresa" });
+
+    router.push("/app");
+  }, [router, nome, email]);
 
   return (
     <>
@@ -220,7 +236,7 @@ export default function SignupFlow() {
           </form>
 
           <FormFooter>
-            Ja tem conta? <Link href="/entrar">Entrar</Link>
+            Ja tem conta? <Link href="/login">Entrar</Link>
           </FormFooter>
         </>
       ) : null}
@@ -329,11 +345,14 @@ export default function SignupFlow() {
             subtitle="Assim que o pagamento cair, seu painel abre automaticamente."
           />
 
-          <PixQRCodeCard
-            planName={plan.name}
+          <CobrancaPix
+            titulo={plan.name}
+            subtitulo="Plano contratado"
             amount={PLAN_AMOUNT}
-            periodicidade="por mes"
-            onPaid={aoConfirmarPagamento}
+            criarCobranca={criarCobrancaAssinatura}
+            consultarStatus={fetchPixChargeStatus}
+            onPago={aoConfirmarPagamento}
+            textoSucesso="Sua assinatura esta ativa. Estamos abrindo seu painel..."
           />
         </>
       ) : null}

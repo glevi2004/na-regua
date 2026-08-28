@@ -11,22 +11,23 @@
 
 /** Rotas que continuam liberadas mesmo com pagamento em atraso. */
 export const ROTAS_LIBERADAS = [
-  "/painel", // visao geral, somente leitura
-  "/painel/assinatura", // area de pagamento e faturas
-  "/painel/suporte", // canal de atendimento
+  "/app", // tela principal, somente leitura
+  "/app/assinatura", // area de pagamento e faturas
+  "/app/suporte", // canal de atendimento
 ] as const;
 
 /** Modulos bloqueados: visiveis na navegacao, porem com cadeado. */
 export const MODULOS_BLOQUEADOS = [
-  "/painel/vendas",
-  "/painel/clientes",
-  "/painel/produtos",
-  "/painel/contas-a-pagar",
-  "/painel/contas-a-receber",
-  "/painel/bancos",
-  "/painel/plano-de-contas",
-  "/painel/agenda",
-  "/painel/empresa",
+  "/app/empresa",
+  "/app/clientes",
+  "/app/produtos",
+  "/app/financeiro/plano-de-contas",
+  "/app/financeiro/contas-a-pagar",
+  "/app/financeiro/contas-a-receber",
+  "/app/crm",
+  "/app/agenda",
+  "/app/vendas",
+  "/app/assistente-ia",
 ] as const;
 
 /**

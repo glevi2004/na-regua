@@ -1,0 +1,188 @@
+"use client";
+
+import { useState } from "react";
+import { estornarVenda, FORMAS, type VendaHistorico } from "@/lib/vendas-api";
+import { formatDateTime, formatMoney } from "@/lib/format";
+import { Badge, Card, PageHeader, Stat } from "@/components/ui/UI";
+import { Button, ButtonLink } from "@/components/ui/Button";
+import Toast from "@/components/ui/Toast";
+import ConfirmarDialog from "@/components/app/ConfirmarDialog";
+import styles from "./vendas.module.css";
+
+export default function VendaDetalhe({ venda }: { venda: VendaHistorico }) {
+  const [status, setStatus] = useState(venda.status);
+  const [estornando, setEstornando] = useState(false);
+  const [processando, setProcessando] = useState(false);
+  const [toast, setToast] = useState<{ msg: string; tone: "success" | "error" } | null>(null);
+
+  const estornada = status === "estornada";
+  const totalItens = venda.itens.reduce((acc, i) => acc + i.quantidade, 0);
+
+  async function confirmarEstorno() {
+    setProcessando(true);
+
+    /* SUBSTITUIR POR: POST /vendas/:id/estorno — precisa ser transacional:
+       estoque, contas a receber e nota fiscal voltam juntos ou nenhum
+       volta. Ver nota no topo de lib/vendas-api.ts. */
+    const r = await estornarVenda(venda.id);
+    setProcessando(false);
+    setEstornando(false);
+
+    if (!r.ok) {
+      setToast({ msg: r.error, tone: "error" });
+      return;
+    }
+
+    setStatus("estornada");
+    setToast({
+      msg: `Venda estornada. ${r.itensDevolvidos} item(ns) devolvido(s) ao estoque.`,
+      tone: "success",
+    });
+  }
+
+  return (
+    <>
+      <PageHeader
+        title={`Venda #${venda.numero}`}
+        subtitle={`${venda.clienteNome} · ${formatDateTime(venda.data)}`}
+        actions={
+          <>
+            <ButtonLink href="/app/vendas" variant="secondary">
+              Voltar
+            </ButtonLink>
+            {!estornada ? (
+              <Button variant="danger" onClick={() => setEstornando(true)}>
+                Estornar venda
+              </Button>
+            ) : null}
+          </>
+        }
+      />
+
+      {estornada ? (
+        <div className={styles.estornadaAviso} role="status">
+          <strong>Esta venda foi estornada.</strong>
+          <span>
+            Os itens voltaram ao estoque e o titulo em contas a receber foi
+            revertido.
+          </span>
+        </div>
+      ) : null}
+
+      <div className="statRow">
+        <Stat label="Total" value={formatMoney(venda.total)} hint={`${totalItens} item(ns)`} />
+        <Stat
+          label="Valor liquido"
+          value={formatMoney(venda.valorLiquido)}
+          hint="sem taxa de cartao"
+          tone={estornada ? "warning" : "positive"}
+        />
+        <Stat label="Imposto" value={formatMoney(venda.imposto)} />
+      </div>
+
+      <div className={styles.detalheGrid}>
+        {/* --- Itens --- */}
+        <Card title="Itens" className={styles.detalheLargo}>
+          <ul className={styles.itensDetalhe}>
+            {venda.itens.map((i, idx) => (
+              <li key={idx} className={styles.itemDetalhe}>
+                <span className={styles.itemDetalheQtd}>{i.quantidade}×</span>
+                <span className={styles.itemDetalheNome}>{i.descricao}</span>
+                <span className={styles.itemDetalheUnit}>
+                  {formatMoney(i.precoUnitario)}
+                </span>
+                <span className={styles.itemDetalheSub}>
+                  {formatMoney(i.precoUnitario * i.quantidade)}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          <div className={styles.resumo}>
+            <div className={styles.resumoLinha}>
+              <span>Subtotal</span>
+              <span>{formatMoney(venda.subtotal)}</span>
+            </div>
+            {venda.desconto > 0 ? (
+              <div className={styles.resumoLinha}>
+                <span>Desconto</span>
+                <span className={styles.resumoDesconto}>
+                  - {formatMoney(venda.desconto)}
+                </span>
+              </div>
+            ) : null}
+            <div className={`${styles.resumoLinha} ${styles.resumoTotal}`}>
+              <span>Total</span>
+              <strong>{formatMoney(venda.total)}</strong>
+            </div>
+          </div>
+        </Card>
+
+        {/* --- Pagamento --- */}
+        <Card title="Pagamento">
+          <ul className={styles.pagamentosDetalhe}>
+            {venda.pagamentos.map((p, idx) => {
+              const f = FORMAS.find((x) => x.valor === p.forma);
+              return (
+                <li key={idx} className={styles.pagamentoDetalhe}>
+                  <span>
+                    <strong>{f?.rotulo ?? p.forma}</strong>
+                    {f && f.taxa > 0 ? (
+                      <span>taxa {f.taxa.toFixed(2).replace(".", ",")}%</span>
+                    ) : null}
+                  </span>
+                  <strong>{formatMoney(p.valor)}</strong>
+                </li>
+              );
+            })}
+          </ul>
+        </Card>
+
+        {/* --- Documentos fiscais --- */}
+        <Card title="Documentos fiscais">
+          {venda.nota ? (
+            <div className={styles.notaDetalhe}>
+              <Badge tone="info">
+                {venda.nota.tipo === "nfce" ? "NFC-e" : "NFS-e"}
+              </Badge>
+              <strong>Numero {venda.nota.numero}</strong>
+              <Button variant="secondary" size="sm">
+                Baixar PDF
+              </Button>
+            </div>
+          ) : (
+            <p className={styles.semNota}>
+              Nenhuma nota emitida para esta venda.
+            </p>
+          )}
+        </Card>
+      </div>
+
+      {estornando ? (
+        <ConfirmarDialog
+          titulo="Estornar a venda"
+          descricao="Os itens voltam ao estoque, o titulo em contas a receber e revertido e a nota fiscal e cancelada. A venda continua no historico, marcada como estornada."
+          tom="perigo"
+          rotuloConfirmar="Estornar"
+          processando={processando}
+          detalhe={
+            <div className={styles.estornoDetalhe}>
+              <strong>
+                Venda #{venda.numero} · {formatMoney(venda.total)}
+              </strong>
+              <span>
+                {venda.clienteNome} · {totalItens} item(ns)
+              </span>
+            </div>
+          }
+          onConfirmar={confirmarEstorno}
+          onCancelar={() => setEstornando(false)}
+        />
+      ) : null}
+
+      {toast ? (
+        <Toast message={toast.msg} tone={toast.tone} onClose={() => setToast(null)} />
+      ) : null}
+    </>
+  );
+}

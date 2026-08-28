@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { trustMetrics } from "@/content/site";
 import { IconArrowRight, IconBolt, IconTrendUp } from "./Icons";
 import styles from "./Hero.module.css";
@@ -34,10 +35,10 @@ export default function Hero() {
           </p>
 
           <div className={styles.ctas}>
-            <a href="#planos" className="btn btnPrimary">
+            <Link href="/criar-conta" className="btn btnPrimary">
               Comecar agora
               <IconArrowRight size={18} />
-            </a>
+            </Link>
             <a href="#painel" className="btn btnGhost">
               Ver o painel
             </a>

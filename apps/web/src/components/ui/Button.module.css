@@ -71,11 +71,11 @@
 }
 
 .danger {
-  background: rgba(255, 118, 118, 0.14);
-  border-color: rgba(255, 118, 118, 0.3);
-  color: #ff9c9c;
+  background: var(--app-danger-soft);
+  border-color: var(--app-danger);
+  color: var(--app-danger);
 }
 
 .danger:hover {
-  background: rgba(255, 118, 118, 0.22);
+  background: rgba(255, 118, 118, 0.26);
 }

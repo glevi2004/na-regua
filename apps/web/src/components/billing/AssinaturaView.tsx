@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import PixQRCodeCard from "@/components/auth/PixQRCodeCard";
+import { useCallback, useState } from "react";
+import { createPixCharge, fetchPixChargeStatus } from "@/lib/auth-api";
+import CobrancaPix from "@/components/app/CobrancaPix";
 import { Badge, Card, PageHeader, Stat } from "@/components/ui/UI";
 import { Button } from "@/components/ui/Button";
 import DataTable, { type Column } from "@/components/ui/DataTable";
@@ -52,6 +53,12 @@ export default function AssinaturaView() {
   const { bloqueado, setStatus } = useSubscription();
   const [pagando, setPagando] = useState(false);
 
+  /* Estavel: o CobrancaPix usa esta funcao como dependencia de efeito. */
+  const criarCobrancaFatura = useCallback(
+    (valor: number) => createPixCharge("Plano unico", valor),
+    [],
+  );
+
   const emAberto = faturas.filter((f) => f.status !== "pago");
   const total = emAberto.reduce((acc, f) => acc + f.valor, 0);
 
@@ -98,16 +105,19 @@ export default function AssinaturaView() {
 
       {pagando ? (
         <div className={styles.pixWrap}>
-          <PixQRCodeCard
-            planName="Plano unico"
+          <CobrancaPix
+            titulo="Plano unico"
+            subtitulo="Fatura em aberto"
             amount={total || 149}
-            periodicidade="fatura em aberto"
-            onPaid={() => {
+            criarCobranca={criarCobrancaFatura}
+            consultarStatus={fetchPixChargeStatus}
+            onPago={() => {
               /* Confirmado: libera o painel na hora. Com backend, isto vira
                  uma releitura de GET /billing/subscription. */
               setStatus("active");
               setPagando(false);
             }}
+            textoSucesso="Acesso liberado. Obrigado!"
           />
         </div>
       ) : null}

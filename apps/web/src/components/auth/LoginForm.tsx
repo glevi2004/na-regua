@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import { signIn } from "@/lib/auth-api";
+import { startSession } from "@/lib/session";
 import { saveSubscriptionStatus } from "@/lib/subscription-store";
 import {
   validateCredential,
@@ -60,7 +61,19 @@ export default function LoginForm() {
        entra em modo restrito. */
     saveSubscriptionStatus(result.subscription.status);
 
-    router.push("/painel");
+    /* 3) Abre a sessao. O cookie e o que o proxy.ts enxerga para liberar
+       /app/*; sem ele a navegacao volta para ca. */
+    startSession({
+      nome: result.user.nome,
+      email: result.user.email,
+      empresa: result.user.empresa,
+    });
+
+    /* Se o proxy guardou um destino (?proximo=), devolve a pessoa para la.
+       Lido de window e nao de useSearchParams para nao exigir Suspense
+       numa pagina estatica. */
+    const proximo = new URLSearchParams(window.location.search).get("proximo");
+    router.push(proximo && proximo.startsWith("/app") ? proximo : "/app");
   }
 
   return (

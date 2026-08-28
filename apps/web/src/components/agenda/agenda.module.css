@@ -1,0 +1,506 @@
+/* ===================== Conexao com o Google ===================== */
+
+.googleBox {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 18px;
+  margin-bottom: 14px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-lg);
+  background: var(--app-surface);
+}
+
+.googleCarregando {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--app-muted);
+}
+
+.googleIcone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: var(--radius);
+  background: var(--app-accent-soft);
+  color: var(--app-accent);
+}
+
+.googleOff {
+  background: var(--app-field);
+  color: var(--app-muted);
+}
+
+.googleTexto {
+  display: grid;
+  flex: 1;
+  min-width: 200px;
+  line-height: 1.45;
+}
+
+.googleTexto strong {
+  font-size: 14.5px;
+  color: var(--app-text);
+}
+
+.googleTexto span {
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+/* ===================== Grade da tela ===================== */
+
+.grid {
+  display: grid;
+  gap: 14px;
+}
+
+/* ===================== Calendario ===================== */
+
+.calendarioTopo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.mesTitulo {
+  font-size: 17px;
+  color: var(--app-text);
+}
+
+.navMes {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--app-border);
+  border-radius: 50%;
+  color: var(--app-text);
+  font-size: 20px;
+  line-height: 1;
+  transition: border-color var(--transition), color var(--transition);
+}
+
+.navMes:hover {
+  border-color: var(--app-accent);
+  color: var(--app-accent);
+}
+
+.semana {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 6px;
+}
+
+.diaSemana {
+  padding: 4px 0;
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+
+.mes {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.dia {
+  display: grid;
+  align-content: start;
+  justify-items: center;
+  gap: 4px;
+  min-height: 56px;
+  padding: 7px 2px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition), border-color var(--transition);
+}
+
+.dia:hover {
+  background: var(--app-field);
+}
+
+.diaNumero {
+  font-family: var(--font-display);
+  font-size: 13.5px;
+  color: var(--app-text);
+}
+
+.diaForaDoMes .diaNumero {
+  color: var(--app-muted);
+  opacity: 0.45;
+}
+
+.diaHoje {
+  border-color: var(--app-accent);
+}
+
+.diaHoje .diaNumero {
+  color: var(--app-accent);
+  font-weight: 700;
+}
+
+.diaSelecionado {
+  background: var(--app-accent-soft);
+  border-color: var(--app-accent);
+}
+
+.diaMarcas {
+  display: flex;
+  gap: 3px;
+}
+
+.diaMarca {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--app-accent);
+}
+
+/* Ponto diferente para o que veio do Google */
+.marcaGoogle {
+  background: var(--app-destaque);
+}
+
+/* ===================== Eventos do dia ===================== */
+
+.eventos {
+  display: grid;
+}
+
+.evento {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 0;
+  border-top: 1px solid var(--app-border);
+}
+
+.eventos li:first-child {
+  border-top: none;
+}
+
+.eventoHora {
+  display: grid;
+  flex: none;
+  min-width: 52px;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--app-text);
+  line-height: 1.35;
+}
+
+.eventoHora span {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--app-muted);
+}
+
+.eventoPrincipal {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  gap: 2px;
+  line-height: 1.45;
+}
+
+.eventoPrincipal strong {
+  font-size: 14.5px;
+  color: var(--app-text);
+}
+
+.eventoPrincipal span {
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+.eventoLocal {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.eventoTags {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  flex: none;
+}
+
+.eventoLembrete {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11.5px;
+  color: var(--app-muted);
+}
+
+.eventoExcluir {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  color: var(--app-muted);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.eventoExcluir:hover {
+  background: var(--app-danger-soft);
+  color: var(--app-danger);
+}
+
+/* ===================== Proximos ===================== */
+
+.destaqueHoje {
+  padding: 11px 14px;
+  margin-bottom: 14px;
+  border-radius: var(--radius-sm);
+  background: var(--app-accent-soft);
+  color: var(--app-accent);
+  font-size: 13.5px;
+}
+
+.destaqueHoje strong {
+  font-family: var(--font-display);
+  font-size: 15px;
+}
+
+.proximos {
+  display: grid;
+}
+
+.proximo {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  width: 100%;
+  padding: 11px 6px;
+  border-top: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  text-align: left;
+  transition: background-color var(--transition);
+}
+
+.proximos li:first-child .proximo {
+  border-top: none;
+}
+
+.proximo:hover {
+  background: var(--app-field);
+}
+
+.proximoData {
+  display: grid;
+  justify-items: center;
+  flex: none;
+  width: 40px;
+  padding: 5px 0;
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  line-height: 1.2;
+}
+
+.proximoData strong {
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--app-text);
+}
+
+.proximoData span {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+
+.proximoTexto {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.proximoTexto strong {
+  font-size: 14px;
+  color: var(--app-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.proximoTexto span {
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
+.proximoGoogle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--app-destaque-soft);
+  color: var(--app-destaque);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* ===================== Dialogo ===================== */
+
+.dialogRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 230;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.dialogBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 9, 26, 0.74);
+  backdrop-filter: blur(3px);
+}
+
+.dialogPainel {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 92vh;
+  overflow-y: auto;
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-lg);
+  background: var(--app-surface);
+  color: var(--app-text);
+  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.9);
+}
+
+.dialogTitulo {
+  font-size: 19px;
+  color: var(--app-text);
+}
+
+.dialogAcoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.excluirDetalhe {
+  display: grid;
+  gap: 3px;
+  line-height: 1.4;
+}
+
+.excluirDetalhe strong {
+  font-size: 14.5px;
+  color: var(--app-text);
+}
+
+.excluirDetalhe span {
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+/* ===================== Formulario ===================== */
+
+.formCampos {
+  display: grid;
+  gap: 14px;
+}
+
+.formLinha {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.campo {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.campo > span {
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+.input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  color: var(--app-text);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--app-accent);
+}
+
+.input option {
+  background: var(--dark-surface);
+  color: var(--dark-text);
+}
+
+.textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.erro {
+  padding: 10px 13px;
+  border: 1px solid var(--app-danger);
+  border-radius: var(--radius-sm);
+  background: var(--app-danger-soft);
+  color: var(--app-danger);
+  font-size: 13px;
+}
+
+/* ===================== Responsivo ===================== */
+
+@media (min-width: 1080px) {
+  .grid {
+    grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
+  }
+
+  .calendarioCard {
+    grid-row: span 2;
+  }
+
+  .dia {
+    min-height: 68px;
+  }
+}

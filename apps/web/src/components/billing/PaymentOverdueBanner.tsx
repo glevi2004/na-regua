@@ -44,7 +44,7 @@ export default function PaymentOverdueBanner({
         {diasEmAtraso > 0 ? ` — ${diasEmAtraso} dias em atraso` : ""}.
       </p>
 
-      <Link href="/painel/assinatura" className={styles.bannerCta}>
+      <Link href="/app/assinatura" className={styles.bannerCta}>
         Regularizar pagamento
       </Link>
 

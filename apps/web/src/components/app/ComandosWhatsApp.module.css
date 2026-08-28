@@ -1,0 +1,74 @@
+.comandos {
+  padding: 22px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(
+    150deg,
+    rgba(109, 51, 221, 0.16) 0%,
+    rgba(57, 200, 189, 0.08) 100%
+  );
+}
+
+.head {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  margin-bottom: 18px;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border-radius: var(--radius);
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.title {
+  font-size: 17px;
+  color: var(--app-text);
+}
+
+.lead {
+  margin-top: 5px;
+  max-width: 66ch;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--app-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 9px 15px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-full);
+  background: var(--app-surface);
+  font-size: 13.5px;
+  color: var(--app-text);
+  transition: border-color var(--transition), transform var(--transition);
+}
+
+.chip:hover {
+  border-color: var(--app-accent);
+  transform: translateY(-2px);
+}
+
+.chipHint {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--app-accent);
+}

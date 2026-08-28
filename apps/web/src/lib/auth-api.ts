@@ -200,7 +200,7 @@ export async function createPixCharge(planName: string, amount: number): Promise
     chargeId.padEnd(36, "0"),
     "52040000530398654",
     amount.toFixed(2).padStart(6, "0"),
-    "5802BR5913PRODUTO LTDA6008CURITIBA62070503***6304",
+    "5802BR5913EI BUDDY LTDA6008CURITIBA62070503***6304",
   ].join("");
 
   return {

@@ -1,12 +1,19 @@
 /**
  * Conteudo da landing.
  *
- * O nome e a logo do produto ainda nao estao definidos — em todo lugar
- * onde a marca apareceria usamos o placeholder de texto `BRAND`.
  * Numeros e depoimentos aqui sao ilustrativos, para dar forma ao layout.
  */
 
-export const BRAND = "Produto";
+/**
+ * Nome do produto. Todo lugar que exibe a marca le daqui — header da
+ * landing, painel de login, sidebar do app, rodape e titulos de pagina —
+ * entao trocar o nome continua sendo uma linha so.
+ *
+ * A LOGO ainda nao existe: o quadradinho de gradiente ao lado do nome e
+ * um marcador, nao um simbolo. Quando houver arte, ela entra no lugar
+ * dele nos mesmos pontos.
+ */
+export const BRAND = "Ei Buddy";
 
 export const nav = [
   { label: "Modulos", href: "#modulos" },
@@ -171,14 +178,30 @@ export const faq = [
 export const footerColumns = [
   {
     title: "Produto",
-    links: ["Modulos", "Como funciona", "Painel", "Planos", "Novidades"],
+    links: [
+      { label: "Modulos", href: "/#modulos" },
+      { label: "Como funciona", href: "/#como-funciona" },
+      { label: "Painel", href: "/#painel" },
+      { label: "Planos", href: "/#planos" },
+      { label: "Duvidas", href: "/#duvidas" },
+    ],
   },
   {
     title: "Conta",
-    links: ["Entrar", "Criar conta", "Migrar meus dados", "Indicar um amigo"],
+    links: [
+      { label: "Entrar", href: "/login" },
+      { label: "Criar conta", href: "/criar-conta" },
+      { label: "Recuperar senha", href: "/recuperar-senha" },
+      { label: "Indicar um amigo", href: "/criar-conta" },
+    ],
   },
   {
     title: "Suporte",
-    links: ["Central de ajuda", "Falar com o time", "Status do sistema", "Contato"],
+    links: [
+      { label: "Central de ajuda", href: "/#duvidas" },
+      { label: "Falar com o time", href: "/#duvidas" },
+      { label: "Status do sistema", href: "/#duvidas" },
+      { label: "Contato", href: "/#duvidas" },
+    ],
   },
 ];

@@ -1,0 +1,137 @@
+.grid {
+  display: grid;
+  gap: 14px;
+}
+
+/* --- Botao de WhatsApp (link externo) --- */
+
+.whatsBotao {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 20px;
+  border-radius: var(--radius-full);
+  background: var(--app-accent);
+  color: #06312e;
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background-color var(--transition), transform var(--transition);
+}
+
+.whatsBotao:hover {
+  background: #4ad9cd;
+  transform: translateY(-1px);
+}
+
+/* --- Dados cadastrais --- */
+
+.dados {
+  display: grid;
+  gap: 16px;
+}
+
+.dados dt {
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
+.dados dd {
+  margin: 4px 0 0;
+  font-size: 14.5px;
+  line-height: 1.5;
+  color: var(--app-text);
+}
+
+/* --- Listas --- */
+
+.linhas {
+  display: grid;
+}
+
+.linha {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--app-border);
+}
+
+.linhas li:first-child {
+  border-top: none;
+}
+
+.linhaId,
+.linhaData {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--app-accent);
+}
+
+.linhaData {
+  color: var(--app-muted);
+  min-width: 76px;
+}
+
+.linhaPrincipal {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.linhaPrincipal strong {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--app-text);
+}
+
+.linhaPrincipal span {
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+.linhaValor {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--app-text);
+  white-space: nowrap;
+}
+
+.verMais {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--app-accent);
+  transition: gap var(--transition);
+}
+
+.verMais:hover {
+  gap: 9px;
+}
+
+@media (min-width: 620px) {
+  .dados {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .dadosLargo {
+    grid-column: span 2;
+  }
+}
+
+@media (min-width: 1080px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .largo {
+    grid-column: span 2;
+  }
+}
