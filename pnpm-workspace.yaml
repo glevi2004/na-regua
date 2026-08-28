@@ -26,3 +26,11 @@ minimumReleaseAgeExclude:
   - expo-modules-autolinking@57.0.11
   - expo-modules-core@57.0.13
   - expo@57.0.16
+
+# vite entra so como engine do vitest (peer). A resolucao natural cai numa
+# versao <=6.4.2, que carrega GHSA-fx2h-pf6j-xcff (alta) e mais duas moderadas.
+# O gate de auditoria da CI e bloqueante em severidade alta (RNF-029), entao
+# forcamos a faixa ja corrigida. O teto <8 existe porque o peer do vitest 3.2
+# aceita ate a major 7.
+overrides:
+  vite: '>=7.3.6 <8'
