@@ -1,8 +1,8 @@
-"use client";
+'use client'
 
-import { useId, useMemo, useRef, useState } from "react";
-import { IconPlus, IconSearch } from "@/components/Icons";
-import styles from "./campoTag.module.css";
+import { useId, useMemo, useRef, useState } from 'react'
+import { IconPlus, IconSearch } from '@/components/Icons'
+import styles from './campoTag.module.css'
 
 /**
  * Campo "(T)" do mapeamento: selecao com autocomplete e criacao no fluxo.
@@ -17,103 +17,102 @@ export default function CampoTag({
   opcoes,
   onChange,
   onCriar,
-  placeholder = "Buscar ou criar",
+  placeholder = 'Buscar ou criar',
   ariaLabel,
   invalido = false,
 }: {
-  valor: string;
-  opcoes: string[];
-  onChange: (valor: string) => void;
+  valor: string
+  opcoes: string[]
+  onChange: (valor: string) => void
   /** Chamado quando um valor novo e criado — o pai guarda na lista. */
-  onCriar: (valor: string) => void;
-  placeholder?: string;
-  ariaLabel: string;
-  invalido?: boolean;
+  onCriar: (valor: string) => void
+  placeholder?: string
+  ariaLabel: string
+  invalido?: boolean
 }) {
-  const id = useId();
-  const [aberto, setAberto] = useState(false);
-  const [termo, setTermo] = useState("");
-  const [destacado, setDestacado] = useState(0);
-  const wrapRef = useRef<HTMLDivElement>(null);
+  const id = useId()
+  const [aberto, setAberto] = useState(false)
+  const [termo, setTermo] = useState('')
+  const [destacado, setDestacado] = useState(0)
+  const wrapRef = useRef<HTMLDivElement>(null)
 
   const filtradas = useMemo(() => {
-    const t = termo.trim().toLowerCase();
-    if (!t) return opcoes;
-    return opcoes.filter((o) => o.toLowerCase().includes(t));
-  }, [opcoes, termo]);
+    const t = termo.trim().toLowerCase()
+    if (!t) return opcoes
+    return opcoes.filter((o) => o.toLowerCase().includes(t))
+  }, [opcoes, termo])
 
   /* So oferece criar quando o texto nao bate exatamente com nada. */
   const podeCriar =
-    termo.trim().length > 0 &&
-    !opcoes.some((o) => o.toLowerCase() === termo.trim().toLowerCase());
+    termo.trim().length > 0 && !opcoes.some((o) => o.toLowerCase() === termo.trim().toLowerCase())
 
-  const totalItens = filtradas.length + (podeCriar ? 1 : 0);
+  const totalItens = filtradas.length + (podeCriar ? 1 : 0)
 
   function escolher(opcao: string) {
-    onChange(opcao);
-    setTermo("");
-    setAberto(false);
+    onChange(opcao)
+    setTermo('')
+    setAberto(false)
   }
 
   function criar() {
-    const limpo = termo.trim();
-    if (!limpo) return;
-    onCriar(limpo);
-    escolher(limpo);
+    const limpo = termo.trim()
+    if (!limpo) return
+    onCriar(limpo)
+    escolher(limpo)
   }
 
   function aoTeclar(e: React.KeyboardEvent) {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setAberto(true);
-      setDestacado((d) => (d + 1) % Math.max(totalItens, 1));
-      return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault()
+      setAberto(true)
+      setDestacado((d) => (d + 1) % Math.max(totalItens, 1))
+      return
     }
-    if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setDestacado((d) => (d - 1 + totalItens) % Math.max(totalItens, 1));
-      return;
+    if (e.key === 'ArrowUp') {
+      e.preventDefault()
+      setDestacado((d) => (d - 1 + totalItens) % Math.max(totalItens, 1))
+      return
     }
-    if (e.key === "Enter") {
-      e.preventDefault();
+    if (e.key === 'Enter') {
+      e.preventDefault()
       if (destacado < filtradas.length) {
-        escolher(filtradas[destacado]);
+        escolher(filtradas[destacado])
       } else if (podeCriar) {
-        criar();
+        criar()
       }
-      return;
+      return
     }
-    if (e.key === "Escape") {
-      setAberto(false);
-      setTermo("");
+    if (e.key === 'Escape') {
+      setAberto(false)
+      setTermo('')
     }
   }
 
   /* Fecha ao sair do campo, mas so depois do clique na lista ser
      processado — por isso o atraso curto. */
   function aoSairDoFoco(e: React.FocusEvent) {
-    if (wrapRef.current?.contains(e.relatedTarget as Node)) return;
-    setAberto(false);
-    setTermo("");
+    if (wrapRef.current?.contains(e.relatedTarget as Node)) return
+    setAberto(false)
+    setTermo('')
   }
 
   return (
     <div className={styles.wrap} ref={wrapRef} onBlur={aoSairDoFoco}>
-      <div className={`${styles.campo} ${invalido ? styles.campoInvalido : ""}`}>
+      <div className={`${styles.campo} ${invalido ? styles.campoInvalido : ''}`}>
         <IconSearch size={16} />
         <input
           id={id}
           className={styles.input}
           value={aberto ? termo : valor}
           onChange={(e) => {
-            setTermo(e.target.value);
-            setAberto(true);
-            setDestacado(0);
+            setTermo(e.target.value)
+            setAberto(true)
+            setDestacado(0)
           }}
           onFocus={() => {
-            setAberto(true);
-            setTermo("");
-            setDestacado(0);
+            setAberto(true)
+            setTermo('')
+            setDestacado(0)
           }}
           onKeyDown={aoTeclar}
           placeholder={valor || placeholder}
@@ -128,7 +127,7 @@ export default function CampoTag({
           <button
             type="button"
             className={styles.limpar}
-            onClick={() => onChange("")}
+            onClick={() => onChange('')}
             aria-label={`Limpar ${ariaLabel}`}
           >
             ×
@@ -142,7 +141,7 @@ export default function CampoTag({
             <li key={opcao} role="option" aria-selected={valor === opcao}>
               <button
                 type="button"
-                className={`${styles.opcao} ${i === destacado ? styles.opcaoAtiva : ""}`}
+                className={`${styles.opcao} ${i === destacado ? styles.opcaoAtiva : ''}`}
                 onMouseEnter={() => setDestacado(i)}
                 onClick={() => escolher(opcao)}
               >
@@ -155,7 +154,7 @@ export default function CampoTag({
             <li role="option" aria-selected={false}>
               <button
                 type="button"
-                className={`${styles.criar} ${destacado === filtradas.length ? styles.opcaoAtiva : ""}`}
+                className={`${styles.criar} ${destacado === filtradas.length ? styles.opcaoAtiva : ''}`}
                 onMouseEnter={() => setDestacado(filtradas.length)}
                 onClick={criar}
               >
@@ -171,5 +170,5 @@ export default function CampoTag({
         </ul>
       ) : null}
     </div>
-  );
+  )
 }

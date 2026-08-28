@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react'
 import {
   COLUNAS,
   comentarCard,
@@ -8,13 +8,13 @@ import {
   ROTULO_ORIGEM,
   type CardCrm,
   type ColunaId,
-} from "@/lib/crm-api";
-import { formatDate } from "@/lib/format";
-import { Badge } from "@/components/ui/UI";
-import { Button } from "@/components/ui/Button";
-import { Spinner } from "@/components/auth/Fields";
-import { IconCheck, IconClose } from "@/components/Icons";
-import styles from "./crm.module.css";
+} from '@/lib/crm-api'
+import { formatDate } from '@/lib/format'
+import { Badge } from '@/components/ui/UI'
+import { Button } from '@/components/ui/Button'
+import { Spinner } from '@/components/auth/Fields'
+import { IconCheck, IconClose } from '@/components/Icons'
+import styles from './crm.module.css'
 
 /**
  * Painel de detalhe do card: historico, comentarios e conclusao.
@@ -27,57 +27,62 @@ export default function CardDetalhe({
   onFechar,
   onAtualizar,
 }: {
-  card: CardCrm;
-  onFechar: () => void;
-  onAtualizar: (card: CardCrm) => void;
+  card: CardCrm
+  onFechar: () => void
+  onAtualizar: (card: CardCrm) => void
 }) {
-  const [comentario, setComentario] = useState("");
-  const [enviando, setEnviando] = useState(false);
-  const [erro, setErro] = useState<string | null>(null);
-  const ref = useRef<HTMLDivElement>(null);
+  const [comentario, setComentario] = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const [erro, setErro] = useState<string | null>(null)
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onFechar();
-    };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    ref.current?.focus();
+      if (e.key === 'Escape') onFechar()
+    }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    ref.current?.focus()
     return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [onFechar]);
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [onFechar])
 
   async function enviarComentario(event: React.FormEvent) {
-    event.preventDefault();
-    setErro(null);
-    setEnviando(true);
+    event.preventDefault()
+    setErro(null)
+    setEnviando(true)
 
     /* SUBSTITUIR POR: POST /crm/cards/:id/comentarios */
-    const r = await comentarCard(card.id, comentario);
-    setEnviando(false);
+    const r = await comentarCard(card.id, comentario)
+    setEnviando(false)
 
     if (!r.ok) {
-      setErro(r.error);
-      return;
+      setErro(r.error)
+      return
     }
 
-    onAtualizar({ ...card, comentarios: [...card.comentarios, r.comentario] });
-    setComentario("");
+    onAtualizar({ ...card, comentarios: [...card.comentarios, r.comentario] })
+    setComentario('')
   }
 
   async function mudarColuna(coluna: ColunaId) {
-    onAtualizar({ ...card, coluna });
+    onAtualizar({ ...card, coluna })
     /* SUBSTITUIR POR: PATCH /crm/cards/:id */
-    await moverCard(card.id, coluna);
+    await moverCard(card.id, coluna)
   }
 
-  const concluido = card.coluna === "concluido";
+  const concluido = card.coluna === 'concluido'
 
   return (
     <div className={styles.dialogRoot}>
-      <button type="button" className={styles.dialogBackdrop} onClick={onFechar} aria-label="Fechar" />
+      <button
+        type="button"
+        className={styles.dialogBackdrop}
+        onClick={onFechar}
+        aria-label="Fechar"
+      />
 
       <div
         ref={ref}
@@ -89,14 +94,19 @@ export default function CardDetalhe({
       >
         <header className={styles.detalheCabecalho}>
           <div className={styles.detalheTags}>
-            <Badge tone={card.tipo === "pendencia" ? "warning" : "info"}>
-              {card.tipo === "pendencia" ? "Pendencia" : "Contato"}
+            <Badge tone={card.tipo === 'pendencia' ? 'warning' : 'info'}>
+              {card.tipo === 'pendencia' ? 'Pendencia' : 'Contato'}
             </Badge>
-            <Badge tone={concluido ? "success" : "neutral"}>
+            <Badge tone={concluido ? 'success' : 'neutral'}>
               {COLUNAS.find((c) => c.id === card.coluna)?.titulo}
             </Badge>
           </div>
-          <button type="button" className={styles.dialogFechar} onClick={onFechar} aria-label="Fechar">
+          <button
+            type="button"
+            className={styles.dialogFechar}
+            onClick={onFechar}
+            aria-label="Fechar"
+          >
             <IconClose size={18} />
           </button>
         </header>
@@ -105,9 +115,7 @@ export default function CardDetalhe({
           {card.titulo}
         </h2>
 
-        {card.descricao ? (
-          <p className={styles.detalheDescricao}>{card.descricao}</p>
-        ) : null}
+        {card.descricao ? <p className={styles.detalheDescricao}>{card.descricao}</p> : null}
 
         <dl className={styles.detalheDados}>
           <div>
@@ -120,11 +128,7 @@ export default function CardDetalhe({
           </div>
           <div>
             <dt>Responsavel</dt>
-            <dd>
-              {card.responsaveis.length > 0
-                ? card.responsaveis.join(", ")
-                : "Ninguem ainda"}
-            </dd>
+            <dd>{card.responsaveis.length > 0 ? card.responsaveis.join(', ') : 'Ninguem ainda'}</dd>
           </div>
           <div>
             <dt>Origem</dt>
@@ -138,7 +142,7 @@ export default function CardDetalhe({
             <button
               key={c.id}
               type="button"
-              className={`${styles.detalheColuna} ${card.coluna === c.id ? styles.detalheColunaAtiva : ""}`}
+              className={`${styles.detalheColuna} ${card.coluna === c.id ? styles.detalheColunaAtiva : ''}`}
               onClick={() => void mudarColuna(c.id)}
               aria-pressed={card.coluna === c.id}
             >
@@ -156,9 +160,7 @@ export default function CardDetalhe({
             <li className={styles.comentario}>
               <span className={styles.comentarioAutor}>Sistema</span>
               <span className={styles.comentarioData}>{formatDate(card.data)}</span>
-              <p className={styles.comentarioTexto}>
-                {ROTULO_ORIGEM[card.origem]}.
-              </p>
+              <p className={styles.comentarioTexto}>{ROTULO_ORIGEM[card.origem]}.</p>
             </li>
 
             {card.comentarios.map((c) => (
@@ -192,7 +194,7 @@ export default function CardDetalhe({
                     Enviando...
                   </>
                 ) : (
-                  "Comentar"
+                  'Comentar'
                 )}
               </Button>
             </div>
@@ -204,7 +206,7 @@ export default function CardDetalhe({
             Fechar
           </Button>
           {!concluido ? (
-            <Button onClick={() => void mudarColuna("concluido")}>
+            <Button onClick={() => void mudarColuna('concluido')}>
               <IconCheck size={16} />
               Marcar como concluido
             </Button>
@@ -212,5 +214,5 @@ export default function CardDetalhe({
         </div>
       </div>
     </div>
-  );
+  )
 }

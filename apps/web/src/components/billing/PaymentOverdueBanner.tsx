@@ -1,9 +1,9 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { useState } from "react";
-import { IconClose } from "../Icons";
-import styles from "./billing.module.css";
+import Link from 'next/link'
+import { useState } from 'react'
+import { IconClose } from '../Icons'
+import styles from './billing.module.css'
 
 /**
  * Banner fixo de pagamento pendente.
@@ -12,24 +12,16 @@ import styles from "./billing.module.css";
  * fica reservado para erro critico. Pode ser recolhido, mas volta a cada
  * navegacao: e um aviso persistente, nao uma notificacao descartavel.
  */
-export default function PaymentOverdueBanner({
-  diasEmAtraso = 14,
-}: {
-  diasEmAtraso?: number;
-}) {
-  const [recolhido, setRecolhido] = useState(false);
+export default function PaymentOverdueBanner({ diasEmAtraso = 14 }: { diasEmAtraso?: number }) {
+  const [recolhido, setRecolhido] = useState(false)
 
   if (recolhido) {
     return (
-      <button
-        type="button"
-        className={styles.bannerCollapsed}
-        onClick={() => setRecolhido(false)}
-      >
+      <button type="button" className={styles.bannerCollapsed} onClick={() => setRecolhido(false)}>
         <span className={styles.bannerDot} aria-hidden="true" />
         Pagamento pendente
       </button>
-    );
+    )
   }
 
   return (
@@ -39,9 +31,8 @@ export default function PaymentOverdueBanner({
       </span>
 
       <p className={styles.bannerText}>
-        <strong>Seu pagamento esta pendente.</strong>{" "}
-        Regularize para manter acesso completo
-        {diasEmAtraso > 0 ? ` — ${diasEmAtraso} dias em atraso` : ""}.
+        <strong>Seu pagamento esta pendente.</strong> Regularize para manter acesso completo
+        {diasEmAtraso > 0 ? ` — ${diasEmAtraso} dias em atraso` : ''}.
       </p>
 
       <Link href="/app/assinatura" className={styles.bannerCta}>
@@ -57,5 +48,5 @@ export default function PaymentOverdueBanner({
         <IconClose size={17} />
       </button>
     </div>
-  );
+  )
 }

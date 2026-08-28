@@ -1,6 +1,6 @@
-import type { ReactNode } from "react";
-import { PageHeader } from "@/components/ui/UI";
-import styles from "./ModuloEmConstrucao.module.css";
+import type { ReactNode } from 'react'
+import { PageHeader } from '@/components/ui/UI'
+import styles from './ModuloEmConstrucao.module.css'
 
 /**
  * Placeholder das telas de modulo que ainda nao foram desenhadas.
@@ -14,11 +14,11 @@ export default function ModuloEmConstrucao({
   subtitulo,
   previsto,
 }: {
-  titulo: string;
-  subtitulo: string;
+  titulo: string
+  subtitulo: string
   /** O que a tela vai conter quando existir. */
-  previsto: string[];
-  children?: ReactNode;
+  previsto: string[]
+  children?: ReactNode
 }) {
   return (
     <>
@@ -39,10 +39,10 @@ export default function ModuloEmConstrucao({
         </ul>
 
         <p className={styles.note}>
-          A rota e a navegacao ja estao ligadas. O conteudo entra na proxima
-          etapa, seguindo o mesmo design das telas ja prontas.
+          A rota e a navegacao ja estao ligadas. O conteudo entra na proxima etapa, seguindo o mesmo
+          design das telas ja prontas.
         </p>
       </section>
     </>
-  );
+  )
 }

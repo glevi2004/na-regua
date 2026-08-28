@@ -1,11 +1,11 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { useEffect, useRef } from "react";
-import { ACOES_BLOQUEADAS, ACOES_LIBERADAS } from "@/lib/access";
-import { IconCheck, IconClose } from "../Icons";
-import { useSubscription } from "./SubscriptionProvider";
-import styles from "./billing.module.css";
+import Link from 'next/link'
+import { useEffect, useRef } from 'react'
+import { ACOES_BLOQUEADAS, ACOES_LIBERADAS } from '@/lib/access'
+import { IconCheck, IconClose } from '../Icons'
+import { useSubscription } from './SubscriptionProvider'
+import styles from './billing.module.css'
 
 /**
  * Modal exibido quando o usuario tenta usar um modulo bloqueado.
@@ -14,27 +14,27 @@ import styles from "./billing.module.css";
  * de perda total) e leva para a area de regularizacao.
  */
 export default function PaymentRequiredModal() {
-  const { modalAberto, fecharModal } = useSubscription();
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const { modalAberto, fecharModal } = useSubscription()
+  const dialogRef = useRef<HTMLDivElement>(null)
 
   /* Fecha no Esc e devolve o foco ao fechar. */
   useEffect(() => {
-    if (!modalAberto) return;
+    if (!modalAberto) return
 
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") fecharModal();
-    };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    dialogRef.current?.focus();
+      if (e.key === 'Escape') fecharModal()
+    }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    dialogRef.current?.focus()
 
     return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [modalAberto, fecharModal]);
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [modalAberto, fecharModal])
 
-  if (!modalAberto) return null;
+  if (!modalAberto) return null
 
   return (
     <div className={styles.modalRoot}>
@@ -69,8 +69,8 @@ export default function PaymentRequiredModal() {
         </h2>
 
         <p className={styles.modalText}>
-          Seu acesso esta em modo restrito porque a ultima fatura ainda nao foi
-          confirmada. Seus dados continuam salvos e nada foi apagado.
+          Seu acesso esta em modo restrito porque a ultima fatura ainda nao foi confirmada. Seus
+          dados continuam salvos e nada foi apagado.
         </p>
 
         <div className={styles.modalLists}>
@@ -102,11 +102,7 @@ export default function PaymentRequiredModal() {
         </div>
 
         <div className={styles.modalActions}>
-          <Link
-            href="/app/assinatura"
-            className={styles.modalPrimary}
-            onClick={fecharModal}
-          >
+          <Link href="/app/assinatura" className={styles.modalPrimary} onClick={fecharModal}>
             Regularizar pagamento
           </Link>
           <button type="button" className={styles.modalGhost} onClick={fecharModal}>
@@ -115,5 +111,5 @@ export default function PaymentRequiredModal() {
         </div>
       </div>
     </div>
-  );
+  )
 }

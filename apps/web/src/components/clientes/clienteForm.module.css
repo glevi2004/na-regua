@@ -20,7 +20,9 @@
   border-radius: var(--radius-full);
   font-size: 13.5px;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .tipoBotao:hover {

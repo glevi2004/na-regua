@@ -8,183 +8,202 @@
  */
 
 export type UF =
-  | "AC" | "AL" | "AM" | "AP" | "BA" | "CE" | "DF" | "ES" | "GO" | "MA"
-  | "MG" | "MS" | "MT" | "PA" | "PB" | "PE" | "PI" | "PR" | "RJ" | "RN"
-  | "RO" | "RR" | "RS" | "SC" | "SE" | "SP" | "TO";
+  | 'AC'
+  | 'AL'
+  | 'AM'
+  | 'AP'
+  | 'BA'
+  | 'CE'
+  | 'DF'
+  | 'ES'
+  | 'GO'
+  | 'MA'
+  | 'MG'
+  | 'MS'
+  | 'MT'
+  | 'PA'
+  | 'PB'
+  | 'PE'
+  | 'PI'
+  | 'PR'
+  | 'RJ'
+  | 'RN'
+  | 'RO'
+  | 'RR'
+  | 'RS'
+  | 'SC'
+  | 'SE'
+  | 'SP'
+  | 'TO'
 
 export type Endereco = {
-  cep: string;
-  logradouro: string;
-  numero: string;
-  complemento?: string;
-  bairro: string;
-  cidade: string;
-  uf: UF;
-};
+  cep: string
+  logradouro: string
+  numero: string
+  complemento?: string
+  bairro: string
+  cidade: string
+  uf: UF
+}
 
 /** Modulo: Empresa */
 export type Empresa = {
-  id: string;
-  razaoSocial: string;
-  nomeFantasia: string;
-  cnpj: string;
-  inscricaoEstadual: string;
-  inscricaoMunicipal: string;
-  ramoAtividade: string;
-  ddd: string;
-  celular: string;
-  email: string;
-  endereco: Endereco;
+  id: string
+  razaoSocial: string
+  nomeFantasia: string
+  cnpj: string
+  inscricaoEstadual: string
+  inscricaoMunicipal: string
+  ramoAtividade: string
+  ddd: string
+  celular: string
+  email: string
+  endereco: Endereco
   /** "Comissoes habilitaveis" do mapeamento original. */
-  comissaoHabilitada: boolean;
-  comissaoPercentual: number;
-};
+  comissaoHabilitada: boolean
+  comissaoPercentual: number
+}
 
 /** Modulo: Clientes / CRM */
 export type Cliente = {
-  id: string;
-  nome: string;
+  id: string
+  nome: string
   /** CPF ou CNPJ, ja formatado para exibicao. */
-  documento: string;
-  tipoPessoa: "fisica" | "juridica";
-  ddd: string;
-  celular: string;
-  email?: string;
-  endereco: Endereco;
-  ultimaCompra: string | null;
-  totalCompras: number;
-  valorTotal: number;
-};
+  documento: string
+  tipoPessoa: 'fisica' | 'juridica'
+  ddd: string
+  celular: string
+  email?: string
+  endereco: Endereco
+  ultimaCompra: string | null
+  totalCompras: number
+  valorTotal: number
+}
 
 /** Modulo: Produtos */
 export type Produto = {
-  id: string;
-  codigo: string;
-  descricao: string;
-  ean: string;
-  ncm: string;
-  categoria: string;
-  fornecedor: string;
-  precoCusto: number;
-  precoVenda: number;
-  estoque: number;
-  estoqueMinimo: number;
+  id: string
+  codigo: string
+  descricao: string
+  ean: string
+  ncm: string
+  categoria: string
+  fornecedor: string
+  precoCusto: number
+  precoVenda: number
+  estoque: number
+  estoqueMinimo: number
   /** Dias desde a ultima venda — alimenta "produtos sem venda ha X tempo". */
-  diasSemVenda: number;
-};
+  diasSemVenda: number
+}
 
-export type FormaPagamento =
-  | "pix"
-  | "debito"
-  | "credito"
-  | "dinheiro"
-  | "carteira";
+export type FormaPagamento = 'pix' | 'debito' | 'credito' | 'dinheiro' | 'carteira'
 
 export type ItemVenda = {
-  produtoId: string;
-  descricao: string;
-  quantidade: number;
-  precoUnitario: number;
-  desconto: number;
-};
+  produtoId: string
+  descricao: string
+  quantidade: number
+  precoUnitario: number
+  desconto: number
+}
 
-export type StatusVenda = "concluida" | "cancelada" | "em_aberto";
-export type TipoNota = "nfce" | "nfse" | "sem_nota";
+export type StatusVenda = 'concluida' | 'cancelada' | 'em_aberto'
+export type TipoNota = 'nfce' | 'nfse' | 'sem_nota'
 
 /** Modulo: Vendas */
 export type Venda = {
-  id: string;
-  numero: string;
-  clienteId: string | null;
-  clienteNome: string;
-  data: string;
-  itens: ItemVenda[];
-  subtotal: number;
-  desconto: number;
-  total: number;
-  formaPagamento: FormaPagamento;
-  status: StatusVenda;
-  nota: TipoNota;
+  id: string
+  numero: string
+  clienteId: string | null
+  clienteNome: string
+  data: string
+  itens: ItemVenda[]
+  subtotal: number
+  desconto: number
+  total: number
+  formaPagamento: FormaPagamento
+  status: StatusVenda
+  nota: TipoNota
   /** Calculados no fechamento: custo, imposto e tarifa de cartao. */
-  custoTotal: number;
-  imposto: number;
-  tarifaCartao: number;
-  valorLiquido: number;
-};
+  custoTotal: number
+  imposto: number
+  tarifaCartao: number
+  valorLiquido: number
+}
 
-export type StatusTitulo = "aberto" | "pago" | "parcial" | "vencido";
+export type StatusTitulo = 'aberto' | 'pago' | 'parcial' | 'vencido'
 
 /** Modulo: Contas a Pagar */
 export type ContaPagar = {
-  id: string;
-  fornecedor: string;
-  planoContasId: string;
-  planoContasNome: string;
-  bancoId: string;
-  bancoNome: string;
-  vencimento: string;
-  valor: number;
-  valorPago: number;
-  descricao: string;
-  status: StatusTitulo;
-};
+  id: string
+  fornecedor: string
+  planoContasId: string
+  planoContasNome: string
+  bancoId: string
+  bancoNome: string
+  vencimento: string
+  valor: number
+  valorPago: number
+  descricao: string
+  status: StatusTitulo
+}
 
 /** Modulo: Contas a Receber */
 export type ContaReceber = {
-  id: string;
-  clienteId: string;
-  clienteNome: string;
-  bancoId: string;
-  bancoNome: string;
-  emissao: string;
-  vencimento: string;
-  referente: string;
-  tipo: FormaPagamento;
-  valor: number;
-  valorRecebido: number;
-  status: StatusTitulo;
-};
+  id: string
+  clienteId: string
+  clienteNome: string
+  bancoId: string
+  bancoNome: string
+  emissao: string
+  vencimento: string
+  referente: string
+  tipo: FormaPagamento
+  valor: number
+  valorRecebido: number
+  status: StatusTitulo
+}
 
 /** Modulo: Bancos */
 export type Banco = {
-  id: string;
-  nome: string;
-  agencia: string;
-  conta: string;
-  saldo: number;
+  id: string
+  nome: string
+  agencia: string
+  conta: string
+  saldo: number
   /** Integracao via Open Finance. */
-  integrado: boolean;
-  ultimaConciliacao: string | null;
-};
+  integrado: boolean
+  ultimaConciliacao: string | null
+}
 
 /** Modulo: Plano de Contas */
 export type PlanoContas = {
-  id: string;
-  nome: string;
-  tipo: "receita" | "despesa";
-  gastoMes: number;
-};
+  id: string
+  nome: string
+  tipo: 'receita' | 'despesa'
+  gastoMes: number
+}
 
 export type CustoFixo = {
-  id: string;
-  nome: string;
-  planoContasId: string;
-  planoContasNome: string;
-  bancoId: string;
-  bancoNome: string;
-  diaVencimento: number;
-  valor: number;
-};
+  id: string
+  nome: string
+  planoContasId: string
+  planoContasNome: string
+  bancoId: string
+  bancoNome: string
+  diaVencimento: number
+  valor: number
+}
 
 /** Modulo: Agenda */
-export type TipoCompromisso = "cobranca" | "entrega" | "reuniao" | "pagamento";
+export type TipoCompromisso = 'cobranca' | 'entrega' | 'reuniao' | 'pagamento'
 
 export type Compromisso = {
-  id: string;
-  titulo: string;
-  data: string;
-  hora: string;
-  tipo: TipoCompromisso;
-  clienteNome?: string;
-  concluido: boolean;
-};
+  id: string
+  titulo: string
+  data: string
+  hora: string
+  tipo: TipoCompromisso
+  clienteNome?: string
+  concluido: boolean
+}

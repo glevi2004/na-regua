@@ -1,6 +1,6 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { SESSION_COOKIE } from "@/lib/session";
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
+import { SESSION_COOKIE } from '@/lib/session'
 
 /**
  * Protecao das rotas de `/app/*`.
@@ -16,18 +16,18 @@ import { SESSION_COOKIE } from "@/lib/session";
  * do token (assinatura e expiracao).
  */
 export function proxy(request: NextRequest) {
-  const temSessao = Boolean(request.cookies.get(SESSION_COOKIE)?.value);
+  const temSessao = Boolean(request.cookies.get(SESSION_COOKIE)?.value)
 
-  if (temSessao) return NextResponse.next();
+  if (temSessao) return NextResponse.next()
 
   /* Guarda o destino para devolver a pessoa a ela apos o login. */
-  const login = new URL("/login", request.url);
-  const destino = request.nextUrl.pathname + request.nextUrl.search;
-  login.searchParams.set("proximo", destino);
+  const login = new URL('/login', request.url)
+  const destino = request.nextUrl.pathname + request.nextUrl.search
+  login.searchParams.set('proximo', destino)
 
-  return NextResponse.redirect(login);
+  return NextResponse.redirect(login)
 }
 
 export const config = {
-  matcher: "/app/:path*",
-};
+  matcher: '/app/:path*',
+}

@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
-import { BRAND } from "@/content/site";
-import CrmQuadro from "@/components/crm/CrmQuadro";
+import type { Metadata } from 'next'
+import { BRAND } from '@/content/site'
+import CrmQuadro from '@/components/crm/CrmQuadro'
 
 export const metadata: Metadata = {
   title: `CRM — ${BRAND}`,
-  description: "Pendencias e contatos em quadro, alimentado pelo cadastro de clientes.",
-};
+  description: 'Pendencias e contatos em quadro, alimentado pelo cadastro de clientes.',
+}
 
 export default function CrmPage() {
-  return <CrmQuadro />;
+  return <CrmQuadro />
 }

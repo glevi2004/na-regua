@@ -1,70 +1,70 @@
-"use client";
+'use client'
 
-import { useMemo, useState } from "react";
+import { useMemo, useState } from 'react'
 import {
   ajustarEstoque,
   calcularMargem,
   movimentacoesEstoque,
   nivelEstoque,
-} from "@/lib/produtos-api";
-import type { Produto } from "@/lib/types";
-import { daysUntil, formatDate, formatMoney, formatPercent } from "@/lib/format";
-import { Badge, Card, EmptyState, PageHeader, Stat } from "@/components/ui/UI";
-import { Button, ButtonLink } from "@/components/ui/Button";
-import Toast from "@/components/ui/Toast";
-import { Spinner } from "@/components/auth/Fields";
-import styles from "./detalhe.module.css";
+} from '@/lib/produtos-api'
+import type { Produto } from '@/lib/types'
+import { daysUntil, formatDate, formatMoney, formatPercent } from '@/lib/format'
+import { Badge, Card, EmptyState, PageHeader, Stat } from '@/components/ui/UI'
+import { Button, ButtonLink } from '@/components/ui/Button'
+import Toast from '@/components/ui/Toast'
+import { Spinner } from '@/components/auth/Fields'
+import styles from './detalhe.module.css'
 
 /** Janelas do filtro de periodo, em dias. */
 const PERIODOS = [
-  { valor: 30, rotulo: "30 dias" },
-  { valor: 90, rotulo: "90 dias" },
-  { valor: 0, rotulo: "Tudo" },
-] as const;
+  { valor: 30, rotulo: '30 dias' },
+  { valor: 90, rotulo: '90 dias' },
+  { valor: 0, rotulo: 'Tudo' },
+] as const
 
 export default function ProdutoDetalhe({ produto }: { produto: Produto }) {
-  const [periodo, setPeriodo] = useState<number>(90);
-  const [novaQuantidade, setNovaQuantidade] = useState(String(produto.estoque));
-  const [motivo, setMotivo] = useState("");
-  const [ajustando, setAjustando] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; tone: "success" | "error" } | null>(null);
+  const [periodo, setPeriodo] = useState<number>(90)
+  const [novaQuantidade, setNovaQuantidade] = useState(String(produto.estoque))
+  const [motivo, setMotivo] = useState('')
+  const [ajustando, setAjustando] = useState(false)
+  const [toast, setToast] = useState<{ msg: string; tone: 'success' | 'error' } | null>(null)
 
-  const todosMovimentos = movimentacoesEstoque(produto.id);
+  const todosMovimentos = movimentacoesEstoque(produto.id)
 
   const movimentos = useMemo(() => {
-    if (periodo === 0) return todosMovimentos;
-    return todosMovimentos.filter((m) => Math.abs(daysUntil(m.data)) <= periodo);
-  }, [todosMovimentos, periodo]);
+    if (periodo === 0) return todosMovimentos
+    return todosMovimentos.filter((m) => Math.abs(daysUntil(m.data)) <= periodo)
+  }, [todosMovimentos, periodo])
 
   const entradas = movimentos
-    .filter((m) => m.tipo === "entrada")
-    .reduce((acc, m) => acc + m.quantidade, 0);
+    .filter((m) => m.tipo === 'entrada')
+    .reduce((acc, m) => acc + m.quantidade, 0)
   const saidas = movimentos
-    .filter((m) => m.tipo === "saida")
-    .reduce((acc, m) => acc + m.quantidade, 0);
+    .filter((m) => m.tipo === 'saida')
+    .reduce((acc, m) => acc + m.quantidade, 0)
 
-  const nivel = nivelEstoque(produto);
-  const margem = calcularMargem(produto.precoCusto, produto.precoVenda);
+  const nivel = nivelEstoque(produto)
+  const margem = calcularMargem(produto.precoCusto, produto.precoVenda)
 
   async function confirmarAjuste() {
-    const quantidade = Number(novaQuantidade);
+    const quantidade = Number(novaQuantidade)
     if (!Number.isFinite(quantidade) || quantidade < 0) {
-      setToast({ msg: "Informe uma quantidade valida.", tone: "error" });
-      return;
+      setToast({ msg: 'Informe uma quantidade valida.', tone: 'error' })
+      return
     }
 
-    setAjustando(true);
+    setAjustando(true)
     /* SUBSTITUIR POR: POST /produtos/:id/ajustes */
-    const r = await ajustarEstoque(produto.id, quantidade, motivo);
-    setAjustando(false);
+    const r = await ajustarEstoque(produto.id, quantidade, motivo)
+    setAjustando(false)
 
     if (!r.ok) {
-      setToast({ msg: r.error, tone: "error" });
-      return;
+      setToast({ msg: r.error, tone: 'error' })
+      return
     }
 
-    setMotivo("");
-    setToast({ msg: "Ajuste registrado no historico.", tone: "success" });
+    setMotivo('')
+    setToast({ msg: 'Ajuste registrado no historico.', tone: 'success' })
   }
 
   return (
@@ -84,18 +84,18 @@ export default function ProdutoDetalhe({ produto }: { produto: Produto }) {
           label="Estoque atual"
           value={`${produto.estoque} un`}
           hint={`minimo ${produto.estoqueMinimo} un`}
-          tone={nivel === "normal" ? "positive" : "warning"}
+          tone={nivel === 'normal' ? 'positive' : 'warning'}
         />
         <Stat label="Preco de venda" value={formatMoney(produto.precoVenda)} />
         <Stat
           label="Margem"
-          value={margem === null ? "—" : formatPercent(margem)}
+          value={margem === null ? '—' : formatPercent(margem)}
           hint={`custo ${formatMoney(produto.precoCusto)}`}
         />
         <Stat
           label="Sem vender ha"
           value={`${produto.diasSemVenda} dia(s)`}
-          tone={produto.diasSemVenda > 30 ? "warning" : "neutral"}
+          tone={produto.diasSemVenda > 30 ? 'warning' : 'neutral'}
         />
       </div>
 
@@ -109,11 +109,11 @@ export default function ProdutoDetalhe({ produto }: { produto: Produto }) {
             </div>
             <div>
               <dt>EAN</dt>
-              <dd>{produto.ean || "—"}</dd>
+              <dd>{produto.ean || '—'}</dd>
             </div>
             <div>
               <dt>NCM</dt>
-              <dd>{produto.ncm || "—"}</dd>
+              <dd>{produto.ncm || '—'}</dd>
             </div>
             <div>
               <dt>Categoria</dt>
@@ -126,9 +126,9 @@ export default function ProdutoDetalhe({ produto }: { produto: Produto }) {
             <div>
               <dt>Situacao</dt>
               <dd>
-                {nivel === "esgotado" ? (
+                {nivel === 'esgotado' ? (
                   <Badge tone="danger">Esgotado</Badge>
-                ) : nivel === "baixo" ? (
+                ) : nivel === 'baixo' ? (
                   <Badge tone="warning">Estoque baixo</Badge>
                 ) : (
                   <Badge tone="success">Normal</Badge>
@@ -141,9 +141,9 @@ export default function ProdutoDetalhe({ produto }: { produto: Produto }) {
         {/* --- Ajuste manual --- */}
         <Card title="Ajustar estoque">
           <p className={styles.ajusteNota}>
-            Use para corrigir a quantidade apos contagem, avaria ou perda. O
-            motivo fica registrado no historico — e o que permite entender
-            depois por que o saldo mudou sem venda nem compra.
+            Use para corrigir a quantidade apos contagem, avaria ou perda. O motivo fica registrado
+            no historico — e o que permite entender depois por que o saldo mudou sem venda nem
+            compra.
           </p>
 
           <div className={styles.ajusteCampos}>
@@ -152,7 +152,7 @@ export default function ProdutoDetalhe({ produto }: { produto: Produto }) {
               <input
                 className={styles.ajusteInput}
                 value={novaQuantidade}
-                onChange={(e) => setNovaQuantidade(e.target.value.replace(/\D/g, ""))}
+                onChange={(e) => setNovaQuantidade(e.target.value.replace(/\D/g, ''))}
                 inputMode="numeric"
               />
             </label>
@@ -175,7 +175,7 @@ export default function ProdutoDetalhe({ produto }: { produto: Produto }) {
                 Registrando...
               </>
             ) : (
-              "Registrar ajuste"
+              'Registrar ajuste'
             )}
           </Button>
         </Card>
@@ -190,7 +190,7 @@ export default function ProdutoDetalhe({ produto }: { produto: Produto }) {
                 <button
                   key={p.valor}
                   type="button"
-                  className={`${styles.periodo} ${periodo === p.valor ? styles.periodoAtivo : ""}`}
+                  className={`${styles.periodo} ${periodo === p.valor ? styles.periodoAtivo : ''}`}
                   onClick={() => setPeriodo(p.valor)}
                   aria-pressed={periodo === p.valor}
                 >
@@ -231,14 +231,14 @@ export default function ProdutoDetalhe({ produto }: { produto: Produto }) {
 
                     <span
                       className={`${styles.movQuantidade} ${
-                        m.tipo === "entrada"
+                        m.tipo === 'entrada'
                           ? styles.entrada
-                          : m.tipo === "saida"
+                          : m.tipo === 'saida'
                             ? styles.saida
                             : styles.ajuste
                       }`}
                     >
-                      {m.tipo === "entrada" ? "+" : m.tipo === "saida" ? "-" : ""}
+                      {m.tipo === 'entrada' ? '+' : m.tipo === 'saida' ? '-' : ''}
                       {Math.abs(m.quantidade)}
                     </span>
 
@@ -255,5 +255,5 @@ export default function ProdutoDetalhe({ produto }: { produto: Produto }) {
         <Toast message={toast.msg} tone={toast.tone} onClose={() => setToast(null)} />
       ) : null}
     </>
-  );
+  )
 }

@@ -7,7 +7,7 @@
 .item {
   display: grid;
   grid-template-columns: auto 1fr auto auto;
-  grid-template-areas: "protocolo principal naolidas status";
+  grid-template-areas: 'protocolo principal naolidas status';
   align-items: center;
   gap: 13px;
   width: 100%;
@@ -80,8 +80,8 @@
   .item {
     grid-template-columns: auto 1fr auto;
     grid-template-areas:
-      "protocolo principal naolidas"
-      "status    status     status";
+      'protocolo principal naolidas'
+      'status    status     status';
     gap: 8px 12px;
   }
 
@@ -147,7 +147,9 @@
   flex: none;
   border-radius: 50%;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .dialogFechar:hover {
@@ -344,7 +346,9 @@
   font-size: 13.5px;
   color: var(--app-muted);
   cursor: pointer;
-  transition: border-color var(--transition), color var(--transition);
+  transition:
+    border-color var(--transition),
+    color var(--transition);
 }
 
 .anexoUpload:hover,

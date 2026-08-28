@@ -10,46 +10,45 @@
  * mesmo formato `PlanilhaLida`, entao a tela nao muda.
  */
 
-import type { CampoImportacao } from "@/components/app/ImportarPlanilha";
+import type { CampoImportacao } from '@/components/app/ImportarPlanilha'
 
 export type PlanilhaLida = {
-  colunas: string[];
-  linhas: string[][];
-};
+  colunas: string[]
+  linhas: string[][]
+}
 
 export type ErroImportacao = {
-  linha: number;
-  nome: string;
-  motivo: string;
-  tipo: "invalido" | "duplicado";
-};
+  linha: number
+  nome: string
+  motivo: string
+  tipo: 'invalido' | 'duplicado'
+}
 
 export type RelatorioImportacao = {
-  importados: number;
-  ignorados: number;
-  erros: ErroImportacao[];
-};
+  importados: number
+  ignorados: number
+  erros: ErroImportacao[]
+}
 
 /** Le um CSV, detectando o separador usado. */
 export function lerCsv(texto: string): PlanilhaLida {
   const linhas = texto
     .split(/\r?\n/)
     .map((l) => l.trim())
-    .filter(Boolean);
+    .filter(Boolean)
 
-  if (linhas.length === 0) return { colunas: [], linhas: [] };
+  if (linhas.length === 0) return { colunas: [], linhas: [] }
 
   /* Planilha exportada em pt-BR costuma sair com ponto e virgula. */
-  const cabecalho = linhas[0];
-  const sep = cabecalho.split(";").length > cabecalho.split(",").length ? ";" : ",";
+  const cabecalho = linhas[0]
+  const sep = cabecalho.split(';').length > cabecalho.split(',').length ? ';' : ','
 
-  const partir = (linha: string) =>
-    linha.split(sep).map((c) => c.trim().replace(/^"|"$/g, ""));
+  const partir = (linha: string) => linha.split(sep).map((c) => c.trim().replace(/^"|"$/g, ''))
 
   return {
     colunas: partir(cabecalho),
     linhas: linhas.slice(1).map(partir),
-  };
+  }
 }
 
 /**
@@ -63,14 +62,14 @@ export async function analisarPlanilhaXlsx(
   arquivo: File,
   campos: CampoImportacao[],
 ): Promise<{ ok: true; planilha: PlanilhaLida } | { ok: false; error: string }> {
-  await new Promise((r) => setTimeout(r, 1200));
-  void arquivo;
+  await new Promise((r) => setTimeout(r, 1200))
+  void arquivo
 
   return {
     ok: true,
     planilha: {
       colunas: campos.map((c) => c.label),
-      linhas: [campos.map(() => "—")],
+      linhas: [campos.map(() => '—')],
     },
-  };
+  }
 }

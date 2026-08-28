@@ -1,17 +1,17 @@
-"use client";
+'use client'
 
-import { useEffect, useRef, useState } from "react";
-import { formatMoney } from "@/lib/format";
-import { Button } from "@/components/ui/Button";
-import { Spinner } from "@/components/auth/Fields";
-import { IconClose } from "@/components/Icons";
-import styles from "./financeiro.module.css";
+import { useEffect, useRef, useState } from 'react'
+import { formatMoney } from '@/lib/format'
+import { Button } from '@/components/ui/Button'
+import { Spinner } from '@/components/auth/Fields'
+import { IconClose } from '@/components/Icons'
+import styles from './financeiro.module.css'
 
 /** Converte "1.234,56" em numero. */
 function paraNumero(valor: string): number {
-  const limpo = valor.replace(/\./g, "").replace(",", ".");
-  const n = Number(limpo);
-  return Number.isFinite(n) ? n : 0;
+  const limpo = valor.replace(/\./g, '').replace(',', '.')
+  const n = Number(limpo)
+  return Number.isFinite(n) ? n : 0
 }
 
 /**
@@ -31,38 +31,38 @@ export default function BaixaDialog({
   onConfirmar,
   onCancelar,
 }: {
-  titulo: string;
-  descricao: string;
-  saldo: number;
+  titulo: string
+  descricao: string
+  saldo: number
   /** "pagar" ou "receber" — muda o texto dos botoes. */
-  verbo: "pagar" | "receber";
-  processando?: boolean;
-  erro?: string | null;
-  onConfirmar: (valor: number) => void;
-  onCancelar: () => void;
+  verbo: 'pagar' | 'receber'
+  processando?: boolean
+  erro?: string | null
+  onConfirmar: (valor: number) => void
+  onCancelar: () => void
 }) {
-  const [modo, setModo] = useState<"total" | "parcial">("total");
-  const [valorParcial, setValorParcial] = useState("");
-  const ref = useRef<HTMLDivElement>(null);
+  const [modo, setModo] = useState<'total' | 'parcial'>('total')
+  const [valorParcial, setValorParcial] = useState('')
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !processando) onCancelar();
-    };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    ref.current?.focus();
+      if (e.key === 'Escape' && !processando) onCancelar()
+    }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    ref.current?.focus()
     return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [onCancelar, processando]);
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [onCancelar, processando])
 
-  const valor = modo === "total" ? saldo : paraNumero(valorParcial);
-  const restante = saldo - valor;
-  const valorValido = valor > 0 && valor <= saldo + 0.01;
+  const valor = modo === 'total' ? saldo : paraNumero(valorParcial)
+  const restante = saldo - valor
+  const valorValido = valor > 0 && valor <= saldo + 0.01
 
-  const rotuloAcao = verbo === "pagar" ? "Baixar pagamento" : "Baixar recebimento";
+  const rotuloAcao = verbo === 'pagar' ? 'Baixar pagamento' : 'Baixar recebimento'
 
   return (
     <div className={styles.dialogRoot}>
@@ -109,25 +109,25 @@ export default function BaixaDialog({
         <div className={styles.baixaModos} role="group" aria-label="Tipo de baixa">
           <button
             type="button"
-            className={`${styles.baixaModo} ${modo === "total" ? styles.baixaModoAtivo : ""}`}
-            onClick={() => setModo("total")}
-            aria-pressed={modo === "total"}
+            className={`${styles.baixaModo} ${modo === 'total' ? styles.baixaModoAtivo : ''}`}
+            onClick={() => setModo('total')}
+            aria-pressed={modo === 'total'}
           >
             Baixa total
           </button>
           <button
             type="button"
-            className={`${styles.baixaModo} ${modo === "parcial" ? styles.baixaModoAtivo : ""}`}
-            onClick={() => setModo("parcial")}
-            aria-pressed={modo === "parcial"}
+            className={`${styles.baixaModo} ${modo === 'parcial' ? styles.baixaModoAtivo : ''}`}
+            onClick={() => setModo('parcial')}
+            aria-pressed={modo === 'parcial'}
           >
             Baixa parcial
           </button>
         </div>
 
-        {modo === "parcial" ? (
+        {modo === 'parcial' ? (
           <label className={styles.baixaCampo}>
-            <span>Valor {verbo === "pagar" ? "pago" : "recebido"} agora</span>
+            <span>Valor {verbo === 'pagar' ? 'pago' : 'recebido'} agora</span>
             <input
               className={styles.baixaInput}
               value={valorParcial}
@@ -140,7 +140,7 @@ export default function BaixaDialog({
               <span className={styles.baixaRestante}>
                 {restante > 0.01
                   ? `Restam ${formatMoney(restante)} em aberto`
-                  : "Este valor quita o titulo"}
+                  : 'Este valor quita o titulo'}
               </span>
             ) : null}
           </label>
@@ -156,10 +156,7 @@ export default function BaixaDialog({
           <Button variant="secondary" onClick={onCancelar} disabled={processando}>
             Cancelar
           </Button>
-          <Button
-            onClick={() => onConfirmar(valor)}
-            disabled={processando || !valorValido}
-          >
+          <Button onClick={() => onConfirmar(valor)} disabled={processando || !valorValido}>
             {processando ? (
               <>
                 <Spinner size={15} />
@@ -172,5 +169,5 @@ export default function BaixaDialog({
         </div>
       </div>
     </div>
-  );
+  )
 }

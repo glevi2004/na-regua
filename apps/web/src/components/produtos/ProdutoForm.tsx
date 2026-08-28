@@ -1,8 +1,8 @@
-"use client";
+'use client'
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import Image from "next/image";
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import Image from 'next/image'
 import {
   buscarEan,
   buscarNcm,
@@ -11,89 +11,89 @@ import {
   FORNECEDORES_INICIAIS,
   salvarProduto,
   type SugestaoNcm,
-} from "@/lib/produtos-api";
-import { formatMoney, formatPercent } from "@/lib/format";
-import { validateRequired, type FieldError } from "@/lib/validation";
-import { Button, ButtonLink } from "@/components/ui/Button";
-import { Card, Field, FormGrid, Input, PageHeader } from "@/components/ui/UI";
-import Toast from "@/components/ui/Toast";
-import { Spinner } from "@/components/auth/Fields";
-import { IconBarcode, IconSearch, IconTrash } from "@/components/Icons";
-import LeitorCodigoBarras from "@/components/app/LeitorCodigoBarras";
-import CampoTag from "@/components/app/CampoTag";
-import styles from "./produtoForm.module.css";
+} from '@/lib/produtos-api'
+import { formatMoney, formatPercent } from '@/lib/format'
+import { validateRequired, type FieldError } from '@/lib/validation'
+import { Button, ButtonLink } from '@/components/ui/Button'
+import { Card, Field, FormGrid, Input, PageHeader } from '@/components/ui/UI'
+import Toast from '@/components/ui/Toast'
+import { Spinner } from '@/components/auth/Fields'
+import { IconBarcode, IconSearch, IconTrash } from '@/components/Icons'
+import LeitorCodigoBarras from '@/components/app/LeitorCodigoBarras'
+import CampoTag from '@/components/app/CampoTag'
+import styles from './produtoForm.module.css'
 
 /** Converte "12,90" ou "12.90" em numero. */
 function paraNumero(valor: string): number {
-  const limpo = valor.replace(/\./g, "").replace(",", ".");
-  const n = Number(limpo);
-  return Number.isFinite(n) ? n : 0;
+  const limpo = valor.replace(/\./g, '').replace(',', '.')
+  const n = Number(limpo)
+  return Number.isFinite(n) ? n : 0
 }
 
 export default function ProdutoForm() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const [codigo, setCodigo] = useState("");
-  const [descricao, setDescricao] = useState("");
-  const [ean, setEan] = useState("");
-  const [ncm, setNcm] = useState("");
-  const [categoria, setCategoria] = useState("");
-  const [fornecedor, setFornecedor] = useState("");
-  const [precoCusto, setPrecoCusto] = useState("");
-  const [precoVenda, setPrecoVenda] = useState("");
-  const [estoque, setEstoque] = useState("0");
-  const [estoqueMinimo, setEstoqueMinimo] = useState("0");
-  const [motivoAjuste, setMotivoAjuste] = useState("");
-  const [imagem, setImagem] = useState<string | null>(null);
+  const [codigo, setCodigo] = useState('')
+  const [descricao, setDescricao] = useState('')
+  const [ean, setEan] = useState('')
+  const [ncm, setNcm] = useState('')
+  const [categoria, setCategoria] = useState('')
+  const [fornecedor, setFornecedor] = useState('')
+  const [precoCusto, setPrecoCusto] = useState('')
+  const [precoVenda, setPrecoVenda] = useState('')
+  const [estoque, setEstoque] = useState('0')
+  const [estoqueMinimo, setEstoqueMinimo] = useState('0')
+  const [motivoAjuste, setMotivoAjuste] = useState('')
+  const [imagem, setImagem] = useState<string | null>(null)
 
-  const [categorias, setCategorias] = useState(CATEGORIAS_INICIAIS);
-  const [fornecedores, setFornecedores] = useState(FORNECEDORES_INICIAIS);
+  const [categorias, setCategorias] = useState(CATEGORIAS_INICIAIS)
+  const [fornecedores, setFornecedores] = useState(FORNECEDORES_INICIAIS)
 
-  const [erros, setErros] = useState<Record<string, FieldError>>({});
-  const [buscandoEan, setBuscandoEan] = useState(false);
-  const [avisoEan, setAvisoEan] = useState<string | null>(null);
-  const [lendoCodigo, setLendoCodigo] = useState(false);
+  const [erros, setErros] = useState<Record<string, FieldError>>({})
+  const [buscandoEan, setBuscandoEan] = useState(false)
+  const [avisoEan, setAvisoEan] = useState<string | null>(null)
+  const [lendoCodigo, setLendoCodigo] = useState(false)
 
-  const [termoNcm, setTermoNcm] = useState("");
-  const [sugestoesNcm, setSugestoesNcm] = useState<SugestaoNcm[]>([]);
-  const [buscandoNcm, setBuscandoNcm] = useState(false);
+  const [termoNcm, setTermoNcm] = useState('')
+  const [sugestoesNcm, setSugestoesNcm] = useState<SugestaoNcm[]>([])
+  const [buscandoNcm, setBuscandoNcm] = useState(false)
 
-  const [salvando, setSalvando] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; tone: "success" | "error" } | null>(null);
+  const [salvando, setSalvando] = useState(false)
+  const [toast, setToast] = useState<{ msg: string; tone: 'success' | 'error' } | null>(null)
 
-  const custo = paraNumero(precoCusto);
-  const venda = paraNumero(precoVenda);
-  const margem = calcularMargem(custo, venda);
-  const lucro = venda - custo;
+  const custo = paraNumero(precoCusto)
+  const venda = paraNumero(precoVenda)
+  const margem = calcularMargem(custo, venda)
+  const lucro = venda - custo
 
   /* ---------------------------------------------------------------- *
    * EAN
    * ---------------------------------------------------------------- */
 
   async function consultarEan(codigoBarras?: string) {
-    const alvo = (codigoBarras ?? ean).trim();
+    const alvo = (codigoBarras ?? ean).trim()
     if (!alvo) {
-      setAvisoEan("Informe o codigo de barras.");
-      return;
+      setAvisoEan('Informe o codigo de barras.')
+      return
     }
 
-    setEan(alvo);
-    setAvisoEan(null);
-    setBuscandoEan(true);
+    setEan(alvo)
+    setAvisoEan(null)
+    setBuscandoEan(true)
 
     /* SUBSTITUIR POR: GET /catalogo/ean/:ean */
-    const r = await buscarEan(alvo);
-    setBuscandoEan(false);
+    const r = await buscarEan(alvo)
+    setBuscandoEan(false)
 
     if (!r.ok) {
-      setAvisoEan(r.error);
-      return;
+      setAvisoEan(r.error)
+      return
     }
 
-    setDescricao(r.dados.descricao);
-    setNcm(r.dados.ncm);
-    if (!categoria) setCategoria(r.dados.categoria);
-    setToast({ msg: "Dados preenchidos pelo codigo de barras.", tone: "success" });
+    setDescricao(r.dados.descricao)
+    setNcm(r.dados.ncm)
+    if (!categoria) setCategoria(r.dados.categoria)
+    setToast({ msg: 'Dados preenchidos pelo codigo de barras.', tone: 'success' })
   }
 
   /* ---------------------------------------------------------------- *
@@ -101,17 +101,17 @@ export default function ProdutoForm() {
    * ---------------------------------------------------------------- */
 
   async function consultarNcm() {
-    const termo = termoNcm.trim() || descricao.trim();
+    const termo = termoNcm.trim() || descricao.trim()
     if (termo.length < 3) {
-      setSugestoesNcm([]);
-      return;
+      setSugestoesNcm([])
+      return
     }
 
-    setBuscandoNcm(true);
+    setBuscandoNcm(true)
     /* SUBSTITUIR POR: GET /fiscal/ncm?q= */
-    const r = await buscarNcm(termo);
-    setBuscandoNcm(false);
-    setSugestoesNcm(r);
+    const r = await buscarNcm(termo)
+    setBuscandoNcm(false)
+    setSugestoesNcm(r)
   }
 
   /* ---------------------------------------------------------------- *
@@ -119,16 +119,16 @@ export default function ProdutoForm() {
    * ---------------------------------------------------------------- */
 
   function receberImagem(arquivo: File) {
-    if (!arquivo.type.startsWith("image/")) {
-      setToast({ msg: "Envie um arquivo de imagem.", tone: "error" });
-      return;
+    if (!arquivo.type.startsWith('image/')) {
+      setToast({ msg: 'Envie um arquivo de imagem.', tone: 'error' })
+      return
     }
 
     /* Previa local via data URL. No envio real o arquivo vai para o
        storage e o cadastro guarda so a URL. */
-    const reader = new FileReader();
-    reader.onload = () => setImagem(String(reader.result));
-    reader.readAsDataURL(arquivo);
+    const reader = new FileReader()
+    reader.onload = () => setImagem(String(reader.result))
+    reader.readAsDataURL(arquivo)
   }
 
   /* ---------------------------------------------------------------- *
@@ -136,22 +136,22 @@ export default function ProdutoForm() {
    * ---------------------------------------------------------------- */
 
   async function salvar(event: React.FormEvent) {
-    event.preventDefault();
+    event.preventDefault()
 
     const novos: Record<string, FieldError> = {
-      codigo: validateRequired(codigo, "o codigo"),
-      descricao: validateRequired(descricao, "a descricao"),
-      categoria: validateRequired(categoria, "a categoria"),
-      precoVenda: venda > 0 ? null : "Informe um preco de venda maior que zero.",
-    };
-
-    setErros(novos);
-    if (Object.values(novos).some(Boolean)) {
-      setToast({ msg: "Confira os campos destacados antes de salvar.", tone: "error" });
-      return;
+      codigo: validateRequired(codigo, 'o codigo'),
+      descricao: validateRequired(descricao, 'a descricao'),
+      categoria: validateRequired(categoria, 'a categoria'),
+      precoVenda: venda > 0 ? null : 'Informe um preco de venda maior que zero.',
     }
 
-    setSalvando(true);
+    setErros(novos)
+    if (Object.values(novos).some(Boolean)) {
+      setToast({ msg: 'Confira os campos destacados antes de salvar.', tone: 'error' })
+      return
+    }
+
+    setSalvando(true)
 
     /* SUBSTITUIR POR: POST /produtos */
     const r = await salvarProduto({
@@ -166,16 +166,16 @@ export default function ProdutoForm() {
       estoque: Number(estoque) || 0,
       estoqueMinimo: Number(estoqueMinimo) || 0,
       imagem,
-    });
-    setSalvando(false);
+    })
+    setSalvando(false)
 
     if (!r.ok) {
-      setToast({ msg: r.error, tone: "error" });
-      return;
+      setToast({ msg: r.error, tone: 'error' })
+      return
     }
 
-    setToast({ msg: "Produto cadastrado.", tone: "success" });
-    router.push("/app/produtos");
+    setToast({ msg: 'Produto cadastrado.', tone: 'success' })
+    router.push('/app/produtos')
   }
 
   const erroDe = (campo: string) =>
@@ -183,14 +183,18 @@ export default function ProdutoForm() {
       <span className={styles.erro} role="alert">
         {erros[campo]}
       </span>
-    ) : null;
+    ) : null
 
   return (
     <>
       <PageHeader
         title="Novo produto"
         subtitle="Cadastro, preco e estoque"
-        actions={<ButtonLink href="/app/produtos" variant="secondary">Cancelar</ButtonLink>}
+        actions={
+          <ButtonLink href="/app/produtos" variant="secondary">
+            Cancelar
+          </ButtonLink>
+        }
       />
 
       <form onSubmit={salvar} noValidate className={styles.form}>
@@ -202,8 +206,8 @@ export default function ProdutoForm() {
                 <Input
                   value={ean}
                   onChange={(e) => {
-                    setEan(e.target.value.replace(/\D/g, ""));
-                    setAvisoEan(null);
+                    setEan(e.target.value.replace(/\D/g, ''))
+                    setAvisoEan(null)
                   }}
                   placeholder="7891000000000"
                   inputMode="numeric"
@@ -240,7 +244,7 @@ export default function ProdutoForm() {
                 placeholder="CAF500"
                 aria-invalid={Boolean(erros.codigo)}
               />
-              {erroDe("codigo")}
+              {erroDe('codigo')}
             </Field>
 
             <Field label="Descricao" span={12}>
@@ -250,7 +254,7 @@ export default function ProdutoForm() {
                 placeholder="Cafe torrado e moido 500g"
                 aria-invalid={Boolean(erros.descricao)}
               />
-              {erroDe("descricao")}
+              {erroDe('descricao')}
             </Field>
 
             <Field label="Categoria" span={6}>
@@ -262,7 +266,7 @@ export default function ProdutoForm() {
                 placeholder="Buscar ou criar categoria"
                 ariaLabel="Categoria"
               />
-              {erroDe("categoria")}
+              {erroDe('categoria')}
             </Field>
 
             <Field label="Fornecedor" span={6}>
@@ -289,16 +293,12 @@ export default function ProdutoForm() {
               />
             </Field>
 
-            <Field
-              label="Nao sabe o NCM?"
-              span={8}
-              hint="Descreva o produto e escolha na lista."
-            >
+            <Field label="Nao sabe o NCM?" span={8} hint="Descreva o produto e escolha na lista.">
               <div className={styles.inline}>
                 <Input
                   value={termoNcm}
                   onChange={(e) => setTermoNcm(e.target.value)}
-                  placeholder={descricao || "cafe torrado"}
+                  placeholder={descricao || 'cafe torrado'}
                 />
                 <Button
                   type="button"
@@ -319,7 +319,7 @@ export default function ProdutoForm() {
                 <li key={s.codigo}>
                   <button
                     type="button"
-                    className={`${styles.sugestao} ${ncm === s.codigo ? styles.sugestaoAtiva : ""}`}
+                    className={`${styles.sugestao} ${ncm === s.codigo ? styles.sugestaoAtiva : ''}`}
                     onClick={() => setNcm(s.codigo)}
                   >
                     <strong>{s.codigo}</strong>
@@ -351,14 +351,14 @@ export default function ProdutoForm() {
                 inputMode="decimal"
                 aria-invalid={Boolean(erros.precoVenda)}
               />
-              {erroDe("precoVenda")}
+              {erroDe('precoVenda')}
             </Field>
 
             <Field label="Margem" span={4}>
               {/* Calculada, nao editavel: e resultado dos dois campos acima */}
               <div
                 className={`${styles.margemBox} ${
-                  margem !== null && margem < 0 ? styles.margemNegativa : ""
+                  margem !== null && margem < 0 ? styles.margemNegativa : ''
                 }`}
                 aria-live="polite"
               >
@@ -368,7 +368,7 @@ export default function ProdutoForm() {
                   <>
                     <strong>{formatPercent(margem)}</strong>
                     <span>
-                      {lucro >= 0 ? "lucro de " : "prejuizo de "}
+                      {lucro >= 0 ? 'lucro de ' : 'prejuizo de '}
                       {formatMoney(Math.abs(lucro))} por unidade
                     </span>
                   </>
@@ -384,15 +384,19 @@ export default function ProdutoForm() {
             <Field label="Quantidade atual" span={4}>
               <Input
                 value={estoque}
-                onChange={(e) => setEstoque(e.target.value.replace(/\D/g, ""))}
+                onChange={(e) => setEstoque(e.target.value.replace(/\D/g, ''))}
                 inputMode="numeric"
               />
             </Field>
 
-            <Field label="Estoque minimo" span={4} hint="Abaixo disso, entra no alerta de reposicao.">
+            <Field
+              label="Estoque minimo"
+              span={4}
+              hint="Abaixo disso, entra no alerta de reposicao."
+            >
               <Input
                 value={estoqueMinimo}
-                onChange={(e) => setEstoqueMinimo(e.target.value.replace(/\D/g, ""))}
+                onChange={(e) => setEstoqueMinimo(e.target.value.replace(/\D/g, ''))}
                 inputMode="numeric"
               />
             </Field>
@@ -439,8 +443,8 @@ export default function ProdutoForm() {
                   accept="image/*"
                   className={styles.imagemInput}
                   onChange={(e) => {
-                    const f = e.target.files?.[0];
-                    if (f) receberImagem(f);
+                    const f = e.target.files?.[0]
+                    if (f) receberImagem(f)
                   }}
                 />
               </label>
@@ -459,7 +463,7 @@ export default function ProdutoForm() {
                 Salvando...
               </>
             ) : (
-              "Cadastrar produto"
+              'Cadastrar produto'
             )}
           </Button>
         </div>
@@ -476,5 +480,5 @@ export default function ProdutoForm() {
         <Toast message={toast.msg} tone={toast.tone} onClose={() => setToast(null)} />
       ) : null}
     </>
-  );
+  )
 }

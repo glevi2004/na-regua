@@ -1,110 +1,99 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { useMemo, useState } from "react";
-import { clientes as todosClientes } from "@/lib/mock-data";
-import {
-  confirmarImportacaoClientes,
-  pendenciaTotal,
-  temVencido,
-} from "@/lib/clientes-api";
-import { isValidCNPJ, isValidCPF } from "@/lib/validation";
-import { daysUntil, formatDate, formatMoney } from "@/lib/format";
-import { Badge, Card, EmptyState, PageHeader, Stat } from "@/components/ui/UI";
-import { Button, ButtonLink } from "@/components/ui/Button";
-import { IconPlus, IconSearch, IconUpload } from "@/components/Icons";
-import { COMANDOS_CLIENTES } from "@/lib/comandos";
-import ComandosWhatsApp from "@/components/app/ComandosWhatsApp";
-import ImportarPlanilha from "@/components/app/ImportarPlanilha";
-import styles from "./clientes.module.css";
+import Link from 'next/link'
+import { useMemo, useState } from 'react'
+import { clientes as todosClientes } from '@/lib/mock-data'
+import { confirmarImportacaoClientes, pendenciaTotal, temVencido } from '@/lib/clientes-api'
+import { isValidCNPJ, isValidCPF } from '@/lib/validation'
+import { daysUntil, formatDate, formatMoney } from '@/lib/format'
+import { Badge, Card, EmptyState, PageHeader, Stat } from '@/components/ui/UI'
+import { Button, ButtonLink } from '@/components/ui/Button'
+import { IconPlus, IconSearch, IconUpload } from '@/components/Icons'
+import { COMANDOS_CLIENTES } from '@/lib/comandos'
+import ComandosWhatsApp from '@/components/app/ComandosWhatsApp'
+import ImportarPlanilha from '@/components/app/ImportarPlanilha'
+import styles from './clientes.module.css'
 
 /** Campos que a planilha de clientes pode alimentar. */
 const CAMPOS_PLANILHA = [
   {
-    key: "nome",
-    label: "Nome / Razao social",
+    key: 'nome',
+    label: 'Nome / Razao social',
     obrigatorio: true,
-    reconhece: (c: string) => c.includes("nome") || c.includes("razao"),
+    reconhece: (c: string) => c.includes('nome') || c.includes('razao'),
   },
   {
-    key: "documento",
-    label: "CPF / CNPJ",
+    key: 'documento',
+    label: 'CPF / CNPJ',
     obrigatorio: true,
-    reconhece: (c: string) =>
-      c.includes("cpf") || c.includes("cnpj") || c.includes("documento"),
+    reconhece: (c: string) => c.includes('cpf') || c.includes('cnpj') || c.includes('documento'),
   },
   {
-    key: "celular",
-    label: "Celular",
+    key: 'celular',
+    label: 'Celular',
     obrigatorio: false,
-    reconhece: (c: string) =>
-      c.includes("tel") || c.includes("cel") || c.includes("whats"),
+    reconhece: (c: string) => c.includes('tel') || c.includes('cel') || c.includes('whats'),
   },
   {
-    key: "email",
-    label: "E-mail",
+    key: 'email',
+    label: 'E-mail',
     obrigatorio: false,
-    reconhece: (c: string) => c.includes("mail"),
+    reconhece: (c: string) => c.includes('mail'),
   },
   {
-    key: "cidade",
-    label: "Cidade",
+    key: 'cidade',
+    label: 'Cidade',
     obrigatorio: false,
-    reconhece: (c: string) => c.includes("cidade") || c.includes("municip"),
+    reconhece: (c: string) => c.includes('cidade') || c.includes('municip'),
   },
   {
-    key: "uf",
-    label: "UF",
+    key: 'uf',
+    label: 'UF',
     obrigatorio: false,
-    reconhece: (c: string) => c === "uf" || c.includes("estado"),
+    reconhece: (c: string) => c === 'uf' || c.includes('estado'),
   },
-];
+]
 
 /** Sem comprar ha mais que isto = cliente inativo. */
-const INATIVO_APOS_DIAS = 60;
+const INATIVO_APOS_DIAS = 60
 
-
-type Filtro = "todos" | "pendencia" | "inativos";
+type Filtro = 'todos' | 'pendencia' | 'inativos'
 
 export default function ClientesLista() {
-  const [busca, setBusca] = useState("");
-  const [filtro, setFiltro] = useState<Filtro>("todos");
-  const [importando, setImportando] = useState(false);
+  const [busca, setBusca] = useState('')
+  const [filtro, setFiltro] = useState<Filtro>('todos')
+  const [importando, setImportando] = useState(false)
 
   const listaFiltrada = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
-    const somenteDigitos = termo.replace(/\D/g, "");
+    const termo = busca.trim().toLowerCase()
+    const somenteDigitos = termo.replace(/\D/g, '')
 
     return todosClientes.filter((c) => {
       /* Busca por nome ou por documento — comparando so os digitos, para
          achar tanto quem digitou com pontuacao quanto sem. */
       if (termo) {
-        const porNome = c.nome.toLowerCase().includes(termo);
+        const porNome = c.nome.toLowerCase().includes(termo)
         const porDoc =
-          somenteDigitos.length > 0 &&
-          c.documento.replace(/\D/g, "").includes(somenteDigitos);
-        if (!porNome && !porDoc) return false;
+          somenteDigitos.length > 0 && c.documento.replace(/\D/g, '').includes(somenteDigitos)
+        if (!porNome && !porDoc) return false
       }
 
-      if (filtro === "pendencia") return pendenciaTotal(c.id) > 0;
+      if (filtro === 'pendencia') return pendenciaTotal(c.id) > 0
 
-      if (filtro === "inativos") {
-        if (!c.ultimaCompra) return true;
-        return Math.abs(daysUntil(c.ultimaCompra)) > INATIVO_APOS_DIAS;
+      if (filtro === 'inativos') {
+        if (!c.ultimaCompra) return true
+        return Math.abs(daysUntil(c.ultimaCompra)) > INATIVO_APOS_DIAS
       }
 
-      return true;
-    });
-  }, [busca, filtro]);
+      return true
+    })
+  }, [busca, filtro])
 
-  const comPendencia = todosClientes.filter((c) => pendenciaTotal(c.id) > 0);
-  const totalPendente = comPendencia.reduce(
-    (acc, c) => acc + pendenciaTotal(c.id),
-    0,
-  );
+  const comPendencia = todosClientes.filter((c) => pendenciaTotal(c.id) > 0)
+  const totalPendente = comPendencia.reduce((acc, c) => acc + pendenciaTotal(c.id), 0)
   const inativos = todosClientes.filter(
     (c) => c.ultimaCompra && Math.abs(daysUntil(c.ultimaCompra)) > INATIVO_APOS_DIAS,
-  );
+  )
 
   return (
     <>
@@ -131,7 +120,7 @@ export default function ClientesLista() {
           label="Com pendencia"
           value={String(comPendencia.length)}
           hint={formatMoney(totalPendente)}
-          tone={comPendencia.length ? "warning" : "neutral"}
+          tone={comPendencia.length ? 'warning' : 'neutral'}
         />
         <Stat
           label="Sem comprar ha 60 dias"
@@ -157,15 +146,15 @@ export default function ClientesLista() {
           <div className={styles.filtros} role="group" aria-label="Filtros">
             {(
               [
-                ["todos", "Todos"],
-                ["pendencia", "Com pendencia"],
-                ["inativos", "Sem compras recentes"],
+                ['todos', 'Todos'],
+                ['pendencia', 'Com pendencia'],
+                ['inativos', 'Sem compras recentes'],
               ] as const
             ).map(([valor, rotulo]) => (
               <button
                 key={valor}
                 type="button"
-                className={`${styles.filtro} ${filtro === valor ? styles.filtroAtivo : ""}`}
+                className={`${styles.filtro} ${filtro === valor ? styles.filtroAtivo : ''}`}
                 onClick={() => setFiltro(valor)}
                 aria-pressed={filtro === valor}
               >
@@ -202,8 +191,8 @@ export default function ClientesLista() {
                 <Button
                   variant="secondary"
                   onClick={() => {
-                    setBusca("");
-                    setFiltro("todos");
+                    setBusca('')
+                    setFiltro('todos')
                   }}
                 >
                   Limpar filtros
@@ -214,8 +203,8 @@ export default function ClientesLista() {
         ) : (
           <ul className={styles.lista}>
             {listaFiltrada.map((cliente) => {
-              const pendente = pendenciaTotal(cliente.id);
-              const vencido = temVencido(cliente.id);
+              const pendente = pendenciaTotal(cliente.id)
+              const vencido = temVencido(cliente.id)
 
               return (
                 <li key={cliente.id}>
@@ -236,14 +225,13 @@ export default function ClientesLista() {
                     <span className={styles.itemUltima}>
                       {cliente.ultimaCompra
                         ? `Ultima: ${formatDate(cliente.ultimaCompra)}`
-                        : "Nunca comprou"}
+                        : 'Nunca comprou'}
                     </span>
 
                     <span className={styles.itemStatus}>
                       {pendente > 0 ? (
-                        <Badge tone={vencido ? "warning" : "info"}>
-                          {vencido ? "Vencido" : "Em aberto"} ·{" "}
-                          {formatMoney(pendente)}
+                        <Badge tone={vencido ? 'warning' : 'info'}>
+                          {vencido ? 'Vencido' : 'Em aberto'} · {formatMoney(pendente)}
                         </Badge>
                       ) : (
                         <Badge tone="success">Em dia</Badge>
@@ -251,7 +239,7 @@ export default function ClientesLista() {
                     </span>
                   </Link>
                 </li>
-              );
+              )
             })}
           </ul>
         )}
@@ -265,24 +253,20 @@ export default function ClientesLista() {
         <ImportarPlanilha
           titulo="Importar clientes"
           campos={CAMPOS_PLANILHA}
-          chavesExistentes={todosClientes.map((c) => c.documento.replace(/\D/g, ""))}
-          chaveDuplicidade={(v) => (v.documento ?? "").replace(/\D/g, "")}
+          chavesExistentes={todosClientes.map((c) => c.documento.replace(/\D/g, ''))}
+          chaveDuplicidade={(v) => (v.documento ?? '').replace(/\D/g, '')}
           validar={(v) => {
-            if (!v.nome?.trim()) return "Nome vazio";
-            const doc = (v.documento ?? "").replace(/\D/g, "");
-            if (!doc) return "CPF/CNPJ vazio";
+            if (!v.nome?.trim()) return 'Nome vazio'
+            const doc = (v.documento ?? '').replace(/\D/g, '')
+            if (!doc) return 'CPF/CNPJ vazio'
             const ok =
-              doc.length === 11
-                ? isValidCPF(doc)
-                : doc.length === 14
-                  ? isValidCNPJ(doc)
-                  : false;
-            return ok ? null : "CPF/CNPJ invalido";
+              doc.length === 11 ? isValidCPF(doc) : doc.length === 14 ? isValidCNPJ(doc) : false
+            return ok ? null : 'CPF/CNPJ invalido'
           }}
           onConfirmar={confirmarImportacaoClientes}
           onClose={() => setImportando(false)}
         />
       ) : null}
     </>
-  );
+  )
 }

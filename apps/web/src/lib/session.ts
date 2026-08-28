@@ -17,22 +17,22 @@
  * por conta propria — a documentacao do Next diz isso explicitamente.
  */
 
-export const SESSION_COOKIE = "nr_session";
+export const SESSION_COOKIE = 'nr_session'
 
 export type SessionUser = {
-  nome: string;
-  email: string;
-  empresa: string;
-};
+  nome: string
+  email: string
+  empresa: string
+}
 
 /** Dias de validade do cookie de demonstracao. */
-const MAX_AGE_DAYS = 7;
+const MAX_AGE_DAYS = 7
 
 export function startSession(user: SessionUser): void {
   try {
-    const value = encodeURIComponent(JSON.stringify(user));
-    const maxAge = MAX_AGE_DAYS * 24 * 60 * 60;
-    document.cookie = `${SESSION_COOKIE}=${value}; path=/; max-age=${maxAge}; SameSite=Lax`;
+    const value = encodeURIComponent(JSON.stringify(user))
+    const maxAge = MAX_AGE_DAYS * 24 * 60 * 60
+    document.cookie = `${SESSION_COOKIE}=${value}; path=/; max-age=${maxAge}; SameSite=Lax`
   } catch {
     /* Sem acesso a cookie: a navegacao ainda funciona, so nao persiste. */
   }
@@ -40,7 +40,7 @@ export function startSession(user: SessionUser): void {
 
 export function endSession(): void {
   try {
-    document.cookie = `${SESSION_COOKIE}=; path=/; max-age=0; SameSite=Lax`;
+    document.cookie = `${SESSION_COOKIE}=; path=/; max-age=0; SameSite=Lax`
   } catch {
     /* ignorado */
   }
@@ -48,13 +48,11 @@ export function endSession(): void {
 
 export function readSession(): SessionUser | null {
   try {
-    const match = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith(`${SESSION_COOKIE}=`));
+    const match = document.cookie.split('; ').find((row) => row.startsWith(`${SESSION_COOKIE}=`))
 
-    if (!match) return null;
-    return JSON.parse(decodeURIComponent(match.split("=").slice(1).join("=")));
+    if (!match) return null
+    return JSON.parse(decodeURIComponent(match.split('=').slice(1).join('=')))
   } catch {
-    return null;
+    return null
   }
 }

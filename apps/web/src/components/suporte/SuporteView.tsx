@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { useState } from "react";
+import { useState } from 'react'
 import {
   abrirChamado,
   CATEGORIAS,
@@ -8,37 +8,35 @@ import {
   ROTULO_STATUS,
   type CategoriaChamado,
   type Chamado,
-} from "@/lib/suporte-api";
-import { formatDate } from "@/lib/format";
-import { Badge, Card, EmptyState, PageHeader, Stat } from "@/components/ui/UI";
-import { Button } from "@/components/ui/Button";
-import Toast from "@/components/ui/Toast";
-import { Spinner } from "@/components/auth/Fields";
-import { IconPlus, IconUpload } from "@/components/Icons";
-import ChamadoDetalhe from "./ChamadoDetalhe";
-import styles from "./suporte.module.css";
+} from '@/lib/suporte-api'
+import { formatDate } from '@/lib/format'
+import { Badge, Card, EmptyState, PageHeader, Stat } from '@/components/ui/UI'
+import { Button } from '@/components/ui/Button'
+import Toast from '@/components/ui/Toast'
+import { Spinner } from '@/components/auth/Fields'
+import { IconPlus, IconUpload } from '@/components/Icons'
+import ChamadoDetalhe from './ChamadoDetalhe'
+import styles from './suporte.module.css'
 
-const TOM_STATUS: Record<string, "neutral" | "info" | "warning" | "success"> = {
-  aberto: "neutral",
-  andamento: "info",
-  respondido: "warning",
-  encerrado: "success",
-};
+const TOM_STATUS: Record<string, 'neutral' | 'info' | 'warning' | 'success'> = {
+  aberto: 'neutral',
+  andamento: 'info',
+  respondido: 'warning',
+  encerrado: 'success',
+}
 
 export default function SuporteView() {
-  const [chamados, setChamados] = useState<Chamado[]>(() => listarChamados());
-  const [aberto, setAberto] = useState<Chamado | null>(null);
-  const [criando, setCriando] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; tone: "success" | "error" } | null>(null);
+  const [chamados, setChamados] = useState<Chamado[]>(() => listarChamados())
+  const [aberto, setAberto] = useState<Chamado | null>(null)
+  const [criando, setCriando] = useState(false)
+  const [toast, setToast] = useState<{ msg: string; tone: 'success' | 'error' } | null>(null)
 
-  const emAndamento = chamados.filter(
-    (c) => c.status !== "encerrado",
-  );
-  const comResposta = chamados.filter((c) => c.naoLidas > 0);
+  const emAndamento = chamados.filter((c) => c.status !== 'encerrado')
+  const comResposta = chamados.filter((c) => c.naoLidas > 0)
 
   function atualizar(chamado: Chamado) {
-    setChamados((atual) => atual.map((c) => (c.id === chamado.id ? chamado : c)));
-    setAberto(chamado);
+    setChamados((atual) => atual.map((c) => (c.id === chamado.id ? chamado : c)))
+    setAberto(chamado)
   }
 
   return (
@@ -60,8 +58,8 @@ export default function SuporteView() {
           <Stat
             label="Com resposta nova"
             value={String(comResposta.length)}
-            hint={comResposta.length ? "aguardando voce" : "nada novo"}
-            tone={comResposta.length ? "warning" : "neutral"}
+            hint={comResposta.length ? 'aguardando voce' : 'nada novo'}
+            tone={comResposta.length ? 'warning' : 'neutral'}
           />
           <Stat label="Total" value={String(chamados.length)} />
         </div>
@@ -83,18 +81,14 @@ export default function SuporteView() {
           <ul className={styles.lista}>
             {chamados.map((c) => (
               <li key={c.id}>
-                <button
-                  type="button"
-                  className={styles.item}
-                  onClick={() => setAberto(c)}
-                >
+                <button type="button" className={styles.item} onClick={() => setAberto(c)}>
                   <span className={styles.itemProtocolo}>#{c.protocolo}</span>
 
                   <span className={styles.itemPrincipal}>
                     <strong>{c.assunto}</strong>
                     <span>
-                      {CATEGORIAS.find((k) => k.valor === c.categoria)?.rotulo} ·
-                      atualizado em {formatDate(c.atualizadoEm)}
+                      {CATEGORIAS.find((k) => k.valor === c.categoria)?.rotulo} · atualizado em{' '}
+                      {formatDate(c.atualizadoEm)}
                     </span>
                   </span>
 
@@ -114,22 +108,18 @@ export default function SuporteView() {
       </Card>
 
       {aberto ? (
-        <ChamadoDetalhe
-          chamado={aberto}
-          onFechar={() => setAberto(null)}
-          onAtualizar={atualizar}
-        />
+        <ChamadoDetalhe chamado={aberto} onFechar={() => setAberto(null)} onAtualizar={atualizar} />
       ) : null}
 
       {criando ? (
         <FormChamado
           onCriado={(novo) => {
-            setChamados((atual) => [novo, ...atual]);
-            setCriando(false);
+            setChamados((atual) => [novo, ...atual])
+            setCriando(false)
             setToast({
               msg: `Chamado #${novo.protocolo} aberto. Respondemos em ate 1 dia util.`,
-              tone: "success",
-            });
+              tone: 'success',
+            })
           }}
           onCancelar={() => setCriando(false)}
         />
@@ -139,7 +129,7 @@ export default function SuporteView() {
         <Toast message={toast.msg} tone={toast.tone} onClose={() => setToast(null)} />
       ) : null}
     </>
-  );
+  )
 }
 
 /* ================================================================== *
@@ -150,38 +140,48 @@ function FormChamado({
   onCriado,
   onCancelar,
 }: {
-  onCriado: (chamado: Chamado) => void;
-  onCancelar: () => void;
+  onCriado: (chamado: Chamado) => void
+  onCancelar: () => void
 }) {
-  const [assunto, setAssunto] = useState("");
-  const [categoria, setCategoria] = useState<CategoriaChamado>("tecnico");
-  const [descricao, setDescricao] = useState("");
-  const [anexo, setAnexo] = useState<string | null>(null);
-  const [erro, setErro] = useState<string | null>(null);
-  const [salvando, setSalvando] = useState(false);
+  const [assunto, setAssunto] = useState('')
+  const [categoria, setCategoria] = useState<CategoriaChamado>('tecnico')
+  const [descricao, setDescricao] = useState('')
+  const [anexo, setAnexo] = useState<string | null>(null)
+  const [erro, setErro] = useState<string | null>(null)
+  const [salvando, setSalvando] = useState(false)
 
   async function salvar(event: React.FormEvent) {
-    event.preventDefault();
-    setErro(null);
-    setSalvando(true);
+    event.preventDefault()
+    setErro(null)
+    setSalvando(true)
 
     /* SUBSTITUIR POR: POST /suporte/chamados */
-    const r = await abrirChamado({ assunto, categoria, descricao, anexo });
-    setSalvando(false);
+    const r = await abrirChamado({ assunto, categoria, descricao, anexo })
+    setSalvando(false)
 
     if (!r.ok) {
-      setErro(r.error);
-      return;
+      setErro(r.error)
+      return
     }
 
-    onCriado(r.chamado);
+    onCriado(r.chamado)
   }
 
   return (
     <div className={styles.dialogRoot}>
-      <button type="button" className={styles.dialogBackdrop} onClick={onCancelar} aria-label="Fechar" />
+      <button
+        type="button"
+        className={styles.dialogBackdrop}
+        onClick={onCancelar}
+        aria-label="Fechar"
+      />
 
-      <div className={styles.dialogPainel} role="dialog" aria-modal="true" aria-labelledby="novo-chamado">
+      <div
+        className={styles.dialogPainel}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="novo-chamado"
+      >
         <h2 id="novo-chamado" className={styles.dialogTitulo}>
           Abrir chamado
         </h2>
@@ -263,12 +263,12 @@ function FormChamado({
                   Abrindo...
                 </>
               ) : (
-                "Abrir chamado"
+                'Abrir chamado'
               )}
             </Button>
           </div>
         </form>
       </div>
     </div>
-  );
+  )
 }

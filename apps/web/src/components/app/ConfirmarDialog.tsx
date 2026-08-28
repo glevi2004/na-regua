@@ -1,10 +1,10 @@
-"use client";
+'use client'
 
-import { useEffect, useRef, type ReactNode } from "react";
-import { Button } from "@/components/ui/Button";
-import { Spinner } from "@/components/auth/Fields";
-import { IconClose } from "@/components/Icons";
-import styles from "./dialog.module.css";
+import { useEffect, useRef, type ReactNode } from 'react'
+import { Button } from '@/components/ui/Button'
+import { Spinner } from '@/components/auth/Fields'
+import { IconClose } from '@/components/Icons'
+import styles from './dialog.module.css'
 
 /**
  * Confirmacao para acoes que mexem em dinheiro.
@@ -16,36 +16,36 @@ export default function ConfirmarDialog({
   titulo,
   descricao,
   detalhe,
-  rotuloConfirmar = "Confirmar",
-  tom = "normal",
+  rotuloConfirmar = 'Confirmar',
+  tom = 'normal',
   processando = false,
   onConfirmar,
   onCancelar,
 }: {
-  titulo: string;
-  descricao: string;
+  titulo: string
+  descricao: string
   /** Linha destacada com o valor ou o item afetado. */
-  detalhe?: ReactNode;
-  rotuloConfirmar?: string;
-  tom?: "normal" | "perigo";
-  processando?: boolean;
-  onConfirmar: () => void;
-  onCancelar: () => void;
+  detalhe?: ReactNode
+  rotuloConfirmar?: string
+  tom?: 'normal' | 'perigo'
+  processando?: boolean
+  onConfirmar: () => void
+  onCancelar: () => void
 }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !processando) onCancelar();
-    };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    ref.current?.focus();
+      if (e.key === 'Escape' && !processando) onCancelar()
+    }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    ref.current?.focus()
     return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [onCancelar, processando]);
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [onCancelar, processando])
 
   return (
     <div className={styles.root}>
@@ -88,7 +88,7 @@ export default function ConfirmarDialog({
             Cancelar
           </Button>
           <Button
-            variant={tom === "perigo" ? "danger" : "primary"}
+            variant={tom === 'perigo' ? 'danger' : 'primary'}
             onClick={onConfirmar}
             disabled={processando}
           >
@@ -104,5 +104,5 @@ export default function ConfirmarDialog({
         </div>
       </div>
     </div>
-  );
+  )
 }

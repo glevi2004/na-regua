@@ -1,16 +1,16 @@
-import Link from "next/link";
-import { trustMetrics } from "@/content/site";
-import { IconArrowRight, IconBolt, IconTrendUp } from "./Icons";
-import styles from "./Hero.module.css";
+import Link from 'next/link'
+import { trustMetrics } from '@/content/site'
+import { IconArrowRight, IconBolt, IconTrendUp } from './Icons'
+import styles from './Hero.module.css'
 
 /** Alturas do grafico do mockup, em % — apenas ilustrativas. */
-const chartBars = [38, 52, 44, 68, 57, 82, 71];
+const chartBars = [38, 52, 44, 68, 57, 82, 71]
 
 const recentSales = [
-  { label: "Venda #1842", meta: "Pix · 3 itens", value: "R$ 268,90" },
-  { label: "Venda #1841", meta: "Credito · 1 item", value: "R$ 89,00" },
-  { label: "Venda #1840", meta: "Dinheiro · 6 itens", value: "R$ 412,50" },
-];
+  { label: 'Venda #1842', meta: 'Pix · 3 itens', value: 'R$ 268,90' },
+  { label: 'Venda #1841', meta: 'Credito · 1 item', value: 'R$ 89,00' },
+  { label: 'Venda #1840', meta: 'Dinheiro · 6 itens', value: 'R$ 412,50' },
+]
 
 export default function Hero() {
   return (
@@ -29,9 +29,8 @@ export default function Hero() {
           </h1>
 
           <p className={styles.lead}>
-            Vendas, financeiro, estoque e fiscal em modulos que conversam entre
-            si. O que voce lanca no balcao chega pronto no relatorio — sem
-            planilha no meio do caminho.
+            Vendas, financeiro, estoque e fiscal em modulos que conversam entre si. O que voce lanca
+            no balcao chega pronto no relatorio — sem planilha no meio do caminho.
           </p>
 
           <div className={styles.ctas}>
@@ -44,9 +43,7 @@ export default function Hero() {
             </a>
           </div>
 
-          <p className={styles.note}>
-            14 dias gratis · sem cartao de credito
-          </p>
+          <p className={styles.note}>14 dias gratis · sem cartao de credito</p>
         </div>
 
         {/* Mockup ilustrativo do produto */}
@@ -84,11 +81,7 @@ export default function Hero() {
                 </div>
                 <div className={styles.chart}>
                   {chartBars.map((h, i) => (
-                    <span
-                      key={i}
-                      className={styles.bar}
-                      style={{ height: `${h}%` }}
-                    />
+                    <span key={i} className={styles.bar} style={{ height: `${h}%` }} />
                   ))}
                 </div>
               </div>
@@ -125,5 +118,5 @@ export default function Hero() {
         </div>
       </div>
     </section>
-  );
+  )
 }

@@ -45,7 +45,9 @@
   font-size: 13.5px;
   font-weight: 600;
   white-space: nowrap;
-  transition: background-color var(--transition), transform var(--transition);
+  transition:
+    background-color var(--transition),
+    transform var(--transition);
 }
 
 .bannerCta:hover {
@@ -114,11 +116,7 @@
   justify-content: center;
   padding-top: 64px;
   border-radius: var(--radius-lg);
-  background: linear-gradient(
-    180deg,
-    rgba(14, 19, 48, 0.35) 0%,
-    rgba(14, 19, 48, 0.72) 100%
-  );
+  background: linear-gradient(180deg, rgba(14, 19, 48, 0.35) 0%, rgba(14, 19, 48, 0.72) 100%);
   cursor: pointer;
 }
 
@@ -225,7 +223,9 @@
   height: 34px;
   border-radius: 50%;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .modalClose:hover {
@@ -335,7 +335,9 @@
   font-family: var(--font-display);
   font-size: 14.5px;
   font-weight: 600;
-  transition: background-color var(--transition), transform var(--transition);
+  transition:
+    background-color var(--transition),
+    transform var(--transition);
 }
 
 .modalPrimary:hover {
@@ -351,7 +353,9 @@
   font-family: var(--font-display);
   font-size: 14.5px;
   font-weight: 600;
-  transition: color var(--transition), border-color var(--transition);
+  transition:
+    color var(--transition),
+    border-color var(--transition);
 }
 
 .modalGhost:hover {

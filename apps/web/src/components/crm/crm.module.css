@@ -51,7 +51,9 @@
   border-radius: var(--radius-full);
   font-size: 13px;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .visaoAtiva {
@@ -80,7 +82,9 @@
   border-radius: var(--radius);
   background: var(--app-field);
   min-height: 220px;
-  transition: border-color var(--transition), background-color var(--transition);
+  transition:
+    border-color var(--transition),
+    background-color var(--transition);
 }
 
 /* Alvo do arraste — precisa ser obvio para onde o card vai cair */
@@ -135,7 +139,9 @@
   background: var(--app-surface);
   overflow: hidden;
   cursor: grab;
-  transition: border-color var(--transition), transform var(--transition);
+  transition:
+    border-color var(--transition),
+    transform var(--transition);
 }
 
 .card:hover {
@@ -354,7 +360,9 @@
   flex: none;
   border-radius: 50%;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .dialogFechar:hover {
@@ -429,7 +437,9 @@
   border-radius: var(--radius-full);
   font-size: 13px;
   color: var(--app-muted);
-  transition: border-color var(--transition), color var(--transition),
+  transition:
+    border-color var(--transition),
+    color var(--transition),
     background-color var(--transition);
 }
 
@@ -564,7 +574,9 @@
   border-radius: var(--radius-full);
   font-size: 13.5px;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .tipoAtivo {

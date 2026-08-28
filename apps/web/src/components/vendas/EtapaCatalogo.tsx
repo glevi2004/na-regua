@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { useMemo, useState } from "react";
+import { useMemo, useState } from 'react'
 import {
   paraItemCarrinho,
   produtoPorEan,
@@ -10,28 +10,22 @@ import {
   valorDesconto,
   type Desconto,
   type ItemCarrinho,
-} from "@/lib/vendas-api";
-import { produtos } from "@/lib/mock-data";
-import { nivelEstoque } from "@/lib/produtos-api";
-import { formatMoney } from "@/lib/format";
-import { Badge, Card, EmptyState } from "@/components/ui/UI";
-import { Button } from "@/components/ui/Button";
-import Toast from "@/components/ui/Toast";
-import ConfirmarDialog from "@/components/app/ConfirmarDialog";
-import LeitorCodigoBarras from "@/components/app/LeitorCodigoBarras";
-import {
-  IconBarcode,
-  IconBox,
-  IconClose,
-  IconSearch,
-  IconTrash,
-} from "@/components/Icons";
-import styles from "./vendas.module.css";
+} from '@/lib/vendas-api'
+import { produtos } from '@/lib/mock-data'
+import { nivelEstoque } from '@/lib/produtos-api'
+import { formatMoney } from '@/lib/format'
+import { Badge, Card, EmptyState } from '@/components/ui/UI'
+import { Button } from '@/components/ui/Button'
+import Toast from '@/components/ui/Toast'
+import ConfirmarDialog from '@/components/app/ConfirmarDialog'
+import LeitorCodigoBarras from '@/components/app/LeitorCodigoBarras'
+import { IconBarcode, IconBox, IconClose, IconSearch, IconTrash } from '@/components/Icons'
+import styles from './vendas.module.css'
 
 function paraNumero(valor: string): number {
-  const limpo = valor.replace(/\./g, "").replace(",", ".");
-  const n = Number(limpo);
-  return Number.isFinite(n) ? n : 0;
+  const limpo = valor.replace(/\./g, '').replace(',', '.')
+  const n = Number(limpo)
+  return Number.isFinite(n) ? n : 0
 }
 
 export default function EtapaCatalogo({
@@ -44,55 +38,52 @@ export default function EtapaCatalogo({
   onAvancar,
   onCancelar,
 }: {
-  itens: ItemCarrinho[];
-  desconto: Desconto | null;
-  onItens: (itens: ItemCarrinho[]) => void;
-  onDesconto: (desconto: Desconto | null) => void;
-  clienteNome: string;
-  onVoltar: () => void;
-  onAvancar: () => void;
-  onCancelar: () => void;
+  itens: ItemCarrinho[]
+  desconto: Desconto | null
+  onItens: (itens: ItemCarrinho[]) => void
+  onDesconto: (desconto: Desconto | null) => void
+  clienteNome: string
+  onVoltar: () => void
+  onAvancar: () => void
+  onCancelar: () => void
 }) {
-  const [busca, setBusca] = useState("");
-  const [categoria, setCategoria] = useState("");
-  const [lendoCodigo, setLendoCodigo] = useState(false);
-  const [carrinhoAberto, setCarrinhoAberto] = useState(false);
-  const [dandoDesconto, setDandoDesconto] = useState(false);
-  const [cancelando, setCancelando] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; tone: "success" | "error" } | null>(null);
+  const [busca, setBusca] = useState('')
+  const [categoria, setCategoria] = useState('')
+  const [lendoCodigo, setLendoCodigo] = useState(false)
+  const [carrinhoAberto, setCarrinhoAberto] = useState(false)
+  const [dandoDesconto, setDandoDesconto] = useState(false)
+  const [cancelando, setCancelando] = useState(false)
+  const [toast, setToast] = useState<{ msg: string; tone: 'success' | 'error' } | null>(null)
 
-  const categorias = useMemo(
-    () => [...new Set(produtos.map((p) => p.categoria))].sort(),
-    [],
-  );
+  const categorias = useMemo(() => [...new Set(produtos.map((p) => p.categoria))].sort(), [])
 
   const catalogo = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
+    const termo = busca.trim().toLowerCase()
     return produtos.filter((p) => {
-      if (categoria && p.categoria !== categoria) return false;
-      if (!termo) return true;
+      if (categoria && p.categoria !== categoria) return false
+      if (!termo) return true
       return (
         p.descricao.toLowerCase().includes(termo) ||
         p.codigo.toLowerCase().includes(termo) ||
-        p.ean.includes(termo.replace(/\D/g, ""))
-      );
-    });
-  }, [busca, categoria]);
+        p.ean.includes(termo.replace(/\D/g, ''))
+      )
+    })
+  }, [busca, categoria])
 
-  const subtotal = subtotalCarrinho(itens);
-  const abatimento = valorDesconto(subtotal, desconto);
-  const total = totalCarrinho(itens, desconto);
-  const quantidadeTotal = itens.reduce((acc, i) => acc + i.quantidade, 0);
+  const subtotal = subtotalCarrinho(itens)
+  const abatimento = valorDesconto(subtotal, desconto)
+  const total = totalCarrinho(itens, desconto)
+  const quantidadeTotal = itens.reduce((acc, i) => acc + i.quantidade, 0)
 
   /* ---------------------------------------------------------------- *
    * Carrinho
    * ---------------------------------------------------------------- */
 
   function adicionar(produtoId: string) {
-    const produto = produtos.find((p) => p.id === produtoId);
-    if (!produto) return;
+    const produto = produtos.find((p) => p.id === produtoId)
+    if (!produto) return
 
-    const existente = itens.find((i) => i.produtoId === produtoId);
+    const existente = itens.find((i) => i.produtoId === produtoId)
 
     if (existente) {
       /* Nao trava a venda por estoque: o balcao pode ter mercadoria que o
@@ -100,38 +91,34 @@ export default function EtapaCatalogo({
       if (existente.quantidade + 1 > existente.estoqueDisponivel) {
         setToast({
           msg: `Estoque de ${produto.descricao} e ${produto.estoque} un. Seguindo mesmo assim.`,
-          tone: "error",
-        });
+          tone: 'error',
+        })
       }
       onItens(
-        itens.map((i) =>
-          i.produtoId === produtoId ? { ...i, quantidade: i.quantidade + 1 } : i,
-        ),
-      );
-      return;
+        itens.map((i) => (i.produtoId === produtoId ? { ...i, quantidade: i.quantidade + 1 } : i)),
+      )
+      return
     }
 
-    onItens([...itens, paraItemCarrinho(produto)]);
+    onItens([...itens, paraItemCarrinho(produto)])
   }
 
   function alterarQuantidade(produtoId: string, quantidade: number) {
     if (quantidade <= 0) {
-      onItens(itens.filter((i) => i.produtoId !== produtoId));
-      return;
+      onItens(itens.filter((i) => i.produtoId !== produtoId))
+      return
     }
-    onItens(
-      itens.map((i) => (i.produtoId === produtoId ? { ...i, quantidade } : i)),
-    );
+    onItens(itens.map((i) => (i.produtoId === produtoId ? { ...i, quantidade } : i)))
   }
 
   function lerCodigo(codigo: string) {
-    const produto = produtoPorEan(codigo);
+    const produto = produtoPorEan(codigo)
     if (!produto) {
-      setToast({ msg: `Codigo ${codigo} nao esta no catalogo.`, tone: "error" });
-      return;
+      setToast({ msg: `Codigo ${codigo} nao esta no catalogo.`, tone: 'error' })
+      return
     }
-    adicionar(produto.id);
-    setToast({ msg: `${produto.descricao} adicionado.`, tone: "success" });
+    adicionar(produto.id)
+    setToast({ msg: `${produto.descricao} adicionado.`, tone: 'success' })
   }
 
   /* ---------------------------------------------------------------- *
@@ -146,10 +133,10 @@ export default function EtapaCatalogo({
    * que devolve o arquivo pronto para compartilhar.
    */
   function gerarOrcamento() {
-    const janela = window.open("", "_blank", "width=800,height=900");
+    const janela = window.open('', '_blank', 'width=800,height=900')
     if (!janela) {
-      setToast({ msg: "Libere as janelas pop-up para gerar o orcamento.", tone: "error" });
-      return;
+      setToast({ msg: 'Libere as janelas pop-up para gerar o orcamento.', tone: 'error' })
+      return
     }
 
     const linhas = itens
@@ -159,7 +146,7 @@ export default function EtapaCatalogo({
           `<td style="text-align:right">${formatMoney(i.precoUnitario)}</td>` +
           `<td style="text-align:right">${formatMoney(subtotalItem(i))}</td></tr>`,
       )
-      .join("");
+      .join('')
 
     janela.document.write(
       `<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">` +
@@ -172,22 +159,22 @@ export default function EtapaCatalogo({
         `td{border-bottom:1px solid #e6e8ef;padding:8px 6px}` +
         `tfoot td{border:none;padding-top:10px;font-weight:600}` +
         `</style></head><body>` +
-        `<h1>Orcamento</h1><p>${clienteNome} · ${new Date().toLocaleDateString("pt-BR")}</p>` +
+        `<h1>Orcamento</h1><p>${clienteNome} · ${new Date().toLocaleDateString('pt-BR')}</p>` +
         `<table><thead><tr><th>Produto</th><th style="text-align:center">Qtd</th>` +
         `<th style="text-align:right">Unitario</th><th style="text-align:right">Subtotal</th></tr></thead>` +
         `<tbody>${linhas}</tbody><tfoot>` +
         `<tr><td colspan="3" style="text-align:right">Subtotal</td><td style="text-align:right">${formatMoney(subtotal)}</td></tr>` +
         (abatimento > 0
           ? `<tr><td colspan="3" style="text-align:right">Desconto</td><td style="text-align:right">- ${formatMoney(abatimento)}</td></tr>`
-          : "") +
+          : '') +
         `<tr><td colspan="3" style="text-align:right;font-size:16px">Total</td><td style="text-align:right;font-size:16px">${formatMoney(total)}</td></tr>` +
         `</tfoot></table>` +
         `<p style="margin-top:24px;font-size:12px">Este orcamento nao e documento fiscal.</p>` +
         `</body></html>`,
-    );
-    janela.document.close();
-    janela.focus();
-    janela.print();
+    )
+    janela.document.close()
+    janela.focus()
+    janela.print()
   }
 
   return (
@@ -217,9 +204,9 @@ export default function EtapaCatalogo({
           <div className={styles.categorias} role="group" aria-label="Categorias">
             <button
               type="button"
-              className={`${styles.categoria} ${categoria === "" ? styles.categoriaAtiva : ""}`}
-              onClick={() => setCategoria("")}
-              aria-pressed={categoria === ""}
+              className={`${styles.categoria} ${categoria === '' ? styles.categoriaAtiva : ''}`}
+              onClick={() => setCategoria('')}
+              aria-pressed={categoria === ''}
             >
               Todas
             </button>
@@ -227,7 +214,7 @@ export default function EtapaCatalogo({
               <button
                 key={c}
                 type="button"
-                className={`${styles.categoria} ${categoria === c ? styles.categoriaAtiva : ""}`}
+                className={`${styles.categoria} ${categoria === c ? styles.categoriaAtiva : ''}`}
                 onClick={() => setCategoria(c)}
                 aria-pressed={categoria === c}
               >
@@ -244,14 +231,14 @@ export default function EtapaCatalogo({
           ) : (
             <ul className={styles.catalogo}>
               {catalogo.map((p) => {
-                const nivel = nivelEstoque(p);
-                const noCarrinho = itens.find((i) => i.produtoId === p.id);
+                const nivel = nivelEstoque(p)
+                const noCarrinho = itens.find((i) => i.produtoId === p.id)
 
                 return (
                   <li key={p.id}>
                     <button
                       type="button"
-                      className={`${styles.produto} ${noCarrinho ? styles.produtoNoCarrinho : ""}`}
+                      className={`${styles.produto} ${noCarrinho ? styles.produtoNoCarrinho : ''}`}
                       onClick={() => adicionar(p.id)}
                     >
                       <span className={styles.produtoImagem} aria-hidden="true">
@@ -265,9 +252,9 @@ export default function EtapaCatalogo({
 
                       <span className={styles.produtoNumeros}>
                         <strong>{formatMoney(p.precoVenda)}</strong>
-                        {nivel === "esgotado" ? (
+                        {nivel === 'esgotado' ? (
                           <Badge tone="danger">Sem estoque</Badge>
-                        ) : nivel === "baixo" ? (
+                        ) : nivel === 'baixo' ? (
                           <Badge tone="warning">{p.estoque} un</Badge>
                         ) : (
                           <span className={styles.produtoEstoque}>{p.estoque} un</span>
@@ -279,16 +266,14 @@ export default function EtapaCatalogo({
                       ) : null}
                     </button>
                   </li>
-                );
+                )
               })}
             </ul>
           )}
         </Card>
 
         {/* ============ Carrinho ============ */}
-        <aside
-          className={`${styles.carrinho} ${carrinhoAberto ? styles.carrinhoAberto : ""}`}
-        >
+        <aside className={`${styles.carrinho} ${carrinhoAberto ? styles.carrinhoAberto : ''}`}>
           <header className={styles.carrinhoCabecalho}>
             <h2 className={styles.carrinhoTitulo}>
               Carrinho
@@ -336,7 +321,7 @@ export default function EtapaCatalogo({
                       onChange={(e) =>
                         alterarQuantidade(
                           i.produtoId,
-                          Number(e.target.value.replace(/\D/g, "")) || 0,
+                          Number(e.target.value.replace(/\D/g, '')) || 0,
                         )
                       }
                       inputMode="numeric"
@@ -377,7 +362,7 @@ export default function EtapaCatalogo({
               <div className={styles.resumoLinha}>
                 <span>
                   Desconto
-                  {desconto?.tipo === "percentual" ? ` (${desconto.quantia}%)` : ""}
+                  {desconto?.tipo === 'percentual' ? ` (${desconto.quantia}%)` : ''}
                 </span>
                 <span className={styles.resumoDesconto}>- {formatMoney(abatimento)}</span>
               </div>
@@ -446,12 +431,12 @@ export default function EtapaCatalogo({
           subtotal={subtotal}
           atual={desconto}
           onAplicar={(d) => {
-            onDesconto(d);
-            setDandoDesconto(false);
+            onDesconto(d)
+            setDandoDesconto(false)
             setToast({
-              msg: d ? "Desconto aplicado." : "Desconto removido.",
-              tone: "success",
-            });
+              msg: d ? 'Desconto aplicado.' : 'Desconto removido.',
+              tone: 'success',
+            })
           }}
           onCancelar={() => setDandoDesconto(false)}
         />
@@ -472,8 +457,8 @@ export default function EtapaCatalogo({
             </div>
           }
           onConfirmar={() => {
-            setCancelando(false);
-            onCancelar();
+            setCancelando(false)
+            onCancelar()
           }}
           onCancelar={() => setCancelando(false)}
         />
@@ -483,7 +468,7 @@ export default function EtapaCatalogo({
         <Toast message={toast.msg} tone={toast.tone} onClose={() => setToast(null)} />
       ) : null}
     </>
-  );
+  )
 }
 
 /* ================================================================== *
@@ -496,26 +481,38 @@ function DialogoDesconto({
   onAplicar,
   onCancelar,
 }: {
-  subtotal: number;
-  atual: Desconto | null;
-  onAplicar: (desconto: Desconto | null) => void;
-  onCancelar: () => void;
+  subtotal: number
+  atual: Desconto | null
+  onAplicar: (desconto: Desconto | null) => void
+  onCancelar: () => void
 }) {
-  const [tipo, setTipo] = useState<"percentual" | "valor">(atual?.tipo ?? "percentual");
-  const [quantia, setQuantia] = useState(atual ? String(atual.quantia).replace(".", ",") : "");
+  const [tipo, setTipo] = useState<'percentual' | 'valor'>(atual?.tipo ?? 'percentual')
+  const [quantia, setQuantia] = useState(atual ? String(atual.quantia).replace('.', ',') : '')
 
-  const numero = paraNumero(quantia);
-  const abatimento = valorDesconto(subtotal, { tipo, quantia: numero });
-  const novoTotal = subtotal - abatimento;
+  const numero = paraNumero(quantia)
+  const abatimento = valorDesconto(subtotal, { tipo, quantia: numero })
+  const novoTotal = subtotal - abatimento
 
   const invalido =
-    numero <= 0 || (tipo === "percentual" && numero > 100) || (tipo === "valor" && numero > subtotal);
+    numero <= 0 ||
+    (tipo === 'percentual' && numero > 100) ||
+    (tipo === 'valor' && numero > subtotal)
 
   return (
     <div className={styles.dialogRoot}>
-      <button type="button" className={styles.dialogBackdrop} onClick={onCancelar} aria-label="Fechar" />
+      <button
+        type="button"
+        className={styles.dialogBackdrop}
+        onClick={onCancelar}
+        aria-label="Fechar"
+      />
 
-      <div className={styles.dialogPainel} role="dialog" aria-modal="true" aria-labelledby="desconto">
+      <div
+        className={styles.dialogPainel}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="desconto"
+      >
         <h2 id="desconto" className={styles.dialogTitulo}>
           Dar desconto
         </h2>
@@ -523,29 +520,29 @@ function DialogoDesconto({
         <div className={styles.tipoToggle} role="group" aria-label="Tipo de desconto">
           <button
             type="button"
-            className={`${styles.tipoBotao} ${tipo === "percentual" ? styles.tipoAtivo : ""}`}
-            onClick={() => setTipo("percentual")}
-            aria-pressed={tipo === "percentual"}
+            className={`${styles.tipoBotao} ${tipo === 'percentual' ? styles.tipoAtivo : ''}`}
+            onClick={() => setTipo('percentual')}
+            aria-pressed={tipo === 'percentual'}
           >
             Percentual
           </button>
           <button
             type="button"
-            className={`${styles.tipoBotao} ${tipo === "valor" ? styles.tipoAtivo : ""}`}
-            onClick={() => setTipo("valor")}
-            aria-pressed={tipo === "valor"}
+            className={`${styles.tipoBotao} ${tipo === 'valor' ? styles.tipoAtivo : ''}`}
+            onClick={() => setTipo('valor')}
+            aria-pressed={tipo === 'valor'}
           >
             Valor fixo
           </button>
         </div>
 
         <label className={styles.campo}>
-          <span>{tipo === "percentual" ? "Percentual (%)" : "Valor (R$)"}</span>
+          <span>{tipo === 'percentual' ? 'Percentual (%)' : 'Valor (R$)'}</span>
           <input
             className={`${styles.input} ${styles.inputGrande}`}
             value={quantia}
             onChange={(e) => setQuantia(e.target.value)}
-            placeholder={tipo === "percentual" ? "10" : "0,00"}
+            placeholder={tipo === 'percentual' ? '10' : '0,00'}
             inputMode="decimal"
             autoFocus
           />
@@ -562,12 +559,12 @@ function DialogoDesconto({
           </div>
         </div>
 
-        {tipo === "percentual" && numero > 100 ? (
+        {tipo === 'percentual' && numero > 100 ? (
           <p className={styles.erro} role="alert">
             O desconto nao pode passar de 100%.
           </p>
         ) : null}
-        {tipo === "valor" && numero > subtotal ? (
+        {tipo === 'valor' && numero > subtotal ? (
           <p className={styles.erro} role="alert">
             O desconto nao pode passar do subtotal.
           </p>
@@ -589,5 +586,5 @@ function DialogoDesconto({
         </div>
       </div>
     </div>
-  );
+  )
 }

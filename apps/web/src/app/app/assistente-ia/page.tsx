@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
-import { Suspense } from "react";
-import { BRAND } from "@/content/site";
-import ChatAssistente from "@/components/assistente/ChatAssistente";
+import type { Metadata } from 'next'
+import { Suspense } from 'react'
+import { BRAND } from '@/content/site'
+import ChatAssistente from '@/components/assistente/ChatAssistente'
 
 export const metadata: Metadata = {
   title: `Assistente — ${BRAND}`,
-  description: "Pergunte em texto sobre vendas, clientes, produtos e contas.",
-};
+  description: 'Pergunte em texto sobre vendas, clientes, produtos e contas.',
+}
 
 export default function AssistentePage() {
   /* useSearchParams (a pergunta vinda de outra tela) exige Suspense em
@@ -15,5 +15,5 @@ export default function AssistentePage() {
     <Suspense fallback={null}>
       <ChatAssistente />
     </Suspense>
-  );
+  )
 }

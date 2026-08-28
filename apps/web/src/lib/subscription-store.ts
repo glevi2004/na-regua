@@ -11,60 +11,60 @@
  * ser consumida com useSyncExternalStore, que trata hidratacao corretamente.
  */
 
-import type { SubscriptionStatus } from "./auth-api";
+import type { SubscriptionStatus } from './auth-api'
 
-const KEY = "demo:subscription-status";
+const KEY = 'demo:subscription-status'
 
 /** Snapshot em cache: getSnapshot precisa devolver valor estavel. */
-let cache: SubscriptionStatus | null = null;
-const listeners = new Set<() => void>();
+let cache: SubscriptionStatus | null = null
+const listeners = new Set<() => void>()
 
 function leDoStorage(): SubscriptionStatus {
   try {
-    const value = window.localStorage.getItem(KEY);
-    if (value === "overdue" || value === "trial" || value === "active") {
-      return value;
+    const value = window.localStorage.getItem(KEY)
+    if (value === 'overdue' || value === 'trial' || value === 'active') {
+      return value
     }
   } catch {
     /* Sem acesso ao storage (aba privada, cookies bloqueados). */
   }
-  return "active";
+  return 'active'
 }
 
 /** Valor lido no cliente. */
 export function getSubscriptionSnapshot(): SubscriptionStatus {
-  if (cache === null) cache = leDoStorage();
-  return cache;
+  if (cache === null) cache = leDoStorage()
+  return cache
 }
 
 /** Valor usado no HTML do servidor e durante a hidratacao. */
 export function getSubscriptionServerSnapshot(): SubscriptionStatus {
-  return "active";
+  return 'active'
 }
 
 export function subscribeSubscription(listener: () => void): () => void {
-  listeners.add(listener);
+  listeners.add(listener)
   return () => {
-    listeners.delete(listener);
-  };
+    listeners.delete(listener)
+  }
 }
 
 export function saveSubscriptionStatus(status: SubscriptionStatus): void {
-  cache = status;
+  cache = status
   try {
-    window.localStorage.setItem(KEY, status);
+    window.localStorage.setItem(KEY, status)
   } catch {
     /* Segue apenas em memoria se o storage nao estiver disponivel. */
   }
-  listeners.forEach((listener) => listener());
+  listeners.forEach((listener) => listener())
 }
 
 export function clearSubscriptionStatus(): void {
-  cache = "active";
+  cache = 'active'
   try {
-    window.localStorage.removeItem(KEY);
+    window.localStorage.removeItem(KEY)
   } catch {
     /* ignorado */
   }
-  listeners.forEach((listener) => listener());
+  listeners.forEach((listener) => listener())
 }

@@ -1,34 +1,23 @@
-import Link from "next/link";
-import type { ReactNode } from "react";
-import styles from "./Button.module.css";
+import Link from 'next/link'
+import type { ReactNode } from 'react'
+import styles from './Button.module.css'
 
-type Variant = "primary" | "secondary" | "ghost" | "danger";
-type Size = "md" | "sm";
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
+type Size = 'md' | 'sm'
 
 type CommonProps = {
-  children: ReactNode;
-  variant?: Variant;
-  size?: Size;
+  children: ReactNode
+  variant?: Variant
+  size?: Size
   /** Ocupa toda a largura disponivel. */
-  block?: boolean;
-  className?: string;
-};
+  block?: boolean
+  className?: string
+}
 
-function classesFor({
-  variant = "primary",
-  size = "md",
-  block,
-  className = "",
-}: CommonProps) {
-  return [
-    styles.base,
-    styles[variant],
-    styles[size],
-    block ? styles.block : "",
-    className,
-  ]
+function classesFor({ variant = 'primary', size = 'md', block, className = '' }: CommonProps) {
+  return [styles.base, styles[variant], styles[size], block ? styles.block : '', className]
     .filter(Boolean)
-    .join(" ");
+    .join(' ')
 }
 
 export function Button({
@@ -40,13 +29,10 @@ export function Button({
   ...rest
 }: CommonProps & React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
-    <button
-      {...rest}
-      className={classesFor({ children, variant, size, block, className })}
-    >
+    <button {...rest} className={classesFor({ children, variant, size, block, className })}>
       {children}
     </button>
-  );
+  )
 }
 
 export function ButtonLink({
@@ -58,11 +44,8 @@ export function ButtonLink({
   className,
 }: CommonProps & { href: string }) {
   return (
-    <Link
-      href={href}
-      className={classesFor({ children, variant, size, block, className })}
-    >
+    <Link href={href} className={classesFor({ children, variant, size, block, className })}>
       {children}
     </Link>
-  );
+  )
 }

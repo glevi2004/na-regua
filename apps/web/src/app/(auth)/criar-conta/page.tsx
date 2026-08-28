@@ -1,12 +1,12 @@
-import type { Metadata } from "next";
-import { BRAND } from "@/content/site";
-import SignupFlow from "@/components/auth/SignupFlow";
+import type { Metadata } from 'next'
+import { BRAND } from '@/content/site'
+import SignupFlow from '@/components/auth/SignupFlow'
 
 export const metadata: Metadata = {
   title: `Criar conta — ${BRAND}`,
-  description: "Crie sua conta e comece a usar o sistema.",
-};
+  description: 'Crie sua conta e comece a usar o sistema.',
+}
 
 export default function CriarContaPage() {
-  return <SignupFlow />;
+  return <SignupFlow />
 }

@@ -1,98 +1,91 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { useMemo, useState } from "react";
-import { produtos as todosProdutos } from "@/lib/mock-data";
-import {
-  calcularMargem,
-  confirmarImportacaoProdutos,
-  nivelEstoque,
-} from "@/lib/produtos-api";
-import { formatMoney, formatPercent } from "@/lib/format";
-import { Badge, Card, EmptyState, PageHeader, Stat } from "@/components/ui/UI";
-import { Button, ButtonLink } from "@/components/ui/Button";
-import { IconBox, IconPlus, IconSearch, IconUpload } from "@/components/Icons";
-import { COMANDOS_PRODUTOS } from "@/lib/comandos";
-import ComandosWhatsApp from "@/components/app/ComandosWhatsApp";
-import ImportarPlanilha from "@/components/app/ImportarPlanilha";
-import ImportarXml from "./ImportarXml";
-import styles from "./produtos.module.css";
-
+import Link from 'next/link'
+import { useMemo, useState } from 'react'
+import { produtos as todosProdutos } from '@/lib/mock-data'
+import { calcularMargem, confirmarImportacaoProdutos, nivelEstoque } from '@/lib/produtos-api'
+import { formatMoney, formatPercent } from '@/lib/format'
+import { Badge, Card, EmptyState, PageHeader, Stat } from '@/components/ui/UI'
+import { Button, ButtonLink } from '@/components/ui/Button'
+import { IconBox, IconPlus, IconSearch, IconUpload } from '@/components/Icons'
+import { COMANDOS_PRODUTOS } from '@/lib/comandos'
+import ComandosWhatsApp from '@/components/app/ComandosWhatsApp'
+import ImportarPlanilha from '@/components/app/ImportarPlanilha'
+import ImportarXml from './ImportarXml'
+import styles from './produtos.module.css'
 
 /** Campos que a planilha de produtos pode alimentar. */
 const CAMPOS_PLANILHA = [
   {
-    key: "codigo",
-    label: "Codigo",
+    key: 'codigo',
+    label: 'Codigo',
     obrigatorio: true,
-    reconhece: (c: string) => c.includes("codigo") || c === "cod" || c.includes("sku"),
+    reconhece: (c: string) => c.includes('codigo') || c === 'cod' || c.includes('sku'),
   },
   {
-    key: "descricao",
-    label: "Descricao",
+    key: 'descricao',
+    label: 'Descricao',
     obrigatorio: true,
-    reconhece: (c: string) => c.includes("descri") || c.includes("produto") || c.includes("nome"),
+    reconhece: (c: string) => c.includes('descri') || c.includes('produto') || c.includes('nome'),
   },
   {
-    key: "precoVenda",
-    label: "Preco de venda",
+    key: 'precoVenda',
+    label: 'Preco de venda',
     obrigatorio: true,
-    reconhece: (c: string) => c.includes("venda") || c.includes("preco"),
+    reconhece: (c: string) => c.includes('venda') || c.includes('preco'),
   },
   {
-    key: "precoCusto",
-    label: "Preco de custo",
+    key: 'precoCusto',
+    label: 'Preco de custo',
     obrigatorio: false,
-    reconhece: (c: string) => c.includes("custo"),
+    reconhece: (c: string) => c.includes('custo'),
   },
   {
-    key: "ean",
-    label: "EAN",
+    key: 'ean',
+    label: 'EAN',
     obrigatorio: false,
-    reconhece: (c: string) => c.includes("ean") || c.includes("barras") || c.includes("gtin"),
+    reconhece: (c: string) => c.includes('ean') || c.includes('barras') || c.includes('gtin'),
   },
   {
-    key: "ncm",
-    label: "NCM",
+    key: 'ncm',
+    label: 'NCM',
     obrigatorio: false,
-    reconhece: (c: string) => c.includes("ncm"),
+    reconhece: (c: string) => c.includes('ncm'),
   },
   {
-    key: "categoria",
-    label: "Categoria",
+    key: 'categoria',
+    label: 'Categoria',
     obrigatorio: false,
-    reconhece: (c: string) => c.includes("categoria") || c.includes("grupo"),
+    reconhece: (c: string) => c.includes('categoria') || c.includes('grupo'),
   },
   {
-    key: "estoque",
-    label: "Estoque",
+    key: 'estoque',
+    label: 'Estoque',
     obrigatorio: false,
-    reconhece: (c: string) => c.includes("estoque") || c.includes("quantidade") || c.includes("qtd"),
+    reconhece: (c: string) =>
+      c.includes('estoque') || c.includes('quantidade') || c.includes('qtd'),
   },
-];
+]
 
-type FiltroEstoque = "todos" | "baixo" | "esgotado";
+type FiltroEstoque = 'todos' | 'baixo' | 'esgotado'
 
 export default function ProdutosLista() {
-  const [busca, setBusca] = useState("");
-  const [categoria, setCategoria] = useState("");
-  const [fornecedor, setFornecedor] = useState("");
-  const [filtroEstoque, setFiltroEstoque] = useState<FiltroEstoque>("todos");
-  const [importandoPlanilha, setImportandoPlanilha] = useState(false);
-  const [importandoXml, setImportandoXml] = useState(false);
+  const [busca, setBusca] = useState('')
+  const [categoria, setCategoria] = useState('')
+  const [fornecedor, setFornecedor] = useState('')
+  const [filtroEstoque, setFiltroEstoque] = useState<FiltroEstoque>('todos')
+  const [importandoPlanilha, setImportandoPlanilha] = useState(false)
+  const [importandoXml, setImportandoXml] = useState(false)
 
   /* Listas de filtro montadas a partir do proprio catalogo. */
-  const categorias = useMemo(
-    () => [...new Set(todosProdutos.map((p) => p.categoria))].sort(),
-    [],
-  );
+  const categorias = useMemo(() => [...new Set(todosProdutos.map((p) => p.categoria))].sort(), [])
   const fornecedores = useMemo(
     () => [...new Set(todosProdutos.map((p) => p.fornecedor))].sort(),
     [],
-  );
+  )
 
   const lista = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
+    const termo = busca.trim().toLowerCase()
 
     return todosProdutos.filter((p) => {
       if (termo) {
@@ -100,35 +93,30 @@ export default function ProdutosLista() {
           p.descricao.toLowerCase().includes(termo) ||
           p.codigo.toLowerCase().includes(termo) ||
           p.categoria.toLowerCase().includes(termo) ||
-          p.ean.includes(termo.replace(/\D/g, ""));
-        if (!casa) return false;
+          p.ean.includes(termo.replace(/\D/g, ''))
+        if (!casa) return false
       }
 
-      if (categoria && p.categoria !== categoria) return false;
-      if (fornecedor && p.fornecedor !== fornecedor) return false;
+      if (categoria && p.categoria !== categoria) return false
+      if (fornecedor && p.fornecedor !== fornecedor) return false
 
-      if (filtroEstoque !== "todos" && nivelEstoque(p) !== filtroEstoque) {
-        return false;
+      if (filtroEstoque !== 'todos' && nivelEstoque(p) !== filtroEstoque) {
+        return false
       }
 
-      return true;
-    });
-  }, [busca, categoria, fornecedor, filtroEstoque]);
+      return true
+    })
+  }, [busca, categoria, fornecedor, filtroEstoque])
 
-  const precisamReposicao = todosProdutos.filter(
-    (p) => nivelEstoque(p) !== "normal",
-  );
-  const valorEstoque = todosProdutos.reduce(
-    (acc, p) => acc + p.estoque * p.precoCusto,
-    0,
-  );
+  const precisamReposicao = todosProdutos.filter((p) => nivelEstoque(p) !== 'normal')
+  const valorEstoque = todosProdutos.reduce((acc, p) => acc + p.estoque * p.precoCusto, 0)
 
   const limparFiltros = () => {
-    setBusca("");
-    setCategoria("");
-    setFornecedor("");
-    setFiltroEstoque("todos");
-  };
+    setBusca('')
+    setCategoria('')
+    setFornecedor('')
+    setFiltroEstoque('todos')
+  }
 
   return (
     <>
@@ -158,8 +146,8 @@ export default function ProdutosLista() {
         <Stat
           label="Precisam de reposicao"
           value={String(precisamReposicao.length)}
-          hint={precisamReposicao.length ? "abaixo do minimo" : "tudo em ordem"}
-          tone={precisamReposicao.length ? "warning" : "positive"}
+          hint={precisamReposicao.length ? 'abaixo do minimo' : 'tudo em ordem'}
+          tone={precisamReposicao.length ? 'warning' : 'positive'}
         />
         <Stat label="Valor em estoque" value={formatMoney(valorEstoque)} hint="a preco de custo" />
       </div>
@@ -212,15 +200,15 @@ export default function ProdutosLista() {
         <div className={styles.filtros} role="group" aria-label="Filtro de estoque">
           {(
             [
-              ["todos", "Todos"],
-              ["baixo", "Estoque baixo"],
-              ["esgotado", "Esgotados"],
+              ['todos', 'Todos'],
+              ['baixo', 'Estoque baixo'],
+              ['esgotado', 'Esgotados'],
             ] as const
           ).map(([valor, rotulo]) => (
             <button
               key={valor}
               type="button"
-              className={`${styles.filtro} ${filtroEstoque === valor ? styles.filtroAtivo : ""}`}
+              className={`${styles.filtro} ${filtroEstoque === valor ? styles.filtroAtivo : ''}`}
               onClick={() => setFiltroEstoque(valor)}
               aria-pressed={filtroEstoque === valor}
             >
@@ -264,8 +252,8 @@ export default function ProdutosLista() {
         ) : (
           <ul className={styles.grid}>
             {lista.map((produto) => {
-              const nivel = nivelEstoque(produto);
-              const margem = calcularMargem(produto.precoCusto, produto.precoVenda);
+              const nivel = nivelEstoque(produto)
+              const margem = calcularMargem(produto.precoCusto, produto.precoVenda)
 
               return (
                 <li key={produto.id}>
@@ -283,20 +271,16 @@ export default function ProdutosLista() {
                     </span>
 
                     <span className={styles.numeros}>
-                      <strong className={styles.preco}>
-                        {formatMoney(produto.precoVenda)}
-                      </strong>
+                      <strong className={styles.preco}>{formatMoney(produto.precoVenda)}</strong>
                       {margem !== null ? (
-                        <span className={styles.margem}>
-                          margem {formatPercent(margem)}
-                        </span>
+                        <span className={styles.margem}>margem {formatPercent(margem)}</span>
                       ) : null}
                     </span>
 
                     <span className={styles.estoque}>
-                      {nivel === "esgotado" ? (
+                      {nivel === 'esgotado' ? (
                         <Badge tone="danger">Esgotado</Badge>
-                      ) : nivel === "baixo" ? (
+                      ) : nivel === 'baixo' ? (
                         <Badge tone="warning">{produto.estoque} un · baixo</Badge>
                       ) : (
                         <Badge tone="success">{produto.estoque} un</Badge>
@@ -304,7 +288,7 @@ export default function ProdutosLista() {
                     </span>
                   </Link>
                 </li>
-              );
+              )
             })}
           </ul>
         )}
@@ -319,13 +303,13 @@ export default function ProdutosLista() {
           titulo="Importar produtos"
           campos={CAMPOS_PLANILHA}
           chavesExistentes={todosProdutos.map((p) => p.codigo.toUpperCase())}
-          chaveDuplicidade={(v) => (v.codigo ?? "").trim().toUpperCase()}
+          chaveDuplicidade={(v) => (v.codigo ?? '').trim().toUpperCase()}
           validar={(v) => {
-            if (!v.codigo?.trim()) return "Codigo vazio";
-            if (!v.descricao?.trim()) return "Descricao vazia";
-            const preco = Number(String(v.precoVenda ?? "").replace(",", "."));
-            if (!Number.isFinite(preco) || preco <= 0) return "Preco de venda invalido";
-            return null;
+            if (!v.codigo?.trim()) return 'Codigo vazio'
+            if (!v.descricao?.trim()) return 'Descricao vazia'
+            const preco = Number(String(v.precoVenda ?? '').replace(',', '.'))
+            if (!Number.isFinite(preco) || preco <= 0) return 'Preco de venda invalido'
+            return null
           }}
           onConfirmar={confirmarImportacaoProdutos}
           onClose={() => setImportandoPlanilha(false)}
@@ -334,5 +318,5 @@ export default function ProdutosLista() {
 
       {importandoXml ? <ImportarXml onClose={() => setImportandoXml(false)} /> : null}
     </>
-  );
+  )
 }

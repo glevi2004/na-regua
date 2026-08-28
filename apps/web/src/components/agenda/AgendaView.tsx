@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from 'react'
 import {
   conectarGoogle,
   criarEvento,
@@ -15,64 +15,61 @@ import {
   statusGoogle,
   type Evento,
   type StatusGoogle,
-} from "@/lib/agenda-api";
-import { formatDate } from "@/lib/format";
-import { Badge, Card, EmptyState, PageHeader } from "@/components/ui/UI";
-import { Button } from "@/components/ui/Button";
-import Toast from "@/components/ui/Toast";
-import { Spinner } from "@/components/auth/Fields";
-import ConfirmarDialog from "@/components/app/ConfirmarDialog";
-import { IconBell, IconCalendar, IconClose, IconPlus } from "@/components/Icons";
-import styles from "./agenda.module.css";
+} from '@/lib/agenda-api'
+import { formatDate } from '@/lib/format'
+import { Badge, Card, EmptyState, PageHeader } from '@/components/ui/UI'
+import { Button } from '@/components/ui/Button'
+import Toast from '@/components/ui/Toast'
+import { Spinner } from '@/components/auth/Fields'
+import ConfirmarDialog from '@/components/app/ConfirmarDialog'
+import { IconBell, IconCalendar, IconClose, IconPlus } from '@/components/Icons'
+import styles from './agenda.module.css'
 
 /** Mes exibido inicialmente — o da data de referencia do app. */
-const [ANO_INICIAL, MES_INICIAL] = [
-  Number(HOJE.slice(0, 4)),
-  Number(HOJE.slice(5, 7)) - 1,
-];
+const [ANO_INICIAL, MES_INICIAL] = [Number(HOJE.slice(0, 4)), Number(HOJE.slice(5, 7)) - 1]
 
 export default function AgendaView() {
-  const [eventos, setEventos] = useState<Evento[]>(() => listarEventos());
-  const [ano, setAno] = useState(ANO_INICIAL);
-  const [mes, setMes] = useState(MES_INICIAL);
-  const [diaSelecionado, setDiaSelecionado] = useState(HOJE);
+  const [eventos, setEventos] = useState<Evento[]>(() => listarEventos())
+  const [ano, setAno] = useState(ANO_INICIAL)
+  const [mes, setMes] = useState(MES_INICIAL)
+  const [diaSelecionado, setDiaSelecionado] = useState(HOJE)
 
-  const [google, setGoogle] = useState<StatusGoogle | null>(null);
-  const [mexendoGoogle, setMexendoGoogle] = useState(false);
+  const [google, setGoogle] = useState<StatusGoogle | null>(null)
+  const [mexendoGoogle, setMexendoGoogle] = useState(false)
 
-  const [criando, setCriando] = useState(false);
-  const [excluindo, setExcluindo] = useState<Evento | null>(null);
-  const [processando, setProcessando] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; tone: "success" | "error" } | null>(null);
+  const [criando, setCriando] = useState(false)
+  const [excluindo, setExcluindo] = useState<Evento | null>(null)
+  const [processando, setProcessando] = useState(false)
+  const [toast, setToast] = useState<{ msg: string; tone: 'success' | 'error' } | null>(null)
 
   /* SUBSTITUIR POR: GET /agenda/google/status */
   useEffect(() => {
-    let cancelado = false;
+    let cancelado = false
     async function carregar() {
-      const s = await statusGoogle();
-      if (!cancelado) setGoogle(s);
+      const s = await statusGoogle()
+      if (!cancelado) setGoogle(s)
     }
-    void carregar();
+    void carregar()
     return () => {
-      cancelado = true;
-    };
-  }, []);
+      cancelado = true
+    }
+  }, [])
 
-  const grade = useMemo(() => montarMes(ano, mes), [ano, mes]);
+  const grade = useMemo(() => montarMes(ano, mes), [ano, mes])
 
   const porDia = useMemo(() => {
-    const mapa = new Map<string, Evento[]>();
+    const mapa = new Map<string, Evento[]>()
     for (const e of eventos) {
-      const lista = mapa.get(e.data) ?? [];
-      lista.push(e);
-      mapa.set(e.data, lista);
+      const lista = mapa.get(e.data) ?? []
+      lista.push(e)
+      mapa.set(e.data, lista)
     }
     /* Ordena por horario dentro de cada dia. */
     for (const lista of mapa.values()) {
-      lista.sort((a, b) => a.horaInicio.localeCompare(b.horaInicio));
+      lista.sort((a, b) => a.horaInicio.localeCompare(b.horaInicio))
     }
-    return mapa;
-  }, [eventos]);
+    return mapa
+  }, [eventos])
 
   const proximos = useMemo(
     () =>
@@ -81,15 +78,15 @@ export default function AgendaView() {
         .sort((a, b) => (a.data + a.horaInicio).localeCompare(b.data + b.horaInicio))
         .slice(0, 5),
     [eventos],
-  );
+  )
 
-  const doDia = porDia.get(diaSelecionado) ?? [];
-  const eventosHoje = porDia.get(HOJE) ?? [];
+  const doDia = porDia.get(diaSelecionado) ?? []
+  const eventosHoje = porDia.get(HOJE) ?? []
 
   function mudarMes(delta: number) {
-    const d = new Date(Date.UTC(ano, mes + delta, 1));
-    setAno(d.getUTCFullYear());
-    setMes(d.getUTCMonth());
+    const d = new Date(Date.UTC(ano, mes + delta, 1))
+    setAno(d.getUTCFullYear())
+    setMes(d.getUTCMonth())
   }
 
   /* ---------------------------------------------------------------- *
@@ -97,33 +94,33 @@ export default function AgendaView() {
    * ---------------------------------------------------------------- */
 
   async function conectar() {
-    setMexendoGoogle(true);
+    setMexendoGoogle(true)
     /* SUBSTITUIR POR: window.location.href = "/agenda/google/authorize" */
-    const r = await conectarGoogle();
-    setMexendoGoogle(false);
-    setGoogle(r.status);
-    setToast({ msg: "Google Agenda conectado.", tone: "success" });
+    const r = await conectarGoogle()
+    setMexendoGoogle(false)
+    setGoogle(r.status)
+    setToast({ msg: 'Google Agenda conectado.', tone: 'success' })
   }
 
   async function desconectar() {
-    setMexendoGoogle(true);
+    setMexendoGoogle(true)
     /* SUBSTITUIR POR: DELETE /agenda/google */
-    await desconectarGoogle();
-    setMexendoGoogle(false);
-    setGoogle({ conectado: false, conta: null, ultimaSincronizacao: null });
+    await desconectarGoogle()
+    setMexendoGoogle(false)
+    setGoogle({ conectado: false, conta: null, ultimaSincronizacao: null })
     /* Eventos vindos do Google saem da lista ao desconectar. */
-    setEventos((atual) => atual.filter((e) => e.origem !== "google"));
-    setToast({ msg: "Google Agenda desconectado.", tone: "success" });
+    setEventos((atual) => atual.filter((e) => e.origem !== 'google'))
+    setToast({ msg: 'Google Agenda desconectado.', tone: 'success' })
   }
 
   async function confirmarExclusao() {
-    if (!excluindo) return;
-    setProcessando(true);
-    await excluirEvento(excluindo.id);
-    setProcessando(false);
-    setEventos((atual) => atual.filter((e) => e.id !== excluindo.id));
-    setExcluindo(null);
-    setToast({ msg: "Compromisso excluido.", tone: "success" });
+    if (!excluindo) return
+    setProcessando(true)
+    await excluirEvento(excluindo.id)
+    setProcessando(false)
+    setEventos((atual) => atual.filter((e) => e.id !== excluindo.id))
+    setExcluindo(null)
+    setToast({ msg: 'Compromisso excluido.', tone: 'success' })
   }
 
   return (
@@ -157,7 +154,7 @@ export default function AgendaView() {
                 {google.conta}
                 {google.ultimaSincronizacao
                   ? ` · sincronizado as ${google.ultimaSincronizacao.slice(11, 16)}`
-                  : ""}
+                  : ''}
               </span>
             </div>
             <Button variant="secondary" size="sm" onClick={desconectar} disabled={mexendoGoogle}>
@@ -173,8 +170,7 @@ export default function AgendaView() {
             <div className={styles.googleTexto}>
               <strong>Google Agenda desconectado</strong>
               <span>
-                Conecte para que os compromissos apareçam nos dois lugares, sem
-                digitar duas vezes.
+                Conecte para que os compromissos apareçam nos dois lugares, sem digitar duas vezes.
               </span>
             </div>
             <Button size="sm" onClick={conectar} disabled={mexendoGoogle}>
@@ -184,7 +180,7 @@ export default function AgendaView() {
                   Conectando...
                 </>
               ) : (
-                "Conectar"
+                'Conectar'
               )}
             </Button>
           </>
@@ -226,16 +222,16 @@ export default function AgendaView() {
 
           <div className={styles.mes}>
             {grade.map((d) => {
-              const doDiaLista = porDia.get(d.data) ?? [];
-              const selecionado = d.data === diaSelecionado;
+              const doDiaLista = porDia.get(d.data) ?? []
+              const selecionado = d.data === diaSelecionado
 
               return (
                 <button
                   key={d.data}
                   type="button"
-                  className={`${styles.dia} ${d.doMes ? "" : styles.diaForaDoMes} ${
-                    d.hoje ? styles.diaHoje : ""
-                  } ${selecionado ? styles.diaSelecionado : ""}`}
+                  className={`${styles.dia} ${d.doMes ? '' : styles.diaForaDoMes} ${
+                    d.hoje ? styles.diaHoje : ''
+                  } ${selecionado ? styles.diaSelecionado : ''}`}
                   onClick={() => setDiaSelecionado(d.data)}
                   aria-label={`${d.dia} — ${doDiaLista.length} compromisso(s)`}
                   aria-pressed={selecionado}
@@ -247,14 +243,14 @@ export default function AgendaView() {
                         <span
                           key={e.id}
                           className={`${styles.diaMarca} ${
-                            e.origem === "google" ? styles.marcaGoogle : ""
+                            e.origem === 'google' ? styles.marcaGoogle : ''
                           }`}
                         />
                       ))}
                     </span>
                   ) : null}
                 </button>
-              );
+              )
             })}
           </div>
         </Card>
@@ -284,14 +280,12 @@ export default function AgendaView() {
                   <span className={styles.eventoPrincipal}>
                     <strong>{e.titulo}</strong>
                     {e.descricao ? <span>{e.descricao}</span> : null}
-                    {e.local ? (
-                      <span className={styles.eventoLocal}>{e.local}</span>
-                    ) : null}
+                    {e.local ? <span className={styles.eventoLocal}>{e.local}</span> : null}
                   </span>
 
                   <span className={styles.eventoTags}>
                     {/* Distingue o que veio do Google do que nasceu aqui */}
-                    {e.origem === "google" ? (
+                    {e.origem === 'google' ? (
                       <Badge tone="info">Google</Badge>
                     ) : (
                       <Badge>No app</Badge>
@@ -299,9 +293,7 @@ export default function AgendaView() {
                     {e.lembreteMinutos !== null ? (
                       <span className={styles.eventoLembrete}>
                         <IconBell size={12} />
-                        {e.lembreteMinutos >= 1440
-                          ? "1 dia"
-                          : `${e.lembreteMinutos} min`}
+                        {e.lembreteMinutos >= 1440 ? '1 dia' : `${e.lembreteMinutos} min`}
                       </span>
                     ) : null}
                     <button
@@ -337,10 +329,10 @@ export default function AgendaView() {
                     type="button"
                     className={styles.proximo}
                     onClick={() => {
-                      setDiaSelecionado(e.data);
-                      const [a, m] = [Number(e.data.slice(0, 4)), Number(e.data.slice(5, 7)) - 1];
-                      setAno(a);
-                      setMes(m);
+                      setDiaSelecionado(e.data)
+                      const [a, m] = [Number(e.data.slice(0, 4)), Number(e.data.slice(5, 7)) - 1]
+                      setAno(a)
+                      setMes(m)
                     }}
                   >
                     <span className={styles.proximoData}>
@@ -350,10 +342,10 @@ export default function AgendaView() {
                     <span className={styles.proximoTexto}>
                       <strong>{e.titulo}</strong>
                       <span>
-                        {e.data === HOJE ? "hoje" : formatDate(e.data)} · {e.horaInicio}
+                        {e.data === HOJE ? 'hoje' : formatDate(e.data)} · {e.horaInicio}
                       </span>
                     </span>
-                    {e.origem === "google" ? (
+                    {e.origem === 'google' ? (
                       <span className={styles.proximoGoogle} title="Do Google Agenda">
                         G
                       </span>
@@ -370,14 +362,14 @@ export default function AgendaView() {
         <FormCompromisso
           dataInicial={diaSelecionado}
           onCriado={(novo) => {
-            setEventos((atual) => [...atual, novo]);
-            setCriando(false);
+            setEventos((atual) => [...atual, novo])
+            setCriando(false)
             setToast({
               msg: google?.conectado
-                ? "Compromisso criado e enviado ao Google Agenda."
-                : "Compromisso criado.",
-              tone: "success",
-            });
+                ? 'Compromisso criado e enviado ao Google Agenda.'
+                : 'Compromisso criado.',
+              tone: 'success',
+            })
           }}
           onCancelar={() => setCriando(false)}
         />
@@ -387,9 +379,9 @@ export default function AgendaView() {
         <ConfirmarDialog
           titulo="Excluir compromisso"
           descricao={
-            excluindo.origem === "google"
-              ? "O compromisso sera removido tambem do Google Agenda."
-              : "O compromisso sera removido da agenda."
+            excluindo.origem === 'google'
+              ? 'O compromisso sera removido tambem do Google Agenda.'
+              : 'O compromisso sera removido da agenda.'
           }
           tom="perigo"
           rotuloConfirmar="Excluir"
@@ -411,7 +403,7 @@ export default function AgendaView() {
         <Toast message={toast.msg} tone={toast.tone} onClose={() => setToast(null)} />
       ) : null}
     </>
-  );
+  )
 }
 
 /* ================================================================== *
@@ -423,25 +415,25 @@ function FormCompromisso({
   onCriado,
   onCancelar,
 }: {
-  dataInicial: string;
-  onCriado: (evento: Evento) => void;
-  onCancelar: () => void;
+  dataInicial: string
+  onCriado: (evento: Evento) => void
+  onCancelar: () => void
 }) {
-  const [titulo, setTitulo] = useState("");
-  const [descricao, setDescricao] = useState("");
-  const [data, setData] = useState(dataInicial);
-  const [horaInicio, setHoraInicio] = useState("09:00");
-  const [horaFim, setHoraFim] = useState("10:00");
-  const [local, setLocal] = useState("");
-  const [lembrete, setLembrete] = useState<number | null>(30);
+  const [titulo, setTitulo] = useState('')
+  const [descricao, setDescricao] = useState('')
+  const [data, setData] = useState(dataInicial)
+  const [horaInicio, setHoraInicio] = useState('09:00')
+  const [horaFim, setHoraFim] = useState('10:00')
+  const [local, setLocal] = useState('')
+  const [lembrete, setLembrete] = useState<number | null>(30)
 
-  const [erro, setErro] = useState<string | null>(null);
-  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null)
+  const [salvando, setSalvando] = useState(false)
 
   async function salvar(event: React.FormEvent) {
-    event.preventDefault();
-    setErro(null);
-    setSalvando(true);
+    event.preventDefault()
+    setErro(null)
+    setSalvando(true)
 
     /* SUBSTITUIR POR: POST /agenda/eventos */
     const r = await criarEvento({
@@ -452,12 +444,12 @@ function FormCompromisso({
       horaFim,
       local,
       lembreteMinutos: lembrete,
-    });
-    setSalvando(false);
+    })
+    setSalvando(false)
 
     if (!r.ok) {
-      setErro(r.error);
-      return;
+      setErro(r.error)
+      return
     }
 
     onCriado({
@@ -468,16 +460,26 @@ function FormCompromisso({
       horaInicio,
       horaFim,
       local: local.trim(),
-      origem: "app",
+      origem: 'app',
       lembreteMinutos: lembrete,
-    });
+    })
   }
 
   return (
     <div className={styles.dialogRoot}>
-      <button type="button" className={styles.dialogBackdrop} onClick={onCancelar} aria-label="Fechar" />
+      <button
+        type="button"
+        className={styles.dialogBackdrop}
+        onClick={onCancelar}
+        aria-label="Fechar"
+      />
 
-      <div className={styles.dialogPainel} role="dialog" aria-modal="true" aria-labelledby="novo-compromisso">
+      <div
+        className={styles.dialogPainel}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="novo-compromisso"
+      >
         <h2 id="novo-compromisso" className={styles.dialogTitulo}>
           Novo compromisso
         </h2>
@@ -540,11 +542,11 @@ function FormCompromisso({
             <span>Lembrete no WhatsApp</span>
             <select
               className={styles.input}
-              value={lembrete === null ? "" : String(lembrete)}
+              value={lembrete === null ? '' : String(lembrete)}
               onChange={(e) => setLembrete(e.target.value ? Number(e.target.value) : null)}
             >
               {LEMBRETES.map((l) => (
-                <option key={l.rotulo} value={l.valor === null ? "" : String(l.valor)}>
+                <option key={l.rotulo} value={l.valor === null ? '' : String(l.valor)}>
                   {l.rotulo}
                 </option>
               ))}
@@ -578,12 +580,12 @@ function FormCompromisso({
                   Salvando...
                 </>
               ) : (
-                "Criar compromisso"
+                'Criar compromisso'
               )}
             </Button>
           </div>
         </form>
       </div>
     </div>
-  );
+  )
 }

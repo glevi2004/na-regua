@@ -1,8 +1,8 @@
-"use client";
+'use client'
 
-import type { BlocoResposta } from "@/lib/assistente-api";
-import { Button } from "@/components/ui/Button";
-import styles from "./assistente.module.css";
+import type { BlocoResposta } from '@/lib/assistente-api'
+import { Button } from '@/components/ui/Button'
+import styles from './assistente.module.css'
 
 /**
  * Desenha os blocos ricos que vem na resposta.
@@ -15,31 +15,31 @@ export default function BlocosResposta({
   blocos,
   onAcao,
 }: {
-  blocos: BlocoResposta[];
-  onAcao: (acao: string) => void;
+  blocos: BlocoResposta[]
+  onAcao: (acao: string) => void
 }) {
   return (
     <>
       {blocos.map((bloco, i) => {
         switch (bloco.tipo) {
-          case "texto":
+          case 'texto':
             return (
               <p key={i} className={styles.blocoTexto}>
                 {bloco.texto}
               </p>
-            );
+            )
 
-          case "indicador":
+          case 'indicador':
             return (
               <div key={i} className={styles.blocoIndicador}>
                 <span>{bloco.rotulo}</span>
                 <strong>{bloco.valor}</strong>
                 {bloco.apoio ? <small>{bloco.apoio}</small> : null}
               </div>
-            );
+            )
 
-          case "lista":
-            if (bloco.itens.length === 0) return null;
+          case 'lista':
+            if (bloco.itens.length === 0) return null
             return (
               <div key={i} className={styles.blocoCard}>
                 <h4 className={styles.blocoTitulo}>{bloco.titulo}</h4>
@@ -54,9 +54,9 @@ export default function BlocosResposta({
                   ))}
                 </ul>
               </div>
-            );
+            )
 
-          case "tabela":
+          case 'tabela':
             return (
               <div key={i} className={styles.blocoCard}>
                 <h4 className={styles.blocoTitulo}>{bloco.titulo}</h4>
@@ -81,9 +81,9 @@ export default function BlocosResposta({
                   </table>
                 </div>
               </div>
-            );
+            )
 
-          case "confirmacao":
+          case 'confirmacao':
             /* Acao so acontece com aceite explicito — ver nota no
                assistente-api.ts. */
             return (
@@ -93,17 +93,17 @@ export default function BlocosResposta({
                   <Button size="sm" onClick={() => onAcao(bloco.acao)}>
                     Confirmar
                   </Button>
-                  <Button size="sm" variant="secondary" onClick={() => onAcao("cancelar")}>
+                  <Button size="sm" variant="secondary" onClick={() => onAcao('cancelar')}>
                     Agora nao
                   </Button>
                 </div>
               </div>
-            );
+            )
 
           default:
-            return null;
+            return null
         }
       })}
     </>
-  );
+  )
 }

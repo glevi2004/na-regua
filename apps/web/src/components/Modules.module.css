@@ -18,13 +18,15 @@
   border-radius: var(--radius-lg);
   background: var(--surface);
   overflow: hidden;
-  transition: transform var(--transition), box-shadow var(--transition),
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition),
     border-color var(--transition);
 }
 
 /* Fio de gradiente que aparece no hover — reforca a ideia de fluidez */
 .card::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0 0 auto 0;
   height: 3px;
@@ -54,7 +56,9 @@
   border-radius: var(--radius);
   background: var(--brand-primary-soft);
   color: var(--brand-primary);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .card:hover .cardIcon {
@@ -117,7 +121,9 @@
   font-size: 14px;
   font-weight: 500;
   color: var(--brand-primary);
-  transition: border-color var(--transition), color var(--transition),
+  transition:
+    border-color var(--transition),
+    color var(--transition),
     transform var(--transition);
 }
 

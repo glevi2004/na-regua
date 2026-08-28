@@ -1,43 +1,43 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { estornarVenda, FORMAS, type VendaHistorico } from "@/lib/vendas-api";
-import { formatDateTime, formatMoney } from "@/lib/format";
-import { Badge, Card, PageHeader, Stat } from "@/components/ui/UI";
-import { Button, ButtonLink } from "@/components/ui/Button";
-import Toast from "@/components/ui/Toast";
-import ConfirmarDialog from "@/components/app/ConfirmarDialog";
-import styles from "./vendas.module.css";
+import { useState } from 'react'
+import { estornarVenda, FORMAS, type VendaHistorico } from '@/lib/vendas-api'
+import { formatDateTime, formatMoney } from '@/lib/format'
+import { Badge, Card, PageHeader, Stat } from '@/components/ui/UI'
+import { Button, ButtonLink } from '@/components/ui/Button'
+import Toast from '@/components/ui/Toast'
+import ConfirmarDialog from '@/components/app/ConfirmarDialog'
+import styles from './vendas.module.css'
 
 export default function VendaDetalhe({ venda }: { venda: VendaHistorico }) {
-  const [status, setStatus] = useState(venda.status);
-  const [estornando, setEstornando] = useState(false);
-  const [processando, setProcessando] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; tone: "success" | "error" } | null>(null);
+  const [status, setStatus] = useState(venda.status)
+  const [estornando, setEstornando] = useState(false)
+  const [processando, setProcessando] = useState(false)
+  const [toast, setToast] = useState<{ msg: string; tone: 'success' | 'error' } | null>(null)
 
-  const estornada = status === "estornada";
-  const totalItens = venda.itens.reduce((acc, i) => acc + i.quantidade, 0);
+  const estornada = status === 'estornada'
+  const totalItens = venda.itens.reduce((acc, i) => acc + i.quantidade, 0)
 
   async function confirmarEstorno() {
-    setProcessando(true);
+    setProcessando(true)
 
     /* SUBSTITUIR POR: POST /vendas/:id/estorno — precisa ser transacional:
        estoque, contas a receber e nota fiscal voltam juntos ou nenhum
        volta. Ver nota no topo de lib/vendas-api.ts. */
-    const r = await estornarVenda(venda.id);
-    setProcessando(false);
-    setEstornando(false);
+    const r = await estornarVenda(venda.id)
+    setProcessando(false)
+    setEstornando(false)
 
     if (!r.ok) {
-      setToast({ msg: r.error, tone: "error" });
-      return;
+      setToast({ msg: r.error, tone: 'error' })
+      return
     }
 
-    setStatus("estornada");
+    setStatus('estornada')
     setToast({
       msg: `Venda estornada. ${r.itensDevolvidos} item(ns) devolvido(s) ao estoque.`,
-      tone: "success",
-    });
+      tone: 'success',
+    })
   }
 
   return (
@@ -62,10 +62,7 @@ export default function VendaDetalhe({ venda }: { venda: VendaHistorico }) {
       {estornada ? (
         <div className={styles.estornadaAviso} role="status">
           <strong>Esta venda foi estornada.</strong>
-          <span>
-            Os itens voltaram ao estoque e o titulo em contas a receber foi
-            revertido.
-          </span>
+          <span>Os itens voltaram ao estoque e o titulo em contas a receber foi revertido.</span>
         </div>
       ) : null}
 
@@ -75,7 +72,7 @@ export default function VendaDetalhe({ venda }: { venda: VendaHistorico }) {
           label="Valor liquido"
           value={formatMoney(venda.valorLiquido)}
           hint="sem taxa de cartao"
-          tone={estornada ? "warning" : "positive"}
+          tone={estornada ? 'warning' : 'positive'}
         />
         <Stat label="Imposto" value={formatMoney(venda.imposto)} />
       </div>
@@ -88,9 +85,7 @@ export default function VendaDetalhe({ venda }: { venda: VendaHistorico }) {
               <li key={idx} className={styles.itemDetalhe}>
                 <span className={styles.itemDetalheQtd}>{i.quantidade}×</span>
                 <span className={styles.itemDetalheNome}>{i.descricao}</span>
-                <span className={styles.itemDetalheUnit}>
-                  {formatMoney(i.precoUnitario)}
-                </span>
+                <span className={styles.itemDetalheUnit}>{formatMoney(i.precoUnitario)}</span>
                 <span className={styles.itemDetalheSub}>
                   {formatMoney(i.precoUnitario * i.quantidade)}
                 </span>
@@ -106,9 +101,7 @@ export default function VendaDetalhe({ venda }: { venda: VendaHistorico }) {
             {venda.desconto > 0 ? (
               <div className={styles.resumoLinha}>
                 <span>Desconto</span>
-                <span className={styles.resumoDesconto}>
-                  - {formatMoney(venda.desconto)}
-                </span>
+                <span className={styles.resumoDesconto}>- {formatMoney(venda.desconto)}</span>
               </div>
             ) : null}
             <div className={`${styles.resumoLinha} ${styles.resumoTotal}`}>
@@ -122,18 +115,18 @@ export default function VendaDetalhe({ venda }: { venda: VendaHistorico }) {
         <Card title="Pagamento">
           <ul className={styles.pagamentosDetalhe}>
             {venda.pagamentos.map((p, idx) => {
-              const f = FORMAS.find((x) => x.valor === p.forma);
+              const f = FORMAS.find((x) => x.valor === p.forma)
               return (
                 <li key={idx} className={styles.pagamentoDetalhe}>
                   <span>
                     <strong>{f?.rotulo ?? p.forma}</strong>
                     {f && f.taxa > 0 ? (
-                      <span>taxa {f.taxa.toFixed(2).replace(".", ",")}%</span>
+                      <span>taxa {f.taxa.toFixed(2).replace('.', ',')}%</span>
                     ) : null}
                   </span>
                   <strong>{formatMoney(p.valor)}</strong>
                 </li>
-              );
+              )
             })}
           </ul>
         </Card>
@@ -142,18 +135,14 @@ export default function VendaDetalhe({ venda }: { venda: VendaHistorico }) {
         <Card title="Documentos fiscais">
           {venda.nota ? (
             <div className={styles.notaDetalhe}>
-              <Badge tone="info">
-                {venda.nota.tipo === "nfce" ? "NFC-e" : "NFS-e"}
-              </Badge>
+              <Badge tone="info">{venda.nota.tipo === 'nfce' ? 'NFC-e' : 'NFS-e'}</Badge>
               <strong>Numero {venda.nota.numero}</strong>
               <Button variant="secondary" size="sm">
                 Baixar PDF
               </Button>
             </div>
           ) : (
-            <p className={styles.semNota}>
-              Nenhuma nota emitida para esta venda.
-            </p>
+            <p className={styles.semNota}>Nenhuma nota emitida para esta venda.</p>
           )}
         </Card>
       </div>
@@ -184,5 +173,5 @@ export default function VendaDetalhe({ venda }: { venda: VendaHistorico }) {
         <Toast message={toast.msg} tone={toast.tone} onClose={() => setToast(null)} />
       ) : null}
     </>
-  );
+  )
 }

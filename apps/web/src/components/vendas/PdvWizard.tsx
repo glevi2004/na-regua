@@ -1,40 +1,40 @@
-"use client";
+'use client'
 
-import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useRouter } from 'next/navigation'
+import { useCallback, useMemo, useState } from 'react'
 import {
   criarVenda,
   totalCarrinho,
   type Desconto,
   type ItemCarrinho,
   type Pagamento,
-} from "@/lib/vendas-api";
-import { clientes } from "@/lib/mock-data";
-import { formatMoney } from "@/lib/format";
-import { maskCPF, maskCelular, validateCPF } from "@/lib/validation";
-import { Card, EmptyState, PageHeader } from "@/components/ui/UI";
-import { Button, ButtonLink } from "@/components/ui/Button";
-import Toast from "@/components/ui/Toast";
-import { Spinner } from "@/components/auth/Fields";
-import { IconCheck, IconPlus, IconSearch, IconUsers } from "@/components/Icons";
-import EtapaCatalogo from "./EtapaCatalogo";
-import EtapaPagamento from "./EtapaPagamento";
-import EtapaFiscal from "./EtapaFiscal";
-import styles from "./vendas.module.css";
+} from '@/lib/vendas-api'
+import { clientes } from '@/lib/mock-data'
+import { formatMoney } from '@/lib/format'
+import { maskCPF, maskCelular, validateCPF } from '@/lib/validation'
+import { Card, EmptyState, PageHeader } from '@/components/ui/UI'
+import { Button, ButtonLink } from '@/components/ui/Button'
+import Toast from '@/components/ui/Toast'
+import { Spinner } from '@/components/auth/Fields'
+import { IconCheck, IconPlus, IconSearch, IconUsers } from '@/components/Icons'
+import EtapaCatalogo from './EtapaCatalogo'
+import EtapaPagamento from './EtapaPagamento'
+import EtapaFiscal from './EtapaFiscal'
+import styles from './vendas.module.css'
 
-type Etapa = 1 | 2 | 3 | 4;
+type Etapa = 1 | 2 | 3 | 4
 
 const ETAPAS = [
-  { id: 1, rotulo: "Cliente" },
-  { id: 2, rotulo: "Carrinho" },
-  { id: 3, rotulo: "Pagamento" },
-  { id: 4, rotulo: "Nota fiscal" },
-] as const;
+  { id: 1, rotulo: 'Cliente' },
+  { id: 2, rotulo: 'Carrinho' },
+  { id: 3, rotulo: 'Pagamento' },
+  { id: 4, rotulo: 'Nota fiscal' },
+] as const
 
 export type ClienteVenda = {
-  id: string | null;
-  nome: string;
-};
+  id: string | null
+  nome: string
+}
 
 /**
  * Fluxo de venda do balcao.
@@ -44,53 +44,53 @@ export type ClienteVenda = {
  * foi montado.
  */
 export default function PdvWizard() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const [etapa, setEtapa] = useState<Etapa>(1);
-  const [cliente, setCliente] = useState<ClienteVenda | null>(null);
-  const [itens, setItens] = useState<ItemCarrinho[]>([]);
-  const [desconto, setDesconto] = useState<Desconto | null>(null);
-  const [pagamentos, setPagamentos] = useState<Pagamento[]>([]);
+  const [etapa, setEtapa] = useState<Etapa>(1)
+  const [cliente, setCliente] = useState<ClienteVenda | null>(null)
+  const [itens, setItens] = useState<ItemCarrinho[]>([])
+  const [desconto, setDesconto] = useState<Desconto | null>(null)
+  const [pagamentos, setPagamentos] = useState<Pagamento[]>([])
 
-  const [vendaId, setVendaId] = useState<string | null>(null);
-  const [vendaNumero, setVendaNumero] = useState<string | null>(null);
-  const [fechando, setFechando] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; tone: "success" | "error" } | null>(null);
+  const [vendaId, setVendaId] = useState<string | null>(null)
+  const [vendaNumero, setVendaNumero] = useState<string | null>(null)
+  const [fechando, setFechando] = useState(false)
+  const [toast, setToast] = useState<{ msg: string; tone: 'success' | 'error' } | null>(null)
 
-  const total = useMemo(() => totalCarrinho(itens, desconto), [itens, desconto]);
+  const total = useMemo(() => totalCarrinho(itens, desconto), [itens, desconto])
 
   /** Fecha a venda no servidor antes de entrar na etapa fiscal. */
   const fecharVenda = useCallback(async () => {
-    setFechando(true);
+    setFechando(true)
 
     /* SUBSTITUIR POR: POST /vendas — o servidor recalcula preco, imposto
        e taxa; o total do front e so referencia. */
     const r = await criarVenda({
       clienteId: cliente?.id ?? null,
-      clienteNome: cliente?.nome ?? "Venda sem cliente",
+      clienteNome: cliente?.nome ?? 'Venda sem cliente',
       itens,
       desconto,
       pagamentos,
-    });
-    setFechando(false);
+    })
+    setFechando(false)
 
     if (!r.ok) {
-      setToast({ msg: r.error, tone: "error" });
-      return;
+      setToast({ msg: r.error, tone: 'error' })
+      return
     }
 
-    setVendaId(r.id);
-    setVendaNumero(r.numero);
-    setEtapa(4);
-  }, [cliente, itens, desconto, pagamentos]);
+    setVendaId(r.id)
+    setVendaNumero(r.numero)
+    setEtapa(4)
+  }, [cliente, itens, desconto, pagamentos])
 
   function cancelarVenda() {
-    setItens([]);
-    setDesconto(null);
-    setPagamentos([]);
-    setCliente(null);
-    setEtapa(1);
-    setToast({ msg: "Venda cancelada. O carrinho foi esvaziado.", tone: "success" });
+    setItens([])
+    setDesconto(null)
+    setPagamentos([])
+    setCliente(null)
+    setEtapa(1)
+    setToast({ msg: 'Venda cancelada. O carrinho foi esvaziado.', tone: 'success' })
   }
 
   return (
@@ -99,8 +99,8 @@ export default function PdvWizard() {
         title="Nova venda"
         subtitle={
           cliente
-            ? `${cliente.nome}${itens.length ? ` · ${itens.length} item(ns) · ${formatMoney(total)}` : ""}`
-            : "Balcao"
+            ? `${cliente.nome}${itens.length ? ` · ${itens.length} item(ns) · ${formatMoney(total)}` : ''}`
+            : 'Balcao'
         }
         actions={
           <ButtonLink href="/app/vendas" variant="secondary">
@@ -112,20 +112,18 @@ export default function PdvWizard() {
       {/* --- Stepper --- */}
       <ol className={styles.stepper} aria-label="Etapas da venda">
         {ETAPAS.map((e) => {
-          const feita = e.id < etapa;
-          const atual = e.id === etapa;
+          const feita = e.id < etapa
+          const atual = e.id === etapa
           return (
             <li
               key={e.id}
-              className={`${styles.step} ${feita ? styles.stepFeito : ""} ${atual ? styles.stepAtual : ""}`}
-              aria-current={atual ? "step" : undefined}
+              className={`${styles.step} ${feita ? styles.stepFeito : ''} ${atual ? styles.stepAtual : ''}`}
+              aria-current={atual ? 'step' : undefined}
             >
-              <span className={styles.stepMarca}>
-                {feita ? <IconCheck size={13} /> : e.id}
-              </span>
+              <span className={styles.stepMarca}>{feita ? <IconCheck size={13} /> : e.id}</span>
               <span className={styles.stepRotulo}>{e.rotulo}</span>
             </li>
-          );
+          )
         })}
       </ol>
 
@@ -134,8 +132,8 @@ export default function PdvWizard() {
         <EtapaCliente
           selecionado={cliente}
           onSelecionar={(c) => {
-            setCliente(c);
-            setEtapa(2);
+            setCliente(c)
+            setEtapa(2)
           }}
         />
       ) : null}
@@ -147,7 +145,7 @@ export default function PdvWizard() {
           desconto={desconto}
           onItens={setItens}
           onDesconto={setDesconto}
-          clienteNome={cliente?.nome ?? "Venda sem cliente"}
+          clienteNome={cliente?.nome ?? 'Venda sem cliente'}
           onVoltar={() => setEtapa(1)}
           onAvancar={() => setEtapa(3)}
           onCancelar={cancelarVenda}
@@ -170,9 +168,9 @@ export default function PdvWizard() {
       {etapa === 4 && vendaId ? (
         <EtapaFiscal
           vendaId={vendaId}
-          vendaNumero={vendaNumero ?? ""}
+          vendaNumero={vendaNumero ?? ''}
           total={total}
-          onConcluir={() => router.push("/app/vendas")}
+          onConcluir={() => router.push('/app/vendas')}
         />
       ) : null}
 
@@ -180,7 +178,7 @@ export default function PdvWizard() {
         <Toast message={toast.msg} tone={toast.tone} onClose={() => setToast(null)} />
       ) : null}
     </>
-  );
+  )
 }
 
 /* ================================================================== *
@@ -191,23 +189,23 @@ function EtapaCliente({
   selecionado,
   onSelecionar,
 }: {
-  selecionado: ClienteVenda | null;
-  onSelecionar: (cliente: ClienteVenda) => void;
+  selecionado: ClienteVenda | null
+  onSelecionar: (cliente: ClienteVenda) => void
 }) {
-  const [busca, setBusca] = useState("");
-  const [cadastrando, setCadastrando] = useState(false);
+  const [busca, setBusca] = useState('')
+  const [cadastrando, setCadastrando] = useState(false)
 
   const encontrados = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
-    if (!termo) return clientes.slice(0, 6);
+    const termo = busca.trim().toLowerCase()
+    if (!termo) return clientes.slice(0, 6)
 
-    const digitos = termo.replace(/\D/g, "");
+    const digitos = termo.replace(/\D/g, '')
     return clientes.filter(
       (c) =>
         c.nome.toLowerCase().includes(termo) ||
-        (digitos.length > 0 && c.documento.replace(/\D/g, "").includes(digitos)),
-    );
-  }, [busca]);
+        (digitos.length > 0 && c.documento.replace(/\D/g, '').includes(digitos)),
+    )
+  }, [busca])
 
   return (
     <>
@@ -241,7 +239,7 @@ function EtapaCliente({
               <li key={c.id}>
                 <button
                   type="button"
-                  className={`${styles.cliente} ${selecionado?.id === c.id ? styles.clienteAtivo : ""}`}
+                  className={`${styles.cliente} ${selecionado?.id === c.id ? styles.clienteAtivo : ''}`}
                   onClick={() => onSelecionar({ id: c.id, nome: c.nome })}
                 >
                   <span className={styles.clienteAvatar} aria-hidden="true">
@@ -270,7 +268,7 @@ function EtapaCliente({
               tao rapido quanto escolher um cliente. */}
           <Button
             variant="ghost"
-            onClick={() => onSelecionar({ id: null, nome: "Venda sem cliente" })}
+            onClick={() => onSelecionar({ id: null, nome: 'Venda sem cliente' })}
           >
             <IconUsers size={16} />
             Seguir sem identificar
@@ -281,14 +279,14 @@ function EtapaCliente({
       {cadastrando ? (
         <CadastroRapido
           onCriado={(nome) => {
-            setCadastrando(false);
-            onSelecionar({ id: null, nome });
+            setCadastrando(false)
+            onSelecionar({ id: null, nome })
           }}
           onCancelar={() => setCadastrando(false)}
         />
       ) : null}
     </>
-  );
+  )
 }
 
 /* ================================================================== *
@@ -299,53 +297,63 @@ function CadastroRapido({
   onCriado,
   onCancelar,
 }: {
-  onCriado: (nome: string) => void;
-  onCancelar: () => void;
+  onCriado: (nome: string) => void
+  onCancelar: () => void
 }) {
-  const [nome, setNome] = useState("");
-  const [documento, setDocumento] = useState("");
-  const [celular, setCelular] = useState("");
-  const [erro, setErro] = useState<string | null>(null);
-  const [salvando, setSalvando] = useState(false);
+  const [nome, setNome] = useState('')
+  const [documento, setDocumento] = useState('')
+  const [celular, setCelular] = useState('')
+  const [erro, setErro] = useState<string | null>(null)
+  const [salvando, setSalvando] = useState(false)
 
   async function salvar(event: React.FormEvent) {
-    event.preventDefault();
+    event.preventDefault()
 
     if (!nome.trim()) {
-      setErro("Informe o nome.");
-      return;
+      setErro('Informe o nome.')
+      return
     }
 
     /* Documento e opcional no cadastro rapido: exigir CPF no balcao com
        fila atras trava a venda. Quando vier preenchido, e validado. */
     if (documento.trim()) {
-      const erroDoc = validateCPF(documento);
+      const erroDoc = validateCPF(documento)
       if (erroDoc) {
-        setErro(erroDoc);
-        return;
+        setErro(erroDoc)
+        return
       }
     }
 
-    setErro(null);
-    setSalvando(true);
+    setErro(null)
+    setSalvando(true)
     /* SUBSTITUIR POR: POST /clientes */
-    await new Promise((r) => setTimeout(r, 700));
-    setSalvando(false);
+    await new Promise((r) => setTimeout(r, 700))
+    setSalvando(false)
 
-    onCriado(nome.trim());
+    onCriado(nome.trim())
   }
 
   return (
     <div className={styles.dialogRoot}>
-      <button type="button" className={styles.dialogBackdrop} onClick={onCancelar} aria-label="Fechar" />
+      <button
+        type="button"
+        className={styles.dialogBackdrop}
+        onClick={onCancelar}
+        aria-label="Fechar"
+      />
 
-      <div className={styles.dialogPainel} role="dialog" aria-modal="true" aria-labelledby="cadastro-rapido">
+      <div
+        className={styles.dialogPainel}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="cadastro-rapido"
+      >
         <h2 id="cadastro-rapido" className={styles.dialogTitulo}>
           Cadastro rapido
         </h2>
         <p className={styles.dialogTexto}>
-          So o essencial para nao segurar a fila. O cadastro completo pode ser
-          feito depois em Clientes.
+          So o essencial para nao segurar a fila. O cadastro completo pode ser feito depois em
+          Clientes.
         </p>
 
         <form onSubmit={salvar} noValidate className={styles.formCampos}>
@@ -398,12 +406,12 @@ function CadastroRapido({
                   Salvando...
                 </>
               ) : (
-                "Cadastrar e continuar"
+                'Cadastrar e continuar'
               )}
             </Button>
           </div>
         </form>
       </div>
     </div>
-  );
+  )
 }

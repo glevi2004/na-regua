@@ -1,26 +1,26 @@
-import type { ReactNode } from "react";
-import Link from "next/link";
-import { BRAND } from "@/content/site";
-import { IconBolt, IconShield, IconSparkles } from "@/components/Icons";
-import styles from "./auth.module.css";
+import type { ReactNode } from 'react'
+import Link from 'next/link'
+import { BRAND } from '@/content/site'
+import { IconBolt, IconShield, IconSparkles } from '@/components/Icons'
+import styles from './auth.module.css'
 
 const destaques = [
   {
     icon: IconBolt,
-    title: "Tudo em um so fluxo",
-    text: "Vendas, financeiro, estoque e fiscal conversando entre si.",
+    title: 'Tudo em um so fluxo',
+    text: 'Vendas, financeiro, estoque e fiscal conversando entre si.',
   },
   {
     icon: IconSparkles,
-    title: "Assistente em texto",
-    text: "Pergunte o que precisa e receba o numero pronto.",
+    title: 'Assistente em texto',
+    text: 'Pergunte o que precisa e receba o numero pronto.',
   },
   {
     icon: IconShield,
-    title: "Seguranca nivel bancario",
-    text: "Dados isolados por empresa e backup diario.",
+    title: 'Seguranca nivel bancario',
+    text: 'Dados isolados por empresa e backup diario.',
   },
-];
+]
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -34,13 +34,11 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           </Link>
 
           <div className={styles.pitch}>
-            <h2 className={styles.pitchTitle}>
-              A gestao do seu comercio, do balcao ao relatorio.
-            </h2>
+            <h2 className={styles.pitchTitle}>A gestao do seu comercio, do balcao ao relatorio.</h2>
 
             <ul className={styles.highlights}>
               {destaques.map((item) => {
-                const Icon = item.icon;
+                const Icon = item.icon
                 return (
                   <li key={item.title} className={styles.highlight}>
                     <span className={styles.highlightIcon}>
@@ -51,7 +49,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
                       <span>{item.text}</span>
                     </span>
                   </li>
-                );
+                )
               })}
             </ul>
           </div>
@@ -67,5 +65,5 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         <div className={styles.formInner}>{children}</div>
       </main>
     </div>
-  );
+  )
 }
