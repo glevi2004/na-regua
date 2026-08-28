@@ -1,4 +1,4 @@
-# ZapGestor
+# EI BUDDY
 
 > ERP para pequenos e médios negócios, operável tanto por aplicativo quanto por
 > um assistente de IA no WhatsApp — os dois sobre o mesmo banco de dados e as
