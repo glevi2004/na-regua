@@ -1,18 +1,34 @@
 {
   "name": "@na-regua/mobile",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "expo-router/entry",
   "dependencies": {
+    "@expo/vector-icons": "^15.0.2",
+    "@na-regua/contracts": "workspace:*",
+    "@na-regua/money": "workspace:*",
+    "@na-regua/ui": "workspace:*",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-navigation/drawer": "^7.13.10",
+    "@react-navigation/native": "^7.3.18",
     "expo": "~57.0.16",
+    "expo-camera": "~57.0.4",
+    "expo-constants": "57.0.14",
+    "expo-linking": "~57.0.8",
+    "expo-router": "~57.0.17",
     "expo-status-bar": "~57.0.1",
     "react": "19.2.3",
+    "react-dom": "19.2.3",
     "react-native": "0.86.2",
-    "@na-regua/ui": "workspace:*",
-    "@na-regua/contracts": "workspace:*",
-    "@na-regua/money": "workspace:*"
+    "react-native-gesture-handler": "~2.32.0",
+    "react-native-reanimated": "4.5.1",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "~4.26.0",
+    "react-native-svg": "15.15.4",
+    "react-native-web": "^0.21.2"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",
+    "babel-preset-expo": "~57.0.8",
     "typescript": "~6.0.3",
     "vitest": "^3.2.6"
   },
@@ -21,6 +37,7 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
+    "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "clean": "rm -rf .expo .turbo"

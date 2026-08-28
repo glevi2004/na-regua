@@ -34,3 +34,13 @@ minimumReleaseAgeExclude:
 # aceita ate a major 7.
 overrides:
   vite: '>=7.3.6 <8'
+  # Prende o metro-config na linha 0.86, alinhada com o react-native 0.86.2 que
+  # o app usa. Sem isto o peer opcional do react-native-worklets (que vem do
+  # Reanimated, exigido pelo drawer) resolve para 0.87.1 e arrasta um segundo
+  # Metro, o 0.87.0, que depende de image-size <=2.0.2 — GHSA-w3rx-r6r6-pgpr e
+  # GHSA-5p2g-fcmc-qvqq, ambas altas, e o gate de auditoria e bloqueante em
+  # severidade alta (RNF-029). Nao da para corrigir subindo a versao: a 2.0.3
+  # que o aviso pede nunca foi publicada. O pin e seguro porque o Metro que o
+  # Expo executa e o 0.84.5, que nem usa o pacote — vendorizou a implementacao
+  # em src/lib/imageSize.js.
+  '@react-native/metro-config': '0.86.3'

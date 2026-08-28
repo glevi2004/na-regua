@@ -1,0 +1,179 @@
+import { useMemo, useState } from 'react'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useRouter } from 'expo-router'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { FORMAS, listarVendas, type VendaHistorico } from '@/lib/vendas-api'
+import { formatDateTime, formatMoney } from '@/lib/format'
+import Cabecalho from '@/components/Cabecalho'
+import Sanfona from '@/components/ui/Sanfona'
+import Botao from '@/components/ui/Botao'
+import { Etiqueta } from '@/components/ui/Cartao'
+import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
+
+/**
+ * Historico de vendas.
+ *
+ * Cada venda e uma sanfona: fechada mostra cliente, valor e situacao —
+ * que e o que se procura ao conferir o dia. Abrir revela os itens, o
+ * pagamento e a nota, sem trocar de tela.
+ */
+export default function Vendas() {
+  const router = useRouter()
+  const [vendas] = useState<VendaHistorico[]>(() => listarVendas())
+
+  const resumo = useMemo(() => {
+    const concluidas = vendas.filter((v) => v.status === 'concluida')
+    const total = concluidas.reduce((a, v) => a + v.total, 0)
+    return {
+      concluidas,
+      total,
+      liquido: concluidas.reduce((a, v) => a + v.valorLiquido, 0),
+      ticket: concluidas.length ? total / concluidas.length : 0,
+    }
+  }, [vendas])
+
+  return (
+    <SafeAreaView style={estilos.tela} edges={['top']}>
+      <Cabecalho
+        titulo="Vendas"
+        subtitulo={`${resumo.concluidas.length} concluidas`}
+        acao={<Botao onPress={() => router.push('/pdv')}>Nova</Botao>}
+      />
+
+      <ScrollView contentContainerStyle={estilos.conteudo}>
+        <View style={estilos.resumo}>
+          <View style={estilos.resumoItem}>
+            <Text style={estilos.resumoRotulo}>Faturamento</Text>
+            <Text style={estilos.resumoValor}>{formatMoney(resumo.total)}</Text>
+          </View>
+          <View style={estilos.resumoItem}>
+            <Text style={estilos.resumoRotulo}>Liquido</Text>
+            <Text style={[estilos.resumoValor, estilos.liquido]}>
+              {formatMoney(resumo.liquido)}
+            </Text>
+          </View>
+          <View style={estilos.resumoItem}>
+            <Text style={estilos.resumoRotulo}>Ticket medio</Text>
+            <Text style={estilos.resumoValor}>{formatMoney(resumo.ticket)}</Text>
+          </View>
+        </View>
+
+        {vendas.map((v) => (
+          <Sanfona
+            key={v.id}
+            titulo={`#${v.numero} · ${v.clienteNome}`}
+            resumo={`${formatDateTime(v.data)} · ${formatMoney(v.total)}`}
+            etiqueta={
+              v.status === 'estornada' ? (
+                <Etiqueta tom="erro">Estornada</Etiqueta>
+              ) : (
+                <Etiqueta tom="sucesso">{formatMoney(v.total)}</Etiqueta>
+              )
+            }
+          >
+            {/* Itens */}
+            {v.itens.map((i, idx) => (
+              <View key={idx} style={estilos.item}>
+                <Text style={estilos.itemQtd}>{i.quantidade}×</Text>
+                <Text style={estilos.itemNome} numberOfLines={1}>
+                  {i.descricao}
+                </Text>
+                <Text style={estilos.itemValor}>{formatMoney(i.precoUnitario * i.quantidade)}</Text>
+              </View>
+            ))}
+
+            <View style={estilos.divisor} />
+
+            <Detalhe rotulo="Subtotal" valor={formatMoney(v.subtotal)} />
+            {v.desconto > 0 ? (
+              <Detalhe rotulo="Desconto" valor={`- ${formatMoney(v.desconto)}`} />
+            ) : null}
+            <Detalhe rotulo="Total" valor={formatMoney(v.total)} forte />
+            <Detalhe
+              rotulo="Pagamento"
+              valor={v.pagamentos
+                .map((p) => FORMAS.find((f) => f.valor === p.forma)?.rotulo ?? p.forma)
+                .join(' + ')}
+            />
+            <Detalhe rotulo="Liquido" valor={formatMoney(v.valorLiquido)} />
+            <Detalhe
+              rotulo="Nota fiscal"
+              valor={
+                v.nota
+                  ? `${v.nota.tipo === 'nfce' ? 'NFC-e' : 'NFS-e'} ${v.nota.numero}`
+                  : 'sem nota'
+              }
+            />
+
+            {v.status !== 'estornada' ? (
+              <Pressable style={estilos.estornar} accessibilityRole="button">
+                <Text style={estilos.estornarTexto}>Estornar venda</Text>
+              </Pressable>
+            ) : null}
+          </Sanfona>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
+  )
+}
+
+function Detalhe({
+  rotulo,
+  valor,
+  forte = false,
+}: {
+  rotulo: string
+  valor: string
+  forte?: boolean
+}) {
+  return (
+    <View style={estilos.detalhe}>
+      <Text style={estilos.detalheRotulo}>{rotulo}</Text>
+      <Text style={[estilos.detalheValor, forte && estilos.detalheForte]}>{valor}</Text>
+    </View>
+  )
+}
+
+const estilos = StyleSheet.create({
+  tela: { flex: 1, backgroundColor: cores.fundo },
+  conteudo: { padding: espaco.lg, gap: espaco.md, paddingBottom: espaco.xxl },
+
+  resumo: {
+    flexDirection: 'row',
+    gap: espaco.sm,
+  },
+  resumoItem: {
+    flex: 1,
+    padding: espaco.md,
+    borderWidth: 1,
+    borderColor: cores.borda,
+    borderRadius: raio.md,
+    backgroundColor: cores.superficie,
+    gap: 2,
+  },
+  resumoRotulo: { fontSize: 11, color: cores.textoFraco },
+  resumoValor: { fontSize: fonte.pequeno, fontWeight: peso.pesado, color: cores.texto },
+  liquido: { color: cores.acento },
+
+  item: { flexDirection: 'row', alignItems: 'center', gap: espaco.sm },
+  itemQtd: { fontSize: fonte.micro, fontWeight: peso.forte, color: cores.acento },
+  itemNome: { flex: 1, fontSize: fonte.pequeno, color: cores.texto },
+  itemValor: { fontSize: fonte.pequeno, fontWeight: peso.forte, color: cores.texto },
+
+  divisor: { height: 1, backgroundColor: cores.borda, marginVertical: espaco.xs },
+
+  detalhe: { flexDirection: 'row', justifyContent: 'space-between', gap: espaco.md },
+  detalheRotulo: { fontSize: fonte.micro, color: cores.textoFraco },
+  detalheValor: { fontSize: fonte.micro, color: cores.texto },
+  detalheForte: { fontSize: fonte.pequeno, fontWeight: peso.pesado },
+
+  estornar: {
+    marginTop: espaco.sm,
+    paddingVertical: espaco.md,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: cores.erro,
+    borderRadius: raio.pill,
+  },
+  estornarTexto: { fontSize: fonte.micro, fontWeight: peso.forte, color: cores.erro },
+})

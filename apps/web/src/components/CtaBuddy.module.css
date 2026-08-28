@@ -1,0 +1,92 @@
+.section {
+  background: var(--bg-muted);
+}
+
+.card {
+  position: relative;
+  display: grid;
+  gap: 32px;
+  align-items: center;
+  padding: 40px 28px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--brand-gradient-subtle);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+/* --- Texto --- */
+
+.badge {
+  display: inline-flex;
+  padding: 7px 14px;
+  border-radius: var(--radius-full);
+  background: var(--brand-accent-soft);
+  color: var(--brand-accent-dark);
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.title {
+  margin-top: 18px;
+  font-size: clamp(26px, 4.2vw, 40px);
+  font-weight: 700;
+  color: var(--brand-primary);
+}
+
+.lead {
+  margin-top: 16px;
+  max-width: 48ch;
+  font-size: 17px;
+  color: var(--text-secondary);
+}
+
+.ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+/* --- Mascote --- */
+
+.mascote {
+  position: relative;
+  /* Altura fixa porque a imagem usa `fill`: sem isto o contentor colapsa. */
+  height: 260px;
+  justify-self: center;
+  width: 100%;
+  max-width: 260px;
+}
+
+/* Halo suave atras do Buddy — assenta o PNG recortado sobre o cartao,
+   senao ele parece colado por cima. */
+.glow {
+  position: absolute;
+  inset: 12% 0 0;
+  background: var(--brand-gradient);
+  filter: blur(54px);
+  opacity: 0.18;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.imagem {
+  object-fit: contain;
+  /* O Buddy fica apoiado na base do bloco, como se pisasse no cartao. */
+  object-position: bottom center;
+}
+
+@media (min-width: 940px) {
+  .card {
+    grid-template-columns: 1fr auto;
+    gap: 48px;
+    padding: 56px 56px 56px 60px;
+  }
+
+  .mascote {
+    height: 340px;
+    max-width: 340px;
+  }
+}

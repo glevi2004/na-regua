@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState, type ComponentType, type ReactNode } from 'react'
@@ -143,7 +144,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
         id="navegacao-painel"
       >
         <Link href="/" className={styles.brand}>
-          <span className={styles.brandMark} aria-hidden="true" />
+          <span className={styles.brandMark} aria-hidden="true">
+            <Image src="/buddy-azul.png" alt="" fill className={styles.brandImg} sizes="32px" />
+          </span>
           <span className={styles.brandName}>{BRAND}</span>
         </Link>
 
