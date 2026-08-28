@@ -31,17 +31,17 @@ os adapters existem
 | 🟠 **2 — Plataforma & Integrações** | `api` `worker` `agent` `whatsapp` `fiscal` `banking` `billing` `payments` `infra` CI |
 | 🟢 **3 — Clientes**                 | `mobile` `web` `ui`                                                                  |
 
-> **A trilha 1 é o gargalo até a Sprint 2.** `money`, `domain` e `contracts`
-> precisam existir antes das outras duas avançarem de verdade. Por isso vêm
-> primeiro e são pequenas de propósito. Se a trilha 1 atrasar, as outras duas
-> param — priorize desbloqueá-la sobre qualquer outra coisa.
+> **A trilha 1 é o gargalo até a Sprint 2.** `money` e `domain` já existem;
+> `contracts` precisa existir antes das outras duas avançarem de verdade. Se a
+> trilha 1 atrasar, as outras duas param — priorize desbloqueá-la sobre qualquer
+> outra coisa.
 
 ## Painel
 
 |                           |                                     |
 | ------------------------- | ----------------------------------- |
 | Total                     | 54 tarefas · 152 dias-desenvolvedor |
-| ✅ Concluídas             | 3 (8 dias)                          |
+| ✅ Concluídas             | 4 (11 dias)                         |
 | 🚧 Bloqueadas por decisão | 15 (51 dias)                        |
 | Por trilha                | 🔵 17 · 🟠 24 · 🟢 12               |
 
@@ -61,7 +61,7 @@ Objetivo: as três trilhas conseguem trabalhar em paralelo sem esperar uma à ou
 
 | ID     | Tarefa                                                                          | Trilha | Módulo       | Est | Dep    | Bloq                | US/RF                   | Status |
 | ------ | ------------------------------------------------------------------------------- | :----: | ------------ | --: | ------ | ------------------- | ----------------------- | :----: |
-| NR-004 | `domain`: cálculo de venda — custo, imposto, tarifa de cartão, parcelas         |   🔵   | `domain`     |   3 | NR-003 | —                   | RF-040, RF-041, RF-038  |   ⬜   |
+| NR-004 | `domain`: cálculo de venda — custo, imposto, tarifa de cartão, parcelas         |   🔵   | `domain`     |   3 | NR-003 | —                   | RF-040, RF-041, RF-038  |   ✅   |
 | NR-005 | `contracts`: schemas base (Company, Customer, Product, Sale)                    |   🔵   | `contracts`  |   2 | NR-003 | —                   | RNF-027                 |   ⬜   |
 | NR-006 | Configuração tipada: validar variáveis de ambiente na inicialização             |   🟠   | `repo`       |   1 | NR-001 | —                   | —                       |   ⬜   |
 | NR-007 | `db`: estratégia multi-tenant, RLS e teste de isolamento                        |   🔵   | `db`         |   3 | NR-005 | **DEC-002**         | RF-121, RF-122, RNF-021 |   🚧   |
@@ -152,7 +152,7 @@ O que atrasa o MVP inteiro se atrasar:
 
 ```mermaid
 flowchart LR
-    N3["NR-003<br/>money ✅"] --> N4["NR-004<br/>domain"]
+    N3["NR-003<br/>money ✅"] --> N4["NR-004<br/>domain ✅"]
     N3 --> N5["NR-005<br/>contracts"]
     N5 --> N7["NR-007<br/>db + RLS<br/>🚧 DEC-002"]
     N7 --> N8["NR-008<br/>cadastros"]
@@ -167,12 +167,13 @@ flowchart LR
     style N7 fill:#7c2d12,color:#fff
     style N42 fill:#7c2d12,color:#fff
     style N3 fill:#14532d,color:#fff
+    style N4 fill:#14532d,color:#fff
 ```
 
 **NR-007 é o nó mais crítico do projeto.** Ele bloqueia todo o schema, e está
 travado por [DEC-002](../decisoes/README.md#dec-002). Enquanto essa decisão não
-fechar, a trilha 1 só consegue avançar em `domain` e `contracts` — o que dá,
-somando, cerca de 5 dias de trabalho. Depois disso ela para.
+fechar, a trilha 1 só consegue avançar em `contracts` (NR-005) — cerca de 2 dias
+de trabalho. `domain` (NR-004) já está feito. Depois disso ela para.
 
 **Prazo real para DEC-002: 5 dias úteis a partir do início da Sprint 1.**
 

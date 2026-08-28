@@ -54,7 +54,7 @@ for (const linha of linhas) {
     cabecalho = null
     continue
   }
-  if (/^\| ID \| Tarefa/.test(linha)) {
+  if (/^\|\s*ID\s+\|\s*Tarefa/.test(linha)) {
     cabecalho = cells(linha)
     continue
   }

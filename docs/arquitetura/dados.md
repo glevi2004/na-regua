@@ -113,6 +113,34 @@ erDiagram
 | Assinatura       | `subscriptions`, `plans`, `invoices_saas`, `coupons`                   | `billing`          |
 | Plataforma       | `audit_logs`, `idempotency_keys`, `attachments`, `outbox`              | `core`             |
 
+### Estados da venda
+
+O lojista precisa ver se a nota saiu, se o Pix liquidou, se um job falhou.
+Isso **não** cabe num campo `sales.status` (`pending` / `paid` / `invoiced`):
+pagamento e NFC-e têm ciclos independentes — a venda fecha **antes** da nota
+([fluxos](fluxos.md#venda-completa)), o fiado é venda válida sem liquidação, o
+cartão presencial não passa pelo PSP.
+
+A tela da venda **compõe** os estados das tabelas ligadas:
+
+| Pergunta do lojista                         | Onde vive                                                                              | Requisito      |
+| ------------------------------------------- | -------------------------------------------------------------------------------------- | -------------- |
+| A venda existe, foi cancelada ou devolvida? | `sales` — nunca `DELETE`                                                               | RNF-040        |
+| A nota saiu?                                | `invoices` — `autorizada`, `contingencia`, `rejeitada`, `cancelada`; sem sucesso falso | RF-054, US-025 |
+| O dinheiro entrou?                          | `receivables` + `settlements` (`cash`/`pix` já liquidado; `credit`/`wallet` em aberto) | RF-063, RF-064 |
+| A integração falhou com qual resposta?      | `requestId` + corpo do provedor; job reprocessa até o limite                           | RF-129, RF-130 |
+
+Duas falhas distintas, dois desfechos:
+
+1. **`registerSale` aborta** (banco, timeout no meio da transação) — não fica
+   venda pela metade. Estoque, recebível e auditoria entram juntos
+   ([RNF-046](../produto/requisitos-nao-funcionais.md)); o PDV mostra o erro e
+   reenvia com a mesma chave de idempotência ([RNF-043](../produto/requisitos-nao-funcionais.md)).
+2. **A venda já gravou e o resto falha** (SEFAZ, webhook) — a venda permanece;
+   o estado filho (nota, recebível, outbox) fica explícito na consulta.
+
+Quem persiste isso é `core` + `db` (NR-022, schema, RF-054), não `domain`.
+
 ## Convenções de schema
 
 | Elemento           | Convenção                                                                |
