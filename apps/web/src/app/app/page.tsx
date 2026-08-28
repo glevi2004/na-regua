@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { BRAND } from "@/content/site";
 import { Badge, Card, PageHeader, Stat } from "@/components/ui/UI";
-import { ButtonLink } from "@/components/ui/Button";
+import { Button, ButtonLink } from "@/components/ui/Button";
 import { IconArrowRight, IconPlus } from "@/components/Icons";
 import {
   contasPagar,
@@ -59,10 +59,10 @@ export default function VisaoGeralPage() {
         title="Bom dia, Marina"
         subtitle="Segunda-feira, 24 de agosto · resumo das ultimas 24 horas"
         actions={
-          <ButtonLink href="/painel/vendas/nova">
+          <Button>
             <IconPlus size={17} />
             Nova venda
-          </ButtonLink>
+          </Button>
         }
       />
 
@@ -94,7 +94,7 @@ export default function VisaoGeralPage() {
           title="Vendas na semana"
           className={styles.wide}
           action={
-            <ButtonLink href="/painel/vendas" variant="ghost" size="sm">
+            <ButtonLink href="/app/vendas" variant="ghost" size="sm">
               Ver todas
               <IconArrowRight size={15} />
             </ButtonLink>
@@ -131,7 +131,7 @@ export default function VisaoGeralPage() {
         <Card
           title="Proximos vencimentos"
           action={
-            <ButtonLink href="/painel/contas-a-pagar" variant="ghost" size="sm">
+            <ButtonLink href="/app/contas-a-pagar" variant="ghost" size="sm">
               Ver todos
               <IconArrowRight size={15} />
             </ButtonLink>
@@ -159,7 +159,7 @@ export default function VisaoGeralPage() {
         <Card
           title="Precisa de reposicao"
           action={
-            <ButtonLink href="/painel/produtos" variant="ghost" size="sm">
+            <ButtonLink href="/app/produtos" variant="ghost" size="sm">
               Ver catalogo
               <IconArrowRight size={15} />
             </ButtonLink>

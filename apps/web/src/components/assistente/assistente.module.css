@@ -1,0 +1,442 @@
+/* Altura do que fica acima e abaixo do chat (topbar, titulo, respiro).
+   Isolada aqui para o calculo ficar em um lugar so. */
+.chat {
+  --chat-fora: 250px;
+
+  display: grid;
+  /* minmax(0, 1fr) e o ponto central: 1fr sozinho equivale a
+     minmax(auto, 1fr), e esse minimo "auto" impede a faixa de encolher
+     abaixo do conteudo — com ele, o overflow da conversa nunca ativa e a
+     pagina inteira e que cresce. */
+  grid-template-rows: minmax(0, 1fr) auto auto;
+  gap: 14px;
+
+  /* Altura fechada, nao minima: e o teto que faz a conversa rolar por
+     dentro em vez de empurrar a pagina. */
+  height: calc(100vh - var(--chat-fora));
+  /* dvh acompanha a barra do navegador no celular, que aparece e some —
+     com vh puro o campo de entrada fica escondido atras dela. */
+  height: calc(100dvh - var(--chat-fora));
+  min-height: 340px;
+}
+
+/* ===================== Conversa ===================== */
+
+.conversa {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 20px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-lg);
+  background: var(--app-surface);
+}
+
+.boasVindas {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 48px 20px;
+  text-align: center;
+}
+
+.boasVindasIcone {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  background: var(--brand-gradient);
+  color: #fff;
+}
+
+.boasVindas h2 {
+  font-size: 20px;
+  color: var(--app-text);
+}
+
+.boasVindas p {
+  max-width: 46ch;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--app-muted);
+}
+
+.mensagens {
+  display: grid;
+  gap: 14px;
+}
+
+.mensagem {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.daPessoa {
+  justify-content: flex-end;
+}
+
+.doAssistente {
+  justify-content: flex-start;
+}
+
+.avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex: none;
+  margin-top: 2px;
+  border-radius: 50%;
+  background: var(--brand-gradient);
+  color: #fff;
+}
+
+.balao {
+  max-width: 76%;
+  padding: 12px 15px;
+  font-size: 14.5px;
+  line-height: 1.55;
+}
+
+.daPessoa .balao {
+  border-radius: var(--radius) var(--radius) 4px var(--radius);
+  background: var(--app-accent);
+  color: #06312e;
+}
+
+.doAssistente .balao {
+  border-radius: var(--radius) var(--radius) var(--radius) 4px;
+  border: 1px solid var(--app-border);
+  background: var(--app-field);
+  color: var(--app-text);
+}
+
+.balaoTexto {
+  white-space: pre-wrap;
+}
+
+.blocos {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* ===================== Digitando ===================== */
+
+.digitando {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.digitando > span {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--app-muted);
+  animation: pulsar 1.2s ease-in-out infinite;
+}
+
+.digitando > span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.digitando > span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes pulsar {
+  0%, 60%, 100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+.digitandoTexto {
+  margin-left: 6px;
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+/* ===================== Blocos ricos ===================== */
+
+.blocoTexto {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--app-muted);
+}
+
+.blocoCard {
+  padding: 13px 15px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius);
+  background: var(--app-surface);
+}
+
+.blocoTitulo {
+  margin-bottom: 10px;
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+
+.blocoLista {
+  display: grid;
+}
+
+.blocoLista li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 8px 0;
+  border-top: 1px solid var(--app-border);
+  font-size: 13.5px;
+  color: var(--app-text);
+}
+
+.blocoLista li:first-child {
+  border-top: none;
+}
+
+.blocoLista strong {
+  font-family: var(--font-display);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.blocoDestaque {
+  color: var(--app-warn);
+}
+
+.blocoIndicador {
+  display: grid;
+  gap: 2px;
+  padding: 13px 16px;
+  border-radius: var(--radius);
+  background: var(--app-accent-soft);
+}
+
+.blocoIndicador span {
+  font-size: 12px;
+  color: var(--app-accent);
+}
+
+.blocoIndicador strong {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--app-accent);
+}
+
+.blocoIndicador small {
+  font-size: 11.5px;
+  color: var(--app-muted);
+}
+
+.blocoTabelaWrap {
+  overflow-x: auto;
+}
+
+.blocoTabela {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.blocoTabela th {
+  padding: 6px 10px 8px 0;
+  text-align: left;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--app-border);
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+
+.blocoTabela td {
+  padding: 8px 10px 8px 0;
+  border-top: 1px solid var(--app-border);
+  color: var(--app-text);
+  white-space: nowrap;
+}
+
+.blocoTabela td:last-child,
+.blocoTabela th:last-child {
+  padding-right: 0;
+  text-align: right;
+}
+
+.blocoConfirmacao {
+  display: grid;
+  gap: 11px;
+  padding: 14px 16px;
+  border: 1px solid var(--app-warn);
+  border-radius: var(--radius);
+  background: var(--app-warn-soft);
+}
+
+.blocoConfirmacao p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--app-text);
+}
+
+.blocoConfirmacaoAcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ===================== Sugestoes ===================== */
+
+.sugestoes {
+  display: grid;
+  gap: 12px;
+  /* Com "Ver todos" aberto sao dezenas de chips: limita a area e rola
+     dentro dela, senao o campo de entrada sai da tela. */
+  max-height: 30vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.grupoSugestao {
+  display: grid;
+  gap: 7px;
+}
+
+.grupoRotulo {
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.chip {
+  padding: 8px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-full);
+  background: var(--app-surface);
+  font-size: 13px;
+  color: var(--app-muted);
+  text-align: left;
+  transition: border-color var(--transition), color var(--transition),
+    transform var(--transition);
+}
+
+.chip:hover {
+  border-color: var(--app-accent);
+  color: var(--app-text);
+  transform: translateY(-1px);
+}
+
+.chipDestaque {
+  border-color: var(--app-accent);
+  color: var(--app-accent);
+}
+
+.chipMais {
+  padding: 8px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-accent);
+}
+
+/* ===================== Entrada ===================== */
+
+.entrada {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-lg);
+  background: var(--app-surface);
+}
+
+.entrada:focus-within {
+  border-color: var(--app-accent);
+}
+
+.entradaBotao {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex: none;
+  border-radius: 50%;
+  color: var(--app-muted);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.entradaBotao:hover {
+  background: var(--app-field);
+  color: var(--app-accent);
+}
+
+.entradaCampo {
+  flex: 1;
+  min-width: 0;
+  max-height: 120px;
+  padding: 10px 6px;
+  border: none;
+  background: none;
+  color: var(--app-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  resize: none;
+}
+
+.entradaCampo:focus {
+  outline: none;
+}
+
+.entradaCampo::placeholder {
+  color: var(--app-muted);
+}
+
+/* ===================== Responsivo ===================== */
+
+@media (max-width: 620px) {
+  .chat {
+    /* No celular sobra menos cromo acima do chat, e a tela e mais curta:
+       a area de sugestoes cede espaco para a conversa. */
+    --chat-fora: 210px;
+  }
+
+  .balao {
+    max-width: 86%;
+  }
+
+  .conversa {
+    padding: 14px;
+  }
+
+  .sugestoes {
+    max-height: 22vh;
+  }
+}

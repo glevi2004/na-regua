@@ -1,0 +1,211 @@
+/* --- Busca e filtros --- */
+
+.toolbar {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.busca {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-full);
+  color: var(--app-muted);
+  transition: border-color var(--transition);
+}
+
+.busca:focus-within {
+  border-color: var(--app-accent);
+}
+
+.busca input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: none;
+  color: var(--app-text);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+}
+
+.busca input:focus {
+  outline: none;
+}
+
+.selects {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.select {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  color: var(--app-text);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--app-accent);
+}
+
+.select option {
+  background: var(--dark-surface);
+  color: var(--dark-text);
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.filtro {
+  padding: 7px 15px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  color: var(--app-muted);
+  transition: border-color var(--transition), color var(--transition),
+    background-color var(--transition);
+}
+
+.filtro:hover {
+  border-color: var(--app-accent);
+  color: var(--app-text);
+}
+
+.filtroAtivo {
+  background: var(--app-accent-soft);
+  border-color: transparent;
+  color: var(--app-accent);
+  font-weight: 600;
+}
+
+/* --- Grid de produtos --- */
+
+.grid {
+  display: grid;
+  gap: 10px;
+}
+
+.card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "imagem info    numeros"
+    "imagem estoque numeros";
+  align-items: center;
+  gap: 6px 14px;
+  padding: 14px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius);
+  transition: border-color var(--transition), transform var(--transition);
+}
+
+.card:hover {
+  border-color: var(--app-accent);
+  transform: translateY(-2px);
+}
+
+.imagem {
+  grid-area: imagem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex: none;
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  color: var(--app-muted);
+}
+
+.info {
+  grid-area: info;
+  display: grid;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.codigo {
+  font-family: var(--font-display);
+  font-size: 11.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: var(--app-accent);
+}
+
+.descricao {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--app-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.categoria {
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+.numeros {
+  grid-area: numeros;
+  display: grid;
+  justify-items: end;
+  line-height: 1.35;
+}
+
+.preco {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--app-text);
+  white-space: nowrap;
+}
+
+.margem {
+  font-size: 11.5px;
+  color: var(--app-muted);
+  white-space: nowrap;
+}
+
+.estoque {
+  grid-area: estoque;
+}
+
+.emptyAcoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.comandosWrap {
+  margin-top: 14px;
+}
+
+@media (min-width: 720px) {
+  .toolbar {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 420px);
+    align-items: center;
+  }
+}
+
+@media (min-width: 980px) {
+  .grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}

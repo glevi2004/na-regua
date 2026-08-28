@@ -1,0 +1,602 @@
+/* ===================== Barra de filtros ===================== */
+
+.barra {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.filtros {
+  display: grid;
+  gap: 8px;
+}
+
+.select {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  color: var(--app-text);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.select:focus {
+  outline: none;
+  border-color: var(--app-accent);
+}
+
+.select option {
+  background: var(--dark-surface);
+  color: var(--dark-text);
+}
+
+.visoes {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-full);
+  background: var(--app-field);
+  justify-self: start;
+}
+
+.visao {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 16px;
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  color: var(--app-muted);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.visaoAtiva {
+  background: var(--app-accent);
+  color: #06312e;
+  font-weight: 600;
+}
+
+/* ===================== Quadro ===================== */
+
+.quadro {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(268px, 1fr);
+  gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.coluna {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius);
+  background: var(--app-field);
+  min-height: 220px;
+  transition: border-color var(--transition), background-color var(--transition);
+}
+
+/* Alvo do arraste — precisa ser obvio para onde o card vai cair */
+.colunaAlvo {
+  border-color: var(--app-accent);
+  background: var(--app-accent-soft);
+}
+
+.colunaCabecalho {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.colunaTitulo {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.colunaContador {
+  margin-left: auto;
+  padding: 2px 9px;
+  border-radius: var(--radius-full);
+  background: var(--app-surface);
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--app-muted);
+}
+
+.cards {
+  display: grid;
+  gap: 9px;
+}
+
+.colunaVazia {
+  padding: 22px 10px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--app-muted);
+  border: 1px dashed var(--app-border);
+  border-radius: var(--radius-sm);
+}
+
+/* ===================== Card ===================== */
+
+.card {
+  display: grid;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-surface);
+  overflow: hidden;
+  cursor: grab;
+  transition: border-color var(--transition), transform var(--transition);
+}
+
+.card:hover {
+  border-color: var(--app-accent);
+}
+
+.cardArrastando {
+  opacity: 0.45;
+  transform: rotate(1.5deg);
+}
+
+.cardCorpo {
+  display: grid;
+  gap: 8px;
+  padding: 13px;
+  text-align: left;
+}
+
+.cardTopo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cardTitulo {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--app-text);
+}
+
+.cardCliente {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+.cardRodape {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.cardData {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
+.cardResponsavel {
+  padding: 3px 9px;
+  border-radius: var(--radius-full);
+  background: var(--app-accent-soft);
+  color: var(--app-accent);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+
+.cardSemResponsavel {
+  font-size: 11.5px;
+  color: var(--app-muted);
+  opacity: 0.8;
+}
+
+.cardOrigem {
+  font-size: 11px;
+  color: var(--app-muted);
+  opacity: 0.75;
+}
+
+/* Seletor acessivel de coluna, alternativa ao arraste */
+.cardMover {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 13px;
+  border-top: 1px solid var(--app-border);
+  background: var(--app-field);
+}
+
+.cardMoverRotulo {
+  font-size: 11.5px;
+  color: var(--app-muted);
+  white-space: nowrap;
+}
+
+.cardMoverSelect {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border: none;
+  background: none;
+  color: var(--app-text);
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  cursor: pointer;
+}
+
+.cardMoverSelect:focus {
+  outline: 1px solid var(--app-accent);
+  border-radius: 4px;
+}
+
+.cardMoverSelect option {
+  background: var(--dark-surface);
+  color: var(--dark-text);
+}
+
+/* ===================== Lista ===================== */
+
+.lista {
+  display: grid;
+}
+
+.listaItem {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 14px 8px;
+  border-top: 1px solid var(--app-border);
+  text-align: left;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--transition);
+}
+
+.lista li:first-child .listaItem {
+  border-top: none;
+}
+
+.listaItem:hover {
+  background: var(--app-field);
+}
+
+.listaPrincipal {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+}
+
+.listaPrincipal strong {
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--app-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.listaPrincipal span {
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+/* ===================== Dialogo ===================== */
+
+.dialogRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 230;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.dialogBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 9, 26, 0.74);
+  backdrop-filter: blur(3px);
+}
+
+.dialogPainel {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 92vh;
+  overflow-y: auto;
+  display: grid;
+  gap: 14px;
+  padding: 22px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-lg);
+  background: var(--app-surface);
+  color: var(--app-text);
+  box-shadow: 0 40px 90px -40px rgba(0, 0, 0, 0.9);
+}
+
+.dialogPainel:focus {
+  outline: none;
+}
+
+.dialogLargo {
+  max-width: 580px;
+}
+
+.dialogTitulo {
+  font-size: 19px;
+  color: var(--app-text);
+}
+
+.dialogFechar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: 50%;
+  color: var(--app-muted);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.dialogFechar:hover {
+  background: var(--app-field);
+  color: var(--app-text);
+}
+
+.dialogAcoes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+/* ===================== Detalhe ===================== */
+
+.detalheCabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.detalheTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.detalheTitulo {
+  font-size: 21px;
+  line-height: 1.3;
+  color: var(--app-text);
+}
+
+.detalheDescricao {
+  font-size: 14.5px;
+  line-height: 1.55;
+  color: var(--app-muted);
+}
+
+.detalheDados {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  padding: 16px;
+  border-radius: var(--radius);
+  background: var(--app-field);
+}
+
+.detalheDados dt {
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
+.detalheDados dd {
+  margin: 3px 0 0;
+  font-size: 14px;
+  color: var(--app-text);
+}
+
+.detalheColunas {
+  display: flex;
+  gap: 6px;
+}
+
+.detalheColuna {
+  flex: 1;
+  padding: 9px 12px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-full);
+  font-size: 13px;
+  color: var(--app-muted);
+  transition: border-color var(--transition), color var(--transition),
+    background-color var(--transition);
+}
+
+.detalheColuna:hover {
+  border-color: var(--app-accent);
+  color: var(--app-text);
+}
+
+.detalheColunaAtiva {
+  background: var(--app-accent-soft);
+  border-color: transparent;
+  color: var(--app-accent);
+  font-weight: 600;
+}
+
+/* ===================== Historico ===================== */
+
+.historico {
+  padding-top: 16px;
+  border-top: 1px solid var(--app-border);
+}
+
+.historicoTitulo {
+  margin-bottom: 12px;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--app-muted);
+}
+
+.comentarios {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.comentario {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 10px;
+  padding-left: 12px;
+  border-left: 2px solid var(--app-border);
+}
+
+.comentarioAutor {
+  font-family: var(--font-display);
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--app-accent);
+}
+
+.comentarioData {
+  font-size: 11.5px;
+  color: var(--app-muted);
+}
+
+.comentarioTexto {
+  grid-column: 1 / -1;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: var(--app-text);
+}
+
+.comentarForm {
+  display: grid;
+  gap: 8px;
+}
+
+.comentarAcoes {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ===================== Formulario ===================== */
+
+.formCampos {
+  display: grid;
+  gap: 14px;
+}
+
+.formLinha {
+  display: grid;
+  gap: 14px;
+}
+
+.campo {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+}
+
+.campo > span {
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+.input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  color: var(--app-text);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--app-accent);
+}
+
+.textarea {
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.tipoToggle {
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-full);
+  background: var(--app-field);
+}
+
+.tipoBotao {
+  flex: 1;
+  padding: 8px 14px;
+  border-radius: var(--radius-full);
+  font-size: 13.5px;
+  color: var(--app-muted);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.tipoAtivo {
+  background: var(--app-accent);
+  color: #06312e;
+  font-weight: 600;
+}
+
+.erro {
+  padding: 10px 13px;
+  border: 1px solid var(--app-danger);
+  border-radius: var(--radius-sm);
+  background: var(--app-danger-soft);
+  color: var(--app-danger);
+  font-size: 13px;
+}
+
+/* ===================== Responsivo ===================== */
+
+@media (min-width: 620px) {
+  .filtros {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .formLinha {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (min-width: 900px) {
+  .barra {
+    grid-template-columns: 1fr auto;
+    align-items: center;
+  }
+}

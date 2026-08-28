@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { BRAND, footerColumns } from "@/content/site";
 import styles from "./Footer.module.css";
 
@@ -36,10 +37,10 @@ export default function Footer() {
               <h3 className={styles.columnTitle}>{col.title}</h3>
               <ul className={styles.columnList}>
                 {col.links.map((link) => (
-                  <li key={link}>
-                    <a href="#top" className={styles.columnLink}>
-                      {link}
-                    </a>
+                  <li key={link.label}>
+                    <Link href={link.href} className={styles.columnLink}>
+                      {link.label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -53,8 +54,8 @@ export default function Footer() {
           © {new Date().getFullYear()} {BRAND}. Todos os direitos reservados.
         </p>
         <div className={styles.legal}>
-          <a href="#top">Termos de uso</a>
-          <a href="#top">Privacidade</a>
+          <a href="/termos-de-uso" target="_blank" rel="noreferrer noopener">Termos de uso</a>
+          <a href="/politica-de-privacidade" target="_blank" rel="noreferrer noopener">Privacidade</a>
         </div>
       </div>
     </footer>

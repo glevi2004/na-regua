@@ -43,7 +43,7 @@ export default function Header() {
         </nav>
 
         <div className={styles.actions}>
-          <Link href="/entrar" className={styles.login}>
+          <Link href="/login" className={styles.login}>
             Entrar
           </Link>
           <Link href="/criar-conta" className="btn btnPrimary">
@@ -88,7 +88,7 @@ export default function Header() {
           Comecar agora
         </Link>
         <Link
-          href="/entrar"
+          href="/login"
           className={`btn btnGhost ${styles.mobileCta}`}
           onClick={() => setOpen(false)}
         >

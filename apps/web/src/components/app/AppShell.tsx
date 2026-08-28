@@ -1,10 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState, type ComponentType, type ReactNode } from "react";
 import { BRAND } from "@/content/site";
 import { MODULOS_BLOQUEADOS } from "@/lib/access";
+import { endSession } from "@/lib/session";
+import { listarChamados, totalNaoLidas } from "@/lib/suporte-api";
 import PaymentOverdueBanner from "../billing/PaymentOverdueBanner";
 import PaymentRequiredModal from "../billing/PaymentRequiredModal";
 import { useSubscription } from "../billing/SubscriptionProvider";
@@ -15,6 +17,7 @@ import {
   IconBox,
   IconCalendar,
   IconChart,
+  IconChevronDown,
   IconClose,
   IconList,
   IconLogout,
@@ -33,35 +36,32 @@ type NavItem = {
   href: string;
   label: string;
   icon: ComponentType<IconProps>;
+  /** Sub-itens: hoje usado apenas por Financeiro. */
+  children?: { href: string; label: string }[];
 };
 
-/** Modulos do mapeamento (docs/ZapGestor_Apresentacao.pdf), agrupados por uso. */
-const navGroups: { title: string; items: NavItem[] }[] = [
+/** Modulos do mapeamento (docs/ZapGestor_Apresentacao.pdf). */
+const navItems: NavItem[] = [
+  { href: "/app", label: "Tela principal", icon: IconChart },
+  { href: "/app/vendas", label: "Vendas", icon: IconBag },
+  { href: "/app/clientes", label: "Clientes", icon: IconUsers },
+  { href: "/app/produtos", label: "Produtos", icon: IconBox },
   {
-    title: "Operacao",
-    items: [
-      { href: "/painel", label: "Visao geral", icon: IconChart },
-      { href: "/painel/vendas", label: "Vendas", icon: IconBag },
-      { href: "/painel/agenda", label: "Agenda", icon: IconCalendar },
+    href: "/app/financeiro",
+    label: "Financeiro",
+    icon: IconWallet,
+    children: [
+      { href: "/app/financeiro/plano-de-contas", label: "Plano de contas" },
+      { href: "/app/financeiro/contas-a-pagar", label: "Contas a pagar" },
+      { href: "/app/financeiro/contas-a-receber", label: "Contas a receber" },
     ],
   },
-  {
-    title: "Cadastros",
-    items: [
-      { href: "/painel/clientes", label: "Clientes", icon: IconUsers },
-      { href: "/painel/produtos", label: "Produtos", icon: IconBox },
-      { href: "/painel/empresa", label: "Empresa", icon: IconSettings },
-    ],
-  },
-  {
-    title: "Financeiro",
-    items: [
-      { href: "/painel/contas-a-pagar", label: "Contas a pagar", icon: IconReceipt },
-      { href: "/painel/contas-a-receber", label: "Contas a receber", icon: IconWallet },
-      { href: "/painel/bancos", label: "Bancos", icon: IconBank },
-      { href: "/painel/plano-de-contas", label: "Plano de contas", icon: IconList },
-    ],
-  },
+  { href: "/app/crm", label: "CRM", icon: IconList },
+  { href: "/app/agenda", label: "Agenda", icon: IconCalendar },
+  { href: "/app/empresa", label: "Empresa", icon: IconSettings },
+  { href: "/app/assistente-ia", label: "Assistente IA", icon: IconSparkles },
+  { href: "/app/assinatura", label: "Assinatura", icon: IconReceipt },
+  { href: "/app/suporte", label: "Suporte", icon: IconBank },
 ];
 
 /** Cadeado exibido ao lado dos modulos restritos. */
@@ -86,16 +86,26 @@ function IconLockSmall() {
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [navOpen, setNavOpen] = useState(false);
   const { bloqueado, pedirRegularizacao } = useSubscription();
 
-  /* Fecha a navegacao ao trocar de rota no mobile.
-     Ajuste durante o render (padrao recomendado do React) em vez de efeito:
-     evita o render extra que um setState em useEffect provocaria. */
+  /* SUBSTITUIR POR: GET /suporte/chamados (ou contador dedicado) — hoje
+     le do mock uma vez, no primeiro render. */
+  const [naoLidas] = useState(() => totalNaoLidas(listarChamados()));
+
+  /* Financeiro comeca aberto quando a rota atual esta dentro dele. */
+  const [financeiroAberto, setFinanceiroAberto] = useState(
+    pathname.startsWith("/app/financeiro"),
+  );
+
+  /* Fecha a navegacao ao trocar de rota no mobile. Ajuste durante o render
+     (padrao recomendado do React) em vez de setState em efeito. */
   const [rotaAnterior, setRotaAnterior] = useState(pathname);
   if (rotaAnterior !== pathname) {
     setRotaAnterior(pathname);
     setNavOpen(false);
+    if (pathname.startsWith("/app/financeiro")) setFinanceiroAberto(true);
   }
 
   useEffect(() => {
@@ -106,11 +116,21 @@ export default function AppShell({ children }: { children: ReactNode }) {
   }, [navOpen]);
 
   const isActive = (href: string) =>
-    href === "/painel" ? pathname === href : pathname.startsWith(href);
+    href === "/app" ? pathname === href : pathname.startsWith(href);
+
+  const isRestrito = (href: string) =>
+    bloqueado &&
+    (MODULOS_BLOQUEADOS as readonly string[]).some(
+      (rota) => rota === href || rota.startsWith(`${href}/`),
+    );
+
+  function sair() {
+    endSession();
+    router.push("/login");
+  }
 
   return (
     <div className={`appTheme ${styles.shell}`}>
-      {/* Fundo escuro atras da navegacao no mobile */}
       {navOpen ? (
         <button
           type="button"
@@ -130,67 +150,109 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </Link>
 
         <nav className={styles.nav} aria-label="Modulos do sistema">
-          {navGroups.map((group) => (
-            <div key={group.title} className={styles.navGroup}>
-              <span className={styles.navGroupTitle}>{group.title}</span>
-              {group.items.map((item) => {
-                const Icon = item.icon;
-                const restrito =
-                  bloqueado &&
-                  (MODULOS_BLOQUEADOS as readonly string[]).includes(item.href);
+          {navItems.map((item) => {
+            const Icon = item.icon;
 
-                /* Modulo restrito continua visivel — mas com cadeado e
-                   abrindo o modal em vez de navegar. */
-                if (restrito) {
-                  return (
-                    <button
-                      key={item.href}
-                      type="button"
-                      className={`${styles.navItem} ${styles.navLocked}`}
-                      onClick={pedirRegularizacao}
-                    >
-                      <Icon size={18} />
-                      {item.label}
-                      <span className={styles.navLockIcon}>
-                        <IconLockSmall />
-                      </span>
-                    </button>
-                  );
-                }
-
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className={`${styles.navItem} ${
+            /* --- Item com submenu (Financeiro) --- */
+            if (item.children) {
+              return (
+                <div key={item.href} className={styles.navGroup}>
+                  <button
+                    type="button"
+                    className={`${styles.navItem} ${styles.navToggle} ${
                       isActive(item.href) ? styles.navActive : ""
                     }`}
-                    aria-current={isActive(item.href) ? "page" : undefined}
+                    onClick={() => setFinanceiroAberto((v) => !v)}
+                    aria-expanded={financeiroAberto}
                   >
                     <Icon size={18} />
                     {item.label}
-                  </Link>
-                );
-              })}
-            </div>
-          ))}
-        </nav>
+                    <span
+                      className={`${styles.navChevron} ${
+                        financeiroAberto ? styles.navChevronOpen : ""
+                      }`}
+                    >
+                      <IconChevronDown size={16} />
+                    </span>
+                  </button>
 
-        <div className={styles.assistant}>
-          <span className={styles.assistantIcon}>
-            <IconSparkles size={16} />
-          </span>
-          <p className={styles.assistantText}>
-            Peca em texto: &ldquo;o que tenho a pagar hoje?&rdquo;
-          </p>
-          <button type="button" className={styles.assistantCta}>
-            Abrir assistente
-          </button>
-        </div>
+                  {financeiroAberto ? (
+                    <div className={styles.subNav}>
+                      {item.children.map((sub) =>
+                        isRestrito(sub.href) ? (
+                          <button
+                            key={sub.href}
+                            type="button"
+                            className={`${styles.subItem} ${styles.navLocked}`}
+                            onClick={pedirRegularizacao}
+                          >
+                            {sub.label}
+                            <span className={styles.navLockIcon}>
+                              <IconLockSmall />
+                            </span>
+                          </button>
+                        ) : (
+                          <Link
+                            key={sub.href}
+                            href={sub.href}
+                            className={`${styles.subItem} ${
+                              pathname === sub.href ? styles.subActive : ""
+                            }`}
+                          >
+                            {sub.label}
+                          </Link>
+                        ),
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              );
+            }
+
+            /* --- Modulo restrito: continua visivel, com cadeado --- */
+            if (isRestrito(item.href)) {
+              return (
+                <button
+                  key={item.href}
+                  type="button"
+                  className={`${styles.navItem} ${styles.navLocked}`}
+                  onClick={pedirRegularizacao}
+                >
+                  <Icon size={18} />
+                  {item.label}
+                  <span className={styles.navLockIcon}>
+                    <IconLockSmall />
+                  </span>
+                </button>
+              );
+            }
+
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`${styles.navItem} ${
+                  isActive(item.href) ? styles.navActive : ""
+                }`}
+                aria-current={isActive(item.href) ? "page" : undefined}
+              >
+                <Icon size={18} />
+                {item.label}
+                {/* Respostas de suporte que a pessoa ainda nao viu */}
+                {item.href === "/app/suporte" && naoLidas > 0 ? (
+                  <span className={styles.navBadge} aria-label={`${naoLidas} resposta(s) nova(s)`}>
+                    {naoLidas}
+                  </span>
+                ) : null}
+              </Link>
+            );
+          })}
+        </nav>
       </aside>
 
       <div className={styles.main}>
-        {/* Aviso persistente de pagamento pendente, acima de tudo */}
+        {/* Aviso persistente de pagamento pendente. Fica no layout de /app,
+            portanto aparece em qualquer sub-rota. */}
         {bloqueado ? <PaymentOverdueBanner /> : null}
 
         <header className={styles.topbar}>
@@ -215,10 +277,15 @@ export default function AppShell({ children }: { children: ReactNode }) {
           </label>
 
           <div className={styles.topActions}>
-            <button type="button" className={styles.iconButton} aria-label="Notificacoes">
+            <button
+              type="button"
+              className={styles.iconButton}
+              aria-label="Notificacoes"
+            >
               <IconBell size={19} />
               <span className={styles.badgeDot} />
             </button>
+
             <div className={styles.user}>
               <span className={styles.avatar}>MA</span>
               <span className={styles.userText}>
@@ -226,16 +293,21 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 <span>Mercearia Sol Nascente</span>
               </span>
             </div>
-            <Link href="/entrar" className={styles.iconButton} aria-label="Sair">
+
+            <button
+              type="button"
+              className={styles.iconButton}
+              onClick={sair}
+              aria-label="Sair"
+            >
               <IconLogout size={19} />
-            </Link>
+            </button>
           </div>
         </header>
 
         <main className={styles.content}>{children}</main>
       </div>
 
-      {/* Modal disparado por qualquer tentativa de usar modulo bloqueado */}
       <PaymentRequiredModal />
     </div>
   );

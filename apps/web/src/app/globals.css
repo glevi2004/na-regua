@@ -288,8 +288,17 @@ svg {
   --app-muted: var(--dark-text-muted);
   --app-accent: var(--brand-accent);
   --app-accent-soft: rgba(57, 200, 189, 0.14);
-  --app-warn: #c4a8ff;
-  --app-warn-soft: rgba(109, 51, 221, 0.26);
+  /* Estados de dado, sobre fundo escuro. Ambar para "atencao" e vermelho
+     para "erro/vencido" — os mesmos significados do tema claro, para que
+     um titulo vencido tenha a mesma cor no painel e no aviso de cobranca. */
+  --app-warn: #fdb022;
+  --app-warn-soft: rgba(253, 176, 34, 0.16);
+  --app-danger: #ff9c9c;
+  --app-danger-soft: rgba(255, 118, 118, 0.16);
+
+  /* Roxo da marca, para destaque — nao para alerta. */
+  --app-destaque: #c4a8ff;
+  --app-destaque-soft: rgba(109, 51, 221, 0.26);
   --app-field: rgba(255, 255, 255, 0.04);
   --app-field-hover: rgba(255, 255, 255, 0.07);
 

@@ -1,0 +1,228 @@
+.form {
+  display: grid;
+  gap: 14px;
+}
+
+/* Campo com botao ou spinner ao lado */
+.inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inline > input {
+  flex: 1;
+  min-width: 0;
+}
+
+.inlineSpinner {
+  display: inline-flex;
+  flex: none;
+  color: var(--app-muted);
+}
+
+.erro {
+  display: block;
+  font-size: 12.5px;
+  color: var(--app-danger);
+}
+
+.dica {
+  display: block;
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+/* --- Conexoes entre usuarios --- */
+
+.conexoes {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px solid var(--app-border);
+}
+
+.conexoesNota {
+  margin-top: 8px;
+  max-width: 62ch;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--app-muted);
+}
+
+/* --- Certificado digital --- */
+
+.certCard {
+  display: grid;
+  gap: 16px;
+  justify-items: start;
+}
+
+.certHead {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.certIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  flex: none;
+  border-radius: var(--radius);
+  background: var(--app-accent-soft);
+  color: var(--app-accent);
+}
+
+.certIconWarn {
+  background: var(--app-warn-soft);
+  color: var(--app-warn);
+}
+
+.certInfo {
+  display: grid;
+  min-width: 0;
+  line-height: 1.35;
+}
+
+.certInfo strong {
+  font-size: 14.5px;
+  color: var(--app-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.certInfo span {
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+.certHead > :last-child {
+  margin-left: auto;
+}
+
+.certMeta {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  width: 100%;
+  padding: 14px 16px;
+  border-radius: var(--radius);
+  background: var(--app-field);
+}
+
+.certMeta dt {
+  font-size: 12px;
+  color: var(--app-muted);
+}
+
+.certMeta dd {
+  margin: 3px 0 0;
+  font-family: var(--font-display);
+  font-size: 14.5px;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.certAlert {
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--warning-border);
+  border-radius: var(--radius-sm);
+  background: var(--warning-bg);
+  color: var(--warning-text);
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.certForm {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+}
+
+.certField {
+  display: grid;
+  gap: 7px;
+}
+
+.certLabel {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--app-muted);
+}
+
+.certFile {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px dashed var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  color: var(--app-text);
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.certFile::file-selector-button {
+  margin-right: 12px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--app-accent);
+  color: #06312e;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.certInput {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-field);
+  color: var(--app-text);
+  font-family: var(--font-body);
+  font-size: 14.5px;
+}
+
+.certInput:focus {
+  outline: none;
+  border-color: var(--app-accent);
+}
+
+.certErro {
+  width: 100%;
+  font-size: 13px;
+  color: var(--app-danger);
+}
+
+.certNota {
+  max-width: 60ch;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--app-muted);
+}
+
+/* --- Rodape --- */
+
+.rodape {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+@media (max-width: 560px) {
+  .inline {
+    flex-wrap: wrap;
+  }
+
+  .certMeta {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Poppins, Inter } from "next/font/google";
+import { BRAND } from "@/content/site";
 import "./globals.css";
 
 /* Fonte de marca/destaque: geometrica e arredondada, no espirito da
@@ -19,7 +20,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Produto — Gestao modular para o seu comercio",
+  /* Le do BRAND para o nome nao precisar ser trocado em dois lugares. */
+  title: `${BRAND} — Gestao modular para o seu comercio`,
   description:
     "Modulos integrados de vendas, financeiro, estoque e fiscal, com um assistente que responde em linguagem natural.",
 };

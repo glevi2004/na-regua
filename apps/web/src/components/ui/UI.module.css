@@ -116,8 +116,8 @@
 }
 
 .badge_danger {
-  background: rgba(255, 118, 118, 0.16);
-  color: #ff9c9c;
+  background: var(--app-danger-soft);
+  color: var(--app-danger);
 }
 
 .badge_info {

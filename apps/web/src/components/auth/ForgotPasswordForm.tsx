@@ -40,7 +40,7 @@ export default function ForgotPasswordForm() {
           para criar uma nova senha. O link vale por 1 hora.
         </Alert>
         <FormFooter>
-          <Link href="/entrar">Voltar para o login</Link>
+          <Link href="/login">Voltar para o login</Link>
         </FormFooter>
       </>
     );
@@ -76,7 +76,7 @@ export default function ForgotPasswordForm() {
       </form>
 
       <FormFooter>
-        Lembrou a senha? <Link href="/entrar">Entrar</Link>
+        Lembrou a senha? <Link href="/login">Entrar</Link>
       </FormFooter>
     </>
   );

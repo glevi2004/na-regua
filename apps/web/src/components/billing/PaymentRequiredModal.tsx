@@ -103,7 +103,7 @@ export default function PaymentRequiredModal() {
 
         <div className={styles.modalActions}>
           <Link
-            href="/painel/assinatura"
+            href="/app/assinatura"
             className={styles.modalPrimary}
             onClick={fecharModal}
           >

@@ -3,31 +3,49 @@
 import QRCode from "qrcode";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
-  createPixCharge,
-  fetchPixChargeStatus,
   PIX_EXPIRATION_MINUTES,
   type PixCharge,
+  type PixChargeStatus,
 } from "@/lib/auth-api";
 import { formatMoney } from "@/lib/format";
-import { IconCheck } from "../Icons";
-import { Spinner } from "./Fields";
-import styles from "./pix.module.css";
+import { IconCheck } from "@/components/Icons";
+import { Spinner } from "@/components/auth/Fields";
+import styles from "./cobrancaPix.module.css";
 
 /** Intervalo do polling de confirmacao, em ms. */
 const POLL_INTERVAL = 4000;
 
 type Estado = "carregando" | "aguardando" | "confirmado" | "expirado" | "erro";
 
-export default function PixQRCodeCard({
-  planName,
+/**
+ * Cobranca por Pix, com os quatro estados: aguardando (com contador e
+ * polling), confirmado, expirado e erro.
+ *
+ * Compartilhado entre a assinatura (criar conta) e a venda no PDV — o que
+ * muda entre os dois e de onde vem a cobranca, nao a tela. Por isso as
+ * chamadas entram por prop em vez de virem importadas: o componente nao
+ * precisa saber se esta cobrando mensalidade ou venda de balcao.
+ */
+export default function CobrancaPix({
+  titulo,
+  subtitulo,
   amount,
-  periodicidade = "por mes",
-  onPaid,
+  criarCobranca,
+  consultarStatus,
+  onPago,
+  textoSucesso,
 }: {
-  planName: string;
+  /** Nome do que esta sendo cobrado (plano, numero da venda...). */
+  titulo: string;
+  /** Linha de apoio ao lado do valor. */
+  subtitulo: string;
   amount: number;
-  periodicidade?: string;
-  onPaid: () => void;
+  /** SUBSTITUIR no chamador: POST da cobranca no backend. */
+  criarCobranca: (amount: number) => Promise<PixCharge>;
+  /** SUBSTITUIR no chamador: GET do status da cobranca. */
+  consultarStatus: (chargeId: string) => Promise<PixChargeStatus>;
+  onPago: () => void;
+  textoSucesso?: string;
 }) {
   const [estado, setEstado] = useState<Estado>("carregando");
   const [charge, setCharge] = useState<PixCharge | null>(null);
@@ -52,7 +70,7 @@ export default function PixQRCodeCard({
     async function carregar() {
       try {
         /* SUBSTITUIR POR: POST /billing/charges */
-        const nova = await createPixCharge(planName, amount);
+        const nova = await criarCobranca(amount);
         if (cancelado) return;
 
         chargeIdRef.current = nova.chargeId;
@@ -85,7 +103,7 @@ export default function PixQRCodeCard({
     return () => {
       cancelado = true;
     };
-  }, [planName, amount, tentativa]);
+  }, [criarCobranca, amount, tentativa]);
 
   /** Acao do usuario: limpa a tela e dispara o efeito de novo. */
   const gerarNovoCodigo = useCallback(() => {
@@ -130,7 +148,7 @@ export default function PixQRCodeCard({
     const timer = setInterval(async () => {
       try {
         /* SUBSTITUIR POR: GET /billing/charges/:id */
-        const status = await fetchPixChargeStatus(idAtual);
+        const status = await consultarStatus(idAtual);
         if (chargeIdRef.current !== idAtual) return;
 
         if (status === "paid") {
@@ -144,14 +162,14 @@ export default function PixQRCodeCard({
     }, POLL_INTERVAL);
 
     return () => clearInterval(timer);
-  }, [estado, charge]);
+  }, [estado, charge, consultarStatus]);
 
   /* Redireciona pouco depois de confirmar, para o usuario ver o sucesso. */
   useEffect(() => {
     if (estado !== "confirmado") return;
-    const timer = setTimeout(onPaid, 1800);
+    const timer = setTimeout(onPago, 1800);
     return () => clearTimeout(timer);
-  }, [estado, onPaid]);
+  }, [estado, onPago]);
 
   /* ---------------------------------------------------------------- *
    * Copiar codigo
@@ -184,7 +202,7 @@ export default function PixQRCodeCard({
         </span>
         <h2 className={styles.successTitle}>Pagamento confirmado!</h2>
         <p className={styles.successText}>
-          Sua assinatura do {planName} esta ativa. Estamos abrindo seu painel...
+          {textoSucesso ?? `${titulo} confirmado.`}
         </p>
         <div className={styles.successBar} aria-hidden="true">
           <span />
@@ -232,12 +250,12 @@ export default function PixQRCodeCard({
       {/* Resumo do plano */}
       <div className={styles.planBox}>
         <div>
-          <span className={styles.planLabel}>Plano contratado</span>
-          <strong className={styles.planName}>{planName}</strong>
+          <span className={styles.planLabel}>{subtitulo}</span>
+          <strong className={styles.planName}>{titulo}</strong>
         </div>
         <div className={styles.planPrice}>
           <strong>{formatMoney(amount)}</strong>
-          <span>{periodicidade}</span>
+          <span>a pagar</span>
         </div>
       </div>
 

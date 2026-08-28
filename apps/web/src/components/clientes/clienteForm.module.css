@@ -1,0 +1,89 @@
+.form {
+  display: grid;
+  gap: 14px;
+}
+
+/* --- Toggle CPF / CNPJ --- */
+
+.tipoToggle {
+  display: inline-flex;
+  gap: 4px;
+  margin-bottom: 20px;
+  padding: 4px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-full);
+  background: var(--app-field);
+}
+
+.tipoBotao {
+  padding: 8px 18px;
+  border-radius: var(--radius-full);
+  font-size: 13.5px;
+  color: var(--app-muted);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.tipoBotao:hover {
+  color: var(--app-text);
+}
+
+.tipoAtivo {
+  background: var(--app-accent);
+  color: #06312e;
+  font-weight: 600;
+}
+
+/* --- Campo com botao ao lado --- */
+
+.inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inline > input {
+  flex: 1;
+  min-width: 0;
+}
+
+.inlineSpinner {
+  display: inline-flex;
+  flex: none;
+  color: var(--app-muted);
+}
+
+.erro {
+  display: block;
+  font-size: 12.5px;
+  color: var(--app-danger);
+}
+
+.aviso {
+  display: block;
+  font-size: 12.5px;
+  color: var(--app-warn);
+}
+
+/* --- Rodape --- */
+
+.rodape {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+@media (max-width: 560px) {
+  .inline {
+    flex-wrap: wrap;
+  }
+
+  .tipoToggle {
+    width: 100%;
+  }
+
+  .tipoBotao {
+    flex: 1;
+  }
+}

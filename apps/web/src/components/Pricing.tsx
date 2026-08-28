@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { plan } from "@/content/site";
 import { IconArrowRight, IconCheck, IconShield } from "./Icons";
 import styles from "./Pricing.module.css";
@@ -27,10 +28,10 @@ export default function Pricing() {
               <span className={styles.period}>{plan.period}</span>
             </p>
 
-            <a href="#top" className={`btn btnPrimary ${styles.cta}`}>
+            <Link href="/criar-conta" className={`btn btnPrimary ${styles.cta}`}>
               Comecar teste gratuito
               <IconArrowRight size={18} />
-            </a>
+            </Link>
 
             <p className={styles.note}>{plan.note}</p>
 

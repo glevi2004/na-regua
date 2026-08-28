@@ -78,6 +78,140 @@ export function passwordStrength(value: string): {
   return { score: score as 1 | 2 | 3, label: labels[score] };
 }
 
+/* -------------------------------------------------------------------------- *
+ * Documentos e endereco
+ * -------------------------------------------------------------------------- */
+
+/** Mascara progressiva de CNPJ: 12.345.678/0001-90 */
+export function maskCNPJ(value: string): string {
+  const d = value.replace(/\D/g, "").slice(0, 14);
+  if (d.length <= 2) return d;
+  if (d.length <= 5) return `${d.slice(0, 2)}.${d.slice(2)}`;
+  if (d.length <= 8) return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5)}`;
+  if (d.length <= 12)
+    return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8)}`;
+  return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`;
+}
+
+/**
+ * Valida CNPJ pelos digitos verificadores — nao apenas pelo formato.
+ * Formato correto com digito errado e o erro que mais passa despercebido
+ * em cadastro, e so aparece na hora de emitir nota.
+ */
+export function isValidCNPJ(value: string): boolean {
+  const d = value.replace(/\D/g, "");
+  if (d.length !== 14) return false;
+  if (/^(\d)\1{13}$/.test(d)) return false;
+
+  const digito = (base: string, pesos: number[]) => {
+    const soma = base
+      .split("")
+      .reduce((acc, n, i) => acc + Number(n) * pesos[i], 0);
+    const resto = soma % 11;
+    return resto < 2 ? 0 : 11 - resto;
+  };
+
+  const pesos1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+  const pesos2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2];
+
+  const dv1 = digito(d.slice(0, 12), pesos1);
+  const dv2 = digito(d.slice(0, 13), pesos2);
+
+  return dv1 === Number(d[12]) && dv2 === Number(d[13]);
+}
+
+export function validateCNPJ(value: string): FieldError {
+  const d = value.replace(/\D/g, "");
+  if (!d) return "Informe o CNPJ.";
+  if (d.length !== 14) return "CNPJ incompleto.";
+  return isValidCNPJ(value) ? null : "CNPJ invalido.";
+}
+
+/** Mascara progressiva de CPF: 123.456.789-00 */
+export function maskCPF(value: string): string {
+  const d = value.replace(/\D/g, "").slice(0, 11);
+  if (d.length <= 3) return d;
+  if (d.length <= 6) return `${d.slice(0, 3)}.${d.slice(3)}`;
+  if (d.length <= 9) return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6)}`;
+  return `${d.slice(0, 3)}.${d.slice(3, 6)}.${d.slice(6, 9)}-${d.slice(9)}`;
+}
+
+/** Valida CPF pelos digitos verificadores. */
+export function isValidCPF(value: string): boolean {
+  const d = value.replace(/\D/g, "");
+  if (d.length !== 11) return false;
+  if (/^(\d)\1{10}$/.test(d)) return false;
+
+  const digito = (qtd: number) => {
+    let soma = 0;
+    for (let i = 0; i < qtd; i++) {
+      soma += Number(d[i]) * (qtd + 1 - i);
+    }
+    const resto = (soma * 10) % 11;
+    return resto === 10 ? 0 : resto;
+  };
+
+  return digito(9) === Number(d[9]) && digito(10) === Number(d[10]);
+}
+
+export function validateCPF(value: string): FieldError {
+  const d = value.replace(/\D/g, "");
+  if (!d) return "Informe o CPF.";
+  if (d.length !== 11) return "CPF incompleto.";
+  return isValidCPF(value) ? null : "CPF invalido.";
+}
+
+/** Valida CPF ou CNPJ conforme o tipo escolhido. */
+export function validateDocumento(
+  value: string,
+  tipo: "fisica" | "juridica",
+): FieldError {
+  return tipo === "fisica" ? validateCPF(value) : validateCNPJ(value);
+}
+
+export function maskDocumento(
+  value: string,
+  tipo: "fisica" | "juridica",
+): string {
+  return tipo === "fisica" ? maskCPF(value) : maskCNPJ(value);
+}
+
+/** Mascara de CEP: 80010-010 */
+export function maskCEP(value: string): string {
+  const d = value.replace(/\D/g, "").slice(0, 8);
+  return d.length <= 5 ? d : `${d.slice(0, 5)}-${d.slice(5)}`;
+}
+
+export function validateCEP(value: string): FieldError {
+  const d = value.replace(/\D/g, "");
+  if (!d) return "Informe o CEP.";
+  return d.length === 8 ? null : "CEP incompleto.";
+}
+
+export function validateRequired(value: string, label: string): FieldError {
+  return value.trim() ? null : `Informe ${label}.`;
+}
+
+/** Celular sem DDD: 99876-5432 */
+export function maskCelular(value: string): string {
+  const d = value.replace(/\D/g, "").slice(0, 9);
+  if (d.length <= 4) return d;
+  if (d.length <= 8) return `${d.slice(0, 4)}-${d.slice(4)}`;
+  return `${d.slice(0, 5)}-${d.slice(5)}`;
+}
+
+export function validateCelular(value: string): FieldError {
+  const d = value.replace(/\D/g, "");
+  if (!d) return "Informe o celular.";
+  return d.length >= 8 && d.length <= 9 ? null : "Celular invalido.";
+}
+
+export function validateDDD(value: string): FieldError {
+  const d = value.replace(/\D/g, "");
+  if (!d) return "DDD.";
+  return d.length === 2 ? null : "DDD invalido.";
+}
+
 /** Mascara progressiva de telefone: (41) 99876-5432 */
 export function maskPhone(value: string): string {
   const d = value.replace(/\D/g, "").slice(0, 11);
