@@ -48,7 +48,9 @@
   color: var(--app-muted);
   font-size: 18px;
   line-height: 1;
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .limpar:hover {

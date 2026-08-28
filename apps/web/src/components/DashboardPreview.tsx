@@ -1,15 +1,9 @@
-import Link from "next/link";
-import { BRAND } from "@/content/site";
-import {
-  IconArrowRight,
-  IconBag,
-  IconBox,
-  IconTrendUp,
-  IconWallet,
-} from "./Icons";
-import styles from "./DashboardPreview.module.css";
+import Link from 'next/link'
+import { BRAND } from '@/content/site'
+import { IconArrowRight, IconBag, IconBox, IconTrendUp, IconWallet } from './Icons'
+import styles from './DashboardPreview.module.css'
 
-const salesBars = [42, 58, 47, 71, 63, 88, 76];
+const salesBars = [42, 58, 47, 71, 63, 88, 76]
 
 export default function DashboardPreview() {
   return (
@@ -18,12 +12,11 @@ export default function DashboardPreview() {
         <header className={styles.head}>
           <span className={styles.eyebrow}>Painel</span>
           <h2 className={styles.title}>
-            Depois do login, tudo em{" "}
-            <span className={styles.titleAccent}>mesas</span> tematicas
+            Depois do login, tudo em <span className={styles.titleAccent}>mesas</span> tematicas
           </h2>
           <p className={styles.lead}>
-            Cada modulo vira uma mesa com o resumo do que importa naquele
-            assunto. Voce abre o painel e ja sabe onde esta o problema do dia.
+            Cada modulo vira uma mesa com o resumo do que importa naquele assunto. Voce abre o
+            painel e ja sabe onde esta o problema do dia.
           </p>
         </header>
 
@@ -33,9 +26,7 @@ export default function DashboardPreview() {
               <span className={styles.sidebarMark} />
               {BRAND}
             </span>
-            <span className={`${styles.sidebarItem} ${styles.sidebarActive}`}>
-              Visao geral
-            </span>
+            <span className={`${styles.sidebarItem} ${styles.sidebarActive}`}>Visao geral</span>
             <span className={styles.sidebarItem}>Vendas</span>
             <span className={styles.sidebarItem}>Financeiro</span>
             <span className={styles.sidebarItem}>Estoque</span>
@@ -96,9 +87,7 @@ export default function DashboardPreview() {
                   <IconBox size={17} />
                 </span>
                 <h3 className={styles.mesaTitle}>Mesa de Estoque</h3>
-                <span className={`${styles.mesaChip} ${styles.mesaChipWarn}`}>
-                  3 alertas
-                </span>
+                <span className={`${styles.mesaChip} ${styles.mesaChipWarn}`}>3 alertas</span>
               </header>
               <strong className={styles.mesaValue}>412 itens</strong>
               <span className={styles.mesaLabel}>no catalogo ativo</span>
@@ -128,5 +117,5 @@ export default function DashboardPreview() {
         </div>
       </div>
     </section>
-  );
+  )
 }

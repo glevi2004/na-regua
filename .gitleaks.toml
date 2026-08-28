@@ -1,0 +1,22 @@
+# Configuracao do gitleaks (RNF-022: nenhum segredo em codigo, log ou
+# variavel versionada). Estende o conjunto de regras padrao — a lista abaixo
+# so abre excecao, nunca afrouxa uma regra existente.
+
+title = "na-regua"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = """
+.env.example e um template versionado de proposito: todo valor sensivel fica
+vazio e os unicos valores preenchidos sao defaults de desenvolvimento local
+(Postgres/Redis/MinIO em container, JWT_SECRET marcado como dev-only). A regra
+generic-api-key marca linhas como FISCAL_API_TOKEN= pelo nome da variavel,
+mesmo sem valor nenhum depois do sinal de igual.
+
+O arquivo real com segredos e .env, que esta no .gitignore e nunca e commitado.
+Se algum dia .env.example passar a carregar um valor de verdade, esta excecao
+tem de sair junto — ver engenharia/ambientes.md.
+"""
+paths = ['''^\.env\.example$''']

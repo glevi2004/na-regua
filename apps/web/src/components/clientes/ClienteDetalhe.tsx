@@ -1,44 +1,39 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { useState } from "react";
+import Link from 'next/link'
+import { useState } from 'react'
 import {
   comprasDoCliente,
   contatosDoCliente,
   pendenciasDoCliente,
   type ContatoCliente,
-} from "@/lib/clientes-api";
-import type { Cliente } from "@/lib/types";
-import { describeDueDate, formatDate, formatMoney } from "@/lib/format";
-import { Badge, Card, EmptyState, PageHeader, Stat } from "@/components/ui/UI";
-import { Button } from "@/components/ui/Button";
-import Toast from "@/components/ui/Toast";
-import {
-  IconArrowRight,
-  IconCalendar,
-  IconPlus,
-  IconReceipt,
-} from "@/components/Icons";
-import styles from "./detalhe.module.css";
+} from '@/lib/clientes-api'
+import type { Cliente } from '@/lib/types'
+import { describeDueDate, formatDate, formatMoney } from '@/lib/format'
+import { Badge, Card, EmptyState, PageHeader, Stat } from '@/components/ui/UI'
+import { Button } from '@/components/ui/Button'
+import Toast from '@/components/ui/Toast'
+import { IconArrowRight, IconCalendar, IconPlus, IconReceipt } from '@/components/Icons'
+import styles from './detalhe.module.css'
 
-const TIPO_CONTATO: Record<ContatoCliente["tipo"], string> = {
-  ligacao: "Ligacao",
-  whatsapp: "WhatsApp",
-  visita: "Visita",
-  observacao: "Observacao",
-};
+const TIPO_CONTATO: Record<ContatoCliente['tipo'], string> = {
+  ligacao: 'Ligacao',
+  whatsapp: 'WhatsApp',
+  visita: 'Visita',
+  observacao: 'Observacao',
+}
 
 export default function ClienteDetalhe({ cliente }: { cliente: Cliente }) {
-  const [toast, setToast] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null)
 
-  const compras = comprasDoCliente(cliente.id);
-  const pendencias = pendenciasDoCliente(cliente.id);
-  const contatos = contatosDoCliente(cliente.id);
+  const compras = comprasDoCliente(cliente.id)
+  const pendencias = pendenciasDoCliente(cliente.id)
+  const contatos = contatosDoCliente(cliente.id)
 
-  const totalPendente = pendencias.reduce((acc, p) => acc + p.valor, 0);
-  const totalComprado = compras.reduce((acc, c) => acc + c.valor, 0);
+  const totalPendente = pendencias.reduce((acc, p) => acc + p.valor, 0)
+  const totalComprado = compras.reduce((acc, c) => acc + c.valor, 0)
 
-  const whatsapp = `https://wa.me/55${cliente.ddd}${cliente.celular.replace(/\D/g, "")}`;
+  const whatsapp = `https://wa.me/55${cliente.ddd}${cliente.celular.replace(/\D/g, '')}`
 
   return (
     <>
@@ -47,11 +42,19 @@ export default function ClienteDetalhe({ cliente }: { cliente: Cliente }) {
         subtitle={`${cliente.documento} · (${cliente.ddd}) ${cliente.celular}`}
         actions={
           <>
-            <Button variant="secondary" onClick={() => setToast("Lancamento de pendencia entra com o modulo de Contas a Receber.")}>
+            <Button
+              variant="secondary"
+              onClick={() =>
+                setToast('Lancamento de pendencia entra com o modulo de Contas a Receber.')
+              }
+            >
               <IconReceipt size={16} />
               Lancar pendencia
             </Button>
-            <Button variant="secondary" onClick={() => setToast("Lancamento de contato entra com o modulo de CRM.")}>
+            <Button
+              variant="secondary"
+              onClick={() => setToast('Lancamento de contato entra com o modulo de CRM.')}
+            >
               <IconCalendar size={16} />
               Lancar contato
             </Button>
@@ -70,16 +73,20 @@ export default function ClienteDetalhe({ cliente }: { cliente: Cliente }) {
       />
 
       <div className="statRow">
-        <Stat label="Compras" value={String(cliente.totalCompras)} hint={formatMoney(totalComprado)} />
+        <Stat
+          label="Compras"
+          value={String(cliente.totalCompras)}
+          hint={formatMoney(totalComprado)}
+        />
         <Stat
           label="Em aberto"
           value={formatMoney(totalPendente)}
-          hint={pendencias.length ? `${pendencias.length} titulo(s)` : "nada pendente"}
-          tone={totalPendente > 0 ? "warning" : "positive"}
+          hint={pendencias.length ? `${pendencias.length} titulo(s)` : 'nada pendente'}
+          tone={totalPendente > 0 ? 'warning' : 'positive'}
         />
         <Stat
           label="Ultima compra"
-          value={cliente.ultimaCompra ? formatDate(cliente.ultimaCompra) : "—"}
+          value={cliente.ultimaCompra ? formatDate(cliente.ultimaCompra) : '—'}
         />
       </div>
 
@@ -93,7 +100,7 @@ export default function ClienteDetalhe({ cliente }: { cliente: Cliente }) {
             </div>
             <div>
               <dt>Tipo</dt>
-              <dd>{cliente.tipoPessoa === "fisica" ? "Pessoa fisica" : "Pessoa juridica"}</dd>
+              <dd>{cliente.tipoPessoa === 'fisica' ? 'Pessoa fisica' : 'Pessoa juridica'}</dd>
             </div>
             <div>
               <dt>Celular</dt>
@@ -103,16 +110,16 @@ export default function ClienteDetalhe({ cliente }: { cliente: Cliente }) {
             </div>
             <div>
               <dt>E-mail</dt>
-              <dd>{cliente.email ?? "—"}</dd>
+              <dd>{cliente.email ?? '—'}</dd>
             </div>
             <div className={styles.dadosLargo}>
               <dt>Endereco</dt>
               <dd>
                 {cliente.endereco.logradouro}, {cliente.endereco.numero}
-                {cliente.endereco.complemento ? ` · ${cliente.endereco.complemento}` : ""}
+                {cliente.endereco.complemento ? ` · ${cliente.endereco.complemento}` : ''}
                 <br />
-                {cliente.endereco.bairro} · {cliente.endereco.cidade}/
-                {cliente.endereco.uf} · CEP {cliente.endereco.cep}
+                {cliente.endereco.bairro} · {cliente.endereco.cidade}/{cliente.endereco.uf} · CEP{' '}
+                {cliente.endereco.cep}
               </dd>
             </div>
           </dl>
@@ -141,9 +148,9 @@ export default function ClienteDetalhe({ cliente }: { cliente: Cliente }) {
                     <strong>{p.referente}</strong>
                     <span>{describeDueDate(p.vencimento)}</span>
                   </span>
-                  {p.status === "vencido" ? (
+                  {p.status === 'vencido' ? (
                     <Badge tone="warning">Vencido</Badge>
-                  ) : p.status === "parcial" ? (
+                  ) : p.status === 'parcial' ? (
                     <Badge tone="info">Parcial</Badge>
                   ) : (
                     <Badge>Em aberto</Badge>
@@ -179,7 +186,7 @@ export default function ClienteDetalhe({ cliente }: { cliente: Cliente }) {
                   <span className={styles.linhaPrincipal}>
                     <strong>{formatDate(c.data)}</strong>
                     <span>
-                      {c.itens} {c.itens === 1 ? "item" : "itens"} · {c.formaPagamento}
+                      {c.itens} {c.itens === 1 ? 'item' : 'itens'} · {c.formaPagamento}
                     </span>
                   </span>
                   <span className={styles.linhaValor}>{formatMoney(c.valor)}</span>
@@ -194,7 +201,11 @@ export default function ClienteDetalhe({ cliente }: { cliente: Cliente }) {
           title="Historico de contatos"
           className={styles.largo}
           action={
-            <Button variant="ghost" size="sm" onClick={() => setToast("Lancamento de contato entra com o modulo de CRM.")}>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setToast('Lancamento de contato entra com o modulo de CRM.')}
+            >
               <IconPlus size={14} />
               Novo contato
             </Button>
@@ -221,9 +232,7 @@ export default function ClienteDetalhe({ cliente }: { cliente: Cliente }) {
         </Card>
       </div>
 
-      {toast ? (
-        <Toast message={toast} tone="success" onClose={() => setToast(null)} />
-      ) : null}
+      {toast ? <Toast message={toast} tone="success" onClose={() => setToast(null)} /> : null}
     </>
-  );
+  )
 }

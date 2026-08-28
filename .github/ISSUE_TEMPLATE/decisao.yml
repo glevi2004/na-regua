@@ -1,0 +1,40 @@
+name: Decisão a tomar
+description: Uma escolha que precisa ser feita e está travando trabalho
+labels: [decisao]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Decisao aceita vira uma `DEC-xxx` em `docs/decisoes/README.md`, e ao
+        fechar vira uma ADR. Decisao nao tomada vira decisao tomada por omissao,
+        dentro de um PR, por quem estava com pressa.
+
+  - type: textarea
+    id: contexto
+    attributes:
+      label: Contexto
+      description: Que situação exige uma escolha? Que forças estão em conflito?
+    validations: { required: true }
+
+  - type: textarea
+    id: opcoes
+    attributes:
+      label: Opções
+      value: |
+        | Opção | Prós | Contras |
+        |---|---|---|
+        |  |  |  |
+    validations: { required: true }
+
+  - type: textarea
+    id: bloqueia
+    attributes:
+      label: O que trava enquanto não for decidido
+      description: Tarefas (NR-xxx), requisitos (RF-xxx) ou módulos
+    validations: { required: true }
+
+  - type: input
+    id: prazo
+    attributes:
+      label: Até quando precisa estar decidido
+    validations: { required: true }

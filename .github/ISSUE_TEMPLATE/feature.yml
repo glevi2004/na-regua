@@ -1,0 +1,46 @@
+name: Funcionalidade
+description: Uma capacidade nova do produto
+labels: [feature]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Funcionalidade vira **user story** em `docs/produto/user-stories.md` e
+        **requisito** em `requisitos-funcionais.md` antes de virar tarefa.
+        Esta issue e o rascunho dessa conversa.
+
+  - type: textarea
+    id: historia
+    attributes:
+      label: História
+      value: |
+        **Como** <persona>
+        **quero** <ação>
+        **para** <benefício>
+    validations: { required: true }
+
+  - type: textarea
+    id: criterios
+    attributes:
+      label: Critérios de aceite
+      description: Inclua pelo menos um caminho de erro — sem isso a história nao fica *Ready*
+      value: |
+        - **DADO** ... **QUANDO** ... **ENTÃO** ...
+        - **DADO** <caso de erro> **QUANDO** ... **ENTÃO** ...
+    validations: { required: true }
+
+  - type: dropdown
+    id: prioridade
+    attributes:
+      label: Prioridade (MoSCoW)
+      options: [MUST, SHOULD, COULD, WON'T]
+    validations: { required: true }
+
+  - type: checkboxes
+    id: canais
+    attributes:
+      label: Por quais canais é acionada
+      description: Se so faz sentido num canal, explique por quê — o padrao do produto e funcionar nos dois
+      options:
+        - label: Aplicativo
+        - label: WhatsApp

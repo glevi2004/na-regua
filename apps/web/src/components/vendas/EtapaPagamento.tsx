@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from 'react'
 import {
   criarCobrancaVenda,
   FORMAS,
@@ -8,21 +8,21 @@ import {
   taxaDoPagamento,
   valorLiquido,
   type Pagamento,
-} from "@/lib/vendas-api";
-import type { FormaPagamento } from "@/lib/types";
-import { formatMoney } from "@/lib/format";
-import { Badge, Card } from "@/components/ui/UI";
-import { Button } from "@/components/ui/Button";
-import Toast from "@/components/ui/Toast";
-import { Spinner } from "@/components/auth/Fields";
-import CobrancaPix from "@/components/app/CobrancaPix";
-import { IconCheck, IconClose, IconTrash } from "@/components/Icons";
-import styles from "./vendas.module.css";
+} from '@/lib/vendas-api'
+import type { FormaPagamento } from '@/lib/types'
+import { formatMoney } from '@/lib/format'
+import { Badge, Card } from '@/components/ui/UI'
+import { Button } from '@/components/ui/Button'
+import Toast from '@/components/ui/Toast'
+import { Spinner } from '@/components/auth/Fields'
+import CobrancaPix from '@/components/app/CobrancaPix'
+import { IconCheck, IconClose, IconTrash } from '@/components/Icons'
+import styles from './vendas.module.css'
 
 function paraNumero(valor: string): number {
-  const limpo = valor.replace(/\./g, "").replace(",", ".");
-  const n = Number(limpo);
-  return Number.isFinite(n) ? n : 0;
+  const limpo = valor.replace(/\./g, '').replace(',', '.')
+  const n = Number(limpo)
+  return Number.isFinite(n) ? n : 0
 }
 
 export default function EtapaPagamento({
@@ -33,82 +33,80 @@ export default function EtapaPagamento({
   onConcluir,
   fechando,
 }: {
-  total: number;
-  pagamentos: Pagamento[];
-  onPagamentos: (pagamentos: Pagamento[]) => void;
-  onVoltar: () => void;
-  onConcluir: () => void;
-  fechando: boolean;
+  total: number
+  pagamentos: Pagamento[]
+  onPagamentos: (pagamentos: Pagamento[]) => void
+  onVoltar: () => void
+  onConcluir: () => void
+  fechando: boolean
 }) {
-  const [forma, setForma] = useState<FormaPagamento>("dinheiro");
-  const [valorParcial, setValorParcial] = useState("");
-  const [cobrando, setCobrando] = useState<Pagamento | null>(null);
-  const [toast, setToast] = useState<{ msg: string; tone: "success" | "error" } | null>(null);
+  const [forma, setForma] = useState<FormaPagamento>('dinheiro')
+  const [valorParcial, setValorParcial] = useState('')
+  const [cobrando, setCobrando] = useState<Pagamento | null>(null)
+  const [toast, setToast] = useState<{ msg: string; tone: 'success' | 'error' } | null>(null)
 
   const confirmado = pagamentos
-    .filter((p) => p.status === "confirmado")
-    .reduce((acc, p) => acc + p.valor, 0);
+    .filter((p) => p.status === 'confirmado')
+    .reduce((acc, p) => acc + p.valor, 0)
 
-  const restante = Math.max(0, total - confirmado);
-  const quitado = restante <= 0.01;
-  const liquido = valorLiquido(pagamentos);
+  const restante = Math.max(0, total - confirmado)
+  const quitado = restante <= 0.01
+  const liquido = valorLiquido(pagamentos)
   const taxaTotal = pagamentos
-    .filter((p) => p.status === "confirmado")
-    .reduce((acc, p) => acc + taxaDoPagamento(p), 0);
+    .filter((p) => p.status === 'confirmado')
+    .reduce((acc, p) => acc + taxaDoPagamento(p), 0)
 
-  const formaAtual = useMemo(() => FORMAS.find((f) => f.valor === forma)!, [forma]);
+  const formaAtual = useMemo(() => FORMAS.find((f) => f.valor === forma)!, [forma])
 
   /* Estavel: o CobrancaPix usa como dependencia de efeito. */
-  const criarCobranca = useCallback((valor: number) => criarCobrancaVenda(valor), []);
+  const criarCobranca = useCallback((valor: number) => criarCobrancaVenda(valor), [])
 
   /* ---------------------------------------------------------------- *
    * Lancar pagamento
    * ---------------------------------------------------------------- */
 
   function lancar() {
-    const valor = valorParcial.trim() ? paraNumero(valorParcial) : restante;
+    const valor = valorParcial.trim() ? paraNumero(valorParcial) : restante
 
     if (valor <= 0) {
-      setToast({ msg: "Informe um valor maior que zero.", tone: "error" });
-      return;
+      setToast({ msg: 'Informe um valor maior que zero.', tone: 'error' })
+      return
     }
     if (valor > restante + 0.01) {
-      setToast({ msg: "O valor e maior que o restante a pagar.", tone: "error" });
-      return;
+      setToast({ msg: 'O valor e maior que o restante a pagar.', tone: 'error' })
+      return
     }
 
     const novo: Pagamento = {
       id: `pg-${Date.now()}`,
       forma,
       valor,
-      status: formaAtual.online ? "pendente" : "confirmado",
-    };
+      status: formaAtual.online ? 'pendente' : 'confirmado',
+    }
 
-    onPagamentos([...pagamentos, novo]);
-    setValorParcial("");
+    onPagamentos([...pagamentos, novo])
+    setValorParcial('')
 
     /* Dinheiro e carteira sao confirmados na hora — nao ha o que aguardar.
        As formas online abrem a cobranca para o cliente pagar. */
     if (formaAtual.online) {
-      setCobrando(novo);
+      setCobrando(novo)
     } else {
       setToast({
         msg: `${formaAtual.rotulo}: ${formatMoney(valor)} recebido.`,
-        tone: "success",
-      });
+        tone: 'success',
+      })
     }
   }
 
   function confirmarCobranca(id: string) {
-    onPagamentos(
-      pagamentos.map((p) => (p.id === id ? { ...p, status: "confirmado" } : p)),
-    );
-    setCobrando(null);
-    setToast({ msg: "Pagamento confirmado.", tone: "success" });
+    onPagamentos(pagamentos.map((p) => (p.id === id ? { ...p, status: 'confirmado' } : p)))
+    setCobrando(null)
+    setToast({ msg: 'Pagamento confirmado.', tone: 'success' })
   }
 
   function remover(id: string) {
-    onPagamentos(pagamentos.filter((p) => p.id !== id));
+    onPagamentos(pagamentos.filter((p) => p.id !== id))
   }
 
   return (
@@ -121,14 +119,14 @@ export default function EtapaPagamento({
               <button
                 key={f.valor}
                 type="button"
-                className={`${styles.formaBotao} ${forma === f.valor ? styles.formaAtiva : ""}`}
+                className={`${styles.formaBotao} ${forma === f.valor ? styles.formaAtiva : ''}`}
                 onClick={() => setForma(f.valor)}
                 aria-pressed={forma === f.valor}
                 disabled={quitado}
               >
                 <strong>{f.rotulo}</strong>
                 {f.taxa > 0 ? (
-                  <span>taxa {f.taxa.toFixed(2).replace(".", ",")}%</span>
+                  <span>taxa {f.taxa.toFixed(2).replace('.', ',')}%</span>
                 ) : (
                   <span>sem taxa</span>
                 )}
@@ -139,9 +137,7 @@ export default function EtapaPagamento({
           {!quitado ? (
             <>
               <label className={styles.campo}>
-                <span>
-                  Valor — deixe em branco para pagar tudo ({formatMoney(restante)})
-                </span>
+                <span>Valor — deixe em branco para pagar tudo ({formatMoney(restante)})</span>
                 <input
                   className={`${styles.input} ${styles.inputGrande}`}
                   value={valorParcial}
@@ -157,11 +153,10 @@ export default function EtapaPagamento({
                   : `Confirmar recebimento em ${formaAtual.rotulo}`}
               </Button>
 
-              {forma === "carteira" ? (
+              {forma === 'carteira' ? (
                 <p className={styles.aviso}>
-                  A carteira do cliente ainda nao tem saldo controlado no
-                  sistema — por enquanto isto registra apenas a forma de
-                  pagamento.
+                  A carteira do cliente ainda nao tem saldo controlado no sistema — por enquanto
+                  isto registra apenas a forma de pagamento.
                 </p>
               ) : null}
             </>
@@ -196,7 +191,7 @@ export default function EtapaPagamento({
           {pagamentos.length > 0 ? (
             <ul className={styles.pagamentos}>
               {pagamentos.map((p) => {
-                const f = FORMAS.find((x) => x.valor === p.forma)!;
+                const f = FORMAS.find((x) => x.valor === p.forma)!
                 return (
                   <li key={p.id} className={styles.pagamento}>
                     <span className={styles.pagamentoPrincipal}>
@@ -206,9 +201,9 @@ export default function EtapaPagamento({
                       ) : null}
                     </span>
 
-                    {p.status === "confirmado" ? (
+                    {p.status === 'confirmado' ? (
                       <Badge tone="success">Confirmado</Badge>
-                    ) : p.status === "falhou" ? (
+                    ) : p.status === 'falhou' ? (
                       <Badge tone="danger">Falhou</Badge>
                     ) : (
                       <Badge tone="warning">Aguardando</Badge>
@@ -216,7 +211,7 @@ export default function EtapaPagamento({
 
                     <span className={styles.pagamentoValor}>{formatMoney(p.valor)}</span>
 
-                    {p.status !== "confirmado" ? (
+                    {p.status !== 'confirmado' ? (
                       <span className={styles.pagamentoAcoes}>
                         <button
                           type="button"
@@ -236,7 +231,7 @@ export default function EtapaPagamento({
                       </span>
                     ) : null}
                   </li>
-                );
+                )
               })}
             </ul>
           ) : (
@@ -264,7 +259,7 @@ export default function EtapaPagamento({
                   Fechando...
                 </>
               ) : (
-                "Fechar venda"
+                'Fechar venda'
               )}
             </Button>
           </div>
@@ -325,5 +320,5 @@ export default function EtapaPagamento({
         <Toast message={toast.msg} tone={toast.tone} onClose={() => setToast(null)} />
       ) : null}
     </>
-  );
+  )
 }

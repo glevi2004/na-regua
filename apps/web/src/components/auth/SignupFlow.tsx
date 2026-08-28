@@ -1,15 +1,11 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useCallback, useState, type FormEvent } from "react";
-import {
-  createAccount,
-  createPixCharge,
-  fetchPixChargeStatus,
-} from "@/lib/auth-api";
-import { startSession } from "@/lib/session";
-import { saveSubscriptionStatus } from "@/lib/subscription-store";
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useCallback, useState, type FormEvent } from 'react'
+import { createAccount, createPixCharge, fetchPixChargeStatus } from '@/lib/auth-api'
+import { startSession } from '@/lib/session'
+import { saveSubscriptionStatus } from '@/lib/subscription-store'
 import {
   maskPhone,
   validateEmail,
@@ -18,68 +14,61 @@ import {
   validatePasswordConfirm,
   validatePhone,
   type FieldError,
-} from "@/lib/validation";
-import { plan } from "@/content/site";
-import {
-  Alert,
-  FormFooter,
-  FormHeader,
-  PasswordField,
-  SubmitButton,
-  TextField,
-} from "./Fields";
-import CouponInput from "./CouponInput";
-import CobrancaPix from "@/components/app/CobrancaPix";
-import SignupStepper from "./SignupStepper";
-import TermsCheckbox from "./TermsCheckbox";
-import styles from "./signup.module.css";
+} from '@/lib/validation'
+import { plan } from '@/content/site'
+import { Alert, FormFooter, FormHeader, PasswordField, SubmitButton, TextField } from './Fields'
+import CouponInput from './CouponInput'
+import CobrancaPix from '@/components/app/CobrancaPix'
+import SignupStepper from './SignupStepper'
+import TermsCheckbox from './TermsCheckbox'
+import styles from './signup.module.css'
 
 /** Valor do plano em numero — a copy da landing traz "R$ 149". */
-const PLAN_AMOUNT = 149;
+const PLAN_AMOUNT = 149
 
 export default function SignupFlow() {
-  const router = useRouter();
-  const [step, setStep] = useState(1);
+  const router = useRouter()
+  const [step, setStep] = useState(1)
 
   /* Etapa 1 */
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [telefone, setTelefone] = useState("");
-  const [senha, setSenha] = useState("");
-  const [confirmacao, setConfirmacao] = useState("");
+  const [nome, setNome] = useState('')
+  const [email, setEmail] = useState('')
+  const [telefone, setTelefone] = useState('')
+  const [senha, setSenha] = useState('')
+  const [confirmacao, setConfirmacao] = useState('')
 
-  const [nomeError, setNomeError] = useState<FieldError>(null);
-  const [emailError, setEmailError] = useState<FieldError>(null);
-  const [telefoneError, setTelefoneError] = useState<FieldError>(null);
-  const [senhaError, setSenhaError] = useState<FieldError>(null);
-  const [confirmacaoError, setConfirmacaoError] = useState<FieldError>(null);
+  const [nomeError, setNomeError] = useState<FieldError>(null)
+  const [emailError, setEmailError] = useState<FieldError>(null)
+  const [telefoneError, setTelefoneError] = useState<FieldError>(null)
+  const [senhaError, setSenhaError] = useState<FieldError>(null)
+  const [confirmacaoError, setConfirmacaoError] = useState<FieldError>(null)
 
   /* Etapa 2 */
-  const [cupom, setCupom] = useState("");
-  const [cupomValido, setCupomValido] = useState<string | null>(null);
+  const [cupom, setCupom] = useState('')
+  const [cupomValido, setCupomValido] = useState<string | null>(null)
 
   /* Etapa 3 */
-  const [aceitou, setAceitou] = useState(false);
-  const [criando, setCriando] = useState(false);
-  const [erroCriacao, setErroCriacao] = useState<string | null>(null);
+  const [aceitou, setAceitou] = useState(false)
+  const [criando, setCriando] = useState(false)
+  const [erroCriacao, setErroCriacao] = useState<string | null>(null)
 
   /* Envolvida em useCallback porque o CobrancaPix a usa como dependencia
      de efeito: uma funcao nova a cada render regeraria a cobranca. */
   const criarCobrancaAssinatura = useCallback(
     (valor: number) => createPixCharge(plan.name, valor),
     [],
-  );
+  )
 
   const handleCupomValido = useCallback((code: string | null) => {
-    setCupomValido(code);
-  }, []);
+    setCupomValido(code)
+  }, [])
 
   /* ---------------------------------------------------------------- *
    * Etapa 1 — dados da conta
    * ---------------------------------------------------------------- */
 
   function submitDados(event: FormEvent) {
-    event.preventDefault();
+    event.preventDefault()
 
     const erros = {
       nome: validateName(nome),
@@ -87,16 +76,16 @@ export default function SignupFlow() {
       telefone: validatePhone(telefone),
       senha: validatePassword(senha),
       confirmacao: validatePasswordConfirm(senha, confirmacao),
-    };
+    }
 
-    setNomeError(erros.nome);
-    setEmailError(erros.email);
-    setTelefoneError(erros.telefone);
-    setSenhaError(erros.senha);
-    setConfirmacaoError(erros.confirmacao);
+    setNomeError(erros.nome)
+    setEmailError(erros.email)
+    setTelefoneError(erros.telefone)
+    setSenhaError(erros.senha)
+    setConfirmacaoError(erros.confirmacao)
 
-    if (Object.values(erros).some(Boolean)) return;
-    setStep(2);
+    if (Object.values(erros).some(Boolean)) return
+    setStep(2)
   }
 
   /* ---------------------------------------------------------------- *
@@ -104,11 +93,11 @@ export default function SignupFlow() {
    * ---------------------------------------------------------------- */
 
   async function submitTermos(event: FormEvent) {
-    event.preventDefault();
-    if (!aceitou) return;
+    event.preventDefault()
+    if (!aceitou) return
 
-    setErroCriacao(null);
-    setCriando(true);
+    setErroCriacao(null)
+    setCriando(true)
 
     /* SUBSTITUIR POR: POST /auth/signup */
     const resultado = await createAccount({
@@ -117,16 +106,16 @@ export default function SignupFlow() {
       telefone,
       senha,
       cupom: cupomValido,
-    });
+    })
 
-    setCriando(false);
+    setCriando(false)
 
     if (!resultado.ok) {
-      setErroCriacao(resultado.error);
-      return;
+      setErroCriacao(resultado.error)
+      return
     }
 
-    setStep(4);
+    setStep(4)
   }
 
   /* ---------------------------------------------------------------- *
@@ -134,13 +123,13 @@ export default function SignupFlow() {
    * ---------------------------------------------------------------- */
 
   const aoConfirmarPagamento = useCallback(() => {
-    saveSubscriptionStatus("active");
+    saveSubscriptionStatus('active')
 
     /* Abre a sessao para o proxy liberar /app/*. */
-    startSession({ nome, email, empresa: "Minha empresa" });
+    startSession({ nome, email, empresa: 'Minha empresa' })
 
-    router.push("/app");
-  }, [router, nome, email]);
+    router.push('/app')
+  }, [router, nome, email])
 
   return (
     <>
@@ -149,18 +138,15 @@ export default function SignupFlow() {
       {/* ============================ Etapa 1 ============================ */}
       {step === 1 ? (
         <>
-          <FormHeader
-            title="Criar conta"
-            subtitle="Comece pelos seus dados de acesso."
-          />
+          <FormHeader title="Criar conta" subtitle="Comece pelos seus dados de acesso." />
 
           <form onSubmit={submitDados} noValidate>
             <TextField
               label="Nome completo"
               value={nome}
               onChange={(v) => {
-                setNome(v);
-                if (nomeError) setNomeError(validateName(v));
+                setNome(v)
+                if (nomeError) setNomeError(validateName(v))
               }}
               onBlur={() => setNomeError(validateName(nome))}
               error={nomeError}
@@ -172,8 +158,8 @@ export default function SignupFlow() {
               label="E-mail"
               value={email}
               onChange={(v) => {
-                setEmail(v);
-                if (emailError) setEmailError(validateEmail(v));
+                setEmail(v)
+                if (emailError) setEmailError(validateEmail(v))
               }}
               onBlur={() => setEmailError(validateEmail(email))}
               error={emailError}
@@ -187,9 +173,9 @@ export default function SignupFlow() {
               label="Telefone / WhatsApp"
               value={telefone}
               onChange={(v) => {
-                const masked = maskPhone(v);
-                setTelefone(masked);
-                if (telefoneError) setTelefoneError(validatePhone(masked));
+                const masked = maskPhone(v)
+                setTelefone(masked)
+                if (telefoneError) setTelefoneError(validatePhone(masked))
               }}
               onBlur={() => setTelefoneError(validatePhone(telefone))}
               error={telefoneError}
@@ -204,10 +190,10 @@ export default function SignupFlow() {
               label="Senha"
               value={senha}
               onChange={(v) => {
-                setSenha(v);
-                if (senhaError) setSenhaError(validatePassword(v));
+                setSenha(v)
+                if (senhaError) setSenhaError(validatePassword(v))
                 if (confirmacaoError) {
-                  setConfirmacaoError(validatePasswordConfirm(v, confirmacao));
+                  setConfirmacaoError(validatePasswordConfirm(v, confirmacao))
                 }
               }}
               onBlur={() => setSenhaError(validatePassword(senha))}
@@ -220,14 +206,12 @@ export default function SignupFlow() {
               label="Confirmar senha"
               value={confirmacao}
               onChange={(v) => {
-                setConfirmacao(v);
+                setConfirmacao(v)
                 if (confirmacaoError) {
-                  setConfirmacaoError(validatePasswordConfirm(senha, v));
+                  setConfirmacaoError(validatePasswordConfirm(senha, v))
                 }
               }}
-              onBlur={() =>
-                setConfirmacaoError(validatePasswordConfirm(senha, confirmacao))
-              }
+              onBlur={() => setConfirmacaoError(validatePasswordConfirm(senha, confirmacao))}
               error={confirmacaoError}
               autoComplete="new-password"
             />
@@ -251,23 +235,19 @@ export default function SignupFlow() {
 
           <form
             onSubmit={(e) => {
-              e.preventDefault();
-              setStep(3);
+              e.preventDefault()
+              setStep(3)
             }}
             noValidate
           >
-            <CouponInput
-              value={cupom}
-              onChange={setCupom}
-              onValidChange={handleCupomValido}
-            />
+            <CouponInput value={cupom} onChange={setCupom} onValidChange={handleCupomValido} />
 
             <div className={styles.stepActions}>
               <SubmitButton type="button" variant="secondary" onClick={() => setStep(1)}>
                 Voltar
               </SubmitButton>
               <SubmitButton>
-                {cupomValido ? "Continuar com cupom" : "Continuar sem cupom"}
+                {cupomValido ? 'Continuar com cupom' : 'Continuar sem cupom'}
               </SubmitButton>
             </div>
           </form>
@@ -277,10 +257,7 @@ export default function SignupFlow() {
       {/* ============================ Etapa 3 ============================ */}
       {step === 3 ? (
         <>
-          <FormHeader
-            title="Termos de uso"
-            subtitle="Ultimo passo antes do pagamento."
-          />
+          <FormHeader title="Termos de uso" subtitle="Ultimo passo antes do pagamento." />
 
           {erroCriacao ? <Alert tone="error">{erroCriacao}</Alert> : null}
 
@@ -301,7 +278,7 @@ export default function SignupFlow() {
               </div>
               <div>
                 <dt>Cupom</dt>
-                <dd>{cupomValido ?? "Nenhum"}</dd>
+                <dd>{cupomValido ?? 'Nenhum'}</dd>
               </div>
               <div>
                 <dt>Plano</dt>
@@ -325,11 +302,7 @@ export default function SignupFlow() {
               >
                 Voltar
               </SubmitButton>
-              <SubmitButton
-                loading={criando}
-                loadingLabel="Criando conta..."
-                disabled={!aceitou}
-              >
+              <SubmitButton loading={criando} loadingLabel="Criando conta..." disabled={!aceitou}>
                 Criar conta
               </SubmitButton>
             </div>
@@ -357,5 +330,5 @@ export default function SignupFlow() {
         </>
       ) : null}
     </>
-  );
+  )
 }

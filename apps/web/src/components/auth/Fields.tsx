@@ -1,30 +1,24 @@
-"use client";
+'use client'
 
-import { useId, useState, type ReactNode } from "react";
-import { passwordStrength } from "@/lib/validation";
-import styles from "./auth-form.module.css";
+import { useId, useState, type ReactNode } from 'react'
+import { passwordStrength } from '@/lib/validation'
+import styles from './auth-form.module.css'
 
 /* ------------------------------------------------------------------ *
  * Cabecalho e rodape do formulario
  * ------------------------------------------------------------------ */
 
-export function FormHeader({
-  title,
-  subtitle,
-}: {
-  title: string;
-  subtitle?: string;
-}) {
+export function FormHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <header className={styles.header}>
       <h1 className={styles.title}>{title}</h1>
       {subtitle ? <p className={styles.subtitle}>{subtitle}</p> : null}
     </header>
-  );
+  )
 }
 
 export function FormFooter({ children }: { children: ReactNode }) {
-  return <p className={styles.footer}>{children}</p>;
+  return <p className={styles.footer}>{children}</p>
 }
 
 /* ------------------------------------------------------------------ *
@@ -32,20 +26,20 @@ export function FormFooter({ children }: { children: ReactNode }) {
  * ------------------------------------------------------------------ */
 
 export function Alert({
-  tone = "error",
+  tone = 'error',
   children,
 }: {
-  tone?: "error" | "warning" | "success";
-  children: ReactNode;
+  tone?: 'error' | 'warning' | 'success'
+  children: ReactNode
 }) {
   return (
     <div
       className={`${styles.alert} ${styles[`alert_${tone}`]}`}
-      role={tone === "error" ? "alert" : "status"}
+      role={tone === 'error' ? 'alert' : 'status'}
     >
       {children}
     </div>
-  );
+  )
 }
 
 /* ------------------------------------------------------------------ *
@@ -53,19 +47,19 @@ export function Alert({
  * ------------------------------------------------------------------ */
 
 type TextFieldProps = {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
+  label: string
+  value: string
+  onChange: (value: string) => void
   /** Validacao roda no blur e some assim que o campo fica valido. */
-  onBlur?: () => void;
-  error?: string | null;
-  hint?: string;
-  type?: "text" | "email" | "tel";
-  placeholder?: string;
-  autoComplete?: string;
-  inputMode?: "text" | "email" | "tel" | "numeric";
-  disabled?: boolean;
-};
+  onBlur?: () => void
+  error?: string | null
+  hint?: string
+  type?: 'text' | 'email' | 'tel'
+  placeholder?: string
+  autoComplete?: string
+  inputMode?: 'text' | 'email' | 'tel' | 'numeric'
+  disabled?: boolean
+}
 
 export function TextField({
   label,
@@ -74,15 +68,15 @@ export function TextField({
   onBlur,
   error,
   hint,
-  type = "text",
+  type = 'text',
   placeholder,
   autoComplete,
   inputMode,
   disabled,
 }: TextFieldProps) {
-  const id = useId();
-  const errorId = `${id}-error`;
-  const hintId = `${id}-hint`;
+  const id = useId()
+  const errorId = `${id}-error`
+  const hintId = `${id}-hint`
 
   return (
     <div className={styles.field}>
@@ -91,7 +85,7 @@ export function TextField({
       </label>
       <input
         id={id}
-        className={`${styles.input} ${error ? styles.inputError : ""}`}
+        className={`${styles.input} ${error ? styles.inputError : ''}`}
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
@@ -113,7 +107,7 @@ export function TextField({
         </span>
       ) : null}
     </div>
-  );
+  )
 }
 
 /* ------------------------------------------------------------------ *
@@ -121,16 +115,16 @@ export function TextField({
  * ------------------------------------------------------------------ */
 
 type PasswordFieldProps = {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  onBlur?: () => void;
-  error?: string | null;
-  autoComplete?: string;
+  label: string
+  value: string
+  onChange: (value: string) => void
+  onBlur?: () => void
+  error?: string | null
+  autoComplete?: string
   /** Mostra a barra de forca da senha (usado so no cadastro). */
-  showStrength?: boolean;
-  disabled?: boolean;
-};
+  showStrength?: boolean
+  disabled?: boolean
+}
 
 export function PasswordField({
   label,
@@ -142,11 +136,11 @@ export function PasswordField({
   showStrength = false,
   disabled,
 }: PasswordFieldProps) {
-  const id = useId();
-  const errorId = `${id}-error`;
-  const [visible, setVisible] = useState(false);
+  const id = useId()
+  const errorId = `${id}-error`
+  const [visible, setVisible] = useState(false)
 
-  const strength = showStrength && value ? passwordStrength(value) : null;
+  const strength = showStrength && value ? passwordStrength(value) : null
 
   return (
     <div className={styles.field}>
@@ -157,10 +151,8 @@ export function PasswordField({
       <div className={styles.passwordWrap}>
         <input
           id={id}
-          className={`${styles.input} ${styles.passwordInput} ${
-            error ? styles.inputError : ""
-          }`}
-          type={visible ? "text" : "password"}
+          className={`${styles.input} ${styles.passwordInput} ${error ? styles.inputError : ''}`}
+          type={visible ? 'text' : 'password'}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
@@ -173,7 +165,7 @@ export function PasswordField({
           type="button"
           className={styles.toggle}
           onClick={() => setVisible((v) => !v)}
-          aria-label={visible ? "Ocultar senha" : "Mostrar senha"}
+          aria-label={visible ? 'Ocultar senha' : 'Mostrar senha'}
           aria-pressed={visible}
           disabled={disabled}
         >
@@ -183,11 +175,7 @@ export function PasswordField({
 
       {strength ? (
         <div className={styles.strength}>
-          <span
-            className={styles.strengthBar}
-            data-score={strength.score}
-            aria-hidden="true"
-          >
+          <span className={styles.strengthBar} data-score={strength.score} aria-hidden="true">
             <i />
             <i />
             <i />
@@ -202,7 +190,7 @@ export function PasswordField({
         </span>
       ) : null}
     </div>
-  );
+  )
 }
 
 /* ------------------------------------------------------------------ *
@@ -213,26 +201,24 @@ export function SubmitButton({
   children,
   loading = false,
   disabled = false,
-  loadingLabel = "Enviando...",
-  type = "submit",
+  loadingLabel = 'Enviando...',
+  type = 'submit',
   onClick,
-  variant = "primary",
+  variant = 'primary',
 }: {
-  children: ReactNode;
-  loading?: boolean;
-  disabled?: boolean;
-  loadingLabel?: string;
-  type?: "submit" | "button";
-  onClick?: () => void;
-  variant?: "primary" | "secondary";
+  children: ReactNode
+  loading?: boolean
+  disabled?: boolean
+  loadingLabel?: string
+  type?: 'submit' | 'button'
+  onClick?: () => void
+  variant?: 'primary' | 'secondary'
 }) {
   return (
     <button
       type={type}
       onClick={onClick}
-      className={`${styles.submit} ${
-        variant === "secondary" ? styles.submitSecondary : ""
-      }`}
+      className={`${styles.submit} ${variant === 'secondary' ? styles.submitSecondary : ''}`}
       disabled={disabled || loading}
       aria-busy={loading}
     >
@@ -245,17 +231,13 @@ export function SubmitButton({
         children
       )}
     </button>
-  );
+  )
 }
 
 export function Spinner({ size = 16 }: { size?: number }) {
   return (
-    <span
-      className={styles.spinner}
-      style={{ width: size, height: size }}
-      aria-hidden="true"
-    />
-  );
+    <span className={styles.spinner} style={{ width: size, height: size }} aria-hidden="true" />
+  )
 }
 
 /* ------------------------------------------------------------------ *
@@ -278,7 +260,7 @@ function Eye() {
       <path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" />
       <circle cx="12" cy="12" r="3.2" />
     </svg>
-  );
+  )
 }
 
 function EyeOff() {
@@ -298,5 +280,5 @@ function EyeOff() {
       <path d="M6.4 7.6A16.8 16.8 0 0 0 2.5 12S6 18.5 12 18.5c1.4 0 2.7-.35 3.8-.9" />
       <path d="M4 4l16 16" />
     </svg>
-  );
+  )
 }

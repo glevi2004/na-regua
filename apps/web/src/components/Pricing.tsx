@@ -1,7 +1,7 @@
-import Link from "next/link";
-import { plan } from "@/content/site";
-import { IconArrowRight, IconCheck, IconShield } from "./Icons";
-import styles from "./Pricing.module.css";
+import Link from 'next/link'
+import { plan } from '@/content/site'
+import { IconArrowRight, IconCheck, IconShield } from './Icons'
+import styles from './Pricing.module.css'
 
 export default function Pricing() {
   return (
@@ -13,8 +13,8 @@ export default function Pricing() {
             Um plano, todos os <span className="gradientText">modulos</span>
           </h2>
           <p className="sectionLead">
-            Sem escalonamento por funcionalidade e sem cobranca por usuario.
-            Voce paga por empresa e usa o sistema inteiro.
+            Sem escalonamento por funcionalidade e sem cobranca por usuario. Voce paga por empresa e
+            usa o sistema inteiro.
           </p>
         </header>
 
@@ -54,5 +54,5 @@ export default function Pricing() {
         </div>
       </div>
     </section>
-  );
+  )
 }

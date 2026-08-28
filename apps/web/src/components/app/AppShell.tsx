@@ -1,15 +1,15 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState, type ComponentType, type ReactNode } from "react";
-import { BRAND } from "@/content/site";
-import { MODULOS_BLOQUEADOS } from "@/lib/access";
-import { endSession } from "@/lib/session";
-import { listarChamados, totalNaoLidas } from "@/lib/suporte-api";
-import PaymentOverdueBanner from "../billing/PaymentOverdueBanner";
-import PaymentRequiredModal from "../billing/PaymentRequiredModal";
-import { useSubscription } from "../billing/SubscriptionProvider";
+import Link from 'next/link'
+import { usePathname, useRouter } from 'next/navigation'
+import { useEffect, useState, type ComponentType, type ReactNode } from 'react'
+import { BRAND } from '@/content/site'
+import { MODULOS_BLOQUEADOS } from '@/lib/access'
+import { endSession } from '@/lib/session'
+import { listarChamados, totalNaoLidas } from '@/lib/suporte-api'
+import PaymentOverdueBanner from '../billing/PaymentOverdueBanner'
+import PaymentRequiredModal from '../billing/PaymentRequiredModal'
+import { useSubscription } from '../billing/SubscriptionProvider'
 import {
   IconBag,
   IconBank,
@@ -29,40 +29,40 @@ import {
   IconUsers,
   IconWallet,
   type IconProps,
-} from "../Icons";
-import styles from "./AppShell.module.css";
+} from '../Icons'
+import styles from './AppShell.module.css'
 
 type NavItem = {
-  href: string;
-  label: string;
-  icon: ComponentType<IconProps>;
+  href: string
+  label: string
+  icon: ComponentType<IconProps>
   /** Sub-itens: hoje usado apenas por Financeiro. */
-  children?: { href: string; label: string }[];
-};
+  children?: { href: string; label: string }[]
+}
 
 /** Modulos do mapeamento (docs/ZapGestor_Apresentacao.pdf). */
 const navItems: NavItem[] = [
-  { href: "/app", label: "Tela principal", icon: IconChart },
-  { href: "/app/vendas", label: "Vendas", icon: IconBag },
-  { href: "/app/clientes", label: "Clientes", icon: IconUsers },
-  { href: "/app/produtos", label: "Produtos", icon: IconBox },
+  { href: '/app', label: 'Tela principal', icon: IconChart },
+  { href: '/app/vendas', label: 'Vendas', icon: IconBag },
+  { href: '/app/clientes', label: 'Clientes', icon: IconUsers },
+  { href: '/app/produtos', label: 'Produtos', icon: IconBox },
   {
-    href: "/app/financeiro",
-    label: "Financeiro",
+    href: '/app/financeiro',
+    label: 'Financeiro',
     icon: IconWallet,
     children: [
-      { href: "/app/financeiro/plano-de-contas", label: "Plano de contas" },
-      { href: "/app/financeiro/contas-a-pagar", label: "Contas a pagar" },
-      { href: "/app/financeiro/contas-a-receber", label: "Contas a receber" },
+      { href: '/app/financeiro/plano-de-contas', label: 'Plano de contas' },
+      { href: '/app/financeiro/contas-a-pagar', label: 'Contas a pagar' },
+      { href: '/app/financeiro/contas-a-receber', label: 'Contas a receber' },
     ],
   },
-  { href: "/app/crm", label: "CRM", icon: IconList },
-  { href: "/app/agenda", label: "Agenda", icon: IconCalendar },
-  { href: "/app/empresa", label: "Empresa", icon: IconSettings },
-  { href: "/app/assistente-ia", label: "Assistente IA", icon: IconSparkles },
-  { href: "/app/assinatura", label: "Assinatura", icon: IconReceipt },
-  { href: "/app/suporte", label: "Suporte", icon: IconBank },
-];
+  { href: '/app/crm', label: 'CRM', icon: IconList },
+  { href: '/app/agenda', label: 'Agenda', icon: IconCalendar },
+  { href: '/app/empresa', label: 'Empresa', icon: IconSettings },
+  { href: '/app/assistente-ia', label: 'Assistente IA', icon: IconSparkles },
+  { href: '/app/assinatura', label: 'Assinatura', icon: IconReceipt },
+  { href: '/app/suporte', label: 'Suporte', icon: IconBank },
+]
 
 /** Cadeado exibido ao lado dos modulos restritos. */
 function IconLockSmall() {
@@ -81,52 +81,50 @@ function IconLockSmall() {
       <rect x="4.5" y="10" width="15" height="10.5" rx="2.5" />
       <path d="M8 10V7.5a4 4 0 0 1 8 0V10" />
     </svg>
-  );
+  )
 }
 
 export default function AppShell({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
-  const router = useRouter();
-  const [navOpen, setNavOpen] = useState(false);
-  const { bloqueado, pedirRegularizacao } = useSubscription();
+  const pathname = usePathname()
+  const router = useRouter()
+  const [navOpen, setNavOpen] = useState(false)
+  const { bloqueado, pedirRegularizacao } = useSubscription()
 
   /* SUBSTITUIR POR: GET /suporte/chamados (ou contador dedicado) — hoje
      le do mock uma vez, no primeiro render. */
-  const [naoLidas] = useState(() => totalNaoLidas(listarChamados()));
+  const [naoLidas] = useState(() => totalNaoLidas(listarChamados()))
 
   /* Financeiro comeca aberto quando a rota atual esta dentro dele. */
-  const [financeiroAberto, setFinanceiroAberto] = useState(
-    pathname.startsWith("/app/financeiro"),
-  );
+  const [financeiroAberto, setFinanceiroAberto] = useState(pathname.startsWith('/app/financeiro'))
 
   /* Fecha a navegacao ao trocar de rota no mobile. Ajuste durante o render
      (padrao recomendado do React) em vez de setState em efeito. */
-  const [rotaAnterior, setRotaAnterior] = useState(pathname);
+  const [rotaAnterior, setRotaAnterior] = useState(pathname)
   if (rotaAnterior !== pathname) {
-    setRotaAnterior(pathname);
-    setNavOpen(false);
-    if (pathname.startsWith("/app/financeiro")) setFinanceiroAberto(true);
+    setRotaAnterior(pathname)
+    setNavOpen(false)
+    if (pathname.startsWith('/app/financeiro')) setFinanceiroAberto(true)
   }
 
   useEffect(() => {
-    document.body.style.overflow = navOpen ? "hidden" : "";
+    document.body.style.overflow = navOpen ? 'hidden' : ''
     return () => {
-      document.body.style.overflow = "";
-    };
-  }, [navOpen]);
+      document.body.style.overflow = ''
+    }
+  }, [navOpen])
 
   const isActive = (href: string) =>
-    href === "/app" ? pathname === href : pathname.startsWith(href);
+    href === '/app' ? pathname === href : pathname.startsWith(href)
 
   const isRestrito = (href: string) =>
     bloqueado &&
     (MODULOS_BLOQUEADOS as readonly string[]).some(
       (rota) => rota === href || rota.startsWith(`${href}/`),
-    );
+    )
 
   function sair() {
-    endSession();
-    router.push("/login");
+    endSession()
+    router.push('/login')
   }
 
   return (
@@ -141,7 +139,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
       ) : null}
 
       <aside
-        className={`${styles.sidebar} ${navOpen ? styles.sidebarOpen : ""}`}
+        className={`${styles.sidebar} ${navOpen ? styles.sidebarOpen : ''}`}
         id="navegacao-painel"
       >
         <Link href="/" className={styles.brand}>
@@ -151,7 +149,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
         <nav className={styles.nav} aria-label="Modulos do sistema">
           {navItems.map((item) => {
-            const Icon = item.icon;
+            const Icon = item.icon
 
             /* --- Item com submenu (Financeiro) --- */
             if (item.children) {
@@ -160,7 +158,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                   <button
                     type="button"
                     className={`${styles.navItem} ${styles.navToggle} ${
-                      isActive(item.href) ? styles.navActive : ""
+                      isActive(item.href) ? styles.navActive : ''
                     }`}
                     onClick={() => setFinanceiroAberto((v) => !v)}
                     aria-expanded={financeiroAberto}
@@ -169,7 +167,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                     {item.label}
                     <span
                       className={`${styles.navChevron} ${
-                        financeiroAberto ? styles.navChevronOpen : ""
+                        financeiroAberto ? styles.navChevronOpen : ''
                       }`}
                     >
                       <IconChevronDown size={16} />
@@ -196,7 +194,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                             key={sub.href}
                             href={sub.href}
                             className={`${styles.subItem} ${
-                              pathname === sub.href ? styles.subActive : ""
+                              pathname === sub.href ? styles.subActive : ''
                             }`}
                           >
                             {sub.label}
@@ -206,7 +204,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
                     </div>
                   ) : null}
                 </div>
-              );
+              )
             }
 
             /* --- Modulo restrito: continua visivel, com cadeado --- */
@@ -224,28 +222,26 @@ export default function AppShell({ children }: { children: ReactNode }) {
                     <IconLockSmall />
                   </span>
                 </button>
-              );
+              )
             }
 
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`${styles.navItem} ${
-                  isActive(item.href) ? styles.navActive : ""
-                }`}
-                aria-current={isActive(item.href) ? "page" : undefined}
+                className={`${styles.navItem} ${isActive(item.href) ? styles.navActive : ''}`}
+                aria-current={isActive(item.href) ? 'page' : undefined}
               >
                 <Icon size={18} />
                 {item.label}
                 {/* Respostas de suporte que a pessoa ainda nao viu */}
-                {item.href === "/app/suporte" && naoLidas > 0 ? (
+                {item.href === '/app/suporte' && naoLidas > 0 ? (
                   <span className={styles.navBadge} aria-label={`${naoLidas} resposta(s) nova(s)`}>
                     {naoLidas}
                   </span>
                 ) : null}
               </Link>
-            );
+            )
           })}
         </nav>
       </aside>
@@ -262,7 +258,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
             onClick={() => setNavOpen((v) => !v)}
             aria-expanded={navOpen}
             aria-controls="navegacao-painel"
-            aria-label={navOpen ? "Fechar navegacao" : "Abrir navegacao"}
+            aria-label={navOpen ? 'Fechar navegacao' : 'Abrir navegacao'}
           >
             {navOpen ? <IconClose size={20} /> : <IconMenu size={20} />}
           </button>
@@ -277,11 +273,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
           </label>
 
           <div className={styles.topActions}>
-            <button
-              type="button"
-              className={styles.iconButton}
-              aria-label="Notificacoes"
-            >
+            <button type="button" className={styles.iconButton} aria-label="Notificacoes">
               <IconBell size={19} />
               <span className={styles.badgeDot} />
             </button>
@@ -294,12 +286,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
               </span>
             </div>
 
-            <button
-              type="button"
-              className={styles.iconButton}
-              onClick={sair}
-              aria-label="Sair"
-            >
+            <button type="button" className={styles.iconButton} onClick={sair} aria-label="Sair">
               <IconLogout size={19} />
             </button>
           </div>
@@ -310,5 +297,5 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
       <PaymentRequiredModal />
     </div>
-  );
+  )
 }

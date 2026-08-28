@@ -49,6 +49,6 @@
   border-radius: 5px;
   background: var(--brand-primary-soft);
   color: var(--brand-primary);
-  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
   font-size: 12.5px;
 }

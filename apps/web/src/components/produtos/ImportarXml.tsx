@@ -1,20 +1,15 @@
-"use client";
+'use client'
 
-import { useEffect, useRef, useState } from "react";
-import {
-  importarXmlCompra,
-  lerXmlNfe,
-  type ItemXml,
-  type NotaXml,
-} from "@/lib/produtos-api";
-import { formatDate, formatMoney } from "@/lib/format";
-import { Badge } from "@/components/ui/UI";
-import { Button } from "@/components/ui/Button";
-import { Spinner } from "@/components/auth/Fields";
-import { IconClose, IconUpload } from "@/components/Icons";
-import styles from "./xml.module.css";
+import { useEffect, useRef, useState } from 'react'
+import { importarXmlCompra, lerXmlNfe, type ItemXml, type NotaXml } from '@/lib/produtos-api'
+import { formatDate, formatMoney } from '@/lib/format'
+import { Badge } from '@/components/ui/UI'
+import { Button } from '@/components/ui/Button'
+import { Spinner } from '@/components/auth/Fields'
+import { IconClose, IconUpload } from '@/components/Icons'
+import styles from './xml.module.css'
 
-type Decisao = "vincular" | "criar" | "ignorar";
+type Decisao = 'vincular' | 'criar' | 'ignorar'
 
 /**
  * Importacao de nota de compra por XML.
@@ -24,74 +19,73 @@ type Decisao = "vincular" | "criar" | "ignorar";
  * impedir que a mesma nota entre duas vezes.
  */
 export default function ImportarXml({ onClose }: { onClose: () => void }) {
-  const [nota, setNota] = useState<NotaXml | null>(null);
-  const [decisoes, setDecisoes] = useState<Record<string, Decisao>>({});
-  const [erro, setErro] = useState<string | null>(null);
-  const [lendo, setLendo] = useState(false);
-  const [importando, setImportando] = useState(false);
-  const [resultado, setResultado] = useState<number | null>(null);
+  const [nota, setNota] = useState<NotaXml | null>(null)
+  const [decisoes, setDecisoes] = useState<Record<string, Decisao>>({})
+  const [erro, setErro] = useState<string | null>(null)
+  const [lendo, setLendo] = useState(false)
+  const [importando, setImportando] = useState(false)
+  const [resultado, setResultado] = useState<number | null>(null)
 
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    dialogRef.current?.focus();
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    dialogRef.current?.focus()
     return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [onClose]);
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [onClose])
 
   async function receberArquivo(arquivo: File) {
-    setErro(null);
-    setLendo(true);
+    setErro(null)
+    setLendo(true)
 
-    if (!arquivo.name.toLowerCase().endsWith(".xml")) {
-      setErro("Envie o arquivo XML da nota fiscal de compra.");
-      setLendo(false);
-      return;
+    if (!arquivo.name.toLowerCase().endsWith('.xml')) {
+      setErro('Envie o arquivo XML da nota fiscal de compra.')
+      setLendo(false)
+      return
     }
 
-    const resultadoLeitura = lerXmlNfe(await arquivo.text());
-    setLendo(false);
+    const resultadoLeitura = lerXmlNfe(await arquivo.text())
+    setLendo(false)
 
     if (!resultadoLeitura.ok) {
-      setErro(resultadoLeitura.error);
-      return;
+      setErro(resultadoLeitura.error)
+      return
     }
 
     /* Sugestao inicial: item que casou com o catalogo entra como vinculo,
        o resto entra como produto novo — e tudo continua editavel. */
-    const iniciais: Record<string, Decisao> = {};
+    const iniciais: Record<string, Decisao> = {}
     resultadoLeitura.nota.itens.forEach((item, i) => {
-      iniciais[String(i)] = item.produtoVinculado ? "vincular" : "criar";
-    });
+      iniciais[String(i)] = item.produtoVinculado ? 'vincular' : 'criar'
+    })
 
-    setNota(resultadoLeitura.nota);
-    setDecisoes(iniciais);
+    setNota(resultadoLeitura.nota)
+    setDecisoes(iniciais)
   }
 
   async function confirmar() {
-    if (!nota) return;
-    setImportando(true);
+    if (!nota) return
+    setImportando(true)
 
     /* SUBSTITUIR POR: POST /compras/xml */
-    const r = await importarXmlCompra(nota, decisoes);
-    setImportando(false);
+    const r = await importarXmlCompra(nota, decisoes)
+    setImportando(false)
 
     if (!r.ok) {
-      setErro(r.error);
-      return;
+      setErro(r.error)
+      return
     }
-    setResultado(r.entradas);
+    setResultado(r.entradas)
   }
 
-  const total =
-    nota?.itens.reduce((acc, i) => acc + i.quantidade * i.valorUnitario, 0) ?? 0;
+  const total = nota?.itens.reduce((acc, i) => acc + i.quantidade * i.valorUnitario, 0) ?? 0
 
   return (
     <div className={styles.root}>
@@ -121,7 +115,7 @@ export default function ImportarXml({ onClose }: { onClose: () => void }) {
               <strong>{resultado} item(ns) lancado(s)</strong>
               <p>
                 O estoque e o preco de custo foram atualizados a partir da nota
-                {nota ? ` ${nota.numero}` : ""}.
+                {nota ? ` ${nota.numero}` : ''}.
               </p>
             </div>
             <div className={styles.acoes}>
@@ -134,9 +128,8 @@ export default function ImportarXml({ onClose }: { onClose: () => void }) {
         {resultado === null && !nota ? (
           <div className={styles.corpo}>
             <p className={styles.texto}>
-              Envie o XML da nota fiscal de compra. Os itens sao lidos
-              automaticamente e voce escolhe, item a item, o que fazer com cada
-              um antes de confirmar.
+              Envie o XML da nota fiscal de compra. Os itens sao lidos automaticamente e voce
+              escolhe, item a item, o que fazer com cada um antes de confirmar.
             </p>
 
             <label className={styles.dropzone}>
@@ -149,8 +142,8 @@ export default function ImportarXml({ onClose }: { onClose: () => void }) {
                 className={styles.fileInput}
                 disabled={lendo}
                 onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) void receberArquivo(f);
+                  const f = e.target.files?.[0]
+                  if (f) void receberArquivo(f)
                 }}
               />
             </label>
@@ -176,15 +169,15 @@ export default function ImportarXml({ onClose }: { onClose: () => void }) {
             <div className={styles.notaInfo}>
               <div>
                 <span>Nota</span>
-                <strong>{nota.numero || "—"}</strong>
+                <strong>{nota.numero || '—'}</strong>
               </div>
               <div>
                 <span>Emitente</span>
-                <strong>{nota.emitente || "—"}</strong>
+                <strong>{nota.emitente || '—'}</strong>
               </div>
               <div>
                 <span>Emissao</span>
-                <strong>{nota.emissao ? formatDate(nota.emissao) : "—"}</strong>
+                <strong>{nota.emissao ? formatDate(nota.emissao) : '—'}</strong>
               </div>
               <div>
                 <span>Total dos itens</span>
@@ -197,7 +190,7 @@ export default function ImportarXml({ onClose }: { onClose: () => void }) {
                 <ItemLinha
                   key={i}
                   item={item}
-                  decisao={decisoes[String(i)] ?? "criar"}
+                  decisao={decisoes[String(i)] ?? 'criar'}
                   onDecisao={(d) => setDecisoes((m) => ({ ...m, [String(i)]: d }))}
                 />
               ))}
@@ -220,7 +213,7 @@ export default function ImportarXml({ onClose }: { onClose: () => void }) {
                     Lancando...
                   </>
                 ) : (
-                  "Confirmar entrada"
+                  'Confirmar entrada'
                 )}
               </Button>
             </div>
@@ -228,7 +221,7 @@ export default function ImportarXml({ onClose }: { onClose: () => void }) {
         ) : null}
       </div>
     </div>
-  );
+  )
 }
 
 /* ------------------------------------------------------------------ */
@@ -238,9 +231,9 @@ function ItemLinha({
   decisao,
   onDecisao,
 }: {
-  item: ItemXml;
-  decisao: Decisao;
-  onDecisao: (d: Decisao) => void;
+  item: ItemXml
+  decisao: Decisao
+  onDecisao: (d: Decisao) => void
 }) {
   return (
     <li className={styles.item}>
@@ -248,7 +241,7 @@ function ItemLinha({
         <span className={styles.itemDescricao}>
           <strong>{item.descricao}</strong>
           <span>
-            {item.ean ? `EAN ${item.ean} · ` : ""}NCM {item.ncm || "—"}
+            {item.ean ? `EAN ${item.ean} · ` : ''}NCM {item.ncm || '—'}
           </span>
         </span>
 
@@ -268,7 +261,7 @@ function ItemLinha({
 
       {item.produtoVinculado ? (
         <p className={styles.itemVinculo}>
-          Vincula a <strong>{item.produtoVinculado.descricao}</strong> (codigo{" "}
+          Vincula a <strong>{item.produtoVinculado.descricao}</strong> (codigo{' '}
           {item.produtoVinculado.codigo})
         </p>
       ) : null}
@@ -276,16 +269,16 @@ function ItemLinha({
       <div className={styles.itemAcoes} role="group" aria-label="O que fazer com o item">
         {(
           [
-            ["vincular", "Vincular", Boolean(item.produtoVinculado)],
-            ["criar", "Criar produto", true],
-            ["ignorar", "Ignorar", true],
+            ['vincular', 'Vincular', Boolean(item.produtoVinculado)],
+            ['criar', 'Criar produto', true],
+            ['ignorar', 'Ignorar', true],
           ] as const
         ).map(([valor, rotulo, habilitado]) =>
           habilitado ? (
             <button
               key={valor}
               type="button"
-              className={`${styles.itemBotao} ${decisao === valor ? styles.itemBotaoAtivo : ""}`}
+              className={`${styles.itemBotao} ${decisao === valor ? styles.itemBotaoAtivo : ''}`}
               onClick={() => onDecisao(valor)}
               aria-pressed={decisao === valor}
             >
@@ -295,5 +288,5 @@ function ItemLinha({
         )}
       </div>
     </li>
-  );
+  )
 }

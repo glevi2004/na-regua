@@ -2,11 +2,7 @@
 .section {
   padding-block: 80px;
   background:
-    radial-gradient(
-      60% 50% at 50% 0%,
-      rgba(109, 51, 221, 0.22) 0%,
-      rgba(109, 51, 221, 0) 70%
-    ),
+    radial-gradient(60% 50% at 50% 0%, rgba(109, 51, 221, 0.22) 0%, rgba(109, 51, 221, 0) 70%),
     var(--dark-bg);
   color: var(--dark-text);
 }
@@ -116,7 +112,9 @@
   border: 1px solid var(--dark-border);
   border-radius: var(--radius);
   background: var(--dark-surface-raised);
-  transition: border-color var(--transition), transform var(--transition);
+  transition:
+    border-color var(--transition),
+    transform var(--transition);
 }
 
 .mesa:hover {
@@ -193,11 +191,7 @@
 }
 
 .bar:last-child {
-  background: linear-gradient(
-    180deg,
-    var(--brand-highlight) 0%,
-    rgba(109, 51, 221, 0.2) 100%
-  );
+  background: linear-gradient(180deg, var(--brand-highlight) 0%, rgba(109, 51, 221, 0.2) 100%);
 }
 
 .rows {
@@ -246,7 +240,9 @@
   font-size: 15px;
   font-weight: 600;
   color: var(--dark-text);
-  transition: border-color var(--transition), color var(--transition),
+  transition:
+    border-color var(--transition),
+    color var(--transition),
     transform var(--transition);
 }
 

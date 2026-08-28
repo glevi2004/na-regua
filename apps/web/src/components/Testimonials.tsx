@@ -1,24 +1,22 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { proofMetrics, testimonials } from "@/content/site";
-import { IconArrowRight, IconQuote } from "./Icons";
-import styles from "./Testimonials.module.css";
+import { useState } from 'react'
+import { proofMetrics, testimonials } from '@/content/site'
+import { IconArrowRight, IconQuote } from './Icons'
+import styles from './Testimonials.module.css'
 
 export default function Testimonials() {
-  const [index, setIndex] = useState(0);
-  const total = testimonials.length;
+  const [index, setIndex] = useState(0)
+  const total = testimonials.length
 
-  const go = (dir: number) => setIndex((i) => (i + dir + total) % total);
+  const go = (dir: number) => setIndex((i) => (i + dir + total) % total)
 
   return (
     <section className="section">
       <div className="container">
         <header className={styles.head}>
           <span className="eyebrow">Prova social</span>
-          <h2 className="sectionTitle">
-            Numeros de quem ja trocou a planilha
-          </h2>
+          <h2 className="sectionTitle">Numeros de quem ja trocou a planilha</h2>
         </header>
 
         <ul className={styles.metrics}>
@@ -32,10 +30,7 @@ export default function Testimonials() {
 
         <div className={styles.carousel}>
           <div className={styles.viewport}>
-            <div
-              className={styles.track}
-              style={{ transform: `translateX(-${index * 100}%)` }}
-            >
+            <div className={styles.track} style={{ transform: `translateX(-${index * 100}%)` }}>
               {testimonials.map((t) => (
                 <figure key={t.name} className={styles.slide}>
                   <span className={styles.quoteMark}>
@@ -60,7 +55,7 @@ export default function Testimonials() {
                 <button
                   key={t.name}
                   type="button"
-                  className={`${styles.dot} ${i === index ? styles.dotActive : ""}`}
+                  className={`${styles.dot} ${i === index ? styles.dotActive : ''}`}
                   onClick={() => setIndex(i)}
                   aria-label={`Ver depoimento ${i + 1} de ${total}`}
                   aria-current={i === index}
@@ -90,5 +85,5 @@ export default function Testimonials() {
         </div>
       </div>
     </section>
-  );
+  )
 }

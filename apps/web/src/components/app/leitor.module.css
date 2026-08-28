@@ -52,7 +52,9 @@
   height: 32px;
   border-radius: 50%;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .fechar:hover {

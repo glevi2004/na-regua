@@ -76,7 +76,9 @@
   border-radius: var(--radius-full);
   font-size: 13px;
   color: var(--app-muted);
-  transition: border-color var(--transition), color var(--transition),
+  transition:
+    border-color var(--transition),
+    color var(--transition),
     background-color var(--transition);
 }
 
@@ -103,14 +105,16 @@
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-areas:
-    "imagem info    numeros"
-    "imagem estoque numeros";
+    'imagem info    numeros'
+    'imagem estoque numeros';
   align-items: center;
   gap: 6px 14px;
   padding: 14px;
   border: 1px solid var(--app-border);
   border-radius: var(--radius);
-  transition: border-color var(--transition), transform var(--transition);
+  transition:
+    border-color var(--transition),
+    transform var(--transition);
 }
 
 .card:hover {

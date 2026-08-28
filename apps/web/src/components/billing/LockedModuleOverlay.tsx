@@ -1,8 +1,8 @@
-"use client";
+'use client'
 
-import type { ReactNode } from "react";
-import { useSubscription } from "./SubscriptionProvider";
-import styles from "./billing.module.css";
+import type { ReactNode } from 'react'
+import { useSubscription } from './SubscriptionProvider'
+import styles from './billing.module.css'
 
 function IconLock({ size = 22 }: { size?: number }) {
   return (
@@ -20,7 +20,7 @@ function IconLock({ size = 22 }: { size?: number }) {
       <rect x="4.5" y="10" width="15" height="10.5" rx="2.5" />
       <path d="M8 10V7.5a4 4 0 0 1 8 0V10" />
     </svg>
-  );
+  )
 }
 
 /**
@@ -31,17 +31,17 @@ function IconLock({ size = 22 }: { size?: number }) {
  * Clicar em qualquer lugar abre o modal de regularizacao.
  */
 export default function LockedModuleOverlay({
-  titulo = "Modulo bloqueado",
-  descricao = "Regularize o pagamento para voltar a usar este modulo.",
+  titulo = 'Modulo bloqueado',
+  descricao = 'Regularize o pagamento para voltar a usar este modulo.',
   children,
 }: {
-  titulo?: string;
-  descricao?: string;
-  children: ReactNode;
+  titulo?: string
+  descricao?: string
+  children: ReactNode
 }) {
-  const { bloqueado, pedirRegularizacao } = useSubscription();
+  const { bloqueado, pedirRegularizacao } = useSubscription()
 
-  if (!bloqueado) return <>{children}</>;
+  if (!bloqueado) return <>{children}</>
 
   return (
     <div className={styles.lockedWrap}>
@@ -50,11 +50,7 @@ export default function LockedModuleOverlay({
         {children}
       </div>
 
-      <button
-        type="button"
-        className={styles.lockedOverlay}
-        onClick={pedirRegularizacao}
-      >
+      <button type="button" className={styles.lockedOverlay} onClick={pedirRegularizacao}>
         <span className={styles.lockedCard}>
           <span className={styles.lockedIcon}>
             <IconLock />
@@ -65,5 +61,5 @@ export default function LockedModuleOverlay({
         </span>
       </button>
     </div>
-  );
+  )
 }

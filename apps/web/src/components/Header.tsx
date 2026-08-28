@@ -1,32 +1,32 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { BRAND, nav } from "@/content/site";
-import { IconClose, IconMenu } from "./Icons";
-import styles from "./Header.module.css";
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
+import { BRAND, nav } from '@/content/site'
+import { IconClose, IconMenu } from './Icons'
+import styles from './Header.module.css'
 
 export default function Header() {
-  const [open, setOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
+  const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    const onScroll = () => setScrolled(window.scrollY > 8)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
 
   /* Trava a rolagem do fundo enquanto o menu mobile estiver aberto. */
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
+    document.body.style.overflow = open ? 'hidden' : ''
     return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
+      document.body.style.overflow = ''
+    }
+  }, [open])
 
   return (
-    <header className={`${styles.header} ${scrolled ? styles.scrolled : ""}`}>
+    <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
       <div className={`container ${styles.inner}`}>
         {/* Placeholder de marca — o nome/logo ainda nao esta definido. */}
         <a href="#top" className={styles.brand} aria-label={`${BRAND}, inicio`}>
@@ -57,7 +57,7 @@ export default function Header() {
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls="menu-mobile"
-          aria-label={open ? "Fechar menu" : "Abrir menu"}
+          aria-label={open ? 'Fechar menu' : 'Abrir menu'}
         >
           {open ? <IconClose /> : <IconMenu />}
         </button>
@@ -65,7 +65,7 @@ export default function Header() {
 
       <div
         id="menu-mobile"
-        className={`${styles.mobilePanel} ${open ? styles.mobileOpen : ""}`}
+        className={`${styles.mobilePanel} ${open ? styles.mobileOpen : ''}`}
         hidden={!open}
       >
         <nav className={styles.mobileNav} aria-label="Secoes do site">
@@ -96,5 +96,5 @@ export default function Header() {
         </Link>
       </div>
     </header>
-  );
+  )
 }

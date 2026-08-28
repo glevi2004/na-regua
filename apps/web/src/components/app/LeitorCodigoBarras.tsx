@@ -1,10 +1,10 @@
-"use client";
+'use client'
 
-import { useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/Button";
-import { Spinner } from "@/components/auth/Fields";
-import { IconBarcode, IconClose } from "@/components/Icons";
-import styles from "./leitor.module.css";
+import { useEffect, useRef, useState } from 'react'
+import { Button } from '@/components/ui/Button'
+import { Spinner } from '@/components/auth/Fields'
+import { IconBarcode, IconClose } from '@/components/Icons'
+import styles from './leitor.module.css'
 
 /**
  * Leitor de codigo de barras pela camera.
@@ -18,122 +18,122 @@ import styles from "./leitor.module.css";
  */
 
 /* A API ainda nao esta no lib.dom padrao do TypeScript. */
-type DetectedBarcode = { rawValue: string };
+type DetectedBarcode = { rawValue: string }
 type BarcodeDetectorLike = {
-  detect: (source: HTMLVideoElement) => Promise<DetectedBarcode[]>;
-};
-type BarcodeDetectorCtor = new (options?: { formats?: string[] }) => BarcodeDetectorLike;
+  detect: (source: HTMLVideoElement) => Promise<DetectedBarcode[]>
+}
+type BarcodeDetectorCtor = new (options?: { formats?: string[] }) => BarcodeDetectorLike
 
 /** Intervalo entre tentativas de leitura, em ms. */
-const INTERVALO_LEITURA = 400;
+const INTERVALO_LEITURA = 400
 
 export default function LeitorCodigoBarras({
   onDetectar,
   onClose,
 }: {
-  onDetectar: (codigo: string) => void;
-  onClose: () => void;
+  onDetectar: (codigo: string) => void
+  onClose: () => void
 }) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const streamRef = useRef<MediaStream | null>(null)
 
-  const [estado, setEstado] = useState<"iniciando" | "lendo" | "indisponivel" | "erro">(
-    "iniciando",
-  );
-  const [mensagem, setMensagem] = useState<string | null>(null);
-  const [manual, setManual] = useState("");
+  const [estado, setEstado] = useState<'iniciando' | 'lendo' | 'indisponivel' | 'erro'>('iniciando')
+  const [mensagem, setMensagem] = useState<string | null>(null)
+  const [manual, setManual] = useState('')
 
   useEffect(() => {
-    let cancelado = false;
-    let timer: ReturnType<typeof setInterval> | null = null;
+    let cancelado = false
+    let timer: ReturnType<typeof setInterval> | null = null
 
     async function iniciar() {
-      const Detector = (
-        window as unknown as { BarcodeDetector?: BarcodeDetectorCtor }
-      ).BarcodeDetector;
+      const Detector = (window as unknown as { BarcodeDetector?: BarcodeDetectorCtor })
+        .BarcodeDetector
 
       if (!Detector) {
-        setEstado("indisponivel");
-        setMensagem(
-          "Este navegador nao le codigo de barras pela camera. Digite o codigo abaixo.",
-        );
-        return;
+        setEstado('indisponivel')
+        setMensagem('Este navegador nao le codigo de barras pela camera. Digite o codigo abaixo.')
+        return
       }
 
       if (!navigator.mediaDevices?.getUserMedia) {
-        setEstado("indisponivel");
-        setMensagem("Camera indisponivel neste navegador. Digite o codigo abaixo.");
-        return;
+        setEstado('indisponivel')
+        setMensagem('Camera indisponivel neste navegador. Digite o codigo abaixo.')
+        return
       }
 
       try {
         /* facingMode "environment" pede a camera traseira no celular. */
         const stream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" },
-        });
+          video: { facingMode: 'environment' },
+        })
         if (cancelado) {
-          stream.getTracks().forEach((t) => t.stop());
-          return;
+          stream.getTracks().forEach((t) => t.stop())
+          return
         }
 
-        streamRef.current = stream;
+        streamRef.current = stream
         if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-          await videoRef.current.play();
+          videoRef.current.srcObject = stream
+          await videoRef.current.play()
         }
 
         const detector = new Detector({
-          formats: ["ean_13", "ean_8", "code_128", "upc_a", "upc_e"],
-        });
+          formats: ['ean_13', 'ean_8', 'code_128', 'upc_a', 'upc_e'],
+        })
 
-        setEstado("lendo");
+        setEstado('lendo')
 
         timer = setInterval(async () => {
-          if (!videoRef.current || cancelado) return;
+          if (!videoRef.current || cancelado) return
           try {
-            const encontrados = await detector.detect(videoRef.current);
+            const encontrados = await detector.detect(videoRef.current)
             if (encontrados.length > 0 && encontrados[0].rawValue) {
-              onDetectar(encontrados[0].rawValue);
-              onClose();
+              onDetectar(encontrados[0].rawValue)
+              onClose()
             }
           } catch {
             /* Quadro ilegivel: segue tentando no proximo intervalo. */
           }
-        }, INTERVALO_LEITURA);
+        }, INTERVALO_LEITURA)
       } catch (e) {
-        if (cancelado) return;
-        setEstado("erro");
+        if (cancelado) return
+        setEstado('erro')
         setMensagem(
-          e instanceof DOMException && e.name === "NotAllowedError"
-            ? "Permissao de camera negada. Libere o acesso ou digite o codigo."
-            : "Nao foi possivel abrir a camera. Digite o codigo abaixo.",
-        );
+          e instanceof DOMException && e.name === 'NotAllowedError'
+            ? 'Permissao de camera negada. Libere o acesso ou digite o codigo.'
+            : 'Nao foi possivel abrir a camera. Digite o codigo abaixo.',
+        )
       }
     }
 
-    void iniciar();
+    void iniciar()
 
     return () => {
-      cancelado = true;
-      if (timer) clearInterval(timer);
+      cancelado = true
+      if (timer) clearInterval(timer)
       /* Solta a camera: sem isto o indicador do aparelho fica aceso. */
-      streamRef.current?.getTracks().forEach((t) => t.stop());
-    };
-  }, [onDetectar, onClose]);
+      streamRef.current?.getTracks().forEach((t) => t.stop())
+    }
+  }, [onDetectar, onClose])
 
   function enviarManual(event: React.FormEvent) {
-    event.preventDefault();
-    const codigo = manual.trim();
-    if (!codigo) return;
-    onDetectar(codigo);
-    onClose();
+    event.preventDefault()
+    const codigo = manual.trim()
+    if (!codigo) return
+    onDetectar(codigo)
+    onClose()
   }
 
   return (
     <div className={styles.root}>
       <button type="button" className={styles.backdrop} onClick={onClose} aria-label="Fechar" />
 
-      <div className={styles.painel} role="dialog" aria-modal="true" aria-label="Ler codigo de barras">
+      <div
+        className={styles.painel}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Ler codigo de barras"
+      >
         <header className={styles.cabecalho}>
           <h2 className={styles.titulo}>
             <IconBarcode size={19} />
@@ -144,11 +144,11 @@ export default function LeitorCodigoBarras({
           </button>
         </header>
 
-        {estado === "iniciando" || estado === "lendo" ? (
+        {estado === 'iniciando' || estado === 'lendo' ? (
           <div className={styles.camera}>
             <video ref={videoRef} className={styles.video} playsInline muted />
             <div className={styles.mira} aria-hidden="true" />
-            {estado === "iniciando" ? (
+            {estado === 'iniciando' ? (
               <p className={styles.aguardando}>
                 <Spinner size={16} />
                 Abrindo a camera...
@@ -187,5 +187,5 @@ export default function LeitorCodigoBarras({
         </form>
       </div>
     </div>
-  );
+  )
 }

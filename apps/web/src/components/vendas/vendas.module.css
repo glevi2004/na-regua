@@ -16,7 +16,7 @@
 }
 
 .step:not(:last-child)::after {
-  content: "";
+  content: '';
   flex: 1;
   height: 2px;
   border-radius: 2px;
@@ -139,7 +139,9 @@
   border-radius: var(--radius-full);
   font-size: 13px;
   color: var(--app-muted);
-  transition: border-color var(--transition), color var(--transition),
+  transition:
+    border-color var(--transition),
+    color var(--transition),
     background-color var(--transition);
 }
 
@@ -259,7 +261,9 @@
   border: 1px solid var(--app-border);
   border-radius: var(--radius);
   text-align: left;
-  transition: border-color var(--transition), background-color var(--transition);
+  transition:
+    border-color var(--transition),
+    background-color var(--transition);
 }
 
 .produto:hover {
@@ -436,8 +440,8 @@
   display: grid;
   grid-template-columns: 1fr auto auto;
   grid-template-areas:
-    "nome subtotal excluir"
-    "qtd  qtd      excluir";
+    'nome subtotal excluir'
+    'qtd  qtd      excluir';
   align-items: center;
   gap: 8px 10px;
   padding: 12px 0;
@@ -488,7 +492,9 @@
   color: var(--app-text);
   font-size: 18px;
   line-height: 1;
-  transition: border-color var(--transition), background-color var(--transition);
+  transition:
+    border-color var(--transition),
+    background-color var(--transition);
 }
 
 .qtdBotao:hover {
@@ -532,7 +538,9 @@
   height: 32px;
   border-radius: 50%;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .itemExcluir:hover {
@@ -661,7 +669,9 @@
   border: 1px solid var(--app-border);
   border-radius: var(--radius);
   text-align: center;
-  transition: border-color var(--transition), background-color var(--transition);
+  transition:
+    border-color var(--transition),
+    background-color var(--transition);
 }
 
 .formaBotao:hover:not(:disabled) {
@@ -865,7 +875,9 @@
   border-radius: var(--radius-sm);
   color: var(--app-muted);
   font-size: 12.5px;
-  transition: color var(--transition), border-color var(--transition);
+  transition:
+    color var(--transition),
+    border-color var(--transition);
 }
 
 .demoBotao:hover {
@@ -976,7 +988,9 @@
   border: 1px solid var(--app-border);
   border-radius: var(--radius);
   text-align: center;
-  transition: border-color var(--transition), background-color var(--transition);
+  transition:
+    border-color var(--transition),
+    background-color var(--transition);
 }
 
 .tipoNota:hover {
@@ -1049,7 +1063,7 @@
 }
 
 .notaChave {
-  font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;
+  font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
   font-size: 12px;
   line-height: 1.6;
   color: var(--app-muted);
@@ -1123,8 +1137,8 @@
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-areas:
-    "numero principal total"
-    "numero nota      status";
+    'numero principal total'
+    'numero nota      status';
   align-items: center;
   gap: 6px 13px;
   padding: 14px 8px;
@@ -1463,7 +1477,9 @@
   border-radius: var(--radius-full);
   font-size: 13.5px;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .tipoAtivo {

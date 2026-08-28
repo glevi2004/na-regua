@@ -20,30 +20,29 @@
  * quando o backend suportar; a UI ja trata os quatro estados.
  */
 
-export type SubscriptionStatus = "active" | "overdue" | "trial";
+export type SubscriptionStatus = 'active' | 'overdue' | 'trial'
 
 export type Subscription = {
-  status: SubscriptionStatus;
-  planName: string;
-  amount: number;
+  status: SubscriptionStatus
+  planName: string
+  amount: number
   /** Data do proximo vencimento ou do vencimento em atraso. */
-  dueDate: string;
-  daysOverdue: number;
-};
+  dueDate: string
+  daysOverdue: number
+}
 
 export type AuthUser = {
-  id: string;
-  nome: string;
-  email: string;
-  empresa: string;
-};
+  id: string
+  nome: string
+  email: string
+  empresa: string
+}
 
 export type SignInResult =
-  | { ok: true; user: AuthUser; subscription: Subscription }
-  | { ok: false; error: string };
+  { ok: true; user: AuthUser; subscription: Subscription } | { ok: false; error: string }
 
 /** Atraso artificial so para exercitar os estados de loading da UI. */
-const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 /* -------------------------------------------------------------------------- */
 /* Autenticacao                                                               */
@@ -56,42 +55,39 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  * A conta cai em "pagamento pendente" quando o e-mail contem "pendente",
  * o que permite demonstrar o fluxo bloqueado sem precisar de dados reais.
  */
-export async function signIn(
-  credential: string,
-  password: string,
-): Promise<SignInResult> {
-  await delay(900);
+export async function signIn(credential: string, password: string): Promise<SignInResult> {
+  await delay(900)
 
   if (password.length < 6) {
-    return { ok: false, error: "E-mail ou senha incorretos." };
+    return { ok: false, error: 'E-mail ou senha incorretos.' }
   }
 
-  const overdue = credential.toLowerCase().includes("pendente");
+  const overdue = credential.toLowerCase().includes('pendente')
 
   return {
     ok: true,
     user: {
-      id: "usr-1",
-      nome: "Marina Alves",
+      id: 'usr-1',
+      nome: 'Marina Alves',
       email: credential,
-      empresa: "Mercearia Sol Nascente",
+      empresa: 'Mercearia Sol Nascente',
     },
     subscription: overdue
       ? {
-          status: "overdue",
-          planName: "Plano unico",
+          status: 'overdue',
+          planName: 'Plano unico',
           amount: 149,
-          dueDate: "2026-08-10",
+          dueDate: '2026-08-10',
           daysOverdue: 14,
         }
       : {
-          status: "active",
-          planName: "Plano unico",
+          status: 'active',
+          planName: 'Plano unico',
           amount: 149,
-          dueDate: "2026-09-10",
+          dueDate: '2026-09-10',
           daysOverdue: 0,
         },
-  };
+  }
 }
 
 /**
@@ -101,14 +97,14 @@ export async function signIn(
  * acesso (por exemplo ao voltar da tela de pagamento).
  */
 export async function fetchSubscription(): Promise<Subscription> {
-  await delay(400);
+  await delay(400)
   return {
-    status: "active",
-    planName: "Plano unico",
+    status: 'active',
+    planName: 'Plano unico',
     amount: 149,
-    dueDate: "2026-09-10",
+    dueDate: '2026-09-10',
     daysOverdue: 0,
-  };
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -116,8 +112,8 @@ export async function fetchSubscription(): Promise<Subscription> {
 /* -------------------------------------------------------------------------- */
 
 export type CouponResult =
-  | { status: "valid"; code: string; partner: string; benefit: string }
-  | { status: "invalid"; message: string };
+  | { status: 'valid'; code: string; partner: string; benefit: string }
+  | { status: 'invalid'; message: string }
 
 /**
  * SUBSTITUIR POR: GET /partners/coupons/:codigo
@@ -126,42 +122,45 @@ export type CouponResult =
  * inexistente e 200 com os dados do parceiro quando valido.
  */
 export async function validateCoupon(code: string): Promise<CouponResult> {
-  await delay(650);
+  await delay(650)
 
   const known: Record<string, { partner: string; benefit: string }> = {
-    PARCEIRO10: { partner: "Contabilidade Prisma", benefit: "10% de desconto nos 3 primeiros meses" },
-    INDICA20: { partner: "Rede Lojista PR", benefit: "20% de desconto no primeiro mes" },
-    SOCIO15: { partner: "Associacao Comercial", benefit: "15% de desconto recorrente" },
-  };
+    PARCEIRO10: {
+      partner: 'Contabilidade Prisma',
+      benefit: '10% de desconto nos 3 primeiros meses',
+    },
+    INDICA20: { partner: 'Rede Lojista PR', benefit: '20% de desconto no primeiro mes' },
+    SOCIO15: { partner: 'Associacao Comercial', benefit: '15% de desconto recorrente' },
+  }
 
-  const found = known[code.trim().toUpperCase()];
+  const found = known[code.trim().toUpperCase()]
   if (!found) {
-    return { status: "invalid", message: "Cupom nao encontrado." };
+    return { status: 'invalid', message: 'Cupom nao encontrado.' }
   }
 
   return {
-    status: "valid",
+    status: 'valid',
     code: code.trim().toUpperCase(),
     partner: found.partner,
     benefit: found.benefit,
-  };
+  }
 }
 
 export type SignupData = {
-  nome: string;
-  email: string;
-  telefone: string;
-  senha: string;
-  cupom: string | null;
-};
+  nome: string
+  email: string
+  telefone: string
+  senha: string
+  cupom: string | null
+}
 
 /** SUBSTITUIR POR: POST /auth/signup — deve devolver o id da conta criada. */
 export async function createAccount(
   data: SignupData,
 ): Promise<{ ok: true; accountId: string } | { ok: false; error: string }> {
-  await delay(1100);
-  void data;
-  return { ok: true, accountId: "acc-1" };
+  await delay(1100)
+  void data
+  return { ok: true, accountId: 'acc-1' }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -169,19 +168,19 @@ export async function createAccount(
 /* -------------------------------------------------------------------------- */
 
 export type PixCharge = {
-  chargeId: string;
+  chargeId: string
   /** Payload "copia e cola" — e o conteudo que vira o QR Code. */
-  payload: string;
+  payload: string
   /** Timestamp (ms) em que o codigo expira. */
-  expiresAt: number;
-  amount: number;
-  planName: string;
-};
+  expiresAt: number
+  amount: number
+  planName: string
+}
 
-export type PixChargeStatus = "pending" | "paid" | "expired";
+export type PixChargeStatus = 'pending' | 'paid' | 'expired'
 
 /** Minutos de validade do codigo Pix. */
-export const PIX_EXPIRATION_MINUTES = 15;
+export const PIX_EXPIRATION_MINUTES = 15
 
 /**
  * SUBSTITUIR POR: POST /billing/charges
@@ -190,18 +189,18 @@ export const PIX_EXPIRATION_MINUTES = 15;
  * transforma essa string em QR Code — nunca monta o payload sozinho.
  */
 export async function createPixCharge(planName: string, amount: number): Promise<PixCharge> {
-  await delay(800);
+  await delay(800)
 
-  const chargeId = `chg-${Math.random().toString(36).slice(2, 10)}`;
+  const chargeId = `chg-${Math.random().toString(36).slice(2, 10)}`
 
   /* Payload de exemplo no formato BR Code. O real vem pronto do PSP. */
   const payload = [
-    "00020126580014BR.GOV.BCB.PIX0136",
-    chargeId.padEnd(36, "0"),
-    "52040000530398654",
-    amount.toFixed(2).padStart(6, "0"),
-    "5802BR5913EI BUDDY LTDA6008CURITIBA62070503***6304",
-  ].join("");
+    '00020126580014BR.GOV.BCB.PIX0136',
+    chargeId.padEnd(36, '0'),
+    '52040000530398654',
+    amount.toFixed(2).padStart(6, '0'),
+    '5802BR5913EI BUDDY LTDA6008CURITIBA62070503***6304',
+  ].join('')
 
   return {
     chargeId,
@@ -209,7 +208,7 @@ export async function createPixCharge(planName: string, amount: number): Promise
     expiresAt: Date.now() + PIX_EXPIRATION_MINUTES * 60_000,
     amount,
     planName,
-  };
+  }
 }
 
 /**
@@ -218,12 +217,10 @@ export async function createPixCharge(planName: string, amount: number): Promise
  * A UI faz polling a cada 4s enquanto o estado for "pending". Quando houver
  * webhook no backend, trocar por SSE/websocket e remover o polling.
  */
-export async function fetchPixChargeStatus(
-  chargeId: string,
-): Promise<PixChargeStatus> {
-  await delay(500);
-  void chargeId;
+export async function fetchPixChargeStatus(chargeId: string): Promise<PixChargeStatus> {
+  await delay(500)
+  void chargeId
   /* Sem backend nao ha como confirmar de verdade: a tela oferece um botao
      explicito de simulacao para demonstrar o estado "pago". */
-  return "pending";
+  return 'pending'
 }

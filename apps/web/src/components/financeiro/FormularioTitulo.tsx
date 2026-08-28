@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react'
 import {
   NOMES_BANCOS,
   NOMES_CLIENTES,
@@ -8,21 +8,21 @@ import {
   NOMES_PLANOS,
   salvarTitulo,
   TIPOS_RECEBIMENTO,
-} from "@/lib/financeiro-api";
-import { Button } from "@/components/ui/Button";
-import { Spinner } from "@/components/auth/Fields";
-import { IconClose } from "@/components/Icons";
-import CampoTag from "@/components/app/CampoTag";
-import styles from "./financeiro.module.css";
+} from '@/lib/financeiro-api'
+import { Button } from '@/components/ui/Button'
+import { Spinner } from '@/components/auth/Fields'
+import { IconClose } from '@/components/Icons'
+import CampoTag from '@/components/app/CampoTag'
+import styles from './financeiro.module.css'
 
 function paraNumero(valor: string): number {
-  const limpo = valor.replace(/\./g, "").replace(",", ".");
-  const n = Number(limpo);
-  return Number.isFinite(n) ? n : 0;
+  const limpo = valor.replace(/\./g, '').replace(',', '.')
+  const n = Number(limpo)
+  return Number.isFinite(n) ? n : 0
 }
 
 /** Data de hoje no formato do input date. */
-const HOJE = "2026-08-24";
+const HOJE = '2026-08-24'
 
 /**
  * Lancamento de titulo, a pagar ou a receber.
@@ -36,68 +36,68 @@ export default function FormularioTitulo({
   onSalvo,
   onCancelar,
 }: {
-  tipo: "pagar" | "receber";
-  onSalvo: (mensagem: string) => void;
-  onCancelar: () => void;
+  tipo: 'pagar' | 'receber'
+  onSalvo: (mensagem: string) => void
+  onCancelar: () => void
 }) {
-  const ref = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null)
 
-  const [banco, setBanco] = useState("");
-  const [plano, setPlano] = useState("");
-  const [contraparte, setContraparte] = useState("");
-  const [emissao, setEmissao] = useState(HOJE);
-  const [vencimento, setVencimento] = useState("");
-  const [valor, setValor] = useState("");
-  const [descricao, setDescricao] = useState("");
-  const [tipoRecebimento, setTipoRecebimento] = useState<string>("pix");
+  const [banco, setBanco] = useState('')
+  const [plano, setPlano] = useState('')
+  const [contraparte, setContraparte] = useState('')
+  const [emissao, setEmissao] = useState(HOJE)
+  const [vencimento, setVencimento] = useState('')
+  const [valor, setValor] = useState('')
+  const [descricao, setDescricao] = useState('')
+  const [tipoRecebimento, setTipoRecebimento] = useState<string>('pix')
 
   /* Listas locais para o "(T)": criar um item aqui ja o deixa disponivel
      no campo, sem recarregar a tela. */
-  const [bancos, setBancos] = useState(NOMES_BANCOS);
-  const [planos, setPlanos] = useState(NOMES_PLANOS);
+  const [bancos, setBancos] = useState(NOMES_BANCOS)
+  const [planos, setPlanos] = useState(NOMES_PLANOS)
   const [contrapartes, setContrapartes] = useState(
-    tipo === "pagar" ? NOMES_FORNECEDORES : NOMES_CLIENTES,
-  );
+    tipo === 'pagar' ? NOMES_FORNECEDORES : NOMES_CLIENTES,
+  )
 
-  const [erros, setErros] = useState<Record<string, string>>({});
-  const [salvando, setSalvando] = useState(false);
+  const [erros, setErros] = useState<Record<string, string>>({})
+  const [salvando, setSalvando] = useState(false)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && !salvando) onCancelar();
-    };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    ref.current?.focus();
+      if (e.key === 'Escape' && !salvando) onCancelar()
+    }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    ref.current?.focus()
     return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [onCancelar, salvando]);
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [onCancelar, salvando])
 
-  const rotuloContraparte = tipo === "pagar" ? "Fornecedor" : "Cliente";
+  const rotuloContraparte = tipo === 'pagar' ? 'Fornecedor' : 'Cliente'
 
   async function salvar(event: React.FormEvent) {
-    event.preventDefault();
+    event.preventDefault()
 
-    const novos: Record<string, string> = {};
-    if (!banco) novos.banco = "Escolha o banco.";
-    if (!contraparte) novos.contraparte = `Escolha o ${rotuloContraparte.toLowerCase()}.`;
-    if (tipo === "pagar" && !plano) novos.plano = "Escolha o plano de conta.";
-    if (!vencimento) novos.vencimento = "Informe a data de vencimento.";
-    if (paraNumero(valor) <= 0) novos.valor = "Informe um valor maior que zero.";
+    const novos: Record<string, string> = {}
+    if (!banco) novos.banco = 'Escolha o banco.'
+    if (!contraparte) novos.contraparte = `Escolha o ${rotuloContraparte.toLowerCase()}.`
+    if (tipo === 'pagar' && !plano) novos.plano = 'Escolha o plano de conta.'
+    if (!vencimento) novos.vencimento = 'Informe a data de vencimento.'
+    if (paraNumero(valor) <= 0) novos.valor = 'Informe um valor maior que zero.'
     if (!descricao.trim()) {
-      novos.descricao = tipo === "pagar" ? "Descreva o que e." : "Informe a que se refere.";
+      novos.descricao = tipo === 'pagar' ? 'Descreva o que e.' : 'Informe a que se refere.'
     }
 
-    setErros(novos);
-    if (Object.keys(novos).length > 0) return;
+    setErros(novos)
+    if (Object.keys(novos).length > 0) return
 
-    setSalvando(true);
+    setSalvando(true)
 
     /* SUBSTITUIR POR: POST /financeiro/titulos */
     const r = await salvarTitulo(
-      tipo === "pagar"
+      tipo === 'pagar'
         ? {
             banco,
             planoContas: plano,
@@ -115,17 +115,15 @@ export default function FormularioTitulo({
             tipo: tipoRecebimento,
             valor: paraNumero(valor),
           },
-    );
-    setSalvando(false);
+    )
+    setSalvando(false)
 
     if (!r.ok) {
-      setErros({ geral: r.error });
-      return;
+      setErros({ geral: r.error })
+      return
     }
 
-    onSalvo(
-      tipo === "pagar" ? "Conta a pagar lancada." : "Conta a receber lancada.",
-    );
+    onSalvo(tipo === 'pagar' ? 'Conta a pagar lancada.' : 'Conta a receber lancada.')
   }
 
   const erroDe = (campo: string) =>
@@ -133,7 +131,7 @@ export default function FormularioTitulo({
       <span className={styles.campoErro} role="alert">
         {erros[campo]}
       </span>
-    ) : null;
+    ) : null
 
   return (
     <div className={styles.dialogRoot}>
@@ -154,7 +152,7 @@ export default function FormularioTitulo({
       >
         <header className={styles.dialogCabecalho}>
           <h2 id="titulo-form" className={styles.dialogTitulo}>
-            {tipo === "pagar" ? "Nova conta a pagar" : "Nova conta a receber"}
+            {tipo === 'pagar' ? 'Nova conta a pagar' : 'Nova conta a receber'}
           </h2>
           <button
             type="button"
@@ -179,7 +177,7 @@ export default function FormularioTitulo({
                 ariaLabel="Banco"
                 invalido={Boolean(erros.banco)}
               />
-              {erroDe("banco")}
+              {erroDe('banco')}
             </label>
 
             <label className={styles.campo}>
@@ -192,11 +190,11 @@ export default function FormularioTitulo({
                 ariaLabel={rotuloContraparte}
                 invalido={Boolean(erros.contraparte)}
               />
-              {erroDe("contraparte")}
+              {erroDe('contraparte')}
             </label>
           </div>
 
-          {tipo === "pagar" ? (
+          {tipo === 'pagar' ? (
             <label className={styles.campo}>
               <span>Plano de conta</span>
               <CampoTag
@@ -207,12 +205,12 @@ export default function FormularioTitulo({
                 ariaLabel="Plano de conta"
                 invalido={Boolean(erros.plano)}
               />
-              {erroDe("plano")}
+              {erroDe('plano')}
             </label>
           ) : null}
 
           <div className={styles.formLinha}>
-            {tipo === "receber" ? (
+            {tipo === 'receber' ? (
               <label className={styles.campo}>
                 <span>Data de emissao</span>
                 <input
@@ -233,7 +231,7 @@ export default function FormularioTitulo({
                 onChange={(e) => setVencimento(e.target.value)}
                 aria-invalid={Boolean(erros.vencimento)}
               />
-              {erroDe("vencimento")}
+              {erroDe('vencimento')}
             </label>
 
             <label className={styles.campo}>
@@ -246,11 +244,11 @@ export default function FormularioTitulo({
                 inputMode="decimal"
                 aria-invalid={Boolean(erros.valor)}
               />
-              {erroDe("valor")}
+              {erroDe('valor')}
             </label>
           </div>
 
-          {tipo === "receber" ? (
+          {tipo === 'receber' ? (
             <label className={styles.campo}>
               <span>Tipo de recebimento</span>
               <select
@@ -268,17 +266,17 @@ export default function FormularioTitulo({
           ) : null}
 
           <label className={styles.campo}>
-            <span>{tipo === "pagar" ? "O que e" : "Referente a"}</span>
+            <span>{tipo === 'pagar' ? 'O que e' : 'Referente a'}</span>
             <input
               className={styles.input}
               value={descricao}
               onChange={(e) => setDescricao(e.target.value)}
               placeholder={
-                tipo === "pagar" ? "Pedido 4471, aluguel de agosto..." : "Venda 1842, servico..."
+                tipo === 'pagar' ? 'Pedido 4471, aluguel de agosto...' : 'Venda 1842, servico...'
               }
               aria-invalid={Boolean(erros.descricao)}
             />
-            {erroDe("descricao")}
+            {erroDe('descricao')}
           </label>
 
           {erros.geral ? (
@@ -298,12 +296,12 @@ export default function FormularioTitulo({
                   Salvando...
                 </>
               ) : (
-                "Lancar titulo"
+                'Lancar titulo'
               )}
             </Button>
           </div>
         </form>
       </div>
     </div>
-  );
+  )
 }

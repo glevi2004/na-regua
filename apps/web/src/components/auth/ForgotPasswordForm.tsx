@@ -1,34 +1,28 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { useState, type FormEvent } from "react";
-import { validateEmail, type FieldError } from "@/lib/validation";
-import {
-  Alert,
-  FormFooter,
-  FormHeader,
-  SubmitButton,
-  TextField,
-} from "./Fields";
+import Link from 'next/link'
+import { useState, type FormEvent } from 'react'
+import { validateEmail, type FieldError } from '@/lib/validation'
+import { Alert, FormFooter, FormHeader, SubmitButton, TextField } from './Fields'
 
 export default function ForgotPasswordForm() {
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState<FieldError>(null);
-  const [loading, setLoading] = useState(false);
-  const [enviado, setEnviado] = useState(false);
+  const [email, setEmail] = useState('')
+  const [error, setError] = useState<FieldError>(null)
+  const [loading, setLoading] = useState(false)
+  const [enviado, setEnviado] = useState(false)
 
   async function handleSubmit(event: FormEvent) {
-    event.preventDefault();
+    event.preventDefault()
 
-    const err = validateEmail(email);
-    setError(err);
-    if (err) return;
+    const err = validateEmail(email)
+    setError(err)
+    if (err) return
 
-    setLoading(true);
+    setLoading(true)
     /* SUBSTITUIR POR: POST /auth/password-reset */
-    await new Promise((r) => setTimeout(r, 900));
-    setLoading(false);
-    setEnviado(true);
+    await new Promise((r) => setTimeout(r, 900))
+    setLoading(false)
+    setEnviado(true)
   }
 
   if (enviado) {
@@ -36,14 +30,14 @@ export default function ForgotPasswordForm() {
       <>
         <FormHeader title="Verifique seu e-mail" />
         <Alert tone="success">
-          Se existir uma conta para <strong>{email}</strong>, enviamos um link
-          para criar uma nova senha. O link vale por 1 hora.
+          Se existir uma conta para <strong>{email}</strong>, enviamos um link para criar uma nova
+          senha. O link vale por 1 hora.
         </Alert>
         <FormFooter>
           <Link href="/login">Voltar para o login</Link>
         </FormFooter>
       </>
-    );
+    )
   }
 
   return (
@@ -58,8 +52,8 @@ export default function ForgotPasswordForm() {
           label="E-mail"
           value={email}
           onChange={(v) => {
-            setEmail(v);
-            if (error) setError(validateEmail(v));
+            setEmail(v)
+            if (error) setError(validateEmail(v))
           }}
           onBlur={() => setError(validateEmail(email))}
           error={error}
@@ -79,5 +73,5 @@ export default function ForgotPasswordForm() {
         Lembrou a senha? <Link href="/login">Entrar</Link>
       </FormFooter>
     </>
-  );
+  )
 }

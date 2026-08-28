@@ -4,16 +4,8 @@
   padding-bottom: 0;
   overflow: hidden;
   background:
-    radial-gradient(
-      70% 55% at 78% 12%,
-      rgba(57, 200, 189, 0.14) 0%,
-      rgba(57, 200, 189, 0) 70%
-    ),
-    radial-gradient(
-      60% 50% at 8% 0%,
-      rgba(109, 51, 221, 0.1) 0%,
-      rgba(109, 51, 221, 0) 68%
-    ),
+    radial-gradient(70% 55% at 78% 12%, rgba(57, 200, 189, 0.14) 0%, rgba(57, 200, 189, 0) 70%),
+    radial-gradient(60% 50% at 8% 0%, rgba(109, 51, 221, 0.1) 0%, rgba(109, 51, 221, 0) 68%),
     var(--bg);
 }
 
@@ -201,20 +193,12 @@
 .bar {
   flex: 1;
   border-radius: 5px 5px 2px 2px;
-  background: linear-gradient(
-    180deg,
-    var(--brand-accent) 0%,
-    var(--brand-primary) 100%
-  );
+  background: linear-gradient(180deg, var(--brand-accent) 0%, var(--brand-primary) 100%);
   opacity: 0.85;
 }
 
 .bar:last-child {
-  background: linear-gradient(
-    180deg,
-    var(--brand-highlight) 0%,
-    var(--brand-primary) 100%
-  );
+  background: linear-gradient(180deg, var(--brand-highlight) 0%, var(--brand-primary) 100%);
   opacity: 1;
 }
 
@@ -271,20 +255,8 @@
   border-bottom: 1px solid var(--border);
   background: var(--bg-muted);
   overflow: hidden;
-  -webkit-mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 8%,
-    #000 92%,
-    transparent
-  );
-  mask-image: linear-gradient(
-    90deg,
-    transparent,
-    #000 8%,
-    #000 92%,
-    transparent
-  );
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent);
 }
 
 .marqueeTrack {
@@ -310,7 +282,7 @@
 }
 
 .marqueeItem::after {
-  content: "";
+  content: '';
   width: 5px;
   height: 5px;
   margin-left: 26px;

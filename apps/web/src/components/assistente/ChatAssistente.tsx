@@ -1,7 +1,7 @@
-"use client";
+'use client'
 
-import { useEffect, useRef, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import {
   CONTEXTO_VAZIO,
   comandosMaisUsados,
@@ -9,44 +9,44 @@ import {
   registrarUso,
   type Contexto,
   type Mensagem,
-} from "@/lib/assistente-api";
-import { COMANDOS_DESTAQUE, GRUPOS_COMANDOS } from "@/lib/comandos";
-import { PageHeader } from "@/components/ui/UI";
-import { Button } from "@/components/ui/Button";
-import Toast from "@/components/ui/Toast";
-import { IconSparkles } from "@/components/Icons";
-import BlocosResposta from "./BlocosResposta";
-import styles from "./assistente.module.css";
+} from '@/lib/assistente-api'
+import { COMANDOS_DESTAQUE, GRUPOS_COMANDOS } from '@/lib/comandos'
+import { PageHeader } from '@/components/ui/UI'
+import { Button } from '@/components/ui/Button'
+import Toast from '@/components/ui/Toast'
+import { IconSparkles } from '@/components/Icons'
+import BlocosResposta from './BlocosResposta'
+import styles from './assistente.module.css'
 
 /** Data de referencia do app. */
-const HOJE = "2026-08-24";
+const HOJE = '2026-08-24'
 
 export default function ChatAssistente() {
-  const router = useRouter();
-  const params = useSearchParams();
+  const router = useRouter()
+  const params = useSearchParams()
 
-  const [mensagens, setMensagens] = useState<Mensagem[]>([]);
-  const [contexto, setContexto] = useState<Contexto>(CONTEXTO_VAZIO);
-  const [entrada, setEntrada] = useState("");
-  const [pensando, setPensando] = useState(false);
-  const [todosComandos, setTodosComandos] = useState(false);
-  const [toast, setToast] = useState<string | null>(null);
+  const [mensagens, setMensagens] = useState<Mensagem[]>([])
+  const [contexto, setContexto] = useState<Contexto>(CONTEXTO_VAZIO)
+  const [entrada, setEntrada] = useState('')
+  const [pensando, setPensando] = useState(false)
+  const [todosComandos, setTodosComandos] = useState(false)
+  const [toast, setToast] = useState<string | null>(null)
 
-  const conversaRef = useRef<HTMLDivElement>(null);
-  const entradaRef = useRef<HTMLTextAreaElement>(null);
+  const conversaRef = useRef<HTMLDivElement>(null)
+  const entradaRef = useRef<HTMLTextAreaElement>(null)
 
   /* Contador em vez de Date.now(): id de mensagem so precisa ser unico
      dentro da conversa, e relogio no render nao e puro. */
-  const proximoId = useRef(0);
-  const novoId = () => `m-${++proximoId.current}`;
+  const proximoId = useRef(0)
+  const novoId = () => `m-${++proximoId.current}`
 
   /* Pergunta vinda dos chips "Via WhatsApp" de outra tela. */
-  const perguntaInicial = params.get("pergunta");
-  const [perguntaUsada, setPerguntaUsada] = useState(false);
+  const perguntaInicial = params.get('pergunta')
+  const [perguntaUsada, setPerguntaUsada] = useState(false)
 
   if (perguntaInicial && !perguntaUsada) {
-    setPerguntaUsada(true);
-    setEntrada(perguntaInicial);
+    setPerguntaUsada(true)
+    setEntrada(perguntaInicial)
   }
 
   /* Rola a conversa para o fim quando ela cresce.
@@ -54,63 +54,63 @@ export default function ChatAssistente() {
      scrollIntoView: aquele rola todo ancestral rolavel, incluindo a
      pagina, e o efeito e a tela pular. */
   useEffect(() => {
-    const caixa = conversaRef.current;
-    if (!caixa) return;
-    caixa.scrollTo({ top: caixa.scrollHeight, behavior: "smooth" });
-  }, [mensagens, pensando]);
+    const caixa = conversaRef.current
+    if (!caixa) return
+    caixa.scrollTo({ top: caixa.scrollHeight, behavior: 'smooth' })
+  }, [mensagens, pensando])
 
   async function perguntar(texto: string) {
-    const limpo = texto.trim();
-    if (!limpo || pensando) return;
+    const limpo = texto.trim()
+    if (!limpo || pensando) return
 
     const daPessoa: Mensagem = {
       id: novoId(),
-      autor: "usuario",
-      canal: "app",
+      autor: 'usuario',
+      canal: 'app',
       texto: limpo,
       data: HOJE,
-    };
+    }
 
-    setMensagens((atual) => [...atual, daPessoa]);
-    setEntrada("");
-    setPensando(true);
+    setMensagens((atual) => [...atual, daPessoa])
+    setEntrada('')
+    setPensando(true)
 
     /* SUBSTITUIR POR: POST /assistente/mensagens — o contexto vai junto
        para o servidor resolver pronome ("o que ele comprou"). */
-    const r = await enviarMensagem(limpo, contexto);
+    const r = await enviarMensagem(limpo, contexto)
 
     /* SUBSTITUIR POR: POST /assistente/uso */
-    registrarUso(r.intencao, limpo);
+    registrarUso(r.intencao, limpo)
 
-    setContexto(r.contexto);
+    setContexto(r.contexto)
     setMensagens((atual) => [
       ...atual,
       {
         id: novoId(),
-        autor: "assistente",
-        canal: "app",
+        autor: 'assistente',
+        canal: 'app',
         texto: r.texto,
         blocos: r.blocos,
         data: HOJE,
       },
-    ]);
-    setPensando(false);
+    ])
+    setPensando(false)
   }
 
   function executarAcao(acao: string) {
-    if (acao === "cancelar") {
-      setToast("Tudo bem, nao fiz nada.");
-      return;
+    if (acao === 'cancelar') {
+      setToast('Tudo bem, nao fiz nada.')
+      return
     }
-    if (acao === "abrir_cadastro_cliente") {
-      router.push("/app/clientes/novo");
-      return;
+    if (acao === 'abrir_cadastro_cliente') {
+      router.push('/app/clientes/novo')
+      return
     }
-    setToast("Esta acao entra quando o assistente estiver ligado ao backend.");
+    setToast('Esta acao entra quando o assistente estiver ligado ao backend.')
   }
 
-  const sugeridos = comandosMaisUsados(3);
-  const conversaVazia = mensagens.length === 0;
+  const sugeridos = comandosMaisUsados(3)
+  const conversaVazia = mensagens.length === 0
 
   return (
     <>
@@ -129,9 +129,8 @@ export default function ChatAssistente() {
               </span>
               <h2>Como posso ajudar?</h2>
               <p>
-                Pergunte sobre vendas, clientes, produtos ou contas. Se citar um
-                cliente, eu guardo o assunto — da para perguntar &ldquo;o que ele
-                comprou&rdquo; logo em seguida.
+                Pergunte sobre vendas, clientes, produtos ou contas. Se citar um cliente, eu guardo
+                o assunto — da para perguntar &ldquo;o que ele comprou&rdquo; logo em seguida.
               </p>
             </div>
           ) : (
@@ -140,10 +139,10 @@ export default function ChatAssistente() {
                 <li
                   key={m.id}
                   className={`${styles.mensagem} ${
-                    m.autor === "usuario" ? styles.daPessoa : styles.doAssistente
+                    m.autor === 'usuario' ? styles.daPessoa : styles.doAssistente
                   }`}
                 >
-                  {m.autor === "assistente" ? (
+                  {m.autor === 'assistente' ? (
                     <span className={styles.avatar} aria-hidden="true">
                       <IconSparkles size={15} />
                     </span>
@@ -175,7 +174,6 @@ export default function ChatAssistente() {
               </div>
             </div>
           ) : null}
-
         </div>
 
         {/* ============ Sugestoes ============ */}
@@ -201,12 +199,7 @@ export default function ChatAssistente() {
           {!todosComandos ? (
             <div className={styles.chips}>
               {COMANDOS_DESTAQUE.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  className={styles.chip}
-                  onClick={() => perguntar(c)}
-                >
+                <button key={c} type="button" className={styles.chip} onClick={() => perguntar(c)}>
                   {c}
                 </button>
               ))}
@@ -252,8 +245,8 @@ export default function ChatAssistente() {
         <form
           className={styles.entrada}
           onSubmit={(e) => {
-            e.preventDefault();
-            void perguntar(entrada);
+            e.preventDefault()
+            void perguntar(entrada)
           }}
         >
           {/* Anexo e audio espelham o uso no WhatsApp. A captura real entra
@@ -261,7 +254,7 @@ export default function ChatAssistente() {
           <button
             type="button"
             className={styles.entradaBotao}
-            onClick={() => setToast("Envio de foto entra junto com o backend do assistente.")}
+            onClick={() => setToast('Envio de foto entra junto com o backend do assistente.')}
             aria-label="Anexar foto"
           >
             <IconClipe />
@@ -274,9 +267,9 @@ export default function ChatAssistente() {
             onChange={(e) => setEntrada(e.target.value)}
             onKeyDown={(e) => {
               /* Enter envia; Shift+Enter quebra linha. */
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                void perguntar(entrada);
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault()
+                void perguntar(entrada)
               }
             }}
             placeholder="Pergunte alguma coisa..."
@@ -287,7 +280,7 @@ export default function ChatAssistente() {
           <button
             type="button"
             className={styles.entradaBotao}
-            onClick={() => setToast("Gravacao de audio entra junto com o backend do assistente.")}
+            onClick={() => setToast('Gravacao de audio entra junto com o backend do assistente.')}
             aria-label="Gravar audio"
           >
             <IconMicrofone />
@@ -301,7 +294,7 @@ export default function ChatAssistente() {
 
       {toast ? <Toast message={toast} tone="success" onClose={() => setToast(null)} /> : null}
     </>
-  );
+  )
 }
 
 /* ------------------------------------------------------------------ */
@@ -321,7 +314,7 @@ function IconClipe() {
     >
       <path d="M20 11.5 12.2 19.3a4.6 4.6 0 0 1-6.5-6.5l8-8a3 3 0 0 1 4.3 4.3l-8 8a1.5 1.5 0 0 1-2.1-2.1l7.2-7.2" />
     </svg>
-  );
+  )
 }
 
 function IconMicrofone() {
@@ -341,5 +334,5 @@ function IconMicrofone() {
       <path d="M5.5 11a6.5 6.5 0 0 0 13 0" />
       <path d="M12 17.5V21" />
     </svg>
-  );
+  )
 }

@@ -1,7 +1,7 @@
-"use client";
+'use client'
 
-import { useId } from "react";
-import styles from "./signup.module.css";
+import { useId } from 'react'
+import styles from './signup.module.css'
 
 /**
  * Aceite obrigatorio dos termos. O botao de avancar da etapa 3 fica
@@ -14,10 +14,10 @@ export default function TermsCheckbox({
   checked,
   onChange,
 }: {
-  checked: boolean;
-  onChange: (checked: boolean) => void;
+  checked: boolean
+  onChange: (checked: boolean) => void
 }) {
-  const id = useId();
+  const id = useId()
 
   return (
     <div className={styles.terms}>
@@ -29,16 +29,16 @@ export default function TermsCheckbox({
         onChange={(e) => onChange(e.target.checked)}
       />
       <label htmlFor={id} className={styles.termsLabel}>
-        Li e aceito os{" "}
+        Li e aceito os{' '}
         <a href="/termos-de-uso" target="_blank" rel="noreferrer noopener">
           Termos de Uso
-        </a>{" "}
-        e a{" "}
+        </a>{' '}
+        e a{' '}
         <a href="/politica-de-privacidade" target="_blank" rel="noreferrer noopener">
           Politica de Privacidade
         </a>
         .
       </label>
     </div>
-  );
+  )
 }

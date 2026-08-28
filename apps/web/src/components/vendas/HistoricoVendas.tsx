@@ -1,43 +1,42 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { useMemo, useState } from "react";
-import { FORMAS, listarVendas, type VendaHistorico } from "@/lib/vendas-api";
-import { daysUntil, formatDateTime, formatMoney } from "@/lib/format";
-import { Badge, Card, EmptyState, PageHeader, Stat } from "@/components/ui/UI";
-import { ButtonLink, Button } from "@/components/ui/Button";
-import { IconPlus, IconSearch } from "@/components/Icons";
-import { COMANDOS_VENDAS } from "@/lib/comandos";
-import ComandosWhatsApp from "@/components/app/ComandosWhatsApp";
-import styles from "./vendas.module.css";
+import Link from 'next/link'
+import { useMemo, useState } from 'react'
+import { FORMAS, listarVendas, type VendaHistorico } from '@/lib/vendas-api'
+import { daysUntil, formatDateTime, formatMoney } from '@/lib/format'
+import { Badge, Card, EmptyState, PageHeader, Stat } from '@/components/ui/UI'
+import { ButtonLink, Button } from '@/components/ui/Button'
+import { IconPlus, IconSearch } from '@/components/Icons'
+import { COMANDOS_VENDAS } from '@/lib/comandos'
+import ComandosWhatsApp from '@/components/app/ComandosWhatsApp'
+import styles from './vendas.module.css'
 
-type FiltroStatus = "todas" | "concluida" | "estornada";
+type FiltroStatus = 'todas' | 'concluida' | 'estornada'
 
 export default function HistoricoVendas() {
-  const [vendas] = useState<VendaHistorico[]>(() => listarVendas());
-  const [busca, setBusca] = useState("");
-  const [status, setStatus] = useState<FiltroStatus>("todas");
-  const [periodo, setPeriodo] = useState(0);
+  const [vendas] = useState<VendaHistorico[]>(() => listarVendas())
+  const [busca, setBusca] = useState('')
+  const [status, setStatus] = useState<FiltroStatus>('todas')
+  const [periodo, setPeriodo] = useState(0)
 
   const filtradas = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
+    const termo = busca.trim().toLowerCase()
 
     return vendas.filter((v) => {
       if (termo) {
-        const casa =
-          v.clienteNome.toLowerCase().includes(termo) || v.numero.includes(termo);
-        if (!casa) return false;
+        const casa = v.clienteNome.toLowerCase().includes(termo) || v.numero.includes(termo)
+        if (!casa) return false
       }
-      if (status !== "todas" && v.status !== status) return false;
-      if (periodo > 0 && Math.abs(daysUntil(v.data.slice(0, 10))) > periodo) return false;
-      return true;
-    });
-  }, [vendas, busca, status, periodo]);
+      if (status !== 'todas' && v.status !== status) return false
+      if (periodo > 0 && Math.abs(daysUntil(v.data.slice(0, 10))) > periodo) return false
+      return true
+    })
+  }, [vendas, busca, status, periodo])
 
-  const concluidas = vendas.filter((v) => v.status === "concluida");
-  const faturamento = concluidas.reduce((acc, v) => acc + v.total, 0);
-  const liquido = concluidas.reduce((acc, v) => acc + v.valorLiquido, 0);
-  const ticket = concluidas.length ? faturamento / concluidas.length : 0;
+  const concluidas = vendas.filter((v) => v.status === 'concluida')
+  const faturamento = concluidas.reduce((acc, v) => acc + v.total, 0)
+  const liquido = concluidas.reduce((acc, v) => acc + v.valorLiquido, 0)
+  const ticket = concluidas.length ? faturamento / concluidas.length : 0
 
   return (
     <>
@@ -96,15 +95,15 @@ export default function HistoricoVendas() {
         <div className={styles.filtros} role="group" aria-label="Status">
           {(
             [
-              ["todas", "Todas"],
-              ["concluida", "Concluidas"],
-              ["estornada", "Estornadas"],
+              ['todas', 'Todas'],
+              ['concluida', 'Concluidas'],
+              ['estornada', 'Estornadas'],
             ] as const
           ).map(([valor, rotulo]) => (
             <button
               key={valor}
               type="button"
-              className={`${styles.categoria} ${status === valor ? styles.categoriaAtiva : ""}`}
+              className={`${styles.categoria} ${status === valor ? styles.categoriaAtiva : ''}`}
               onClick={() => setStatus(valor)}
               aria-pressed={status === valor}
             >
@@ -115,11 +114,11 @@ export default function HistoricoVendas() {
 
         {filtradas.length === 0 ? (
           <EmptyState
-            title={vendas.length === 0 ? "Nenhuma venda ainda" : "Nenhuma venda encontrada"}
+            title={vendas.length === 0 ? 'Nenhuma venda ainda' : 'Nenhuma venda encontrada'}
             description={
               vendas.length === 0
-                ? "Abra o PDV e registre a primeira venda."
-                : "Ajuste a busca ou os filtros."
+                ? 'Abra o PDV e registre a primeira venda.'
+                : 'Ajuste a busca ou os filtros.'
             }
             action={
               vendas.length === 0 ? (
@@ -131,9 +130,9 @@ export default function HistoricoVendas() {
                 <Button
                   variant="secondary"
                   onClick={() => {
-                    setBusca("");
-                    setStatus("todas");
-                    setPeriodo(0);
+                    setBusca('')
+                    setStatus('todas')
+                    setPeriodo(0)
                   }}
                 >
                   Limpar filtros
@@ -151,17 +150,17 @@ export default function HistoricoVendas() {
                   <span className={styles.vendaPrincipal}>
                     <strong>{v.clienteNome}</strong>
                     <span>
-                      {formatDateTime(v.data)} ·{" "}
+                      {formatDateTime(v.data)} ·{' '}
                       {v.pagamentos
                         .map((p) => FORMAS.find((f) => f.valor === p.forma)?.rotulo)
-                        .join(" + ")}
+                        .join(' + ')}
                     </span>
                   </span>
 
                   <span className={styles.vendaNota}>
                     {v.nota ? (
                       <Badge tone="info">
-                        {v.nota.tipo === "nfce" ? "NFC-e" : "NFS-e"} {v.nota.numero}
+                        {v.nota.tipo === 'nfce' ? 'NFC-e' : 'NFS-e'} {v.nota.numero}
                       </Badge>
                     ) : (
                       <Badge>Sem nota</Badge>
@@ -169,7 +168,7 @@ export default function HistoricoVendas() {
                   </span>
 
                   <span className={styles.vendaStatus}>
-                    {v.status === "estornada" ? (
+                    {v.status === 'estornada' ? (
                       <Badge tone="danger">Estornada</Badge>
                     ) : (
                       <Badge tone="success">Concluida</Badge>
@@ -188,5 +187,5 @@ export default function HistoricoVendas() {
         <ComandosWhatsApp comandos={COMANDOS_VENDAS} />
       </div>
     </>
-  );
+  )
 }

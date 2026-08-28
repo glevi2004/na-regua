@@ -1,10 +1,10 @@
-"use client";
+'use client'
 
-import { useEffect } from "react";
-import { IconCheck, IconClose } from "../Icons";
-import styles from "./Toast.module.css";
+import { useEffect } from 'react'
+import { IconCheck, IconClose } from '../Icons'
+import styles from './Toast.module.css'
 
-export type ToastTone = "success" | "error";
+export type ToastTone = 'success' | 'error'
 
 /**
  * Aviso temporario no rodape da tela.
@@ -15,38 +15,29 @@ export type ToastTone = "success" | "error";
  */
 export default function Toast({
   message,
-  tone = "success",
+  tone = 'success',
   onClose,
   duration = 4000,
 }: {
-  message: string;
-  tone?: ToastTone;
-  onClose: () => void;
-  duration?: number;
+  message: string
+  tone?: ToastTone
+  onClose: () => void
+  duration?: number
 }) {
   useEffect(() => {
-    const timer = setTimeout(onClose, duration);
-    return () => clearTimeout(timer);
-  }, [onClose, duration]);
+    const timer = setTimeout(onClose, duration)
+    return () => clearTimeout(timer)
+  }, [onClose, duration])
 
   return (
-    <div
-      className={`${styles.toast} ${styles[tone]}`}
-      role="status"
-      aria-live="polite"
-    >
+    <div className={`${styles.toast} ${styles[tone]}`} role="status" aria-live="polite">
       <span className={styles.icon}>
-        {tone === "success" ? <IconCheck size={15} /> : <IconClose size={15} />}
+        {tone === 'success' ? <IconCheck size={15} /> : <IconClose size={15} />}
       </span>
       <p className={styles.message}>{message}</p>
-      <button
-        type="button"
-        className={styles.close}
-        onClick={onClose}
-        aria-label="Fechar aviso"
-      >
+      <button type="button" className={styles.close} onClick={onClose} aria-label="Fechar aviso">
         <IconClose size={16} />
       </button>
     </div>
-  );
+  )
 }

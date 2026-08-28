@@ -1,44 +1,44 @@
-"use client";
+'use client'
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react'
 import {
   analisarPlanilhaXlsx,
   lerCsv,
   type ErroImportacao,
   type PlanilhaLida,
   type RelatorioImportacao,
-} from "@/lib/planilha";
-import { Button } from "@/components/ui/Button";
-import { Spinner } from "@/components/auth/Fields";
-import { IconClose, IconUpload } from "@/components/Icons";
-import styles from "./importar.module.css";
+} from '@/lib/planilha'
+import { Button } from '@/components/ui/Button'
+import { Spinner } from '@/components/auth/Fields'
+import { IconClose, IconUpload } from '@/components/Icons'
+import styles from './importar.module.css'
 
 export type CampoImportacao = {
-  key: string;
-  label: string;
-  obrigatorio: boolean;
+  key: string
+  label: string
+  obrigatorio: boolean
   /** Decide se uma coluna da planilha corresponde a este campo. */
-  reconhece: (coluna: string) => boolean;
-};
+  reconhece: (coluna: string) => boolean
+}
 
 type Props = {
-  titulo: string;
-  campos: CampoImportacao[];
+  titulo: string
+  campos: CampoImportacao[]
   /** Valor que identifica o registro, para detectar repetidos. */
-  chaveDuplicidade: (valores: Record<string, string>) => string;
+  chaveDuplicidade: (valores: Record<string, string>) => string
   /** Chaves ja existentes na base — usadas para marcar duplicados. */
-  chavesExistentes: string[];
+  chavesExistentes: string[]
   /** Devolve o motivo quando a linha for invalida, ou null quando estiver ok. */
-  validar: (valores: Record<string, string>) => string | null;
+  validar: (valores: Record<string, string>) => string | null
   /** SUBSTITUIR pela chamada real de importacao do modulo. */
-  onConfirmar: (registros: Record<string, string>[]) => Promise<void>;
-  onClose: () => void;
-};
+  onConfirmar: (registros: Record<string, string>[]) => Promise<void>
+  onClose: () => void
+}
 
-type Etapa = "arquivo" | "mapear" | "relatorio";
+type Etapa = 'arquivo' | 'mapear' | 'relatorio'
 
 /** Quantas linhas aparecem na previa. */
-const LINHAS_PREVIA = 5;
+const LINHAS_PREVIA = 5
 
 /**
  * Assistente de importacao compartilhado entre os modulos.
@@ -55,81 +55,81 @@ export default function ImportarPlanilha({
   onConfirmar,
   onClose,
 }: Props) {
-  const [etapa, setEtapa] = useState<Etapa>("arquivo");
-  const [planilha, setPlanilha] = useState<PlanilhaLida | null>(null);
-  const [mapa, setMapa] = useState<Record<string, string>>({});
-  const [lendo, setLendo] = useState(false);
-  const [importando, setImportando] = useState(false);
-  const [erro, setErro] = useState<string | null>(null);
-  const [relatorio, setRelatorio] = useState<RelatorioImportacao | null>(null);
+  const [etapa, setEtapa] = useState<Etapa>('arquivo')
+  const [planilha, setPlanilha] = useState<PlanilhaLida | null>(null)
+  const [mapa, setMapa] = useState<Record<string, string>>({})
+  const [lendo, setLendo] = useState(false)
+  const [importando, setImportando] = useState(false)
+  const [erro, setErro] = useState<string | null>(null)
+  const [relatorio, setRelatorio] = useState<RelatorioImportacao | null>(null)
 
-  const dialogRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
-    dialogRef.current?.focus();
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    dialogRef.current?.focus()
     return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
-    };
-  }, [onClose]);
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [onClose])
 
   /* ---------------------------------------------------------------- *
    * Etapa 1 — leitura do arquivo
    * ---------------------------------------------------------------- */
 
   async function receberArquivo(arquivo: File) {
-    setErro(null);
-    setLendo(true);
+    setErro(null)
+    setLendo(true)
 
-    const nome = arquivo.name.toLowerCase();
+    const nome = arquivo.name.toLowerCase()
 
     try {
-      let lida: PlanilhaLida;
+      let lida: PlanilhaLida
 
-      if (nome.endsWith(".csv")) {
+      if (nome.endsWith('.csv')) {
         /* CSV e lido aqui mesmo: a previa fica instantanea. */
-        lida = lerCsv(await arquivo.text());
-      } else if (nome.endsWith(".xlsx") || nome.endsWith(".xls")) {
+        lida = lerCsv(await arquivo.text())
+      } else if (nome.endsWith('.xlsx') || nome.endsWith('.xls')) {
         /* SUBSTITUIR POR: POST /importar/previa */
-        const resultado = await analisarPlanilhaXlsx(arquivo, campos);
+        const resultado = await analisarPlanilhaXlsx(arquivo, campos)
         if (!resultado.ok) {
-          setErro(resultado.error);
-          setLendo(false);
-          return;
+          setErro(resultado.error)
+          setLendo(false)
+          return
         }
-        lida = resultado.planilha;
+        lida = resultado.planilha
       } else {
-        setErro("Formato nao suportado. Envie um arquivo .csv ou .xlsx.");
-        setLendo(false);
-        return;
+        setErro('Formato nao suportado. Envie um arquivo .csv ou .xlsx.')
+        setLendo(false)
+        return
       }
 
       if (lida.colunas.length === 0 || lida.linhas.length === 0) {
-        setErro("A planilha parece vazia. Confira se ha cabecalho e ao menos uma linha.");
-        setLendo(false);
-        return;
+        setErro('A planilha parece vazia. Confira se ha cabecalho e ao menos uma linha.')
+        setLendo(false)
+        return
       }
 
       /* Adivinha o mapeamento pelo nome da coluna — economiza o trabalho
          manual no caso comum, e continua editavel. */
-      const automatico: Record<string, string> = {};
+      const automatico: Record<string, string> = {}
       for (const campo of campos) {
-        const achou = lida.colunas.find((col) => campo.reconhece(col.toLowerCase()));
-        if (achou) automatico[campo.key] = achou;
+        const achou = lida.colunas.find((col) => campo.reconhece(col.toLowerCase()))
+        if (achou) automatico[campo.key] = achou
       }
 
-      setPlanilha(lida);
-      setMapa(automatico);
-      setEtapa("mapear");
+      setPlanilha(lida)
+      setMapa(automatico)
+      setEtapa('mapear')
     } catch {
-      setErro("Nao foi possivel ler o arquivo.");
+      setErro('Nao foi possivel ler o arquivo.')
     } finally {
-      setLendo(false);
+      setLendo(false)
     }
   }
 
@@ -138,72 +138,70 @@ export default function ImportarPlanilha({
    * ---------------------------------------------------------------- */
 
   function valoresDa(linha: string[]): Record<string, string> {
-    const valores: Record<string, string> = {};
-    if (!planilha) return valores;
+    const valores: Record<string, string> = {}
+    if (!planilha) return valores
 
     for (const campo of campos) {
-      const coluna = mapa[campo.key];
+      const coluna = mapa[campo.key]
       if (!coluna) {
-        valores[campo.key] = "";
-        continue;
+        valores[campo.key] = ''
+        continue
       }
-      const indice = planilha.colunas.indexOf(coluna);
-      valores[campo.key] = indice >= 0 ? (linha[indice] ?? "") : "";
+      const indice = planilha.colunas.indexOf(coluna)
+      valores[campo.key] = indice >= 0 ? (linha[indice] ?? '') : ''
     }
-    return valores;
+    return valores
   }
 
-  const obrigatoriosOk = campos
-    .filter((c) => c.obrigatorio)
-    .every((c) => mapa[c.key]);
+  const obrigatoriosOk = campos.filter((c) => c.obrigatorio).every((c) => mapa[c.key])
 
   function analisarLinhas(): { validos: Record<string, string>[]; erros: ErroImportacao[] } {
-    if (!planilha) return { validos: [], erros: [] };
+    if (!planilha) return { validos: [], erros: [] }
 
-    const erros: ErroImportacao[] = [];
-    const validos: Record<string, string>[] = [];
-    const vistos = new Set(chavesExistentes);
+    const erros: ErroImportacao[] = []
+    const validos: Record<string, string>[] = []
+    const vistos = new Set(chavesExistentes)
 
     planilha.linhas.forEach((linha, i) => {
-      const valores = valoresDa(linha);
-      const rotulo = valores[campos[0].key] || "(sem identificacao)";
+      const valores = valoresDa(linha)
+      const rotulo = valores[campos[0].key] || '(sem identificacao)'
 
-      const motivo = validar(valores);
+      const motivo = validar(valores)
       if (motivo) {
-        erros.push({ linha: i + 2, nome: rotulo, motivo, tipo: "invalido" });
-        return;
+        erros.push({ linha: i + 2, nome: rotulo, motivo, tipo: 'invalido' })
+        return
       }
 
-      const chave = chaveDuplicidade(valores);
+      const chave = chaveDuplicidade(valores)
       if (chave && vistos.has(chave)) {
-        erros.push({ linha: i + 2, nome: rotulo, motivo: "Ja cadastrado", tipo: "duplicado" });
-        return;
+        erros.push({ linha: i + 2, nome: rotulo, motivo: 'Ja cadastrado', tipo: 'duplicado' })
+        return
       }
 
-      if (chave) vistos.add(chave);
-      validos.push(valores);
-    });
+      if (chave) vistos.add(chave)
+      validos.push(valores)
+    })
 
-    return { validos, erros };
+    return { validos, erros }
   }
 
   async function confirmar() {
-    if (!planilha) return;
+    if (!planilha) return
 
-    setImportando(true);
-    const { validos, erros } = analisarLinhas();
+    setImportando(true)
+    const { validos, erros } = analisarLinhas()
 
     /* A validacao acima e adiantamento: o servidor precisa repetir, ja que
        a base pode ter mudado entre a previa e a confirmacao. */
-    await onConfirmar(validos);
+    await onConfirmar(validos)
 
-    setRelatorio({ importados: validos.length, ignorados: erros.length, erros });
-    setImportando(false);
-    setEtapa("relatorio");
+    setRelatorio({ importados: validos.length, ignorados: erros.length, erros })
+    setImportando(false)
+    setEtapa('relatorio')
   }
 
-  const previa = planilha?.linhas.slice(0, LINHAS_PREVIA) ?? [];
-  const analise = etapa === "mapear" && planilha ? analisarLinhas() : null;
+  const previa = planilha?.linhas.slice(0, LINHAS_PREVIA) ?? []
+  const analise = etapa === 'mapear' && planilha ? analisarLinhas() : null
 
   return (
     <div className={styles.root}>
@@ -227,12 +225,11 @@ export default function ImportarPlanilha({
         </header>
 
         {/* ============ Etapa 1: arquivo ============ */}
-        {etapa === "arquivo" ? (
+        {etapa === 'arquivo' ? (
           <div className={styles.corpo}>
             <p className={styles.texto}>
-              Envie um arquivo <strong>.csv</strong> ou <strong>.xlsx</strong> com
-              uma linha de cabecalho. Na proxima etapa voce diz qual coluna
-              corresponde a cada campo.
+              Envie um arquivo <strong>.csv</strong> ou <strong>.xlsx</strong> com uma linha de
+              cabecalho. Na proxima etapa voce diz qual coluna corresponde a cada campo.
             </p>
 
             <label className={styles.dropzone}>
@@ -245,8 +242,8 @@ export default function ImportarPlanilha({
                 className={styles.fileInput}
                 disabled={lendo}
                 onChange={(e) => {
-                  const f = e.target.files?.[0];
-                  if (f) void receberArquivo(f);
+                  const f = e.target.files?.[0]
+                  if (f) void receberArquivo(f)
                 }}
               />
             </label>
@@ -267,7 +264,7 @@ export default function ImportarPlanilha({
         ) : null}
 
         {/* ============ Etapa 2: mapear e prever ============ */}
-        {etapa === "mapear" && planilha ? (
+        {etapa === 'mapear' && planilha ? (
           <div className={styles.corpo}>
             <section>
               <h3 className={styles.subtitulo}>De qual coluna vem cada campo</h3>
@@ -282,10 +279,8 @@ export default function ImportarPlanilha({
                     </span>
                     <select
                       className={styles.mapaSelect}
-                      value={mapa[campo.key] ?? ""}
-                      onChange={(e) =>
-                        setMapa((m) => ({ ...m, [campo.key]: e.target.value }))
-                      }
+                      value={mapa[campo.key] ?? ''}
+                      onChange={(e) => setMapa((m) => ({ ...m, [campo.key]: e.target.value }))}
                     >
                       <option value="">— nao importar —</option>
                       {planilha.colunas.map((col) => (
@@ -315,29 +310,27 @@ export default function ImportarPlanilha({
                   </thead>
                   <tbody>
                     {previa.map((linha, i) => {
-                      const valores = valoresDa(linha);
+                      const valores = valoresDa(linha)
                       return (
                         <tr key={i}>
                           {campos.map((c) => (
-                            <td key={c.key}>{valores[c.key] || "—"}</td>
+                            <td key={c.key}>{valores[c.key] || '—'}</td>
                           ))}
                         </tr>
-                      );
+                      )
                     })}
                   </tbody>
                 </table>
               </div>
 
               {planilha.linhas.length > LINHAS_PREVIA ? (
-                <p className={styles.nota}>
-                  Mostrando as primeiras {LINHAS_PREVIA} linhas.
-                </p>
+                <p className={styles.nota}>Mostrando as primeiras {LINHAS_PREVIA} linhas.</p>
               ) : null}
             </section>
 
             {analise ? (
               <p className={styles.resumo}>
-                <strong>{analise.validos.length}</strong> pronta(s) para importar ·{" "}
+                <strong>{analise.validos.length}</strong> pronta(s) para importar ·{' '}
                 <strong>{analise.erros.length}</strong> com problema
               </p>
             ) : null}
@@ -349,7 +342,7 @@ export default function ImportarPlanilha({
             ) : null}
 
             <div className={styles.acoes}>
-              <Button variant="secondary" onClick={() => setEtapa("arquivo")}>
+              <Button variant="secondary" onClick={() => setEtapa('arquivo')}>
                 Trocar arquivo
               </Button>
               <Button onClick={confirmar} disabled={!obrigatoriosOk || importando}>
@@ -359,7 +352,7 @@ export default function ImportarPlanilha({
                     Importando...
                   </>
                 ) : (
-                  "Confirmar importacao"
+                  'Confirmar importacao'
                 )}
               </Button>
             </div>
@@ -367,7 +360,7 @@ export default function ImportarPlanilha({
         ) : null}
 
         {/* ============ Etapa 3: relatorio ============ */}
-        {etapa === "relatorio" && relatorio ? (
+        {etapa === 'relatorio' && relatorio ? (
           <div className={styles.corpo}>
             <div className={styles.placar}>
               <div className={styles.placarItem}>
@@ -390,7 +383,7 @@ export default function ImportarPlanilha({
                       <span className={styles.erroNome}>{e.nome}</span>
                       <span
                         className={`${styles.erroTag} ${
-                          e.tipo === "duplicado" ? styles.erroTagDup : ""
+                          e.tipo === 'duplicado' ? styles.erroTagDup : ''
                         }`}
                       >
                         {e.motivo}
@@ -399,8 +392,8 @@ export default function ImportarPlanilha({
                   ))}
                 </ul>
                 <p className={styles.nota}>
-                  Corrija estas linhas na planilha e importe de novo — quem ja
-                  entrou nao sera duplicado.
+                  Corrija estas linhas na planilha e importe de novo — quem ja entrou nao sera
+                  duplicado.
                 </p>
               </section>
             ) : (
@@ -414,5 +407,5 @@ export default function ImportarPlanilha({
         ) : null}
       </div>
     </div>
-  );
+  )
 }
