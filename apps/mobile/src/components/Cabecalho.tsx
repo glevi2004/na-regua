@@ -1,8 +1,8 @@
-import type { ReactNode } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useNavigation } from "expo-router";
-import type { DrawerActionType } from "@react-navigation/native";
-import { cores, espaco, fonte, peso } from "@/theme/tokens";
+import type { ReactNode } from 'react'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
+import { useNavigation } from 'expo-router'
+import type { DrawerActionType } from '@react-navigation/native'
+import { cores, espaco, fonte, peso } from '@/theme/tokens'
 
 /**
  * Cabecalho das telas do app.
@@ -15,14 +15,14 @@ export default function Cabecalho({
   subtitulo,
   acao,
 }: {
-  titulo: string;
-  subtitulo?: string;
-  acao?: ReactNode;
+  titulo: string
+  subtitulo?: string
+  acao?: ReactNode
 }) {
-  const navigation = useNavigation();
+  const navigation = useNavigation()
 
   function abrirMenu() {
-    navigation.dispatch({ type: "OPEN_DRAWER" } as unknown as DrawerActionType);
+    navigation.dispatch({ type: 'OPEN_DRAWER' } as unknown as DrawerActionType)
   }
 
   return (
@@ -53,13 +53,13 @@ export default function Cabecalho({
 
       {acao}
     </View>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
   cabecalho: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: espaco.md,
     paddingHorizontal: espaco.lg,
     paddingVertical: espaco.md,
@@ -67,7 +67,7 @@ const estilos = StyleSheet.create({
   botaoMenu: {
     width: 40,
     height: 40,
-    justifyContent: "center",
+    justifyContent: 'center',
     gap: 5,
     paddingHorizontal: 8,
   },
@@ -79,4 +79,4 @@ const estilos = StyleSheet.create({
   textos: { flex: 1, gap: 1 },
   titulo: { fontSize: fonte.titulo, fontWeight: peso.pesado, color: cores.texto },
   subtitulo: { fontSize: fonte.micro, color: cores.textoFraco },
-});
+})

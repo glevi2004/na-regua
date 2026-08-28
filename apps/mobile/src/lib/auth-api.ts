@@ -12,39 +12,34 @@
  * so no web — aqui o lojista entra com uma conta que ja existe.
  */
 
-const espera = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const espera = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
 export type Usuario = {
-  nome: string;
-  email: string;
-  empresa: string;
-};
+  nome: string
+  email: string
+  empresa: string
+}
 
-export type ResultadoLogin =
-  | { ok: true; usuario: Usuario }
-  | { ok: false; erro: string };
+export type ResultadoLogin = { ok: true; usuario: Usuario } | { ok: false; erro: string }
 
 /**
  * SUBSTITUIR POR: POST /auth/login
  *
  * Sem backend, qualquer credencial com senha de 6+ caracteres entra.
  */
-export async function entrar(
-  credencial: string,
-  senha: string,
-): Promise<ResultadoLogin> {
-  await espera(900);
+export async function entrar(credencial: string, senha: string): Promise<ResultadoLogin> {
+  await espera(900)
 
   if (senha.length < 6) {
-    return { ok: false, erro: "E-mail ou senha incorretos." };
+    return { ok: false, erro: 'E-mail ou senha incorretos.' }
   }
 
   return {
     ok: true,
     usuario: {
-      nome: "Marina Alves",
+      nome: 'Marina Alves',
       email: credencial,
-      empresa: "Mercearia Sol Nascente",
+      empresa: 'Mercearia Sol Nascente',
     },
-  };
+  }
 }

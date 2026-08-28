@@ -1,5 +1,5 @@
-import ContasView from "@/components/ContasView";
+import ContasView from '@/components/ContasView'
 
 export default function ContasReceber() {
-  return <ContasView tipo="receber" />;
+  return <ContasView tipo="receber" />
 }

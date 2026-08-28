@@ -1,17 +1,17 @@
-import { useMemo, useState } from "react";
-import { FlatList, Linking, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Cabecalho from "@/components/Cabecalho";
-import { clientes } from "@/lib/mock-data";
-import { pendenciaTotal, temVencido } from "@/lib/clientes-api";
-import { daysUntil, formatDate, formatMoney } from "@/lib/format";
-import type { Cliente } from "@/lib/types";
-import { Etiqueta, Vazio } from "@/components/ui/Cartao";
-import Botao from "@/components/ui/Botao";
-import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
+import { useMemo, useState } from 'react'
+import { FlatList, Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import Cabecalho from '@/components/Cabecalho'
+import { clientes } from '@/lib/mock-data'
+import { pendenciaTotal, temVencido } from '@/lib/clientes-api'
+import { daysUntil, formatDate, formatMoney } from '@/lib/format'
+import type { Cliente } from '@/lib/types'
+import { Etiqueta, Vazio } from '@/components/ui/Cartao'
+import Botao from '@/components/ui/Botao'
+import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
 /** Sem comprar ha mais que isto = cliente inativo. */
-const INATIVO_APOS_DIAS = 60;
+const INATIVO_APOS_DIAS = 60
 
 /**
  * Consulta rapida de clientes.
@@ -21,30 +21,30 @@ const INATIVO_APOS_DIAS = 60;
  * alguma coisa?" — e conseguir ligar ou mandar mensagem na hora.
  */
 export default function Clientes() {
-  const [busca, setBusca] = useState("");
-  const [soPendencia, setSoPendencia] = useState(false);
+  const [busca, setBusca] = useState('')
+  const [soPendencia, setSoPendencia] = useState(false)
 
   const lista = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
-    const digitos = termo.replace(/\D/g, "");
+    const termo = busca.trim().toLowerCase()
+    const digitos = termo.replace(/\D/g, '')
 
     return clientes.filter((c) => {
-      if (soPendencia && pendenciaTotal(c.id) <= 0) return false;
-      if (!termo) return true;
+      if (soPendencia && pendenciaTotal(c.id) <= 0) return false
+      if (!termo) return true
 
       /* Compara documento so por digitos: quem digita sem pontuacao
          precisa achar o cliente cadastrado com pontuacao. */
       return (
         c.nome.toLowerCase().includes(termo) ||
-        (digitos.length > 0 && c.documento.replace(/\D/g, "").includes(digitos))
-      );
-    });
-  }, [busca, soPendencia]);
+        (digitos.length > 0 && c.documento.replace(/\D/g, '').includes(digitos))
+      )
+    })
+  }, [busca, soPendencia])
 
-  const comPendencia = clientes.filter((c) => pendenciaTotal(c.id) > 0).length;
+  const comPendencia = clientes.filter((c) => pendenciaTotal(c.id) > 0).length
 
   return (
-    <SafeAreaView style={estilos.tela} edges={["top"]}>
+    <SafeAreaView style={estilos.tela} edges={['top']}>
       <Cabecalho
         titulo="Clientes"
         subtitulo={`${clientes.length} cadastrados · ${comPendencia} com pendencia`}
@@ -66,9 +66,7 @@ export default function Clientes() {
           onPress={() => setSoPendencia(false)}
           style={[estilos.chip, !soPendencia && estilos.chipAtivo]}
         >
-          <Text style={[estilos.chipTexto, !soPendencia && estilos.chipTextoAtivo]}>
-            Todos
-          </Text>
+          <Text style={[estilos.chipTexto, !soPendencia && estilos.chipTextoAtivo]}>Todos</Text>
         </Pressable>
         <Pressable
           onPress={() => setSoPendencia(true)}
@@ -93,8 +91,8 @@ export default function Clientes() {
               <Botao
                 variante="secundario"
                 onPress={() => {
-                  setBusca("");
-                  setSoPendencia(false);
+                  setBusca('')
+                  setSoPendencia(false)
                 }}
               >
                 Limpar
@@ -104,24 +102,22 @@ export default function Clientes() {
         }
       />
     </SafeAreaView>
-  );
+  )
 }
 
 function LinhaCliente({ cliente }: { cliente: Cliente }) {
-  const pendente = pendenciaTotal(cliente.id);
-  const vencido = temVencido(cliente.id);
+  const pendente = pendenciaTotal(cliente.id)
+  const vencido = temVencido(cliente.id)
   const inativo =
-    cliente.ultimaCompra && Math.abs(daysUntil(cliente.ultimaCompra)) > INATIVO_APOS_DIAS;
+    cliente.ultimaCompra && Math.abs(daysUntil(cliente.ultimaCompra)) > INATIVO_APOS_DIAS
 
-  const numero = `55${cliente.ddd}${cliente.celular.replace(/\D/g, "")}`;
+  const numero = `55${cliente.ddd}${cliente.celular.replace(/\D/g, '')}`
 
   return (
     <View style={estilos.cliente}>
       <View style={estilos.clienteTopo}>
         <View style={estilos.avatar}>
-          <Text style={estilos.avatarTexto}>
-            {cliente.nome.slice(0, 2).toUpperCase()}
-          </Text>
+          <Text style={estilos.avatarTexto}>{cliente.nome.slice(0, 2).toUpperCase()}</Text>
         </View>
 
         <View style={estilos.clienteInfo}>
@@ -132,9 +128,7 @@ function LinhaCliente({ cliente }: { cliente: Cliente }) {
         </View>
 
         {pendente > 0 ? (
-          <Etiqueta tom={vencido ? "atencao" : "neutro"}>
-            {formatMoney(pendente)}
-          </Etiqueta>
+          <Etiqueta tom={vencido ? 'atencao' : 'neutro'}>{formatMoney(pendente)}</Etiqueta>
         ) : (
           <Etiqueta tom="sucesso">Em dia</Etiqueta>
         )}
@@ -144,8 +138,8 @@ function LinhaCliente({ cliente }: { cliente: Cliente }) {
         <Text style={estilos.clienteUltima}>
           {cliente.ultimaCompra
             ? `Ultima compra ${formatDate(cliente.ultimaCompra)}`
-            : "Nunca comprou"}
-          {inativo ? " · sumiu" : ""}
+            : 'Nunca comprou'}
+          {inativo ? ' · sumiu' : ''}
         </Text>
 
         {/* Abrir o WhatsApp direto: no balcao, cobrar ou avisar acontece
@@ -160,7 +154,7 @@ function LinhaCliente({ cliente }: { cliente: Cliente }) {
         </Pressable>
       </View>
     </View>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
@@ -182,7 +176,7 @@ const estilos = StyleSheet.create({
     fontSize: fonte.corpo,
   },
 
-  filtros: { flexDirection: "row", gap: espaco.sm, paddingHorizontal: espaco.lg },
+  filtros: { flexDirection: 'row', gap: espaco.sm, paddingHorizontal: espaco.lg },
   chip: {
     paddingHorizontal: espaco.lg,
     paddingVertical: espaco.sm,
@@ -203,13 +197,13 @@ const estilos = StyleSheet.create({
     borderRadius: raio.md,
     backgroundColor: cores.superficie,
   },
-  clienteTopo: { flexDirection: "row", alignItems: "center", gap: espaco.md },
+  clienteTopo: { flexDirection: 'row', alignItems: 'center', gap: espaco.md },
   avatar: {
     width: 42,
     height: 42,
     borderRadius: 21,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: cores.primaria,
   },
   avatarTexto: { fontSize: fonte.pequeno, fontWeight: peso.forte, color: cores.texto },
@@ -218,9 +212,9 @@ const estilos = StyleSheet.create({
   clienteDoc: { fontSize: fonte.micro, color: cores.textoFraco },
 
   clienteRodape: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     gap: espaco.md,
     paddingTop: espaco.md,
     borderTopWidth: 1,
@@ -234,4 +228,4 @@ const estilos = StyleSheet.create({
     backgroundColor: cores.sucessoFundo,
   },
   acaoTexto: { fontSize: fonte.micro, fontWeight: peso.forte, color: cores.acento },
-});
+})

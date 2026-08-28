@@ -1,6 +1,6 @@
-import { useState } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
+import { useState } from 'react'
+import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
 /**
  * Campo de texto com rotulo e erro inline.
@@ -17,22 +17,22 @@ export default function Campo({
   dica,
   placeholder,
   senha = false,
-  tipoTeclado = "default",
-  autoCap = "sentences",
+  tipoTeclado = 'default',
+  autoCap = 'sentences',
   editavel = true,
 }: {
-  rotulo: string;
-  valor: string;
-  onChange: (valor: string) => void;
-  erro?: string | null;
-  dica?: string;
-  placeholder?: string;
-  senha?: boolean;
-  tipoTeclado?: "default" | "email-address" | "numeric" | "phone-pad" | "decimal-pad";
-  autoCap?: "none" | "sentences" | "words" | "characters";
-  editavel?: boolean;
+  rotulo: string
+  valor: string
+  onChange: (valor: string) => void
+  erro?: string | null
+  dica?: string
+  placeholder?: string
+  senha?: boolean
+  tipoTeclado?: 'default' | 'email-address' | 'numeric' | 'phone-pad' | 'decimal-pad'
+  autoCap?: 'none' | 'sentences' | 'words' | 'characters'
+  editavel?: boolean
 }) {
-  const [visivel, setVisivel] = useState(false);
+  const [visivel, setVisivel] = useState(false)
 
   return (
     <View style={estilos.campo}>
@@ -58,9 +58,9 @@ export default function Campo({
             onPress={() => setVisivel((v) => !v)}
             hitSlop={10}
             accessibilityRole="button"
-            accessibilityLabel={visivel ? "Ocultar senha" : "Mostrar senha"}
+            accessibilityLabel={visivel ? 'Ocultar senha' : 'Mostrar senha'}
           >
-            <Text style={estilos.alternar}>{visivel ? "ocultar" : "mostrar"}</Text>
+            <Text style={estilos.alternar}>{visivel ? 'ocultar' : 'mostrar'}</Text>
           </Pressable>
         ) : null}
       </View>
@@ -73,7 +73,7 @@ export default function Campo({
         <Text style={estilos.dica}>{dica}</Text>
       ) : null}
     </View>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
@@ -84,8 +84,8 @@ const estilos = StyleSheet.create({
     color: cores.textoFraco,
   },
   caixa: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: espaco.md,
     minHeight: 50,
     paddingHorizontal: espaco.lg,
@@ -110,4 +110,4 @@ const estilos = StyleSheet.create({
   },
   erro: { fontSize: fonte.micro, color: cores.erro },
   dica: { fontSize: fonte.micro, color: cores.textoFraco },
-});
+})

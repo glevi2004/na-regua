@@ -1,26 +1,31 @@
-import { useMemo, useState } from "react";
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { contasPagar, contasReceber } from "@/lib/mock-data";
-import { baixarTitulo, estornarTitulo, situacaoDoTitulo, ROTULO_SITUACAO } from "@/lib/financeiro-api";
-import type { StatusTitulo } from "@/lib/types";
-import { daysUntil, describeDueDate, formatDate, formatMoney } from "@/lib/format";
-import Cabecalho from "@/components/Cabecalho";
-import Sanfona from "@/components/ui/Sanfona";
-import Botao from "@/components/ui/Botao";
-import { Etiqueta, Vazio } from "@/components/ui/Cartao";
-import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
+import { useMemo, useState } from 'react'
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { contasPagar, contasReceber } from '@/lib/mock-data'
+import {
+  baixarTitulo,
+  estornarTitulo,
+  situacaoDoTitulo,
+  ROTULO_SITUACAO,
+} from '@/lib/financeiro-api'
+import type { StatusTitulo } from '@/lib/types'
+import { daysUntil, describeDueDate, formatDate, formatMoney } from '@/lib/format'
+import Cabecalho from '@/components/Cabecalho'
+import Sanfona from '@/components/ui/Sanfona'
+import Botao from '@/components/ui/Botao'
+import { Etiqueta, Vazio } from '@/components/ui/Cartao'
+import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
 /** Forma comum entre conta a pagar e a receber. */
 type Linha = {
-  id: string;
-  contraparte: string;
-  descricao: string;
-  vencimento: string;
-  valor: number;
-  baixado: number;
-  status: StatusTitulo;
-};
+  id: string
+  contraparte: string
+  descricao: string
+  vencimento: string
+  valor: number
+  baixado: number
+  status: StatusTitulo
+}
 
 /**
  * Contas a pagar / a receber.
@@ -32,8 +37,8 @@ type Linha = {
  * titulos mistura o que vence hoje com o que ja foi pago. Vencidos ficam
  * abertos por padrao, que e o que exige acao.
  */
-export default function ContasView({ tipo }: { tipo: "pagar" | "receber" }) {
-  const pagar = tipo === "pagar";
+export default function ContasView({ tipo }: { tipo: 'pagar' | 'receber' }) {
+  const pagar = tipo === 'pagar'
 
   const [linhas, setLinhas] = useState<Linha[]>(() =>
     pagar
@@ -55,68 +60,65 @@ export default function ContasView({ tipo }: { tipo: "pagar" | "receber" }) {
           baixado: c.valorRecebido,
           status: c.status,
         })),
-  );
+  )
 
   const grupos = useMemo(() => {
-    const abertos = linhas.filter((l) => l.status !== "pago");
+    const abertos = linhas.filter((l) => l.status !== 'pago')
     return {
       vencidos: abertos.filter((l) => daysUntil(l.vencimento) < 0),
       aVencer: abertos.filter((l) => daysUntil(l.vencimento) >= 0),
-      quitados: linhas.filter((l) => l.status === "pago"),
-    };
-  }, [linhas]);
+      quitados: linhas.filter((l) => l.status === 'pago'),
+    }
+  }, [linhas])
 
-  const soma = (lista: Linha[]) =>
-    lista.reduce((a, l) => a + (l.valor - l.baixado), 0);
+  const soma = (lista: Linha[]) => lista.reduce((a, l) => a + (l.valor - l.baixado), 0)
 
   function pedirBaixa(linha: Linha) {
-    const saldo = linha.valor - linha.baixado;
+    const saldo = linha.valor - linha.baixado
 
     /* Baixa mexe em dinheiro: confirma antes, com o valor a vista.
        A baixa parcial fica no web — no celular, digitar valor com fila
        atras e mais risco que ajuda. */
     Alert.alert(
-      pagar ? "Baixar pagamento" : "Baixar recebimento",
+      pagar ? 'Baixar pagamento' : 'Baixar recebimento',
       `${linha.contraparte}\n${linha.descricao}\n\n${formatMoney(saldo)}`,
       [
-        { text: "Voltar", style: "cancel" },
+        { text: 'Voltar', style: 'cancel' },
         {
-          text: "Confirmar",
+          text: 'Confirmar',
           onPress: async () => {
             /* SUBSTITUIR POR: POST /financeiro/titulos/:id/baixas */
-            const r = await baixarTitulo(linha.id, saldo, saldo);
+            const r = await baixarTitulo(linha.id, saldo, saldo)
             if (!r.ok) {
-              Alert.alert("Nao deu certo", r.error);
-              return;
+              Alert.alert('Nao deu certo', r.error)
+              return
             }
             setLinhas((atual) =>
               atual.map((l) =>
-                l.id === linha.id
-                  ? { ...l, baixado: l.valor, status: r.status }
-                  : l,
+                l.id === linha.id ? { ...l, baixado: l.valor, status: r.status } : l,
               ),
-            );
+            )
           },
         },
       ],
-    );
+    )
   }
 
   function pedirEstorno(linha: Linha) {
     Alert.alert(
-      "Estornar baixa",
+      'Estornar baixa',
       `A baixa sera desfeita e o titulo volta para em aberto.\n\n${linha.contraparte}`,
       [
-        { text: "Voltar", style: "cancel" },
+        { text: 'Voltar', style: 'cancel' },
         {
-          text: "Estornar",
-          style: "destructive",
+          text: 'Estornar',
+          style: 'destructive',
           onPress: async () => {
             /* SUBSTITUIR POR: DELETE /financeiro/titulos/:id/baixas/:baixaId */
-            const r = await estornarTitulo(linha.id);
+            const r = await estornarTitulo(linha.id)
             if (!r.ok) {
-              Alert.alert("Nao deu certo", r.error);
-              return;
+              Alert.alert('Nao deu certo', r.error)
+              return
             }
             setLinhas((atual) =>
               atual.map((l) =>
@@ -124,30 +126,30 @@ export default function ContasView({ tipo }: { tipo: "pagar" | "receber" }) {
                   ? {
                       ...l,
                       baixado: 0,
-                      status: daysUntil(l.vencimento) < 0 ? "vencido" : "aberto",
+                      status: daysUntil(l.vencimento) < 0 ? 'vencido' : 'aberto',
                     }
                   : l,
               ),
-            );
+            )
           },
         },
       ],
-    );
+    )
   }
 
-  const totalAberto = soma([...grupos.vencidos, ...grupos.aVencer]);
+  const totalAberto = soma([...grupos.vencidos, ...grupos.aVencer])
 
   return (
-    <SafeAreaView style={estilos.tela} edges={["top"]}>
+    <SafeAreaView style={estilos.tela} edges={['top']}>
       <Cabecalho
-        titulo={pagar ? "Contas a pagar" : "Contas a receber"}
+        titulo={pagar ? 'Contas a pagar' : 'Contas a receber'}
         subtitulo={`${formatMoney(totalAberto)} em aberto`}
       />
 
       <ScrollView contentContainerStyle={estilos.conteudo}>
         {linhas.length === 0 ? (
           <Vazio
-            titulo={pagar ? "Nenhuma conta a pagar" : "Nenhuma conta a receber"}
+            titulo={pagar ? 'Nenhuma conta a pagar' : 'Nenhuma conta a receber'}
             descricao="Lancamentos aparecem aqui conforme forem criados."
           />
         ) : (
@@ -157,7 +159,7 @@ export default function ContasView({ tipo }: { tipo: "pagar" | "receber" }) {
               resumo={
                 grupos.vencidos.length
                   ? `${grupos.vencidos.length} · ${formatMoney(soma(grupos.vencidos))}`
-                  : "nada em atraso"
+                  : 'nada em atraso'
               }
               etiqueta={
                 grupos.vencidos.length > 0 ? (
@@ -201,7 +203,7 @@ export default function ContasView({ tipo }: { tipo: "pagar" | "receber" }) {
             </Sanfona>
 
             <Sanfona
-              titulo={pagar ? "Pagos" : "Recebidos"}
+              titulo={pagar ? 'Pagos' : 'Recebidos'}
               resumo={`${grupos.quitados.length} titulo(s)`}
             >
               {grupos.quitados.length === 0 ? (
@@ -221,7 +223,7 @@ export default function ContasView({ tipo }: { tipo: "pagar" | "receber" }) {
         )}
       </ScrollView>
     </SafeAreaView>
-  );
+  )
 }
 
 function LinhaTitulo({
@@ -229,26 +231,22 @@ function LinhaTitulo({
   onBaixar,
   onEstornar,
 }: {
-  linha: Linha;
-  onBaixar: () => void;
-  onEstornar: () => void;
+  linha: Linha
+  onBaixar: () => void
+  onEstornar: () => void
 }) {
-  const saldo = linha.valor - linha.baixado;
-  const quitado = linha.status === "pago";
-  const situacao = situacaoDoTitulo(
-    linha.status,
-    linha.vencimento,
-    daysUntil(linha.vencimento),
-  );
+  const saldo = linha.valor - linha.baixado
+  const quitado = linha.status === 'pago'
+  const situacao = situacaoDoTitulo(linha.status, linha.vencimento, daysUntil(linha.vencimento))
 
   const tom =
-    situacao === "vencido"
-      ? "erro"
-      : situacao === "aVencer"
-        ? "atencao"
-        : situacao === "quitado"
-          ? "sucesso"
-          : "neutro";
+    situacao === 'vencido'
+      ? 'erro'
+      : situacao === 'aVencer'
+        ? 'atencao'
+        : situacao === 'quitado'
+          ? 'sucesso'
+          : 'neutro'
 
   return (
     <View style={estilos.titulo}>
@@ -261,9 +259,7 @@ function LinhaTitulo({
             {linha.descricao}
           </Text>
         </View>
-        <Text style={estilos.tituloValor}>
-          {formatMoney(quitado ? linha.valor : saldo)}
-        </Text>
+        <Text style={estilos.tituloValor}>{formatMoney(quitado ? linha.valor : saldo)}</Text>
       </View>
 
       <View style={estilos.tituloRodape}>
@@ -280,12 +276,12 @@ function LinhaTitulo({
           accessibilityRole="button"
         >
           <Text style={[estilos.acaoTexto, quitado && estilos.acaoTextoSecundario]}>
-            {quitado || linha.baixado > 0 ? "Estornar" : "Baixar"}
+            {quitado || linha.baixado > 0 ? 'Estornar' : 'Baixar'}
           </Text>
         </Pressable>
       </View>
     </View>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
@@ -299,19 +295,19 @@ const estilos = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: cores.borda,
   },
-  tituloTopo: { flexDirection: "row", alignItems: "center", gap: espaco.md },
+  tituloTopo: { flexDirection: 'row', alignItems: 'center', gap: espaco.md },
   tituloInfo: { flex: 1, gap: 1 },
   tituloNome: { fontSize: fonte.pequeno, fontWeight: peso.forte, color: cores.texto },
   tituloApoio: { fontSize: fonte.micro, color: cores.textoFraco },
   tituloValor: { fontSize: fonte.corpo, fontWeight: peso.pesado, color: cores.texto },
 
   tituloRodape: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     gap: espaco.md,
   },
-  tituloSituacao: { flexDirection: "row", alignItems: "center", gap: espaco.sm },
+  tituloSituacao: { flexDirection: 'row', alignItems: 'center', gap: espaco.sm },
   tituloData: { fontSize: fonte.micro, color: cores.textoFraco },
 
   acao: {
@@ -320,10 +316,10 @@ const estilos = StyleSheet.create({
     borderRadius: raio.pill,
     backgroundColor: cores.acento,
     minHeight: 36,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
   acaoSecundaria: {
-    backgroundColor: "transparent",
+    backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: cores.borda,
   },
@@ -333,4 +329,4 @@ const estilos = StyleSheet.create({
     color: cores.textoSobreAcento,
   },
   acaoTextoSecundario: { color: cores.textoFraco },
-});
+})

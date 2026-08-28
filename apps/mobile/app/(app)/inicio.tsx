@@ -1,18 +1,18 @@
-import { useMemo } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { contasPagar, contasReceber, produtos } from "@/lib/mock-data";
-import { listarVendas } from "@/lib/vendas-api";
-import { nivelEstoque } from "@/lib/produtos-api";
-import { describeDueDate, daysUntil, formatMoney } from "@/lib/format";
-import Cabecalho from "@/components/Cabecalho";
-import Sanfona from "@/components/ui/Sanfona";
-import { Etiqueta } from "@/components/ui/Cartao";
-import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
+import { useMemo } from 'react'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useRouter } from 'expo-router'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { contasPagar, contasReceber, produtos } from '@/lib/mock-data'
+import { listarVendas } from '@/lib/vendas-api'
+import { nivelEstoque } from '@/lib/produtos-api'
+import { describeDueDate, daysUntil, formatMoney } from '@/lib/format'
+import Cabecalho from '@/components/Cabecalho'
+import Sanfona from '@/components/ui/Sanfona'
+import { Etiqueta } from '@/components/ui/Cartao'
+import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
 /** Data de referencia do app. */
-const HOJE = "2026-08-24";
+const HOJE = '2026-08-24'
 
 /**
  * Tela principal.
@@ -22,24 +22,21 @@ const HOJE = "2026-08-24";
  * cada assunto abre so quando interessa.
  */
 export default function Inicio() {
-  const router = useRouter();
+  const router = useRouter()
 
   const dados = useMemo(() => {
-    const vendas = listarVendas().filter((v) => v.status === "concluida");
-    const hoje = vendas.filter((v) => v.data.startsWith(HOJE));
-    const faturamento = hoje.reduce((a, v) => a + v.total, 0);
+    const vendas = listarVendas().filter((v) => v.status === 'concluida')
+    const hoje = vendas.filter((v) => v.data.startsWith(HOJE))
+    const faturamento = hoje.reduce((a, v) => a + v.total, 0)
 
-    const aPagar = contasPagar.filter((c) => c.status !== "pago");
-    const vencidas = aPagar.filter((c) => daysUntil(c.vencimento) < 0);
-    const totalPagar = aPagar.reduce((a, c) => a + (c.valor - c.valorPago), 0);
+    const aPagar = contasPagar.filter((c) => c.status !== 'pago')
+    const vencidas = aPagar.filter((c) => daysUntil(c.vencimento) < 0)
+    const totalPagar = aPagar.reduce((a, c) => a + (c.valor - c.valorPago), 0)
 
-    const aReceber = contasReceber.filter((c) => c.status !== "pago");
-    const totalReceber = aReceber.reduce(
-      (a, c) => a + (c.valor - c.valorRecebido),
-      0,
-    );
+    const aReceber = contasReceber.filter((c) => c.status !== 'pago')
+    const totalReceber = aReceber.reduce((a, c) => a + (c.valor - c.valorRecebido), 0)
 
-    const repor = produtos.filter((p) => nivelEstoque(p) !== "normal");
+    const repor = produtos.filter((p) => nivelEstoque(p) !== 'normal')
 
     return {
       vendas,
@@ -51,11 +48,11 @@ export default function Inicio() {
       aReceber,
       totalReceber,
       repor,
-    };
-  }, []);
+    }
+  }, [])
 
   return (
-    <SafeAreaView style={estilos.tela} edges={["top"]}>
+    <SafeAreaView style={estilos.tela} edges={['top']}>
       <Cabecalho titulo="Bom dia, Marina" subtitulo="Segunda-feira, 24 de agosto" />
 
       <ScrollView contentContainerStyle={estilos.conteudo}>
@@ -76,9 +73,7 @@ export default function Inicio() {
             rotulo="A pagar"
             valor={formatMoney(dados.totalPagar)}
             apoio={
-              dados.vencidas.length > 0
-                ? `${dados.vencidas.length} vencido(s)`
-                : "nada vencido"
+              dados.vencidas.length > 0 ? `${dados.vencidas.length} vencido(s)` : 'nada vencido'
             }
             alerta={dados.vencidas.length > 0}
           />
@@ -86,7 +81,7 @@ export default function Inicio() {
 
         <Pressable
           style={estilos.atalho}
-          onPress={() => router.push("/pdv")}
+          onPress={() => router.push('/pdv')}
           accessibilityRole="button"
         >
           <Text style={estilos.atalhoTexto}>Abrir o balcao</Text>
@@ -124,13 +119,9 @@ export default function Inicio() {
                 <Text style={estilos.linhaTexto} numberOfLines={1}>
                   {c.fornecedor}
                 </Text>
-                <Text style={estilos.linhaApoio}>
-                  {describeDueDate(c.vencimento)}
-                </Text>
+                <Text style={estilos.linhaApoio}>{describeDueDate(c.vencimento)}</Text>
               </View>
-              <Text style={estilos.linhaValor}>
-                {formatMoney(c.valor - c.valorPago)}
-              </Text>
+              <Text style={estilos.linhaValor}>{formatMoney(c.valor - c.valorPago)}</Text>
             </View>
           ))}
         </Sanfona>
@@ -139,9 +130,7 @@ export default function Inicio() {
           titulo="Precisa repor"
           resumo={`${dados.repor.length} produto(s)`}
           etiqueta={
-            dados.repor.length > 0 ? (
-              <Etiqueta tom="atencao">estoque baixo</Etiqueta>
-            ) : undefined
+            dados.repor.length > 0 ? <Etiqueta tom="atencao">estoque baixo</Etiqueta> : undefined
           }
         >
           {dados.repor.map((p) => (
@@ -152,15 +141,13 @@ export default function Inicio() {
                 </Text>
                 <Text style={estilos.linhaApoio}>minimo {p.estoqueMinimo} un</Text>
               </View>
-              <Text style={[estilos.linhaValor, estilos.alerta]}>
-                {p.estoque} un
-              </Text>
+              <Text style={[estilos.linhaValor, estilos.alerta]}>{p.estoque} un</Text>
             </View>
           ))}
         </Sanfona>
       </ScrollView>
     </SafeAreaView>
-  );
+  )
 }
 
 function Indicador({
@@ -170,11 +157,11 @@ function Indicador({
   destaque = false,
   alerta = false,
 }: {
-  rotulo: string;
-  valor: string;
-  apoio?: string;
-  destaque?: boolean;
-  alerta?: boolean;
+  rotulo: string
+  valor: string
+  apoio?: string
+  destaque?: boolean
+  alerta?: boolean
 }) {
   return (
     <View style={[estilos.indicador, destaque && estilos.indicadorDestaque]}>
@@ -190,7 +177,7 @@ function Indicador({
       </Text>
       {apoio ? <Text style={estilos.indicadorApoio}>{apoio}</Text> : null}
     </View>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
@@ -227,8 +214,8 @@ const estilos = StyleSheet.create({
   atalhoApoio: { fontSize: fonte.micro, color: cores.textoSobreAcento, opacity: 0.8 },
 
   linha: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: espaco.md,
     paddingVertical: espaco.sm,
     borderTopWidth: 1,
@@ -239,4 +226,4 @@ const estilos = StyleSheet.create({
   linhaTexto: { flex: 1, fontSize: fonte.pequeno, color: cores.texto },
   linhaApoio: { fontSize: fonte.micro, color: cores.textoFraco },
   linhaValor: { fontSize: fonte.pequeno, fontWeight: peso.forte, color: cores.texto },
-});
+})

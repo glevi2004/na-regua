@@ -1,14 +1,14 @@
-import { useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { FORMAS, listarVendas, type VendaHistorico } from "@/lib/vendas-api";
-import { formatDateTime, formatMoney } from "@/lib/format";
-import Cabecalho from "@/components/Cabecalho";
-import Sanfona from "@/components/ui/Sanfona";
-import Botao from "@/components/ui/Botao";
-import { Etiqueta } from "@/components/ui/Cartao";
-import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
+import { useMemo, useState } from 'react'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useRouter } from 'expo-router'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { FORMAS, listarVendas, type VendaHistorico } from '@/lib/vendas-api'
+import { formatDateTime, formatMoney } from '@/lib/format'
+import Cabecalho from '@/components/Cabecalho'
+import Sanfona from '@/components/ui/Sanfona'
+import Botao from '@/components/ui/Botao'
+import { Etiqueta } from '@/components/ui/Cartao'
+import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
 /**
  * Historico de vendas.
@@ -18,26 +18,26 @@ import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
  * pagamento e a nota, sem trocar de tela.
  */
 export default function Vendas() {
-  const router = useRouter();
-  const [vendas] = useState<VendaHistorico[]>(() => listarVendas());
+  const router = useRouter()
+  const [vendas] = useState<VendaHistorico[]>(() => listarVendas())
 
   const resumo = useMemo(() => {
-    const concluidas = vendas.filter((v) => v.status === "concluida");
-    const total = concluidas.reduce((a, v) => a + v.total, 0);
+    const concluidas = vendas.filter((v) => v.status === 'concluida')
+    const total = concluidas.reduce((a, v) => a + v.total, 0)
     return {
       concluidas,
       total,
       liquido: concluidas.reduce((a, v) => a + v.valorLiquido, 0),
       ticket: concluidas.length ? total / concluidas.length : 0,
-    };
-  }, [vendas]);
+    }
+  }, [vendas])
 
   return (
-    <SafeAreaView style={estilos.tela} edges={["top"]}>
+    <SafeAreaView style={estilos.tela} edges={['top']}>
       <Cabecalho
         titulo="Vendas"
         subtitulo={`${resumo.concluidas.length} concluidas`}
-        acao={<Botao onPress={() => router.push("/pdv")}>Nova</Botao>}
+        acao={<Botao onPress={() => router.push('/pdv')}>Nova</Botao>}
       />
 
       <ScrollView contentContainerStyle={estilos.conteudo}>
@@ -64,7 +64,7 @@ export default function Vendas() {
             titulo={`#${v.numero} · ${v.clienteNome}`}
             resumo={`${formatDateTime(v.data)} · ${formatMoney(v.total)}`}
             etiqueta={
-              v.status === "estornada" ? (
+              v.status === 'estornada' ? (
                 <Etiqueta tom="erro">Estornada</Etiqueta>
               ) : (
                 <Etiqueta tom="sucesso">{formatMoney(v.total)}</Etiqueta>
@@ -78,9 +78,7 @@ export default function Vendas() {
                 <Text style={estilos.itemNome} numberOfLines={1}>
                   {i.descricao}
                 </Text>
-                <Text style={estilos.itemValor}>
-                  {formatMoney(i.precoUnitario * i.quantidade)}
-                </Text>
+                <Text style={estilos.itemValor}>{formatMoney(i.precoUnitario * i.quantidade)}</Text>
               </View>
             ))}
 
@@ -95,19 +93,19 @@ export default function Vendas() {
               rotulo="Pagamento"
               valor={v.pagamentos
                 .map((p) => FORMAS.find((f) => f.valor === p.forma)?.rotulo ?? p.forma)
-                .join(" + ")}
+                .join(' + ')}
             />
             <Detalhe rotulo="Liquido" valor={formatMoney(v.valorLiquido)} />
             <Detalhe
               rotulo="Nota fiscal"
               valor={
                 v.nota
-                  ? `${v.nota.tipo === "nfce" ? "NFC-e" : "NFS-e"} ${v.nota.numero}`
-                  : "sem nota"
+                  ? `${v.nota.tipo === 'nfce' ? 'NFC-e' : 'NFS-e'} ${v.nota.numero}`
+                  : 'sem nota'
               }
             />
 
-            {v.status !== "estornada" ? (
+            {v.status !== 'estornada' ? (
               <Pressable style={estilos.estornar} accessibilityRole="button">
                 <Text style={estilos.estornarTexto}>Estornar venda</Text>
               </Pressable>
@@ -116,7 +114,7 @@ export default function Vendas() {
         ))}
       </ScrollView>
     </SafeAreaView>
-  );
+  )
 }
 
 function Detalhe({
@@ -124,18 +122,16 @@ function Detalhe({
   valor,
   forte = false,
 }: {
-  rotulo: string;
-  valor: string;
-  forte?: boolean;
+  rotulo: string
+  valor: string
+  forte?: boolean
 }) {
   return (
     <View style={estilos.detalhe}>
       <Text style={estilos.detalheRotulo}>{rotulo}</Text>
-      <Text style={[estilos.detalheValor, forte && estilos.detalheForte]}>
-        {valor}
-      </Text>
+      <Text style={[estilos.detalheValor, forte && estilos.detalheForte]}>{valor}</Text>
     </View>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
@@ -143,7 +139,7 @@ const estilos = StyleSheet.create({
   conteudo: { padding: espaco.lg, gap: espaco.md, paddingBottom: espaco.xxl },
 
   resumo: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: espaco.sm,
   },
   resumoItem: {
@@ -159,14 +155,14 @@ const estilos = StyleSheet.create({
   resumoValor: { fontSize: fonte.pequeno, fontWeight: peso.pesado, color: cores.texto },
   liquido: { color: cores.acento },
 
-  item: { flexDirection: "row", alignItems: "center", gap: espaco.sm },
+  item: { flexDirection: 'row', alignItems: 'center', gap: espaco.sm },
   itemQtd: { fontSize: fonte.micro, fontWeight: peso.forte, color: cores.acento },
   itemNome: { flex: 1, fontSize: fonte.pequeno, color: cores.texto },
   itemValor: { fontSize: fonte.pequeno, fontWeight: peso.forte, color: cores.texto },
 
   divisor: { height: 1, backgroundColor: cores.borda, marginVertical: espaco.xs },
 
-  detalhe: { flexDirection: "row", justifyContent: "space-between", gap: espaco.md },
+  detalhe: { flexDirection: 'row', justifyContent: 'space-between', gap: espaco.md },
   detalheRotulo: { fontSize: fonte.micro, color: cores.textoFraco },
   detalheValor: { fontSize: fonte.micro, color: cores.texto },
   detalheForte: { fontSize: fonte.pequeno, fontWeight: peso.pesado },
@@ -174,10 +170,10 @@ const estilos = StyleSheet.create({
   estornar: {
     marginTop: espaco.sm,
     paddingVertical: espaco.md,
-    alignItems: "center",
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: cores.erro,
     borderRadius: raio.pill,
   },
   estornarTexto: { fontSize: fonte.micro, fontWeight: peso.forte, color: cores.erro },
-});
+})

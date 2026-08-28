@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { ActivityIndicator, StyleSheet, View } from "react-native";
-import { Redirect } from "expo-router";
-import { lerSessao } from "@/lib/session";
-import { cores } from "@/theme/tokens";
+import { useEffect, useState } from 'react'
+import { ActivityIndicator, StyleSheet, View } from 'react-native'
+import { Redirect } from 'expo-router'
+import { lerSessao } from '@/lib/session'
+import { cores } from '@/theme/tokens'
 
 /**
  * Porta de entrada: decide entre login e app conforme haja sessao.
@@ -12,40 +12,38 @@ import { cores } from "@/theme/tokens";
  * quem ja esta logado.
  */
 export default function Entrada() {
-  const [estado, setEstado] = useState<"verificando" | "logado" | "deslogado">(
-    "verificando",
-  );
+  const [estado, setEstado] = useState<'verificando' | 'logado' | 'deslogado'>('verificando')
 
   useEffect(() => {
-    let cancelado = false;
+    let cancelado = false
 
     async function verificar() {
-      const sessao = await lerSessao();
-      if (!cancelado) setEstado(sessao ? "logado" : "deslogado");
+      const sessao = await lerSessao()
+      if (!cancelado) setEstado(sessao ? 'logado' : 'deslogado')
     }
 
-    void verificar();
+    void verificar()
     return () => {
-      cancelado = true;
-    };
-  }, []);
+      cancelado = true
+    }
+  }, [])
 
-  if (estado === "verificando") {
+  if (estado === 'verificando') {
     return (
       <View style={estilos.centro}>
         <ActivityIndicator color={cores.acento} />
       </View>
-    );
+    )
   }
 
-  return <Redirect href={estado === "logado" ? "/inicio" : "/login"} />;
+  return <Redirect href={estado === 'logado' ? '/inicio' : '/login'} />
 }
 
 const estilos = StyleSheet.create({
   centro: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: cores.fundo,
   },
-});
+})

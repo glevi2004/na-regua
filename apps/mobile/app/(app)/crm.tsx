@@ -1,12 +1,19 @@
-import { useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { COLUNAS, listarCards, moverCard, ROTULO_ORIGEM, type CardCrm, type ColunaId } from "@/lib/crm-api";
-import { formatDate, daysUntil } from "@/lib/format";
-import Cabecalho from "@/components/Cabecalho";
-import Sanfona from "@/components/ui/Sanfona";
-import { Etiqueta } from "@/components/ui/Cartao";
-import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
+import { useMemo, useState } from 'react'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import {
+  COLUNAS,
+  listarCards,
+  moverCard,
+  ROTULO_ORIGEM,
+  type CardCrm,
+  type ColunaId,
+} from '@/lib/crm-api'
+import { formatDate, daysUntil } from '@/lib/format'
+import Cabecalho from '@/components/Cabecalho'
+import Sanfona from '@/components/ui/Sanfona'
+import { Etiqueta } from '@/components/ui/Cartao'
+import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
 /**
  * CRM.
@@ -17,48 +24,41 @@ import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
  * de destino, que funciona no toque e no leitor de tela (arrastar nao).
  */
 export default function Crm() {
-  const [cards, setCards] = useState<CardCrm[]>(() => listarCards());
+  const [cards, setCards] = useState<CardCrm[]>(() => listarCards())
 
   const porColuna = useMemo(() => {
-    const mapa = new Map<ColunaId, CardCrm[]>();
-    for (const c of COLUNAS) mapa.set(c.id, []);
+    const mapa = new Map<ColunaId, CardCrm[]>()
+    for (const c of COLUNAS) mapa.set(c.id, [])
     for (const card of cards) {
-      mapa.get(card.coluna)?.push(card);
+      mapa.get(card.coluna)?.push(card)
     }
-    return mapa;
-  }, [cards]);
+    return mapa
+  }, [cards])
 
   async function mover(id: string, destino: ColunaId) {
-    const anterior = cards.find((c) => c.id === id)?.coluna;
-    if (!anterior || anterior === destino) return;
+    const anterior = cards.find((c) => c.id === id)?.coluna
+    if (!anterior || anterior === destino) return
 
     /* Move na tela antes da resposta e desfaz se falhar — arrastar card
        que demora a responder parece travado. */
-    setCards((atual) =>
-      atual.map((c) => (c.id === id ? { ...c, coluna: destino } : c)),
-    );
+    setCards((atual) => atual.map((c) => (c.id === id ? { ...c, coluna: destino } : c)))
 
     /* SUBSTITUIR POR: PATCH /crm/cards/:id */
-    const r = await moverCard(id, destino);
+    const r = await moverCard(id, destino)
     if (!r.ok) {
-      setCards((atual) =>
-        atual.map((c) => (c.id === id ? { ...c, coluna: anterior } : c)),
-      );
+      setCards((atual) => atual.map((c) => (c.id === id ? { ...c, coluna: anterior } : c)))
     }
   }
 
-  const aFazer = porColuna.get("afazer")?.length ?? 0;
+  const aFazer = porColuna.get('afazer')?.length ?? 0
 
   return (
-    <SafeAreaView style={estilos.tela} edges={["top"]}>
-      <Cabecalho
-        titulo="CRM"
-        subtitulo={aFazer > 0 ? `${aFazer} a fazer` : "nada pendente"}
-      />
+    <SafeAreaView style={estilos.tela} edges={['top']}>
+      <Cabecalho titulo="CRM" subtitulo={aFazer > 0 ? `${aFazer} a fazer` : 'nada pendente'} />
 
       <ScrollView contentContainerStyle={estilos.conteudo}>
         {COLUNAS.map((coluna) => {
-          const lista = porColuna.get(coluna.id) ?? [];
+          const lista = porColuna.get(coluna.id) ?? []
 
           return (
             <Sanfona
@@ -66,11 +66,11 @@ export default function Crm() {
               titulo={coluna.titulo}
               resumo={`${lista.length} card(s)`}
               etiqueta={
-                coluna.id === "afazer" && lista.length > 0 ? (
+                coluna.id === 'afazer' && lista.length > 0 ? (
                   <Etiqueta tom="atencao">{lista.length}</Etiqueta>
                 ) : undefined
               }
-              inicialAberta={coluna.id !== "concluido"}
+              inicialAberta={coluna.id !== 'concluido'}
             >
               {lista.length === 0 ? (
                 <Text style={estilos.vazio}>Nada nesta coluna.</Text>
@@ -84,27 +84,21 @@ export default function Crm() {
                 ))
               )}
             </Sanfona>
-          );
+          )
         })}
       </ScrollView>
     </SafeAreaView>
-  );
+  )
 }
 
-function CardLinha({
-  card,
-  onMover,
-}: {
-  card: CardCrm;
-  onMover: (destino: ColunaId) => void;
-}) {
-  const atrasado = card.coluna !== "concluido" && daysUntil(card.data) < 0;
+function CardLinha({ card, onMover }: { card: CardCrm; onMover: (destino: ColunaId) => void }) {
+  const atrasado = card.coluna !== 'concluido' && daysUntil(card.data) < 0
 
   return (
     <View style={estilos.card}>
       <View style={estilos.cardTopo}>
-        <Etiqueta tom={card.tipo === "pendencia" ? "atencao" : "neutro"}>
-          {card.tipo === "pendencia" ? "Pendencia" : "Contato"}
+        <Etiqueta tom={card.tipo === 'pendencia' ? 'atencao' : 'neutro'}>
+          {card.tipo === 'pendencia' ? 'Pendencia' : 'Contato'}
         </Etiqueta>
         {atrasado ? <Etiqueta tom="erro">Atrasado</Etiqueta> : null}
       </View>
@@ -131,7 +125,7 @@ function CardLinha({
         ))}
       </View>
     </View>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
@@ -145,12 +139,12 @@ const estilos = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: cores.borda,
   },
-  cardTopo: { flexDirection: "row", gap: espaco.sm },
+  cardTopo: { flexDirection: 'row', gap: espaco.sm },
   cardTitulo: { fontSize: fonte.pequeno, fontWeight: peso.forte, color: cores.texto },
   cardApoio: { fontSize: fonte.micro, color: cores.textoFraco },
   cardOrigem: { fontSize: 11, color: cores.textoFraco, opacity: 0.7 },
 
-  mover: { flexDirection: "row", flexWrap: "wrap", gap: espaco.sm, marginTop: espaco.xs },
+  mover: { flexDirection: 'row', flexWrap: 'wrap', gap: espaco.sm, marginTop: espaco.xs },
   moverBotao: {
     paddingHorizontal: espaco.md,
     paddingVertical: espaco.sm,
@@ -158,7 +152,7 @@ const estilos = StyleSheet.create({
     borderColor: cores.borda,
     borderRadius: raio.pill,
     minHeight: 36,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
   moverTexto: { fontSize: fonte.micro, color: cores.textoFraco },
-});
+})

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState } from 'react'
 import {
   KeyboardAvoidingView,
   Platform,
@@ -8,8 +8,8 @@ import {
   Text,
   TextInput,
   View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+} from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 import {
   CONTEXTO_VAZIO,
   enviarMensagem,
@@ -17,12 +17,12 @@ import {
   type BlocoResposta,
   type Contexto,
   type Mensagem,
-} from "@/lib/assistente-api";
-import { COMANDOS_DESTAQUE } from "@/lib/comandos";
-import Cabecalho from "@/components/Cabecalho";
-import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
+} from '@/lib/assistente-api'
+import { COMANDOS_DESTAQUE } from '@/lib/comandos'
+import Cabecalho from '@/components/Cabecalho'
+import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
-const HOJE = "2026-08-24";
+const HOJE = '2026-08-24'
 
 /**
  * Assistente.
@@ -33,75 +33,72 @@ const HOJE = "2026-08-24";
  * fora da tela.
  */
 export default function Assistente() {
-  const [mensagens, setMensagens] = useState<Mensagem[]>([]);
-  const [contexto, setContexto] = useState<Contexto>(CONTEXTO_VAZIO);
-  const [entrada, setEntrada] = useState("");
-  const [pensando, setPensando] = useState(false);
+  const [mensagens, setMensagens] = useState<Mensagem[]>([])
+  const [contexto, setContexto] = useState<Contexto>(CONTEXTO_VAZIO)
+  const [entrada, setEntrada] = useState('')
+  const [pensando, setPensando] = useState(false)
 
-  const rolagem = useRef<ScrollView>(null);
-  const proximoId = useRef(0);
+  const rolagem = useRef<ScrollView>(null)
+  const proximoId = useRef(0)
 
   async function perguntar(texto: string) {
-    const limpo = texto.trim();
-    if (!limpo || pensando) return;
+    const limpo = texto.trim()
+    if (!limpo || pensando) return
 
     setMensagens((atual) => [
       ...atual,
       {
         id: `m-${++proximoId.current}`,
-        autor: "usuario",
-        canal: "app",
+        autor: 'usuario',
+        canal: 'app',
         texto: limpo,
         data: HOJE,
       },
-    ]);
-    setEntrada("");
-    setPensando(true);
+    ])
+    setEntrada('')
+    setPensando(true)
 
     /* SUBSTITUIR POR: POST /assistente/mensagens — o contexto vai junto
        para o servidor resolver pronome ("o que ele comprou"). */
-    const r = await enviarMensagem(limpo, contexto);
-    registrarUso(r.intencao, limpo);
+    const r = await enviarMensagem(limpo, contexto)
+    registrarUso(r.intencao, limpo)
 
-    setContexto(r.contexto);
+    setContexto(r.contexto)
     setMensagens((atual) => [
       ...atual,
       {
         id: `m-${++proximoId.current}`,
-        autor: "assistente",
-        canal: "app",
+        autor: 'assistente',
+        canal: 'app',
         texto: r.texto,
         blocos: r.blocos,
         data: HOJE,
       },
-    ]);
-    setPensando(false);
+    ])
+    setPensando(false)
   }
 
   return (
-    <SafeAreaView style={estilos.tela} edges={["top"]}>
+    <SafeAreaView style={estilos.tela} edges={['top']}>
       <Cabecalho titulo="Assistente" subtitulo="Pergunte em texto" />
 
       <KeyboardAvoidingView
         style={estilos.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         keyboardVerticalOffset={8}
       >
         <ScrollView
           ref={rolagem}
           style={estilos.conversa}
           contentContainerStyle={estilos.conversaConteudo}
-          onContentSizeChange={() =>
-            rolagem.current?.scrollToEnd({ animated: true })
-          }
+          onContentSizeChange={() => rolagem.current?.scrollToEnd({ animated: true })}
         >
           {mensagens.length === 0 ? (
             <View style={estilos.boasVindas}>
               <Text style={estilos.boasVindasTitulo}>Como posso ajudar?</Text>
               <Text style={estilos.boasVindasTexto}>
-                Pergunte sobre vendas, clientes, produtos ou contas. Se citar um
-                cliente, eu guardo o assunto — da para perguntar &ldquo;o que ele
-                comprou&rdquo; logo depois.
+                Pergunte sobre vendas, clientes, produtos ou contas. Se citar um cliente, eu guardo
+                o assunto — da para perguntar &ldquo;o que ele comprou&rdquo; logo depois.
               </Text>
             </View>
           ) : (
@@ -110,22 +107,17 @@ export default function Assistente() {
                 key={m.id}
                 style={[
                   estilos.balaoWrap,
-                  m.autor === "usuario" ? estilos.daPessoa : estilos.doAssistente,
+                  m.autor === 'usuario' ? estilos.daPessoa : estilos.doAssistente,
                 ]}
               >
                 <View
                   style={[
                     estilos.balao,
-                    m.autor === "usuario"
-                      ? estilos.balaoPessoa
-                      : estilos.balaoAssistente,
+                    m.autor === 'usuario' ? estilos.balaoPessoa : estilos.balaoAssistente,
                   ]}
                 >
                   <Text
-                    style={[
-                      estilos.balaoTexto,
-                      m.autor === "usuario" && estilos.balaoTextoPessoa,
-                    ]}
+                    style={[estilos.balaoTexto, m.autor === 'usuario' && estilos.balaoTextoPessoa]}
                   >
                     {m.texto}
                   </Text>
@@ -174,10 +166,7 @@ export default function Assistente() {
           <Pressable
             onPress={() => perguntar(entrada)}
             disabled={!entrada.trim() || pensando}
-            style={[
-              estilos.enviar,
-              (!entrada.trim() || pensando) && estilos.enviarInativo,
-            ]}
+            style={[estilos.enviar, (!entrada.trim() || pensando) && estilos.enviarInativo]}
             accessibilityRole="button"
             accessibilityLabel="Enviar"
           >
@@ -186,29 +175,27 @@ export default function Assistente() {
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
-  );
+  )
 }
 
 /** Resposta rica: tabela, lista ou indicador dentro da conversa. */
 function Bloco({ bloco }: { bloco: BlocoResposta }) {
-  if (bloco.tipo === "texto") {
-    return <Text style={estilos.blocoTexto}>{bloco.texto}</Text>;
+  if (bloco.tipo === 'texto') {
+    return <Text style={estilos.blocoTexto}>{bloco.texto}</Text>
   }
 
-  if (bloco.tipo === "indicador") {
+  if (bloco.tipo === 'indicador') {
     return (
       <View style={estilos.indicador}>
         <Text style={estilos.indicadorRotulo}>{bloco.rotulo}</Text>
         <Text style={estilos.indicadorValor}>{bloco.valor}</Text>
-        {bloco.apoio ? (
-          <Text style={estilos.indicadorApoio}>{bloco.apoio}</Text>
-        ) : null}
+        {bloco.apoio ? <Text style={estilos.indicadorApoio}>{bloco.apoio}</Text> : null}
       </View>
-    );
+    )
   }
 
-  if (bloco.tipo === "lista") {
-    if (bloco.itens.length === 0) return null;
+  if (bloco.tipo === 'lista') {
+    if (bloco.itens.length === 0) return null
     return (
       <View style={estilos.blocoCard}>
         <Text style={estilos.blocoTitulo}>{bloco.titulo}</Text>
@@ -217,16 +204,14 @@ function Bloco({ bloco }: { bloco: BlocoResposta }) {
             <Text style={estilos.blocoRotulo} numberOfLines={1}>
               {i.rotulo}
             </Text>
-            <Text style={[estilos.blocoValor, i.destaque && estilos.blocoDestaque]}>
-              {i.valor}
-            </Text>
+            <Text style={[estilos.blocoValor, i.destaque && estilos.blocoDestaque]}>{i.valor}</Text>
           </View>
         ))}
       </View>
-    );
+    )
   }
 
-  if (bloco.tipo === "tabela") {
+  if (bloco.tipo === 'tabela') {
     return (
       <View style={estilos.blocoCard}>
         <Text style={estilos.blocoTitulo}>{bloco.titulo}</Text>
@@ -239,7 +224,7 @@ function Bloco({ bloco }: { bloco: BlocoResposta }) {
           </View>
         ))}
       </View>
-    );
+    )
   }
 
   /* confirmacao — acao so acontece com aceite explicito */
@@ -247,7 +232,7 @@ function Bloco({ bloco }: { bloco: BlocoResposta }) {
     <View style={estilos.confirmacao}>
       <Text style={estilos.confirmacaoTexto}>{bloco.pergunta}</Text>
     </View>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
@@ -257,7 +242,7 @@ const estilos = StyleSheet.create({
   conversa: { flex: 1 },
   conversaConteudo: { padding: espaco.lg, gap: espaco.md },
 
-  boasVindas: { paddingVertical: espaco.xxl, gap: espaco.sm, alignItems: "center" },
+  boasVindas: { paddingVertical: espaco.xxl, gap: espaco.sm, alignItems: 'center' },
   boasVindasTitulo: {
     fontSize: fonte.titulo,
     fontWeight: peso.pesado,
@@ -266,14 +251,14 @@ const estilos = StyleSheet.create({
   boasVindasTexto: {
     fontSize: fonte.pequeno,
     color: cores.textoFraco,
-    textAlign: "center",
+    textAlign: 'center',
     lineHeight: 21,
   },
 
-  balaoWrap: { flexDirection: "row" },
-  daPessoa: { justifyContent: "flex-end" },
-  doAssistente: { justifyContent: "flex-start" },
-  balao: { maxWidth: "86%", padding: espaco.md, gap: espaco.sm },
+  balaoWrap: { flexDirection: 'row' },
+  daPessoa: { justifyContent: 'flex-end' },
+  doAssistente: { justifyContent: 'flex-start' },
+  balao: { maxWidth: '86%', padding: espaco.md, gap: espaco.sm },
   balaoPessoa: {
     backgroundColor: cores.acento,
     borderRadius: raio.md,
@@ -302,13 +287,13 @@ const estilos = StyleSheet.create({
     fontSize: 11,
     fontWeight: peso.forte,
     color: cores.textoFraco,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     letterSpacing: 0.8,
     marginBottom: espaco.xs,
   },
   blocoLinha: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     gap: espaco.md,
   },
   blocoRotulo: { flex: 1, fontSize: fonte.micro, color: cores.texto },
@@ -338,7 +323,7 @@ const estilos = StyleSheet.create({
   sugestoesConteudo: {
     paddingHorizontal: espaco.lg,
     gap: espaco.sm,
-    alignItems: "center",
+    alignItems: 'center',
   },
   chip: {
     paddingHorizontal: espaco.lg,
@@ -350,8 +335,8 @@ const estilos = StyleSheet.create({
   chipTexto: { fontSize: fonte.micro, color: cores.textoFraco },
 
   entrada: {
-    flexDirection: "row",
-    alignItems: "flex-end",
+    flexDirection: 'row',
+    alignItems: 'flex-end',
     gap: espaco.sm,
     padding: espaco.md,
     borderTopWidth: 1,
@@ -375,10 +360,10 @@ const estilos = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 23,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: cores.acento,
   },
   enviarInativo: { opacity: 0.4 },
   enviarTexto: { fontSize: 20, color: cores.textoSobreAcento, fontWeight: peso.pesado },
-});
+})

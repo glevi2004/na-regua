@@ -1,5 +1,5 @@
-import { StyleSheet, View } from "react-native";
-import { cores } from "@/theme/tokens";
+import { StyleSheet, View } from 'react-native'
+import { cores } from '@/theme/tokens'
 
 /**
  * Icones desenhados com View.
@@ -11,21 +11,21 @@ import { cores } from "@/theme/tokens";
  * vale trocar por @expo/vector-icons.
  */
 
-export type NomeIcone = "catalogo" | "pdv" | "clientes" | "agenda";
+export type NomeIcone = 'catalogo' | 'pdv' | 'clientes' | 'agenda'
 
 export default function Icone({
   nome,
   ativo = false,
   tamanho = 22,
 }: {
-  nome: NomeIcone;
-  ativo?: boolean;
-  tamanho?: number;
+  nome: NomeIcone
+  ativo?: boolean
+  tamanho?: number
 }) {
-  const cor = ativo ? cores.acento : cores.textoFraco;
-  const base = { width: tamanho, height: tamanho };
+  const cor = ativo ? cores.acento : cores.textoFraco
+  const base = { width: tamanho, height: tamanho }
 
-  if (nome === "catalogo") {
+  if (nome === 'catalogo') {
     /* Grade 2x2 — representa o grid de produtos. */
     return (
       <View style={[base, estilos.grade]}>
@@ -39,10 +39,10 @@ export default function Icone({
           />
         ))}
       </View>
-    );
+    )
   }
 
-  if (nome === "pdv") {
+  if (nome === 'pdv') {
     /* Sacola de compras. */
     return (
       <View style={[base, estilos.centro]}>
@@ -59,10 +59,10 @@ export default function Icone({
           ]}
         />
       </View>
-    );
+    )
   }
 
-  if (nome === "clientes") {
+  if (nome === 'clientes') {
     /* Cabeca e ombros. */
     return (
       <View style={[base, estilos.centro]}>
@@ -79,7 +79,7 @@ export default function Icone({
           ]}
         />
       </View>
-    );
+    )
   }
 
   /* agenda — folha de calendario com argolas */
@@ -98,17 +98,17 @@ export default function Icone({
         <View style={[estilos.calendarioLinha, { backgroundColor: cor }]} />
       </View>
     </View>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
-  centro: { alignItems: "center", justifyContent: "flex-end" },
+  centro: { alignItems: 'center', justifyContent: 'flex-end' },
 
   grade: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    alignContent: "space-between",
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    alignContent: 'space-between',
   },
   gradeItem: { borderWidth: 1.8, borderRadius: 2.5 },
 
@@ -130,11 +130,11 @@ const estilos = StyleSheet.create({
   },
 
   argolas: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     marginBottom: -1,
   },
   argola: { width: 1.8, height: 4, borderRadius: 1 },
-  calendario: { borderWidth: 1.8, borderRadius: 3, justifyContent: "flex-start" },
+  calendario: { borderWidth: 1.8, borderRadius: 3, justifyContent: 'flex-start' },
   calendarioLinha: { height: 1.8, marginTop: 4 },
-});
+})

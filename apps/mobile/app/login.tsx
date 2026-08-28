@@ -1,66 +1,56 @@
-import { useState } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
-import { useRouter } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { entrar } from "@/lib/auth-api";
-import { abrirSessao } from "@/lib/session";
-import { validateCredential, validateLoginPassword } from "@/lib/validation";
-import Botao from "@/components/ui/Botao";
-import Campo from "@/components/ui/Campo";
-import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
+import { useState } from 'react'
+import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useRouter } from 'expo-router'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { entrar } from '@/lib/auth-api'
+import { abrirSessao } from '@/lib/session'
+import { validateCredential, validateLoginPassword } from '@/lib/validation'
+import Botao from '@/components/ui/Botao'
+import Campo from '@/components/ui/Campo'
+import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
 export default function Login() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const [credencial, setCredencial] = useState("");
-  const [senha, setSenha] = useState("");
-  const [erroCredencial, setErroCredencial] = useState<string | null>(null);
-  const [erroSenha, setErroSenha] = useState<string | null>(null);
-  const [erroGeral, setErroGeral] = useState<string | null>(null);
-  const [carregando, setCarregando] = useState(false);
+  const [credencial, setCredencial] = useState('')
+  const [senha, setSenha] = useState('')
+  const [erroCredencial, setErroCredencial] = useState<string | null>(null)
+  const [erroSenha, setErroSenha] = useState<string | null>(null)
+  const [erroGeral, setErroGeral] = useState<string | null>(null)
+  const [carregando, setCarregando] = useState(false)
 
   async function submeter() {
-    const eCred = validateCredential(credencial);
-    const eSenha = validateLoginPassword(senha);
-    setErroCredencial(eCred);
-    setErroSenha(eSenha);
-    if (eCred || eSenha) return;
+    const eCred = validateCredential(credencial)
+    const eSenha = validateLoginPassword(senha)
+    setErroCredencial(eCred)
+    setErroSenha(eSenha)
+    if (eCred || eSenha) return
 
-    setErroGeral(null);
-    setCarregando(true);
+    setErroGeral(null)
+    setCarregando(true)
 
     /* SUBSTITUIR POR: POST /auth/login */
-    const r = await entrar(credencial, senha);
+    const r = await entrar(credencial, senha)
 
     if (!r.ok) {
-      setErroGeral(r.erro);
-      setCarregando(false);
-      return;
+      setErroGeral(r.erro)
+      setCarregando(false)
+      return
     }
 
-    await abrirSessao(r.usuario);
+    await abrirSessao(r.usuario)
     /* replace e nao push: voltar do app para o login nao faz sentido. */
-    router.replace("/inicio");
+    router.replace('/inicio')
   }
 
   return (
-    <SafeAreaView style={estilos.tela} edges={["top", "bottom"]}>
+    <SafeAreaView style={estilos.tela} edges={['top', 'bottom']}>
       {/* No iOS o teclado cobre o campo de senha sem isto. */}
       <KeyboardAvoidingView
         style={estilos.flex}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView
-          contentContainerStyle={estilos.conteudo}
-          keyboardShouldPersistTaps="handled"
-        >
+        <ScrollView contentContainerStyle={estilos.conteudo} keyboardShouldPersistTaps="handled">
           <View style={estilos.marca}>
             <View style={estilos.marcaSimbolo} />
             <Text style={estilos.marcaNome}>Ei Buddy</Text>
@@ -68,9 +58,7 @@ export default function Login() {
 
           <View style={estilos.cabecalho}>
             <Text style={estilos.titulo}>Entrar</Text>
-            <Text style={estilos.subtitulo}>
-              Acesse o balcao do seu negocio.
-            </Text>
+            <Text style={estilos.subtitulo}>Acesse o balcao do seu negocio.</Text>
           </View>
 
           {erroGeral ? (
@@ -84,8 +72,8 @@ export default function Login() {
               rotulo="E-mail ou telefone"
               valor={credencial}
               onChange={(v) => {
-                setCredencial(v);
-                if (erroCredencial) setErroCredencial(validateCredential(v));
+                setCredencial(v)
+                if (erroCredencial) setErroCredencial(validateCredential(v))
               }}
               erro={erroCredencial}
               placeholder="voce@empresa.com.br"
@@ -98,8 +86,8 @@ export default function Login() {
               rotulo="Senha"
               valor={senha}
               onChange={(v) => {
-                setSenha(v);
-                if (erroSenha) setErroSenha(validateLoginPassword(v));
+                setSenha(v)
+                if (erroSenha) setErroSenha(validateLoginPassword(v))
               }}
               erro={erroSenha}
               senha
@@ -109,7 +97,7 @@ export default function Login() {
           </View>
 
           <Botao onPress={submeter} carregando={carregando} largura>
-            {carregando ? "Entrando..." : "Entrar"}
+            {carregando ? 'Entrando...' : 'Entrar'}
           </Botao>
 
           {/* --------------------------------------------------------------
@@ -117,19 +105,16 @@ export default function Login() {
              -------------------------------------------------------------- */}
           <View style={estilos.demo}>
             <Text style={estilos.demoTitulo}>Modo demonstracao</Text>
-            <Text style={estilos.demoTexto}>
-              Qualquer e-mail com senha de 6+ caracteres entra.
-            </Text>
+            <Text style={estilos.demoTexto}>Qualquer e-mail com senha de 6+ caracteres entra.</Text>
           </View>
 
           <Text style={estilos.rodape}>
-            Criar conta e gerenciar assinatura ficam no site — este app e o
-            balcao.
+            Criar conta e gerenciar assinatura ficam no site — este app e o balcao.
           </Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
@@ -137,12 +122,12 @@ const estilos = StyleSheet.create({
   flex: { flex: 1 },
   conteudo: {
     flexGrow: 1,
-    justifyContent: "center",
+    justifyContent: 'center',
     padding: espaco.xl,
     gap: espaco.xl,
   },
 
-  marca: { flexDirection: "row", alignItems: "center", gap: espaco.md },
+  marca: { flexDirection: 'row', alignItems: 'center', gap: espaco.md },
   marcaSimbolo: {
     width: 30,
     height: 30,
@@ -177,7 +162,7 @@ const estilos = StyleSheet.create({
   demo: {
     padding: espaco.lg,
     borderWidth: 1,
-    borderStyle: "dashed",
+    borderStyle: 'dashed',
     borderColor: cores.borda,
     borderRadius: raio.sm,
     gap: espaco.xs,
@@ -186,7 +171,7 @@ const estilos = StyleSheet.create({
     fontSize: fonte.micro,
     fontWeight: peso.forte,
     color: cores.textoFraco,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     letterSpacing: 1,
   },
   demoTexto: { fontSize: fonte.pequeno, color: cores.textoFraco },
@@ -194,7 +179,7 @@ const estilos = StyleSheet.create({
   rodape: {
     fontSize: fonte.micro,
     color: cores.textoFraco,
-    textAlign: "center",
+    textAlign: 'center',
     lineHeight: 18,
   },
-});
+})

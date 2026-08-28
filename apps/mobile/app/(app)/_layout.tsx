@@ -1,6 +1,6 @@
-import { Drawer } from "expo-router/drawer";
-import MenuLateral from "@/components/MenuLateral";
-import { cores } from "@/theme/tokens";
+import { Drawer } from 'expo-router/drawer'
+import MenuLateral from '@/components/MenuLateral'
+import { cores } from '@/theme/tokens'
 
 /**
  * Navegacao do app: gaveta lateral com os grupos retrateis.
@@ -18,13 +18,13 @@ export default function LayoutApp() {
       drawerContent={(props) => <MenuLateral {...props} />}
       screenOptions={{
         headerShown: false,
-        drawerType: "front",
-        drawerStyle: { backgroundColor: "#0b1029", width: 280 },
+        drawerType: 'front',
+        drawerStyle: { backgroundColor: '#0b1029', width: 280 },
         sceneStyle: { backgroundColor: cores.fundo },
         /* Deslizar da borda para abrir — gesto esperado no celular. */
         swipeEnabled: true,
         swipeEdgeWidth: 40,
       }}
     />
-  );
+  )
 }

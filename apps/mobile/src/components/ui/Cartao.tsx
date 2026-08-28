@@ -1,15 +1,15 @@
-import type { ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
-import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
+import type { ReactNode } from 'react'
+import { StyleSheet, Text, View } from 'react-native'
+import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
 export function Cartao({
   titulo,
   acao,
   children,
 }: {
-  titulo?: string;
-  acao?: ReactNode;
-  children: ReactNode;
+  titulo?: string
+  acao?: ReactNode
+  children: ReactNode
 }) {
   return (
     <View style={estilos.cartao}>
@@ -21,23 +21,21 @@ export function Cartao({
       ) : null}
       {children}
     </View>
-  );
+  )
 }
 
 export function Etiqueta({
   children,
-  tom = "neutro",
+  tom = 'neutro',
 }: {
-  children: ReactNode;
-  tom?: "neutro" | "sucesso" | "atencao" | "erro";
+  children: ReactNode
+  tom?: 'neutro' | 'sucesso' | 'atencao' | 'erro'
 }) {
   return (
     <View style={[estilos.etiqueta, estilos[`etiqueta_${tom}`]]}>
-      <Text style={[estilos.etiquetaTexto, estilos[`etiquetaTexto_${tom}`]]}>
-        {children}
-      </Text>
+      <Text style={[estilos.etiquetaTexto, estilos[`etiquetaTexto_${tom}`]]}>{children}</Text>
     </View>
-  );
+  )
 }
 
 export function Vazio({
@@ -45,9 +43,9 @@ export function Vazio({
   descricao,
   acao,
 }: {
-  titulo: string;
-  descricao?: string;
-  acao?: ReactNode;
+  titulo: string
+  descricao?: string
+  acao?: ReactNode
 }) {
   return (
     <View style={estilos.vazio}>
@@ -55,7 +53,7 @@ export function Vazio({
       {descricao ? <Text style={estilos.vazioTexto}>{descricao}</Text> : null}
       {acao}
     </View>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
@@ -68,9 +66,9 @@ const estilos = StyleSheet.create({
     gap: espaco.md,
   },
   cabecalho: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     gap: espaco.md,
   },
   titulo: {
@@ -80,12 +78,12 @@ const estilos = StyleSheet.create({
   },
 
   etiqueta: {
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
     paddingHorizontal: espaco.md,
     paddingVertical: espaco.xs,
     borderRadius: raio.pill,
   },
-  etiqueta_neutro: { backgroundColor: "rgba(255,255,255,0.07)" },
+  etiqueta_neutro: { backgroundColor: 'rgba(255,255,255,0.07)' },
   etiqueta_sucesso: { backgroundColor: cores.sucessoFundo },
   etiqueta_atencao: { backgroundColor: cores.atencaoFundo },
   etiqueta_erro: { backgroundColor: cores.erroFundo },
@@ -97,7 +95,7 @@ const estilos = StyleSheet.create({
   etiquetaTexto_erro: { color: cores.erro },
 
   vazio: {
-    alignItems: "center",
+    alignItems: 'center',
     gap: espaco.sm,
     paddingVertical: espaco.xxl,
     paddingHorizontal: espaco.lg,
@@ -106,12 +104,12 @@ const estilos = StyleSheet.create({
     fontSize: fonte.medio,
     fontWeight: peso.forte,
     color: cores.texto,
-    textAlign: "center",
+    textAlign: 'center',
   },
   vazioTexto: {
     fontSize: fonte.pequeno,
     color: cores.textoFraco,
-    textAlign: "center",
+    textAlign: 'center',
     lineHeight: 20,
   },
-});
+})

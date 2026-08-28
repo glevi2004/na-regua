@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Cabecalho from "@/components/Cabecalho";
+import { useState } from 'react'
+import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import Cabecalho from '@/components/Cabecalho'
 import {
   FORMAS,
   paraItemCarrinho,
@@ -9,12 +9,12 @@ import {
   subtotalCarrinho,
   subtotalItem,
   type ItemCarrinho,
-} from "@/lib/vendas-api";
-import { formatMoney } from "@/lib/format";
-import Botao from "@/components/ui/Botao";
-import { Vazio } from "@/components/ui/Cartao";
-import LeitorCodigo from "@/components/LeitorCodigo";
-import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
+} from '@/lib/vendas-api'
+import { formatMoney } from '@/lib/format'
+import Botao from '@/components/ui/Botao'
+import { Vazio } from '@/components/ui/Cartao'
+import LeitorCodigo from '@/components/LeitorCodigo'
+import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
 /**
  * PDV simplificado.
@@ -24,83 +24,77 @@ import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
  * celular, cada passo a mais e um cliente esperando na fila.
  */
 export default function Pdv() {
-  const [itens, setItens] = useState<ItemCarrinho[]>([]);
-  const [lendo, setLendo] = useState(false);
-  const [forma, setForma] = useState<string>("dinheiro");
+  const [itens, setItens] = useState<ItemCarrinho[]>([])
+  const [lendo, setLendo] = useState(false)
+  const [forma, setForma] = useState<string>('dinheiro')
 
-  const total = subtotalCarrinho(itens);
-  const quantidade = itens.reduce((acc, i) => acc + i.quantidade, 0);
+  const total = subtotalCarrinho(itens)
+  const quantidade = itens.reduce((acc, i) => acc + i.quantidade, 0)
 
   function adicionarPorCodigo(codigo: string) {
-    const produto = produtoPorEan(codigo);
+    const produto = produtoPorEan(codigo)
 
     if (!produto) {
-      Alert.alert("Nao encontrado", `O codigo ${codigo} nao esta no catalogo.`);
-      return;
+      Alert.alert('Nao encontrado', `O codigo ${codigo} nao esta no catalogo.`)
+      return
     }
 
     setItens((atual) => {
-      const existe = atual.find((i) => i.produtoId === produto.id);
+      const existe = atual.find((i) => i.produtoId === produto.id)
       if (existe) {
         return atual.map((i) =>
           i.produtoId === produto.id ? { ...i, quantidade: i.quantidade + 1 } : i,
-        );
+        )
       }
-      return [...atual, paraItemCarrinho(produto)];
-    });
+      return [...atual, paraItemCarrinho(produto)]
+    })
   }
 
   function mudarQuantidade(produtoId: string, delta: number) {
     setItens((atual) =>
       atual
-        .map((i) =>
-          i.produtoId === produtoId
-            ? { ...i, quantidade: i.quantidade + delta }
-            : i,
-        )
+        .map((i) => (i.produtoId === produtoId ? { ...i, quantidade: i.quantidade + delta } : i))
         .filter((i) => i.quantidade > 0),
-    );
+    )
   }
 
   function cancelar() {
-    Alert.alert("Cancelar a venda", "O carrinho sera esvaziado.", [
-      { text: "Voltar", style: "cancel" },
+    Alert.alert('Cancelar a venda', 'O carrinho sera esvaziado.', [
+      { text: 'Voltar', style: 'cancel' },
       {
-        text: "Cancelar venda",
-        style: "destructive",
+        text: 'Cancelar venda',
+        style: 'destructive',
         onPress: () => setItens([]),
       },
-    ]);
+    ])
   }
 
   function fechar() {
-    const rotulo = FORMAS.find((f) => f.valor === forma)?.rotulo ?? forma;
+    const rotulo = FORMAS.find((f) => f.valor === forma)?.rotulo ?? forma
 
     Alert.alert(
-      "Fechar a venda",
+      'Fechar a venda',
       `${quantidade} item(ns) · ${formatMoney(total)}\nPagamento em ${rotulo}.`,
       [
-        { text: "Voltar", style: "cancel" },
+        { text: 'Voltar', style: 'cancel' },
         {
-          text: "Fechar",
+          text: 'Fechar',
           onPress: () => {
             /* SUBSTITUIR POR: POST /vendas — o servidor recalcula preco,
                imposto e taxa. O total daqui e so referencia. */
-            setItens([]);
-            Alert.alert("Venda registrada", "O carrinho foi esvaziado.");
+            setItens([])
+            Alert.alert('Venda registrada', 'O carrinho foi esvaziado.')
           },
         },
       ],
-    );
+    )
   }
 
   return (
-    <SafeAreaView style={estilos.tela} edges={["top"]}>
+    <SafeAreaView style={estilos.tela} edges={['top']}>
       <Cabecalho
         titulo="Venda"
-        subtitulo={
-          quantidade === 0 ? "Carrinho vazio" : `${quantidade} item(ns)`
-        }
+        subtitulo={quantidade === 0 ? 'Carrinho vazio' : `${quantidade} item(ns)`}
         acao={<Botao onPress={() => setLendo(true)}>Bipar</Botao>}
       />
 
@@ -121,9 +115,7 @@ export default function Pdv() {
                 <Text style={estilos.itemNome} numberOfLines={2}>
                   {item.descricao}
                 </Text>
-                <Text style={estilos.itemUnitario}>
-                  {formatMoney(item.precoUnitario)} un
-                </Text>
+                <Text style={estilos.itemUnitario}>{formatMoney(item.precoUnitario)} un</Text>
               </View>
 
               <View style={estilos.contador}>
@@ -146,9 +138,7 @@ export default function Pdv() {
                 </Pressable>
               </View>
 
-              <Text style={estilos.itemSubtotal}>
-                {formatMoney(subtotalItem(item))}
-              </Text>
+              <Text style={estilos.itemSubtotal}>{formatMoney(subtotalItem(item))}</Text>
             </View>
           )}
         />
@@ -166,12 +156,7 @@ export default function Pdv() {
                 onPress={() => setForma(f.valor)}
                 style={[estilos.forma, forma === f.valor && estilos.formaAtiva]}
               >
-                <Text
-                  style={[
-                    estilos.formaTexto,
-                    forma === f.valor && estilos.formaTextoAtivo,
-                  ]}
-                >
+                <Text style={[estilos.formaTexto, forma === f.valor && estilos.formaTextoAtivo]}>
                   {f.rotulo}
                 </Text>
               </Pressable>
@@ -196,22 +181,18 @@ export default function Pdv() {
         </View>
       ) : null}
 
-      <LeitorCodigo
-        aberto={lendo}
-        onLer={adicionarPorCodigo}
-        onFechar={() => setLendo(false)}
-      />
+      <LeitorCodigo aberto={lendo} onLer={adicionarPorCodigo} onFechar={() => setLendo(false)} />
     </SafeAreaView>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.fundo },
 
   cabecalho: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     padding: espaco.lg,
   },
   titulo: { fontSize: fonte.display, fontWeight: peso.pesado, color: cores.texto },
@@ -223,8 +204,8 @@ const estilos = StyleSheet.create({
     paddingBottom: espaco.lg,
   },
   item: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: espaco.md,
     padding: espaco.md,
     borderWidth: 1,
@@ -236,12 +217,12 @@ const estilos = StyleSheet.create({
   itemNome: { fontSize: fonte.pequeno, fontWeight: peso.forte, color: cores.texto },
   itemUnitario: { fontSize: fonte.micro, color: cores.textoFraco },
 
-  contador: { flexDirection: "row", alignItems: "center", gap: espaco.sm },
+  contador: { flexDirection: 'row', alignItems: 'center', gap: espaco.sm },
   contadorBotao: {
     width: 40,
     height: 40,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 1,
     borderColor: cores.borda,
     borderRadius: raio.sm,
@@ -249,14 +230,14 @@ const estilos = StyleSheet.create({
   contadorSinal: { fontSize: 20, color: cores.texto },
   contadorValor: {
     minWidth: 26,
-    textAlign: "center",
+    textAlign: 'center',
     fontSize: fonte.medio,
     fontWeight: peso.forte,
     color: cores.texto,
   },
   itemSubtotal: {
     minWidth: 72,
-    textAlign: "right",
+    textAlign: 'right',
     fontSize: fonte.corpo,
     fontWeight: peso.forte,
     color: cores.texto,
@@ -269,11 +250,11 @@ const estilos = StyleSheet.create({
     borderTopColor: cores.borda,
     backgroundColor: cores.superficie,
   },
-  formas: { flexDirection: "row", gap: espaco.sm },
+  formas: { flexDirection: 'row', gap: espaco.sm },
   forma: {
     flex: 1,
     paddingVertical: espaco.md,
-    alignItems: "center",
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: cores.borda,
     borderRadius: raio.sm,
@@ -283,13 +264,13 @@ const estilos = StyleSheet.create({
   formaTextoAtivo: { color: cores.acento, fontWeight: peso.forte },
 
   totalLinha: {
-    flexDirection: "row",
-    alignItems: "baseline",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
   },
   totalRotulo: { fontSize: fonte.corpo, color: cores.textoFraco },
   totalValor: { fontSize: 30, fontWeight: peso.pesado, color: cores.texto },
 
-  acoes: { flexDirection: "row", gap: espaco.sm },
+  acoes: { flexDirection: 'row', gap: espaco.sm },
   acaoPrincipal: { flex: 1 },
-});
+})

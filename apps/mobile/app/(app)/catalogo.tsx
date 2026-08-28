@@ -1,52 +1,49 @@
-import { useMemo, useState } from "react";
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Cabecalho from "@/components/Cabecalho";
-import { produtos } from "@/lib/mock-data";
-import { nivelEstoque } from "@/lib/produtos-api";
-import { produtoPorEan } from "@/lib/vendas-api";
-import { formatMoney } from "@/lib/format";
-import type { Produto } from "@/lib/types";
-import Botao from "@/components/ui/Botao";
-import { Etiqueta, Vazio } from "@/components/ui/Cartao";
-import LeitorCodigo from "@/components/LeitorCodigo";
-import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
+import { useMemo, useState } from 'react'
+import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import Cabecalho from '@/components/Cabecalho'
+import { produtos } from '@/lib/mock-data'
+import { nivelEstoque } from '@/lib/produtos-api'
+import { produtoPorEan } from '@/lib/vendas-api'
+import { formatMoney } from '@/lib/format'
+import type { Produto } from '@/lib/types'
+import Botao from '@/components/ui/Botao'
+import { Etiqueta, Vazio } from '@/components/ui/Cartao'
+import LeitorCodigo from '@/components/LeitorCodigo'
+import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
 export default function Catalogo() {
-  const [busca, setBusca] = useState("");
-  const [categoria, setCategoria] = useState("");
-  const [lendo, setLendo] = useState(false);
-  const [encontrado, setEncontrado] = useState<Produto | null>(null);
+  const [busca, setBusca] = useState('')
+  const [categoria, setCategoria] = useState('')
+  const [lendo, setLendo] = useState(false)
+  const [encontrado, setEncontrado] = useState<Produto | null>(null)
 
-  const categorias = useMemo(
-    () => [...new Set(produtos.map((p) => p.categoria))].sort(),
-    [],
-  );
+  const categorias = useMemo(() => [...new Set(produtos.map((p) => p.categoria))].sort(), [])
 
   const lista = useMemo(() => {
-    const termo = busca.trim().toLowerCase();
+    const termo = busca.trim().toLowerCase()
     return produtos.filter((p) => {
-      if (categoria && p.categoria !== categoria) return false;
-      if (!termo) return true;
+      if (categoria && p.categoria !== categoria) return false
+      if (!termo) return true
       return (
         p.descricao.toLowerCase().includes(termo) ||
         p.codigo.toLowerCase().includes(termo) ||
-        p.ean.includes(termo.replace(/\D/g, ""))
-      );
-    });
-  }, [busca, categoria]);
+        p.ean.includes(termo.replace(/\D/g, ''))
+      )
+    })
+  }, [busca, categoria])
 
   function aoLerCodigo(codigo: string) {
-    const produto = produtoPorEan(codigo);
-    setEncontrado(produto);
-    setLendo(false);
+    const produto = produtoPorEan(codigo)
+    setEncontrado(produto)
+    setLendo(false)
 
     /* Achou: joga na busca para a pessoa ver o item na lista tambem. */
-    if (produto) setBusca(produto.descricao);
+    if (produto) setBusca(produto.descricao)
   }
 
   return (
-    <SafeAreaView style={estilos.tela} edges={["top"]}>
+    <SafeAreaView style={estilos.tela} edges={['top']}>
       <Cabecalho titulo="Catalogo" subtitulo={`${produtos.length} produtos`} />
 
       <View style={estilos.barra}>
@@ -67,20 +64,15 @@ export default function Catalogo() {
         showsHorizontalScrollIndicator={false}
         style={estilos.categorias}
         contentContainerStyle={estilos.categoriasConteudo}
-        data={["", ...categorias]}
-        keyExtractor={(c) => c || "todas"}
+        data={['', ...categorias]}
+        keyExtractor={(c) => c || 'todas'}
         renderItem={({ item }) => (
           <Pressable
             onPress={() => setCategoria(item)}
             style={[estilos.chip, categoria === item && estilos.chipAtivo]}
           >
-            <Text
-              style={[
-                estilos.chipTexto,
-                categoria === item && estilos.chipTextoAtivo,
-              ]}
-            >
-              {item || "Todas"}
+            <Text style={[estilos.chipTexto, categoria === item && estilos.chipTextoAtivo]}>
+              {item || 'Todas'}
             </Text>
           </Pressable>
         )}
@@ -91,7 +83,7 @@ export default function Catalogo() {
           titulo="Produto nao encontrado"
           descricao="Nenhum item com esse termo ou codigo."
           acao={
-            <Botao variante="secundario" onPress={() => setBusca("")}>
+            <Botao variante="secundario" onPress={() => setBusca('')}>
               Limpar busca
             </Botao>
           }
@@ -103,25 +95,18 @@ export default function Catalogo() {
           contentContainerStyle={estilos.lista}
           renderItem={({ item }) => <LinhaProduto produto={item} />}
           ListEmptyComponent={
-            <Vazio
-              titulo="Nada por aqui"
-              descricao="Nenhum produto nesta categoria."
-            />
+            <Vazio titulo="Nada por aqui" descricao="Nenhum produto nesta categoria." />
           }
         />
       )}
 
-      <LeitorCodigo
-        aberto={lendo}
-        onLer={aoLerCodigo}
-        onFechar={() => setLendo(false)}
-      />
+      <LeitorCodigo aberto={lendo} onLer={aoLerCodigo} onFechar={() => setLendo(false)} />
     </SafeAreaView>
-  );
+  )
 }
 
 function LinhaProduto({ produto }: { produto: Produto }) {
-  const nivel = nivelEstoque(produto);
+  const nivel = nivelEstoque(produto)
 
   return (
     <View style={estilos.produto}>
@@ -135,16 +120,16 @@ function LinhaProduto({ produto }: { produto: Produto }) {
 
       <View style={estilos.produtoNumeros}>
         <Text style={estilos.produtoPreco}>{formatMoney(produto.precoVenda)}</Text>
-        {nivel === "esgotado" ? (
+        {nivel === 'esgotado' ? (
           <Etiqueta tom="erro">Esgotado</Etiqueta>
-        ) : nivel === "baixo" ? (
+        ) : nivel === 'baixo' ? (
           <Etiqueta tom="atencao">{produto.estoque} un</Etiqueta>
         ) : (
           <Etiqueta tom="sucesso">{produto.estoque} un</Etiqueta>
         )}
       </View>
     </View>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
@@ -155,10 +140,10 @@ const estilos = StyleSheet.create({
   subtitulo: { fontSize: fonte.pequeno, color: cores.textoFraco },
 
   barra: {
-    flexDirection: "row",
+    flexDirection: 'row',
     gap: espaco.sm,
     padding: espaco.lg,
-    alignItems: "center",
+    alignItems: 'center',
   },
   busca: {
     flex: 1,
@@ -187,8 +172,8 @@ const estilos = StyleSheet.create({
 
   lista: { padding: espaco.lg, gap: espaco.sm },
   produto: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: espaco.md,
     padding: espaco.lg,
     borderWidth: 1,
@@ -204,6 +189,6 @@ const estilos = StyleSheet.create({
   },
   produtoNome: { fontSize: fonte.corpo, fontWeight: peso.forte, color: cores.texto },
   produtoCategoria: { fontSize: fonte.micro, color: cores.textoFraco },
-  produtoNumeros: { alignItems: "flex-end", gap: espaco.sm },
+  produtoNumeros: { alignItems: 'flex-end', gap: espaco.sm },
   produtoPreco: { fontSize: fonte.medio, fontWeight: peso.forte, color: cores.texto },
-});
+})

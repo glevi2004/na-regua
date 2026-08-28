@@ -1,22 +1,22 @@
-import { useMemo, useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import Cabecalho from "@/components/Cabecalho";
-import { compromissos } from "@/lib/mock-data";
-import { formatDate } from "@/lib/format";
-import type { Compromisso } from "@/lib/types";
-import { Etiqueta, Vazio } from "@/components/ui/Cartao";
-import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
+import { useMemo, useState } from 'react'
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import Cabecalho from '@/components/Cabecalho'
+import { compromissos } from '@/lib/mock-data'
+import { formatDate } from '@/lib/format'
+import type { Compromisso } from '@/lib/types'
+import { Etiqueta, Vazio } from '@/components/ui/Cartao'
+import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
 /** Data de referencia do app (mesma dos mocks). */
-const HOJE = "2026-08-24";
+const HOJE = '2026-08-24'
 
-const ROTULO_TIPO: Record<Compromisso["tipo"], string> = {
-  cobranca: "Cobranca",
-  entrega: "Entrega",
-  reuniao: "Reuniao",
-  pagamento: "Pagamento",
-};
+const ROTULO_TIPO: Record<Compromisso['tipo'], string> = {
+  cobranca: 'Cobranca',
+  entrega: 'Entrega',
+  reuniao: 'Reuniao',
+  pagamento: 'Pagamento',
+}
 
 /**
  * Agenda do dia.
@@ -28,41 +28,39 @@ const ROTULO_TIPO: Record<Compromisso["tipo"], string> = {
 export default function Agenda() {
   const [concluidos, setConcluidos] = useState<Set<string>>(
     () => new Set(compromissos.filter((c) => c.concluido).map((c) => c.id)),
-  );
+  )
 
   const { hoje, proximos } = useMemo(() => {
     const ordenados = [...compromissos].sort((a, b) =>
       (a.data + a.hora).localeCompare(b.data + b.hora),
-    );
+    )
     return {
       hoje: ordenados.filter((c) => c.data === HOJE),
       proximos: ordenados.filter((c) => c.data > HOJE),
-    };
-  }, []);
+    }
+  }, [])
 
   function alternar(id: string) {
     setConcluidos((atual) => {
-      const novo = new Set(atual);
+      const novo = new Set(atual)
       if (novo.has(id)) {
-        novo.delete(id);
+        novo.delete(id)
       } else {
-        novo.add(id);
+        novo.add(id)
       }
       /* SUBSTITUIR POR: PATCH /agenda/eventos/:id { concluido } */
-      return novo;
-    });
+      return novo
+    })
   }
 
-  const pendentesHoje = hoje.filter((c) => !concluidos.has(c.id)).length;
+  const pendentesHoje = hoje.filter((c) => !concluidos.has(c.id)).length
 
   return (
-    <SafeAreaView style={estilos.tela} edges={["top"]}>
+    <SafeAreaView style={estilos.tela} edges={['top']}>
       <Cabecalho
         titulo="Agenda"
         subtitulo={
-          pendentesHoje === 0
-            ? "Nada pendente para hoje"
-            : `${pendentesHoje} pendente(s) hoje`
+          pendentesHoje === 0 ? 'Nada pendente para hoje' : `${pendentesHoje} pendente(s) hoje`
         }
       />
 
@@ -97,7 +95,7 @@ export default function Agenda() {
         ) : null}
       </ScrollView>
     </SafeAreaView>
-  );
+  )
 }
 
 function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
@@ -106,7 +104,7 @@ function Secao({ titulo, children }: { titulo: string; children: React.ReactNode
       <Text style={estilos.secaoTitulo}>{titulo}</Text>
       <View style={estilos.secaoItens}>{children}</View>
     </View>
-  );
+  )
 }
 
 function LinhaCompromisso({
@@ -115,10 +113,10 @@ function LinhaCompromisso({
   onAlternar,
   mostrarData = false,
 }: {
-  item: Compromisso;
-  concluido: boolean;
-  onAlternar: () => void;
-  mostrarData?: boolean;
+  item: Compromisso
+  concluido: boolean
+  onAlternar: () => void
+  mostrarData?: boolean
 }) {
   return (
     <Pressable
@@ -141,17 +139,17 @@ function LinhaCompromisso({
           {item.titulo}
         </Text>
         <Text style={estilos.compromissoApoio}>
-          {mostrarData ? `${formatDate(item.data)} · ` : ""}
+          {mostrarData ? `${formatDate(item.data)} · ` : ''}
           {item.hora}
-          {item.clienteNome ? ` · ${item.clienteNome}` : ""}
+          {item.clienteNome ? ` · ${item.clienteNome}` : ''}
         </Text>
       </View>
 
-      <Etiqueta tom={item.tipo === "cobranca" ? "atencao" : "neutro"}>
+      <Etiqueta tom={item.tipo === 'cobranca' ? 'atencao' : 'neutro'}>
         {ROTULO_TIPO[item.tipo]}
       </Etiqueta>
     </Pressable>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
@@ -167,14 +165,14 @@ const estilos = StyleSheet.create({
     fontSize: fonte.micro,
     fontWeight: peso.forte,
     color: cores.textoFraco,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     letterSpacing: 1,
   },
   secaoItens: { gap: espaco.sm },
 
   compromisso: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: espaco.md,
     padding: espaco.lg,
     borderWidth: 1,
@@ -188,8 +186,8 @@ const estilos = StyleSheet.create({
     borderRadius: 13,
     borderWidth: 2,
     borderColor: cores.borda,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   marcadorFeito: { backgroundColor: cores.acento, borderColor: cores.acento },
   marcadorCheck: {
@@ -205,8 +203,8 @@ const estilos = StyleSheet.create({
     color: cores.texto,
   },
   textoFeito: {
-    textDecorationLine: "line-through",
+    textDecorationLine: 'line-through',
     color: cores.textoFraco,
   },
   compromissoApoio: { fontSize: fonte.micro, color: cores.textoFraco },
-});
+})

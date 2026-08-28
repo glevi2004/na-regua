@@ -1,17 +1,13 @@
-import { useState } from "react";
-import { Alert, ScrollView, StyleSheet, Text, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
-import {
-  gerarContasDeCustosFixos,
-  listarCustosFixos,
-  listarPlanos,
-} from "@/lib/financeiro-api";
-import { formatMoney } from "@/lib/format";
-import Cabecalho from "@/components/Cabecalho";
-import Sanfona from "@/components/ui/Sanfona";
-import Botao from "@/components/ui/Botao";
-import { Etiqueta } from "@/components/ui/Cartao";
-import { cores, espaco, fonte, peso } from "@/theme/tokens";
+import { useState } from 'react'
+import { Alert, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
+import { gerarContasDeCustosFixos, listarCustosFixos, listarPlanos } from '@/lib/financeiro-api'
+import { formatMoney } from '@/lib/format'
+import Cabecalho from '@/components/Cabecalho'
+import Sanfona from '@/components/ui/Sanfona'
+import Botao from '@/components/ui/Botao'
+import { Etiqueta } from '@/components/ui/Cartao'
+import { cores, espaco, fonte, peso } from '@/theme/tokens'
 
 /**
  * Plano de contas e custos fixos.
@@ -20,36 +16,31 @@ import { cores, espaco, fonte, peso } from "@/theme/tokens";
  * ficam no web — sao cadastros feitos uma vez, com calma.
  */
 export default function PlanoDeContas() {
-  const [planos] = useState(() => listarPlanos());
-  const [custos] = useState(() => listarCustosFixos());
-  const [gerando, setGerando] = useState(false);
+  const [planos] = useState(() => listarPlanos())
+  const [custos] = useState(() => listarCustosFixos())
+  const [gerando, setGerando] = useState(false)
 
-  const totalFixos = custos.reduce((a, c) => a + c.valor, 0);
-  const gastoMes = planos
-    .filter((p) => p.tipo === "despesa")
-    .reduce((a, p) => a + p.gastoMes, 0);
+  const totalFixos = custos.reduce((a, c) => a + c.valor, 0)
+  const gastoMes = planos.filter((p) => p.tipo === 'despesa').reduce((a, p) => a + p.gastoMes, 0)
 
   async function gerar() {
-    setGerando(true);
+    setGerando(true)
     /* SUBSTITUIR POR: POST /financeiro/custos-fixos/gerar — o servidor
        precisa ser idempotente por (custo fixo, competencia). */
-    const r = await gerarContasDeCustosFixos(custos, "2026-08");
-    setGerando(false);
+    const r = await gerarContasDeCustosFixos(custos, '2026-08')
+    setGerando(false)
 
     Alert.alert(
-      "Contas geradas",
+      'Contas geradas',
       r.jaExistiam > 0
         ? `${r.geradas} gerada(s). ${r.jaExistiam} ja existiam neste mes e foram puladas.`
         : `${r.geradas} conta(s) a pagar gerada(s) para agosto.`,
-    );
+    )
   }
 
   return (
-    <SafeAreaView style={estilos.tela} edges={["top"]}>
-      <Cabecalho
-        titulo="Plano de contas"
-        subtitulo={`${formatMoney(gastoMes)} de gasto no mes`}
-      />
+    <SafeAreaView style={estilos.tela} edges={['top']}>
+      <Cabecalho titulo="Plano de contas" subtitulo={`${formatMoney(gastoMes)} de gasto no mes`} />
 
       <ScrollView contentContainerStyle={estilos.conteudo}>
         <Sanfona
@@ -75,7 +66,7 @@ export default function PlanoDeContas() {
           ))}
 
           <Botao onPress={gerar} carregando={gerando} largura>
-            {gerando ? "Gerando..." : "Gerar contas a pagar do mes"}
+            {gerando ? 'Gerando...' : 'Gerar contas a pagar do mes'}
           </Botao>
         </Sanfona>
 
@@ -85,8 +76,8 @@ export default function PlanoDeContas() {
               <View style={estilos.linhaInfo}>
                 <Text style={estilos.linhaNome}>{p.nome}</Text>
               </View>
-              <Etiqueta tom={p.tipo === "receita" ? "sucesso" : "neutro"}>
-                {p.tipo === "receita" ? "Receita" : "Despesa"}
+              <Etiqueta tom={p.tipo === 'receita' ? 'sucesso' : 'neutro'}>
+                {p.tipo === 'receita' ? 'Receita' : 'Despesa'}
               </Etiqueta>
               <Text style={estilos.linhaValor}>{formatMoney(p.gastoMes)}</Text>
             </View>
@@ -94,7 +85,7 @@ export default function PlanoDeContas() {
         </Sanfona>
       </ScrollView>
     </SafeAreaView>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
@@ -102,8 +93,8 @@ const estilos = StyleSheet.create({
   conteudo: { padding: espaco.lg, gap: espaco.md, paddingBottom: espaco.xxl },
 
   linha: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: espaco.md,
     paddingVertical: espaco.sm,
     borderTopWidth: 1,
@@ -113,8 +104,8 @@ const estilos = StyleSheet.create({
     width: 34,
     height: 34,
     borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: cores.campo,
   },
   diaTexto: { fontSize: fonte.micro, fontWeight: peso.forte, color: cores.acento },
@@ -122,4 +113,4 @@ const estilos = StyleSheet.create({
   linhaNome: { fontSize: fonte.pequeno, fontWeight: peso.forte, color: cores.texto },
   linhaApoio: { fontSize: fonte.micro, color: cores.textoFraco },
   linhaValor: { fontSize: fonte.pequeno, fontWeight: peso.forte, color: cores.texto },
-});
+})
