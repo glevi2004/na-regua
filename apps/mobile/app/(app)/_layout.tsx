@@ -1,52 +1,30 @@
-import { Tabs } from "expo-router";
-import Icone, { type NomeIcone } from "@/components/ui/Icone";
-import { cores, fonte, peso } from "@/theme/tokens";
+import { Drawer } from "expo-router/drawer";
+import MenuLateral from "@/components/MenuLateral";
+import { cores } from "@/theme/tokens";
 
 /**
- * Abas do app.
+ * Navegacao do app: gaveta lateral com os grupos retrateis.
  *
- * Quatro abas, nao dez: o mobile e o balcao. Financeiro, relatorio e
- * configuracao ficam no web, onde ha tela grande e tempo para conferir.
+ * Sao doze modulos — barra de abas nao comporta, e uma lista corrida de
+ * doze itens tambem nao. A gaveta espelha a sidebar do web, e os grupos
+ * abrem e fecham para manter so o assunto do momento na frente.
+ *
+ * Cada tela desenha o proprio cabecalho (com o botao da gaveta), entao o
+ * header nativo fica desligado.
  */
 export default function LayoutApp() {
   return (
-    <Tabs
+    <Drawer
+      drawerContent={(props) => <MenuLateral {...props} />}
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: cores.acento,
-        tabBarInactiveTintColor: cores.textoFraco,
-        tabBarStyle: {
-          backgroundColor: cores.superficie,
-          borderTopColor: cores.borda,
-          /* Altura folgada: alvo de toque confortavel em pe. */
-          height: 62,
-          paddingTop: 6,
-          paddingBottom: 8,
-        },
-        tabBarLabelStyle: {
-          fontSize: fonte.micro,
-          fontWeight: peso.medio,
-        },
+        drawerType: "front",
+        drawerStyle: { backgroundColor: "#0b1029", width: 280 },
         sceneStyle: { backgroundColor: cores.fundo },
+        /* Deslizar da borda para abrir — gesto esperado no celular. */
+        swipeEnabled: true,
+        swipeEdgeWidth: 40,
       }}
-    >
-      {(
-        [
-          ["catalogo", "Catalogo"],
-          ["pdv", "Venda"],
-          ["clientes", "Clientes"],
-          ["agenda", "Agenda"],
-        ] as [NomeIcone, string][]
-      ).map(([nome, titulo]) => (
-        <Tabs.Screen
-          key={nome}
-          name={nome}
-          options={{
-            title: titulo,
-            tabBarIcon: ({ focused }) => <Icone nome={nome} ativo={focused} />,
-          }}
-        />
-      ))}
-    </Tabs>
+    />
   );
 }

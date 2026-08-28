@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Cabecalho from "@/components/Cabecalho";
 import { compromissos } from "@/lib/mock-data";
 import { formatDate } from "@/lib/format";
 import type { Compromisso } from "@/lib/types";
@@ -56,14 +57,14 @@ export default function Agenda() {
 
   return (
     <SafeAreaView style={estilos.tela} edges={["top"]}>
-      <View style={estilos.cabecalho}>
-        <Text style={estilos.titulo}>Agenda</Text>
-        <Text style={estilos.subtitulo}>
-          {pendentesHoje === 0
+      <Cabecalho
+        titulo="Agenda"
+        subtitulo={
+          pendentesHoje === 0
             ? "Nada pendente para hoje"
-            : `${pendentesHoje} pendente(s) hoje`}
-        </Text>
-      </View>
+            : `${pendentesHoje} pendente(s) hoje`
+        }
+      />
 
       <ScrollView contentContainerStyle={estilos.conteudo}>
         <Secao titulo="Hoje">

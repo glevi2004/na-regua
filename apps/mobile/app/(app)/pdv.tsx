@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Cabecalho from "@/components/Cabecalho";
 import {
   FORMAS,
   paraItemCarrinho,
@@ -95,15 +96,13 @@ export default function Pdv() {
 
   return (
     <SafeAreaView style={estilos.tela} edges={["top"]}>
-      <View style={estilos.cabecalho}>
-        <View>
-          <Text style={estilos.titulo}>Venda</Text>
-          <Text style={estilos.subtitulo}>
-            {quantidade === 0 ? "Carrinho vazio" : `${quantidade} item(ns)`}
-          </Text>
-        </View>
-        <Botao onPress={() => setLendo(true)}>Bipar</Botao>
-      </View>
+      <Cabecalho
+        titulo="Venda"
+        subtitulo={
+          quantidade === 0 ? "Carrinho vazio" : `${quantidade} item(ns)`
+        }
+        acao={<Botao onPress={() => setLendo(true)}>Bipar</Botao>}
+      />
 
       {itens.length === 0 ? (
         <Vazio

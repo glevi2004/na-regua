@@ -1,24 +1,29 @@
 # mobile
 
-App do lojista — Expo + React Native. O balcao: bipar produto, fechar
-venda, consultar cliente e ver a agenda do dia.
+App do lojista — Expo + React Native. Todos os modulos do painel web,
+adaptados para a tela do celular.
 
-## Escopo: por que nao tem tudo que o web tem
+## Escopo
 
-Este app **nao** e uma copia do painel web. Financeiro, relatorio, CRM,
-emissao fiscal, cadastro completo e assinatura ficam no web, onde ha tela
-grande e tempo para conferir. Aqui esta o que se faz em pe, com o celular
-na mao e um cliente esperando.
+O app cobre **todos os modulos do painel web**, adaptados para a tela do
+celular. Sao 14 telas atras de uma gaveta lateral com grupos retrateis,
+espelhando a sidebar do web.
 
-O que ficou de fora, de proposito:
+A adaptacao nao e encolher o layout: onde o web mostra cartoes lado a
+lado, aqui o conteudo vira **sanfonas** (`src/components/ui/Sanfona.tsx`).
+Fechada, cada secao mostra um resumo — quanto ha em aberto, quantos itens
+— para nao ser preciso abrir so para conferir.
+
+O que ficou de fora, e por que:
 
 | Fora do mobile | Por que |
 | --- | --- |
-| Criar conta, assinatura, pagamento do plano | Tarefa de retaguarda, feita uma vez |
-| Financeiro (a pagar / a receber / plano de contas) | Conferencia de valor pede tela grande |
-| Importar XML de nota de compra | Depende de `DOMParser`, que o RN nao tem — e e entrada de mercadoria, nao balcao |
-| Emissao de NFC-e / NFS-e | Depende do certificado digital cadastrado no web |
-| Cadastro e edicao de cliente/produto | Consulta sim, digitacao longa no celular nao |
+| Criar conta e recuperar senha | Feito uma vez, e o cadastro completo pede teclado de verdade |
+| Envio do certificado digital | Arquivo .pfx pelo celular e trabalhoso, e senha de certificado nao deveria ir em teclado de toque |
+| Pagamento da mensalidade | Cobrar assinatura dentro do app iOS esbarra na regra de compra da Apple — decisao de produto pendente |
+| Importar XML de nota de compra | Depende de `DOMParser`, que o RN nao tem |
+| Importar planilha | Selecao de arquivo e mapeamento de colunas nao cabem bem no celular |
+| Baixa parcial de titulo | Digitar valor com fila atras e mais risco que ajuda; a baixa total esta aqui |
 
 ## Rodar
 

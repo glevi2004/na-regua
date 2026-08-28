@@ -38,7 +38,7 @@ export default function Entrada() {
     );
   }
 
-  return <Redirect href={estado === "logado" ? "/(app)/catalogo" : "/login"} />;
+  return <Redirect href={estado === "logado" ? "/inicio" : "/login"} />;
 }
 
 const estilos = StyleSheet.create({

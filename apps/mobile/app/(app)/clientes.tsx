@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { FlatList, Linking, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Cabecalho from "@/components/Cabecalho";
 import { clientes } from "@/lib/mock-data";
 import { pendenciaTotal, temVencido } from "@/lib/clientes-api";
 import { daysUntil, formatDate, formatMoney } from "@/lib/format";
@@ -44,12 +45,10 @@ export default function Clientes() {
 
   return (
     <SafeAreaView style={estilos.tela} edges={["top"]}>
-      <View style={estilos.cabecalho}>
-        <Text style={estilos.titulo}>Clientes</Text>
-        <Text style={estilos.subtitulo}>
-          {clientes.length} cadastrados · {comPendencia} com pendencia
-        </Text>
-      </View>
+      <Cabecalho
+        titulo="Clientes"
+        subtitulo={`${clientes.length} cadastrados · ${comPendencia} com pendencia`}
+      />
 
       <View style={estilos.barra}>
         <TextInput

@@ -47,7 +47,7 @@ export default function Login() {
 
     await abrirSessao(r.usuario);
     /* replace e nao push: voltar do app para o login nao faz sentido. */
-    router.replace("/(app)/catalogo");
+    router.replace("/inicio");
   }
 
   return (

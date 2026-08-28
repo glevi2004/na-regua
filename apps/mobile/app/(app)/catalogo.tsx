@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Cabecalho from "@/components/Cabecalho";
 import { produtos } from "@/lib/mock-data";
 import { nivelEstoque } from "@/lib/produtos-api";
 import { produtoPorEan } from "@/lib/vendas-api";
@@ -46,10 +47,7 @@ export default function Catalogo() {
 
   return (
     <SafeAreaView style={estilos.tela} edges={["top"]}>
-      <View style={estilos.cabecalho}>
-        <Text style={estilos.titulo}>Catalogo</Text>
-        <Text style={estilos.subtitulo}>{produtos.length} produtos</Text>
-      </View>
+      <Cabecalho titulo="Catalogo" subtitulo={`${produtos.length} produtos`} />
 
       <View style={estilos.barra}>
         <TextInput
