@@ -1,8 +1,8 @@
-import Link from "next/link";
-import { BRAND, footerColumns } from "@/content/site";
-import styles from "./Footer.module.css";
+import Link from 'next/link'
+import { BRAND, footerColumns } from '@/content/site'
+import styles from './Footer.module.css'
 
-const social = ["Instagram", "LinkedIn", "YouTube"];
+const social = ['Instagram', 'LinkedIn', 'YouTube']
 
 export default function Footer() {
   return (
@@ -15,9 +15,8 @@ export default function Footer() {
             <span className={styles.brandName}>{BRAND}</span>
           </span>
           <p className={styles.aboutText}>
-            Modulos integrados de vendas, financeiro, estoque e fiscal para
-            quem toca o comercio no dia a dia — com um assistente que responde
-            em linguagem natural.
+            Modulos integrados de vendas, financeiro, estoque e fiscal para quem toca o comercio no
+            dia a dia — com um assistente que responde em linguagem natural.
           </p>
 
           <ul className={styles.social}>
@@ -54,10 +53,14 @@ export default function Footer() {
           © {new Date().getFullYear()} {BRAND}. Todos os direitos reservados.
         </p>
         <div className={styles.legal}>
-          <a href="/termos-de-uso" target="_blank" rel="noreferrer noopener">Termos de uso</a>
-          <a href="/politica-de-privacidade" target="_blank" rel="noreferrer noopener">Privacidade</a>
+          <a href="/termos-de-uso" target="_blank" rel="noreferrer noopener">
+            Termos de uso
+          </a>
+          <a href="/politica-de-privacidade" target="_blank" rel="noreferrer noopener">
+            Privacidade
+          </a>
         </div>
       </div>
     </footer>
-  );
+  )
 }

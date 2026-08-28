@@ -58,7 +58,9 @@
   border: 1px solid var(--dark-border);
   font-size: 13px;
   color: var(--dark-text-muted);
-  transition: border-color var(--transition), color var(--transition),
+  transition:
+    border-color var(--transition),
+    color var(--transition),
     transform var(--transition);
 }
 

@@ -1,20 +1,15 @@
-import {
-  IconBarcode,
-  IconReceipt,
-  IconSparkles,
-  IconTrendUp,
-} from "./Icons";
-import styles from "./FeatureVisuals.module.css";
+import { IconBarcode, IconReceipt, IconSparkles, IconTrendUp } from './Icons'
+import styles from './FeatureVisuals.module.css'
 
 /* --------------------------------------------------------------------------
    Pilar 1 — Vendas: carrinho de balcao com leitor de codigo de barras
    -------------------------------------------------------------------------- */
 
 const cartItems = [
-  { name: "Cafe torrado 500g", qty: "2 un", value: "R$ 43,80" },
-  { name: "Filtro de papel n103", qty: "1 un", value: "R$ 8,90" },
-  { name: "Acucar mascavo 1kg", qty: "3 un", value: "R$ 38,70" },
-];
+  { name: 'Cafe torrado 500g', qty: '2 un', value: 'R$ 43,80' },
+  { name: 'Filtro de papel n103', qty: '1 un', value: 'R$ 8,90' },
+  { name: 'Acucar mascavo 1kg', qty: '3 un', value: 'R$ 38,70' },
+]
 
 export function SalesVisual() {
   return (
@@ -64,7 +59,7 @@ export function SalesVisual() {
         NFC-e emitida junto com o fechamento
       </div>
     </div>
-  );
+  )
 }
 
 /* --------------------------------------------------------------------------
@@ -72,10 +67,10 @@ export function SalesVisual() {
    -------------------------------------------------------------------------- */
 
 const bills = [
-  { name: "Fornecedor Aurora", due: "Vence hoje", value: "R$ 1.240,00", state: "due" },
-  { name: "Aluguel do ponto", due: "Vence em 3 dias", value: "R$ 3.800,00", state: "soon" },
-  { name: "Energia eletrica", due: "Vence em 8 dias", value: "R$ 742,30", state: "ok" },
-];
+  { name: 'Fornecedor Aurora', due: 'Vence hoje', value: 'R$ 1.240,00', state: 'due' },
+  { name: 'Aluguel do ponto', due: 'Vence em 3 dias', value: 'R$ 3.800,00', state: 'soon' },
+  { name: 'Energia eletrica', due: 'Vence em 8 dias', value: 'R$ 742,30', state: 'ok' },
+]
 
 export function FinanceVisual() {
   return (
@@ -122,9 +117,9 @@ export function FinanceVisual() {
           <li key={bill.name} className={styles.billRow}>
             <span
               className={`${styles.billDot} ${
-                bill.state === "due"
+                bill.state === 'due'
                   ? styles.dotDue
-                  : bill.state === "soon"
+                  : bill.state === 'soon'
                     ? styles.dotSoon
                     : styles.dotOk
               }`}
@@ -138,7 +133,7 @@ export function FinanceVisual() {
         ))}
       </ul>
     </div>
-  );
+  )
 }
 
 /* --------------------------------------------------------------------------
@@ -196,5 +191,5 @@ export function AssistantVisual() {
         </div>
       </div>
     </div>
-  );
+  )
 }

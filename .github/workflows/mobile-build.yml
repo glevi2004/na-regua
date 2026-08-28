@@ -1,0 +1,29 @@
+name: Build — mobile
+
+# ESQUELETO. Depende de conta EAS (Expo Application Services) e de DEC-001
+# (nome do produto, que vira o nome nas lojas de aplicativo).
+
+on:
+  workflow_dispatch:
+    inputs:
+      perfil:
+        description: Perfil do EAS
+        required: true
+        type: choice
+        options: [development, preview, production]
+
+jobs:
+  build:
+    name: Build EAS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bloqueado por DEC-001 e conta EAS
+        run: |
+          echo "::warning::Build mobile nao configurado."
+          echo "Pendencias:"
+          echo "  - conta EAS e EXPO_TOKEN nos secrets"
+          echo "  - DEC-001: nome do produto define o nome nas lojas"
+          echo "  - eas.json com os perfis de build"
+          exit 1

@@ -137,7 +137,9 @@
   height: 8px;
   border-radius: var(--radius-full);
   background: var(--border-strong);
-  transition: width var(--transition), background-color var(--transition);
+  transition:
+    width var(--transition),
+    background-color var(--transition);
 }
 
 .dotActive {
@@ -159,7 +161,9 @@
   border-radius: 50%;
   border: 1px solid var(--border-strong);
   color: var(--brand-primary);
-  transition: border-color var(--transition), color var(--transition),
+  transition:
+    border-color var(--transition),
+    color var(--transition),
     transform var(--transition);
 }
 

@@ -1,57 +1,44 @@
-import type { Metadata } from "next";
-import { BRAND } from "@/content/site";
-import { Badge, Card, PageHeader, Stat } from "@/components/ui/UI";
-import { Button, ButtonLink } from "@/components/ui/Button";
-import { IconArrowRight, IconPlus } from "@/components/Icons";
-import {
-  contasPagar,
-  contasReceber,
-  produtos,
-  vendas,
-} from "@/lib/mock-data";
-import {
-  describeDueDate,
-  formaPagamentoLabel,
-  formatMoney,
-} from "@/lib/format";
-import styles from "./painel.module.css";
+import type { Metadata } from 'next'
+import { BRAND } from '@/content/site'
+import { Badge, Card, PageHeader, Stat } from '@/components/ui/UI'
+import { Button, ButtonLink } from '@/components/ui/Button'
+import { IconArrowRight, IconPlus } from '@/components/Icons'
+import { contasPagar, contasReceber, produtos, vendas } from '@/lib/mock-data'
+import { describeDueDate, formaPagamentoLabel, formatMoney } from '@/lib/format'
+import styles from './painel.module.css'
 
 export const metadata: Metadata = {
   title: `Visao geral — ${BRAND}`,
-};
+}
 
 const semana = [
-  { dia: "Seg", valor: 42 },
-  { dia: "Ter", valor: 58 },
-  { dia: "Qua", valor: 47 },
-  { dia: "Qui", valor: 71 },
-  { dia: "Sex", valor: 63 },
-  { dia: "Sab", valor: 88 },
-  { dia: "Dom", valor: 34 },
-];
+  { dia: 'Seg', valor: 42 },
+  { dia: 'Ter', valor: 58 },
+  { dia: 'Qua', valor: 47 },
+  { dia: 'Qui', valor: 71 },
+  { dia: 'Sex', valor: 63 },
+  { dia: 'Sab', valor: 88 },
+  { dia: 'Dom', valor: 34 },
+]
 
 export default function VisaoGeralPage() {
   const vendasHoje = vendas.filter(
-    (v) => v.data.startsWith("2026-08-24") && v.status === "concluida",
-  );
-  const faturamentoHoje = vendasHoje.reduce((acc, v) => acc + v.total, 0);
-  const ticketMedio = vendasHoje.length
-    ? faturamentoHoje / vendasHoje.length
-    : 0;
+    (v) => v.data.startsWith('2026-08-24') && v.status === 'concluida',
+  )
+  const faturamentoHoje = vendasHoje.reduce((acc, v) => acc + v.total, 0)
+  const ticketMedio = vendasHoje.length ? faturamentoHoje / vendasHoje.length : 0
 
   const aReceber = contasReceber
-    .filter((c) => c.status !== "pago")
-    .reduce((acc, c) => acc + (c.valor - c.valorRecebido), 0);
+    .filter((c) => c.status !== 'pago')
+    .reduce((acc, c) => acc + (c.valor - c.valorRecebido), 0)
 
   const aPagar = contasPagar
-    .filter((c) => c.status !== "pago")
-    .reduce((acc, c) => acc + (c.valor - c.valorPago), 0);
+    .filter((c) => c.status !== 'pago')
+    .reduce((acc, c) => acc + (c.valor - c.valorPago), 0)
 
-  const vencimentos = contasPagar
-    .filter((c) => c.status !== "pago")
-    .slice(0, 4);
+  const vencimentos = contasPagar.filter((c) => c.status !== 'pago').slice(0, 4)
 
-  const reposicao = produtos.filter((p) => p.estoque < p.estoqueMinimo);
+  const reposicao = produtos.filter((p) => p.estoque < p.estoqueMinimo)
 
   return (
     <>
@@ -80,12 +67,7 @@ export default function VisaoGeralPage() {
           tone="positive"
         />
         <Stat label="A receber" value={formatMoney(aReceber)} hint="proximos 30 dias" />
-        <Stat
-          label="A pagar"
-          value={formatMoney(aPagar)}
-          hint="1 titulo vencido"
-          tone="warning"
-        />
+        <Stat label="A pagar" value={formatMoney(aPagar)} hint="1 titulo vencido" tone="warning" />
       </div>
 
       <div className={styles.grid}>
@@ -118,9 +100,7 @@ export default function VisaoGeralPage() {
                   <strong>{venda.clienteNome}</strong>
                   <span>{formaPagamentoLabel[venda.formaPagamento]}</span>
                 </span>
-                {venda.status === "cancelada" ? (
-                  <Badge tone="danger">Cancelada</Badge>
-                ) : null}
+                {venda.status === 'cancelada' ? <Badge tone="danger">Cancelada</Badge> : null}
                 <span className={styles.rowValue}>{formatMoney(venda.total)}</span>
               </li>
             ))}
@@ -144,9 +124,7 @@ export default function VisaoGeralPage() {
                   <strong>{conta.fornecedor}</strong>
                   <span>{describeDueDate(conta.vencimento)}</span>
                 </span>
-                {conta.status === "vencido" ? (
-                  <Badge tone="warning">Vencido</Badge>
-                ) : null}
+                {conta.status === 'vencido' ? <Badge tone="warning">Vencido</Badge> : null}
                 <span className={styles.rowValue}>
                   {formatMoney(conta.valor - conta.valorPago)}
                 </span>
@@ -172,14 +150,12 @@ export default function VisaoGeralPage() {
                   <strong>{produto.descricao}</strong>
                   <span>minimo {produto.estoqueMinimo} un</span>
                 </span>
-                <span className={`${styles.rowValue} ${styles.alert}`}>
-                  {produto.estoque} un
-                </span>
+                <span className={`${styles.rowValue} ${styles.alert}`}>{produto.estoque} un</span>
               </li>
             ))}
           </ul>
         </Card>
       </div>
     </>
-  );
+  )
 }

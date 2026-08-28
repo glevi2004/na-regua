@@ -1,36 +1,62 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# web
 
-## Getting Started
+Next.js — backoffice, catálogo público e landing.
 
-First, run the development server:
+**Estado:** 🟡 scaffold do Next.js · `NR-013`, `NR-072`, `NR-074`, `NR-075`, `NR-076`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Responsabilidade
+
+O que é melhor em tela grande: relatórios, conciliação bancária, cadastros em
+lote, gestão de assinatura. Mais o catálogo público e a landing.
+
+**O que não faz:** regra de negócio. Fala com a API por HTTP.
+
+## Fronteiras
+
+|                       |                                             |
+| --------------------- | ------------------------------------------- |
+| **Depende de**        | `ui`, `contracts`, `money` + a API por HTTP |
+| **Proibido importar** | `core`, `db`, `domain`                      |
+
+## Superfícies
+
+| Superfície               | Público           | Autenticação |
+| ------------------------ | ----------------- | ------------ |
+| Backoffice               | lojista, contador | ✅           |
+| Catálogo público da loja | cliente final     | ❌           |
+| Landing                  | visitante         | ❌           |
+
+O catálogo é público e por empresa: cuidado redobrado para não vazar dado de
+outra loja nem informação interna (custo, margem, estoque exato).
+
+## Pacotes internos precisam de transpilação
+
+Os pacotes do workspace exportam TypeScript direto de `src/` (padrão _internal
+packages_), então o `next.config.ts` declara:
+
+```ts
+transpilePackages: ['@na-regua/ui', '@na-regua/contracts', '@na-regua/money']
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Sem isso o build quebra. O ganho: não existe passo de build entre editar um
+pacote e ver a mudança no aplicativo.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tipos de rota
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+O Next 16 gera `LayoutProps` e `PageProps` em `.next/types`. Num checkout limpo
+esses tipos não existem ainda, e `tsc --noEmit` falha. Por isso o script de
+typecheck roda `next typegen` antes:
 
-## Learn More
+```json
+"typecheck": "next typegen && tsc --noEmit"
+```
 
-To learn more about Next.js, take a look at the following resources:
+## Variáveis de ambiente
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+`API_URL`, `WEB_PORT`. Nada com prefixo público pode conter segredo.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Desenvolvimento
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm --filter @na-regua/web dev    # http://localhost:3000
+```

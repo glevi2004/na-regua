@@ -1,10 +1,10 @@
-"use client";
+'use client'
 
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { buscarCep, UFS } from "@/lib/empresa-api";
-import { buscarCnpj } from "@/lib/empresa-api";
-import { buscarCpf, salvarCliente } from "@/lib/clientes-api";
+import { useRouter } from 'next/navigation'
+import { useState } from 'react'
+import { buscarCep, UFS } from '@/lib/empresa-api'
+import { buscarCnpj } from '@/lib/empresa-api'
+import { buscarCpf, salvarCliente } from '@/lib/clientes-api'
 import {
   maskCelular,
   maskCEP,
@@ -15,77 +15,77 @@ import {
   validateDocumento,
   validateRequired,
   type FieldError,
-} from "@/lib/validation";
-import { Button, ButtonLink } from "@/components/ui/Button";
-import { Card, Field, FormGrid, Input, PageHeader, Select } from "@/components/ui/UI";
-import Toast from "@/components/ui/Toast";
-import { Spinner } from "@/components/auth/Fields";
-import { IconSearch } from "@/components/Icons";
-import styles from "./clienteForm.module.css";
+} from '@/lib/validation'
+import { Button, ButtonLink } from '@/components/ui/Button'
+import { Card, Field, FormGrid, Input, PageHeader, Select } from '@/components/ui/UI'
+import Toast from '@/components/ui/Toast'
+import { Spinner } from '@/components/auth/Fields'
+import { IconSearch } from '@/components/Icons'
+import styles from './clienteForm.module.css'
 
-type TipoPessoa = "fisica" | "juridica";
+type TipoPessoa = 'fisica' | 'juridica'
 
 type Campos = {
-  documento: string;
-  nome: string;
-  email: string;
-  ddd: string;
-  celular: string;
-  cep: string;
-  logradouro: string;
-  numero: string;
-  complemento: string;
-  bairro: string;
-  cidade: string;
-  uf: string;
-};
+  documento: string
+  nome: string
+  email: string
+  ddd: string
+  celular: string
+  cep: string
+  logradouro: string
+  numero: string
+  complemento: string
+  bairro: string
+  cidade: string
+  uf: string
+}
 
 const VAZIO: Campos = {
-  documento: "",
-  nome: "",
-  email: "",
-  ddd: "",
-  celular: "",
-  cep: "",
-  logradouro: "",
-  numero: "",
-  complemento: "",
-  bairro: "",
-  cidade: "",
-  uf: "",
-};
+  documento: '',
+  nome: '',
+  email: '',
+  ddd: '',
+  celular: '',
+  cep: '',
+  logradouro: '',
+  numero: '',
+  complemento: '',
+  bairro: '',
+  cidade: '',
+  uf: '',
+}
 
-type Erros = Partial<Record<keyof Campos, FieldError>>;
+type Erros = Partial<Record<keyof Campos, FieldError>>
 
 export default function ClienteForm() {
-  const router = useRouter();
+  const router = useRouter()
 
-  const [tipo, setTipo] = useState<TipoPessoa>("fisica");
-  const [campos, setCampos] = useState<Campos>(VAZIO);
-  const [erros, setErros] = useState<Erros>({});
+  const [tipo, setTipo] = useState<TipoPessoa>('fisica')
+  const [campos, setCampos] = useState<Campos>(VAZIO)
+  const [erros, setErros] = useState<Erros>({})
 
-  const [buscandoCep, setBuscandoCep] = useState(false);
-  const [buscandoDoc, setBuscandoDoc] = useState(false);
-  const [salvando, setSalvando] = useState(false);
+  const [buscandoCep, setBuscandoCep] = useState(false)
+  const [buscandoDoc, setBuscandoDoc] = useState(false)
+  const [salvando, setSalvando] = useState(false)
 
-  const [avisoCep, setAvisoCep] = useState<string | null>(null);
-  const [avisoDoc, setAvisoDoc] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ msg: string; tone: "success" | "error" } | null>(null);
+  const [avisoCep, setAvisoCep] = useState<string | null>(null)
+  const [avisoDoc, setAvisoDoc] = useState<string | null>(null)
+  const [toast, setToast] = useState<{ msg: string; tone: 'success' | 'error' } | null>(null)
 
-  const rotuloDocumento = tipo === "fisica" ? "CPF" : "CNPJ";
-  const rotuloNome = tipo === "fisica" ? "Nome completo" : "Razao social";
+  const rotuloDocumento = tipo === 'fisica' ? 'CPF' : 'CNPJ'
+  const rotuloNome = tipo === 'fisica' ? 'Nome completo' : 'Razao social'
 
   function set<K extends keyof Campos>(campo: K, valor: string) {
-    setCampos((c) => ({ ...c, [campo]: valor }));
-    if (erros[campo]) setErros((e) => ({ ...e, [campo]: null }));
+    setCampos((c) => ({ ...c, [campo]: valor }))
+    if (erros[campo]) setErros((e) => ({ ...e, [campo]: null }))
   }
 
   /** Trocar o tipo limpa o documento — a mascara e a validacao mudam. */
   function trocarTipo(novo: TipoPessoa) {
-    setTipo(novo);
-    setCampos((c) => ({ ...c, documento: "" }));
-    setErros((e) => ({ ...e, documento: null }));
-    setAvisoDoc(null);
+    setTipo(novo)
+    setCampos((c) => ({ ...c, documento: '' }))
+    setErros((e) => ({ ...e, documento: null }))
+    setAvisoDoc(null)
   }
 
   /* ---------------------------------------------------------------- *
@@ -93,18 +93,18 @@ export default function ClienteForm() {
    * ---------------------------------------------------------------- */
 
   async function preencherPorCep(cepFormatado: string) {
-    if (cepFormatado.replace(/\D/g, "").length !== 8) return;
+    if (cepFormatado.replace(/\D/g, '').length !== 8) return
 
-    setBuscandoCep(true);
-    setAvisoCep(null);
+    setBuscandoCep(true)
+    setAvisoCep(null)
 
     /* SUBSTITUIR POR: GET /enderecos/cep/:cep */
-    const resultado = await buscarCep(cepFormatado);
-    setBuscandoCep(false);
+    const resultado = await buscarCep(cepFormatado)
+    setBuscandoCep(false)
 
     if (!resultado.ok) {
-      setAvisoCep(resultado.error);
-      return;
+      setAvisoCep(resultado.error)
+      return
     }
 
     setCampos((c) => ({
@@ -113,8 +113,8 @@ export default function ClienteForm() {
       bairro: resultado.endereco.bairro,
       cidade: resultado.endereco.cidade,
       uf: resultado.endereco.uf,
-    }));
-    setErros((e) => ({ ...e, logradouro: null, bairro: null, cidade: null, uf: null }));
+    }))
+    setErros((e) => ({ ...e, logradouro: null, bairro: null, cidade: null, uf: null }))
   }
 
   /* ---------------------------------------------------------------- *
@@ -122,24 +122,24 @@ export default function ClienteForm() {
    * ---------------------------------------------------------------- */
 
   async function preencherPorDocumento() {
-    setAvisoDoc(null);
+    setAvisoDoc(null)
 
-    const erro = validateDocumento(campos.documento, tipo);
+    const erro = validateDocumento(campos.documento, tipo)
     if (erro) {
-      setErros((e) => ({ ...e, documento: erro }));
-      return;
+      setErros((e) => ({ ...e, documento: erro }))
+      return
     }
 
-    setBuscandoDoc(true);
+    setBuscandoDoc(true)
 
-    if (tipo === "juridica") {
+    if (tipo === 'juridica') {
       /* SUBSTITUIR POR: GET /empresas/cnpj/:cnpj */
-      const r = await buscarCnpj(campos.documento);
-      setBuscandoDoc(false);
+      const r = await buscarCnpj(campos.documento)
+      setBuscandoDoc(false)
 
       if (!r.ok) {
-        setAvisoDoc(r.error);
-        return;
+        setAvisoDoc(r.error)
+        return
       }
 
       setCampos((c) => ({
@@ -151,24 +151,24 @@ export default function ClienteForm() {
         bairro: r.dados.bairro,
         cidade: r.dados.cidade,
         uf: r.dados.uf,
-      }));
-      setErros({});
-      setToast({ msg: "Dados preenchidos a partir do CNPJ.", tone: "success" });
-      return;
+      }))
+      setErros({})
+      setToast({ msg: 'Dados preenchidos a partir do CNPJ.', tone: 'success' })
+      return
     }
 
     /* SUBSTITUIR POR: GET /pessoas/cpf/:cpf */
-    const r = await buscarCpf(campos.documento);
-    setBuscandoDoc(false);
+    const r = await buscarCpf(campos.documento)
+    setBuscandoDoc(false)
 
     if (!r.ok) {
-      setAvisoDoc(r.error);
-      return;
+      setAvisoDoc(r.error)
+      return
     }
 
-    setCampos((c) => ({ ...c, nome: r.nome }));
-    setErros((e) => ({ ...e, nome: null }));
-    setToast({ msg: "Nome preenchido a partir do CPF.", tone: "success" });
+    setCampos((c) => ({ ...c, nome: r.nome }))
+    setErros((e) => ({ ...e, nome: null }))
+    setToast({ msg: 'Nome preenchido a partir do CPF.', tone: 'success' })
   }
 
   /* ---------------------------------------------------------------- *
@@ -178,42 +178,42 @@ export default function ClienteForm() {
   function validarTudo(): boolean {
     const novos: Erros = {
       documento: validateDocumento(campos.documento, tipo),
-      nome: validateRequired(campos.nome, tipo === "fisica" ? "o nome" : "a razao social"),
+      nome: validateRequired(campos.nome, tipo === 'fisica' ? 'o nome' : 'a razao social'),
       ddd: validateDDD(campos.ddd),
       celular: validateCelular(campos.celular),
       cep: validateCEP(campos.cep),
-      logradouro: validateRequired(campos.logradouro, "o logradouro"),
-      numero: validateRequired(campos.numero, "o numero"),
-      bairro: validateRequired(campos.bairro, "o bairro"),
-      cidade: validateRequired(campos.cidade, "a cidade"),
-      uf: validateRequired(campos.uf, "a UF"),
-    };
+      logradouro: validateRequired(campos.logradouro, 'o logradouro'),
+      numero: validateRequired(campos.numero, 'o numero'),
+      bairro: validateRequired(campos.bairro, 'o bairro'),
+      cidade: validateRequired(campos.cidade, 'a cidade'),
+      uf: validateRequired(campos.uf, 'a UF'),
+    }
 
-    setErros(novos);
-    return !Object.values(novos).some(Boolean);
+    setErros(novos)
+    return !Object.values(novos).some(Boolean)
   }
 
   async function salvar(event: React.FormEvent) {
-    event.preventDefault();
+    event.preventDefault()
 
     if (!validarTudo()) {
-      setToast({ msg: "Confira os campos destacados antes de salvar.", tone: "error" });
-      return;
+      setToast({ msg: 'Confira os campos destacados antes de salvar.', tone: 'error' })
+      return
     }
 
-    setSalvando(true);
+    setSalvando(true)
 
     /* SUBSTITUIR POR: POST /clientes */
-    const resultado = await salvarCliente({ ...campos, tipoPessoa: tipo });
-    setSalvando(false);
+    const resultado = await salvarCliente({ ...campos, tipoPessoa: tipo })
+    setSalvando(false)
 
     if (!resultado.ok) {
-      setToast({ msg: resultado.error, tone: "error" });
-      return;
+      setToast({ msg: resultado.error, tone: 'error' })
+      return
     }
 
-    setToast({ msg: "Cliente cadastrado.", tone: "success" });
-    router.push("/app/clientes");
+    setToast({ msg: 'Cliente cadastrado.', tone: 'success' })
+    router.push('/app/clientes')
   }
 
   /** Campo com mensagem de erro embaixo. */
@@ -222,7 +222,7 @@ export default function ClienteForm() {
       <span className={styles.erro} role="alert">
         {erros[campo]}
       </span>
-    ) : null;
+    ) : null
   }
 
   return (
@@ -230,7 +230,11 @@ export default function ClienteForm() {
       <PageHeader
         title="Novo cliente"
         subtitle="Cadastro de pessoa fisica ou juridica"
-        actions={<ButtonLink href="/app/clientes" variant="secondary">Cancelar</ButtonLink>}
+        actions={
+          <ButtonLink href="/app/clientes" variant="secondary">
+            Cancelar
+          </ButtonLink>
+        }
       />
 
       <form onSubmit={salvar} noValidate className={styles.form}>
@@ -239,17 +243,17 @@ export default function ClienteForm() {
           <div className={styles.tipoToggle} role="group" aria-label="Tipo de pessoa">
             <button
               type="button"
-              className={`${styles.tipoBotao} ${tipo === "fisica" ? styles.tipoAtivo : ""}`}
-              onClick={() => trocarTipo("fisica")}
-              aria-pressed={tipo === "fisica"}
+              className={`${styles.tipoBotao} ${tipo === 'fisica' ? styles.tipoAtivo : ''}`}
+              onClick={() => trocarTipo('fisica')}
+              aria-pressed={tipo === 'fisica'}
             >
               Pessoa fisica
             </button>
             <button
               type="button"
-              className={`${styles.tipoBotao} ${tipo === "juridica" ? styles.tipoAtivo : ""}`}
-              onClick={() => trocarTipo("juridica")}
-              aria-pressed={tipo === "juridica"}
+              className={`${styles.tipoBotao} ${tipo === 'juridica' ? styles.tipoAtivo : ''}`}
+              onClick={() => trocarTipo('juridica')}
+              aria-pressed={tipo === 'juridica'}
             >
               Pessoa juridica
             </button>
@@ -260,14 +264,14 @@ export default function ClienteForm() {
               <div className={styles.inline}>
                 <Input
                   value={campos.documento}
-                  onChange={(e) => set("documento", maskDocumento(e.target.value, tipo))}
+                  onChange={(e) => set('documento', maskDocumento(e.target.value, tipo))}
                   onBlur={() =>
                     setErros((er) => ({
                       ...er,
                       documento: validateDocumento(campos.documento, tipo),
                     }))
                   }
-                  placeholder={tipo === "fisica" ? "000.000.000-00" : "00.000.000/0000-00"}
+                  placeholder={tipo === 'fisica' ? '000.000.000-00' : '00.000.000/0000-00'}
                   inputMode="numeric"
                   aria-invalid={Boolean(erros.documento)}
                 />
@@ -281,7 +285,7 @@ export default function ClienteForm() {
                   Buscar
                 </Button>
               </div>
-              {erroDe("documento")}
+              {erroDe('documento')}
               {avisoDoc ? (
                 <span className={styles.aviso} role="status">
                   {avisoDoc}
@@ -292,39 +296,39 @@ export default function ClienteForm() {
             <Field label={rotuloNome} span={7}>
               <Input
                 value={campos.nome}
-                onChange={(e) => set("nome", e.target.value)}
+                onChange={(e) => set('nome', e.target.value)}
                 aria-invalid={Boolean(erros.nome)}
               />
-              {erroDe("nome")}
+              {erroDe('nome')}
             </Field>
 
             <Field label="DDD" span={2}>
               <Input
                 value={campos.ddd}
-                onChange={(e) => set("ddd", e.target.value.replace(/\D/g, "").slice(0, 2))}
+                onChange={(e) => set('ddd', e.target.value.replace(/\D/g, '').slice(0, 2))}
                 inputMode="numeric"
                 placeholder="41"
                 aria-invalid={Boolean(erros.ddd)}
               />
-              {erroDe("ddd")}
+              {erroDe('ddd')}
             </Field>
 
             <Field label="Celular / WhatsApp" span={5}>
               <Input
                 value={campos.celular}
-                onChange={(e) => set("celular", maskCelular(e.target.value))}
+                onChange={(e) => set('celular', maskCelular(e.target.value))}
                 inputMode="tel"
                 placeholder="99876-5432"
                 aria-invalid={Boolean(erros.celular)}
               />
-              {erroDe("celular")}
+              {erroDe('celular')}
             </Field>
 
             <Field label="E-mail" span={5} hint="Opcional">
               <Input
                 type="email"
                 value={campos.email}
-                onChange={(e) => set("email", e.target.value)}
+                onChange={(e) => set('email', e.target.value)}
                 placeholder="cliente@email.com"
               />
             </Field>
@@ -338,10 +342,10 @@ export default function ClienteForm() {
                 <Input
                   value={campos.cep}
                   onChange={(e) => {
-                    const m = maskCEP(e.target.value);
-                    set("cep", m);
-                    setAvisoCep(null);
-                    void preencherPorCep(m);
+                    const m = maskCEP(e.target.value)
+                    set('cep', m)
+                    setAvisoCep(null)
+                    void preencherPorCep(m)
                   }}
                   placeholder="00000-000"
                   inputMode="numeric"
@@ -353,7 +357,7 @@ export default function ClienteForm() {
                   </span>
                 ) : null}
               </div>
-              {erroDe("cep")}
+              {erroDe('cep')}
               {avisoCep ? (
                 <span className={styles.aviso} role="status">
                   {avisoCep}
@@ -364,25 +368,25 @@ export default function ClienteForm() {
             <Field label="Logradouro" span={8}>
               <Input
                 value={campos.logradouro}
-                onChange={(e) => set("logradouro", e.target.value)}
+                onChange={(e) => set('logradouro', e.target.value)}
                 aria-invalid={Boolean(erros.logradouro)}
               />
-              {erroDe("logradouro")}
+              {erroDe('logradouro')}
             </Field>
 
             <Field label="Numero" span={3}>
               <Input
                 value={campos.numero}
-                onChange={(e) => set("numero", e.target.value)}
+                onChange={(e) => set('numero', e.target.value)}
                 aria-invalid={Boolean(erros.numero)}
               />
-              {erroDe("numero")}
+              {erroDe('numero')}
             </Field>
 
             <Field label="Complemento" span={4}>
               <Input
                 value={campos.complemento}
-                onChange={(e) => set("complemento", e.target.value)}
+                onChange={(e) => set('complemento', e.target.value)}
                 placeholder="Apto, bloco, sala"
               />
             </Field>
@@ -390,25 +394,25 @@ export default function ClienteForm() {
             <Field label="Bairro" span={5}>
               <Input
                 value={campos.bairro}
-                onChange={(e) => set("bairro", e.target.value)}
+                onChange={(e) => set('bairro', e.target.value)}
                 aria-invalid={Boolean(erros.bairro)}
               />
-              {erroDe("bairro")}
+              {erroDe('bairro')}
             </Field>
 
             <Field label="Cidade" span={8}>
               <Input
                 value={campos.cidade}
-                onChange={(e) => set("cidade", e.target.value)}
+                onChange={(e) => set('cidade', e.target.value)}
                 aria-invalid={Boolean(erros.cidade)}
               />
-              {erroDe("cidade")}
+              {erroDe('cidade')}
             </Field>
 
             <Field label="UF" span={4}>
               <Select
                 value={campos.uf}
-                onChange={(e) => set("uf", e.target.value)}
+                onChange={(e) => set('uf', e.target.value)}
                 aria-invalid={Boolean(erros.uf)}
               >
                 <option value="">--</option>
@@ -418,7 +422,7 @@ export default function ClienteForm() {
                   </option>
                 ))}
               </Select>
-              {erroDe("uf")}
+              {erroDe('uf')}
             </Field>
           </FormGrid>
         </Card>
@@ -434,7 +438,7 @@ export default function ClienteForm() {
                 Salvando...
               </>
             ) : (
-              "Cadastrar cliente"
+              'Cadastrar cliente'
             )}
           </Button>
         </div>
@@ -444,5 +448,5 @@ export default function ClienteForm() {
         <Toast message={toast.msg} tone={toast.tone} onClose={() => setToast(null)} />
       ) : null}
     </>
-  );
+  )
 }

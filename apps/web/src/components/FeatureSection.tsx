@@ -1,20 +1,20 @@
-import type { ReactNode } from "react";
-import { IconCheck } from "./Icons";
-import styles from "./FeatureSection.module.css";
+import type { ReactNode } from 'react'
+import { IconCheck } from './Icons'
+import styles from './FeatureSection.module.css'
 
 type FeatureSectionProps = {
-  id?: string;
-  eyebrow: string;
-  title: ReactNode;
-  text: string;
-  bullets: string[];
+  id?: string
+  eyebrow: string
+  title: ReactNode
+  text: string
+  bullets: string[]
   /** Mini-previa de UI que ilustra o pilar. */
-  visual: ReactNode;
+  visual: ReactNode
   /** Inverte o lado da imagem — usado para alternar entre as secoes. */
-  reverse?: boolean;
+  reverse?: boolean
   /** Fundo levemente acinzentado, para separar blocos vizinhos. */
-  muted?: boolean;
-};
+  muted?: boolean
+}
 
 export default function FeatureSection({
   id,
@@ -27,11 +27,8 @@ export default function FeatureSection({
   muted = false,
 }: FeatureSectionProps) {
   return (
-    <section
-      className={`section ${styles.section} ${muted ? styles.muted : ""}`}
-      id={id}
-    >
-      <div className={`container ${styles.grid} ${reverse ? styles.reverse : ""}`}>
+    <section className={`section ${styles.section} ${muted ? styles.muted : ''}`} id={id}>
+      <div className={`container ${styles.grid} ${reverse ? styles.reverse : ''}`}>
         <div className={styles.copy}>
           <span className="eyebrow">{eyebrow}</span>
           <h2 className="sectionTitle">{title}</h2>
@@ -52,5 +49,5 @@ export default function FeatureSection({
         <div className={styles.visual}>{visual}</div>
       </div>
     </section>
-  );
+  )
 }

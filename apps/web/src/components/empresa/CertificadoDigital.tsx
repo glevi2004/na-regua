@@ -1,16 +1,13 @@
-"use client";
+'use client'
 
-import { useId, useRef, useState } from "react";
-import {
-  enviarCertificado,
-  type Certificado,
-} from "@/lib/empresa-api";
-import { formatDate } from "@/lib/format";
-import { Button } from "@/components/ui/Button";
-import { Badge } from "@/components/ui/UI";
-import { IconShield, IconTrash, IconUpload } from "@/components/Icons";
-import { Spinner } from "@/components/auth/Fields";
-import styles from "./empresa.module.css";
+import { useId, useRef, useState } from 'react'
+import { enviarCertificado, type Certificado } from '@/lib/empresa-api'
+import { formatDate } from '@/lib/format'
+import { Button } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/UI'
+import { IconShield, IconTrash, IconUpload } from '@/components/Icons'
+import { Spinner } from '@/components/auth/Fields'
+import styles from './empresa.module.css'
 
 /**
  * Envio do certificado digital A1 (.pfx/.p12), necessario para emitir
@@ -24,60 +21,58 @@ export default function CertificadoDigital({
   certificado,
   onChange,
 }: {
-  certificado: Certificado | null;
-  onChange: (certificado: Certificado | null) => void;
+  certificado: Certificado | null
+  onChange: (certificado: Certificado | null) => void
 }) {
-  const inputId = useId();
-  const senhaId = useId();
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputId = useId()
+  const senhaId = useId()
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  const [arquivo, setArquivo] = useState<File | null>(null);
-  const [senha, setSenha] = useState("");
-  const [enviando, setEnviando] = useState(false);
-  const [erro, setErro] = useState<string | null>(null);
+  const [arquivo, setArquivo] = useState<File | null>(null)
+  const [senha, setSenha] = useState('')
+  const [enviando, setEnviando] = useState(false)
+  const [erro, setErro] = useState<string | null>(null)
 
   async function enviar() {
     if (!arquivo) {
-      setErro("Escolha o arquivo do certificado.");
-      return;
+      setErro('Escolha o arquivo do certificado.')
+      return
     }
 
-    setErro(null);
-    setEnviando(true);
+    setErro(null)
+    setEnviando(true)
 
     /* SUBSTITUIR POR: POST /empresa/certificado */
-    const resultado = await enviarCertificado(arquivo, senha);
-    setEnviando(false);
+    const resultado = await enviarCertificado(arquivo, senha)
+    setEnviando(false)
 
     if (!resultado.ok) {
-      setErro(resultado.error);
-      return;
+      setErro(resultado.error)
+      return
     }
 
-    onChange(resultado.certificado);
-    setArquivo(null);
-    setSenha("");
-    if (inputRef.current) inputRef.current.value = "";
+    onChange(resultado.certificado)
+    setArquivo(null)
+    setSenha('')
+    if (inputRef.current) inputRef.current.value = ''
   }
 
   function remover() {
-    onChange(null);
-    setArquivo(null);
-    setSenha("");
-    setErro(null);
-    if (inputRef.current) inputRef.current.value = "";
+    onChange(null)
+    setArquivo(null)
+    setSenha('')
+    setErro(null)
+    if (inputRef.current) inputRef.current.value = ''
   }
 
   /* --- Estado: certificado ja enviado --- */
   if (certificado) {
-    const expirado = certificado.status === "expirado";
+    const expirado = certificado.status === 'expirado'
 
     return (
       <div className={styles.certCard}>
         <div className={styles.certHead}>
-          <span
-            className={`${styles.certIcon} ${expirado ? styles.certIconWarn : ""}`}
-          >
+          <span className={`${styles.certIcon} ${expirado ? styles.certIconWarn : ''}`}>
             <IconShield size={20} />
           </span>
 
@@ -86,11 +81,7 @@ export default function CertificadoDigital({
             <span>{certificado.titular}</span>
           </div>
 
-          {expirado ? (
-            <Badge tone="warning">Expirado</Badge>
-          ) : (
-            <Badge tone="success">Valido</Badge>
-          )}
+          {expirado ? <Badge tone="warning">Expirado</Badge> : <Badge tone="success">Valido</Badge>}
         </div>
 
         <dl className={styles.certMeta}>
@@ -100,14 +91,13 @@ export default function CertificadoDigital({
           </div>
           <div>
             <dt>Emissao fiscal</dt>
-            <dd>{expirado ? "Bloqueada" : "Liberada"}</dd>
+            <dd>{expirado ? 'Bloqueada' : 'Liberada'}</dd>
           </div>
         </dl>
 
         {expirado ? (
           <p className={styles.certAlert}>
-            O certificado venceu. Ate enviar um novo, nao e possivel emitir
-            NFC-e nem NFS-e.
+            O certificado venceu. Ate enviar um novo, nao e possivel emitir NFC-e nem NFS-e.
           </p>
         ) : null}
 
@@ -116,7 +106,7 @@ export default function CertificadoDigital({
           Trocar certificado
         </Button>
       </div>
-    );
+    )
   }
 
   /* --- Estado: nenhum certificado --- */
@@ -146,8 +136,8 @@ export default function CertificadoDigital({
             className={styles.certFile}
             disabled={enviando}
             onChange={(e) => {
-              setArquivo(e.target.files?.[0] ?? null);
-              setErro(null);
+              setArquivo(e.target.files?.[0] ?? null)
+              setErro(null)
             }}
           />
         </div>
@@ -162,8 +152,8 @@ export default function CertificadoDigital({
             className={styles.certInput}
             value={senha}
             onChange={(e) => {
-              setSenha(e.target.value);
-              setErro(null);
+              setSenha(e.target.value)
+              setErro(null)
             }}
             disabled={enviando}
             autoComplete="off"
@@ -193,9 +183,9 @@ export default function CertificadoDigital({
       </Button>
 
       <p className={styles.certNota}>
-        O arquivo e a senha sao enviados direto ao servidor por conexao
-        segura. A senha nao fica guardada no navegador.
+        O arquivo e a senha sao enviados direto ao servidor por conexao segura. A senha nao fica
+        guardada no navegador.
       </p>
     </div>
-  );
+  )
 }

@@ -17,7 +17,7 @@
 
 /* Linha ligando uma etapa a outra */
 .step:not(:last-child)::after {
-  content: "";
+  content: '';
   flex: 1;
   height: 2px;
   border-radius: 2px;
@@ -43,7 +43,9 @@
   font-family: var(--font-display);
   font-size: 13px;
   font-weight: 600;
-  transition: background-color var(--transition), border-color var(--transition),
+  transition:
+    background-color var(--transition),
+    border-color var(--transition),
     color var(--transition);
 }
 

@@ -42,7 +42,9 @@
   border: 1px solid var(--app-border);
   border-radius: var(--radius-sm);
   text-align: left;
-  transition: border-color var(--transition), background-color var(--transition);
+  transition:
+    border-color var(--transition),
+    background-color var(--transition);
 }
 
 .sugestao:hover {

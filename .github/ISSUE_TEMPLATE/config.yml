@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Decisão ou pergunta em aberto
+    url: https://github.com/OWNER/REPO/blob/main/docs/decisoes/README.md
+    about: Antes de abrir issue, veja se já existe uma DEC ou QST sobre o assunto
+  - name: Documentação
+    url: https://github.com/OWNER/REPO/blob/main/docs/README.md
+    about: Índice completo da documentação do projeto

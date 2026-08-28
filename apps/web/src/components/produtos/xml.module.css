@@ -55,7 +55,9 @@
   height: 34px;
   border-radius: 50%;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .fechar:hover {
@@ -89,7 +91,9 @@
   background: var(--app-field);
   color: var(--app-muted);
   cursor: pointer;
-  transition: border-color var(--transition), background-color var(--transition);
+  transition:
+    border-color var(--transition),
+    background-color var(--transition);
 }
 
 .dropzone:hover {
@@ -235,7 +239,9 @@
   border-radius: var(--radius-full);
   font-size: 12.5px;
   color: var(--app-muted);
-  transition: border-color var(--transition), color var(--transition),
+  transition:
+    border-color var(--transition),
+    color var(--transition),
     background-color var(--transition);
 }
 

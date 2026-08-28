@@ -15,12 +15,7 @@
   --brand-highlight: #6d33dd;
   --brand-highlight-soft: #efe8fd;
 
-  --brand-gradient: linear-gradient(
-    135deg,
-    #1e2a78 0%,
-    #39c8bd 50%,
-    #6d33dd 100%
-  );
+  --brand-gradient: linear-gradient(135deg, #1e2a78 0%, #39c8bd 50%, #6d33dd 100%);
   --brand-gradient-subtle: linear-gradient(
     135deg,
     rgba(30, 42, 120, 0.06) 0%,
@@ -68,8 +63,8 @@
   --dark-text-muted: #9aa2ce;
 
   /* Escala tipografica */
-  --font-display: var(--font-poppins), "Segoe UI", system-ui, sans-serif;
-  --font-body: var(--font-inter), "Segoe UI", system-ui, sans-serif;
+  --font-display: var(--font-poppins), 'Segoe UI', system-ui, sans-serif;
+  --font-body: var(--font-inter), 'Segoe UI', system-ui, sans-serif;
 
   /* Espacamento e forma */
   --radius-sm: 8px;
@@ -244,8 +239,11 @@ svg {
   font-size: 15px;
   font-weight: 600;
   white-space: nowrap;
-  transition: transform var(--transition), box-shadow var(--transition),
-    background-color var(--transition), color var(--transition),
+  transition:
+    transform var(--transition),
+    box-shadow var(--transition),
+    background-color var(--transition),
+    color var(--transition),
     border-color var(--transition);
 }
 

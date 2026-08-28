@@ -87,7 +87,9 @@
   color: var(--app-text);
   font-size: 20px;
   line-height: 1;
-  transition: border-color var(--transition), color var(--transition);
+  transition:
+    border-color var(--transition),
+    color var(--transition);
 }
 
 .navMes:hover {
@@ -128,7 +130,9 @@
   padding: 7px 2px;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
-  transition: background-color var(--transition), border-color var(--transition);
+  transition:
+    background-color var(--transition),
+    border-color var(--transition);
 }
 
 .dia:hover {
@@ -260,7 +264,9 @@
   height: 26px;
   border-radius: 50%;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .eventoExcluir:hover {

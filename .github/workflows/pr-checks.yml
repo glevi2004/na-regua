@@ -1,0 +1,55 @@
+name: PR
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  convencoes:
+    name: Convencoes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      - name: Titulo do PR segue Conventional Commits
+        # Usamos squash merge: o titulo do PR VIRA a mensagem do commit na main.
+        # Por isso e ele que precisa passar, nao os commits da branch.
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: echo "$PR_TITLE" | pnpm commitlint
+
+      - name: Nome da branch segue a convencao
+        env:
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          PADRAO='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert|hotfix)/NR-[0-9]+-[a-z0-9-]+$'
+          if [[ ! "$BRANCH" =~ $PADRAO ]]; then
+            echo "::error::Nome de branch invalido: '$BRANCH'"
+            echo "Esperado: <tipo>/NR-<numero>-<slug-kebab-case>"
+            echo "Exemplo:  feat/NR-042-carrinho-codigo-barras"
+            echo "Ver docs/engenharia/git-workflow.md#nomenclatura"
+            exit 1
+          fi
+          echo "Branch OK: $BRANCH"
+
+      - name: Referencia a tarefa no titulo ou no corpo
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          BRANCH: ${{ github.head_ref }}
+        run: |
+          if ! echo "$PR_TITLE $PR_BODY $BRANCH" | grep -qE 'NR-[0-9]+'; then
+            echo "::error::PR sem NR-xxx. Todo trabalho sai de uma tarefa do ledger."
+            exit 1
+          fi

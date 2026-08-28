@@ -1,9 +1,9 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { useState } from "react";
-import { IconArrowRight, IconSparkles } from "@/components/Icons";
-import styles from "./ComandosWhatsApp.module.css";
+import Link from 'next/link'
+import { useState } from 'react'
+import { IconArrowRight, IconSparkles } from '@/components/Icons'
+import styles from './ComandosWhatsApp.module.css'
 
 /**
  * Previa dos comandos que o lojista pode mandar por WhatsApp.
@@ -17,18 +17,18 @@ import styles from "./ComandosWhatsApp.module.css";
  */
 export default function ComandosWhatsApp({
   comandos,
-  descricao = "Estas perguntas funcionam por mensagem, sem abrir o sistema. Toque para abrir no assistente — o texto tambem e copiado.",
+  descricao = 'Estas perguntas funcionam por mensagem, sem abrir o sistema. Toque para abrir no assistente — o texto tambem e copiado.',
 }: {
-  comandos: string[];
-  descricao?: string;
+  comandos: string[]
+  descricao?: string
 }) {
-  const [copiado, setCopiado] = useState<string | null>(null);
+  const [copiado, setCopiado] = useState<string | null>(null)
 
   async function copiar(comando: string) {
     try {
-      await navigator.clipboard.writeText(comando);
-      setCopiado(comando);
-      setTimeout(() => setCopiado(null), 2000);
+      await navigator.clipboard.writeText(comando)
+      setCopiado(comando)
+      setTimeout(() => setCopiado(null), 2000)
     } catch {
       /* Sem permissao de area de transferencia: o link ainda leva ao
          assistente com a pergunta preenchida, entao nao ha o que avisar. */
@@ -57,12 +57,12 @@ export default function ComandosWhatsApp({
             >
               &ldquo;{comando}&rdquo;
               <span className={styles.chipHint}>
-                {copiado === comando ? "copiado" : <IconArrowRight size={14} />}
+                {copiado === comando ? 'copiado' : <IconArrowRight size={14} />}
               </span>
             </Link>
           </li>
         ))}
       </ul>
     </section>
-  );
+  )
 }

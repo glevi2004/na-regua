@@ -1,0 +1,38 @@
+# Revisores automaticos por trilha.
+# Substitua os placeholders pelos usuarios reais do GitHub.
+# Ver docs/engenharia/fluxo-de-trabalho.md#as-tres-trilhas
+
+# Padrao: qualquer um do time
+*                       @TRILHA-1 @TRILHA-2 @TRILHA-3
+
+# Trilha 1 — Nucleo & Dados
+/packages/money/        @TRILHA-1
+/packages/domain/       @TRILHA-1
+/packages/db/           @TRILHA-1
+/packages/core/         @TRILHA-1
+
+# Trilha 2 — Plataforma & Integracoes
+/apps/api/              @TRILHA-2
+/apps/worker/           @TRILHA-2
+/packages/agent/        @TRILHA-2
+/packages/fiscal/       @TRILHA-2
+/packages/whatsapp/     @TRILHA-2
+/packages/banking/      @TRILHA-2
+/packages/billing/      @TRILHA-2
+/packages/payments/     @TRILHA-2
+/infra/                 @TRILHA-2
+/.github/               @TRILHA-2
+
+# Trilha 3 — Clientes
+/apps/mobile/           @TRILHA-3
+/apps/web/              @TRILHA-3
+/packages/ui/           @TRILHA-3
+
+# contracts e a fronteira que TODAS as trilhas consomem. Um breaking change
+# aqui quebra as outras duas em silencio — por isso as tres revisam.
+# Ver docs/arquitetura/principios.md#4-contracts-e-o-contrato-unico
+/packages/contracts/    @TRILHA-1 @TRILHA-2 @TRILHA-3
+
+# Decisoes de arquitetura sao do time inteiro
+/docs/arquitetura/      @TRILHA-1 @TRILHA-2 @TRILHA-3
+/docs/decisoes/         @TRILHA-1 @TRILHA-2 @TRILHA-3

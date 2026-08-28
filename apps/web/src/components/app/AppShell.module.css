@@ -88,7 +88,9 @@
   border-radius: var(--radius-sm);
   font-size: 14.5px;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .navItem:hover {
@@ -131,11 +133,7 @@
   padding: 16px;
   border: 1px solid var(--app-border);
   border-radius: var(--radius);
-  background: linear-gradient(
-    150deg,
-    rgba(109, 51, 221, 0.26) 0%,
-    rgba(57, 200, 189, 0.12) 100%
-  );
+  background: linear-gradient(150deg, rgba(109, 51, 221, 0.26) 0%, rgba(57, 200, 189, 0.12) 100%);
 }
 
 .assistantIcon {
@@ -255,7 +253,9 @@
   border-radius: 50%;
   border: 1px solid var(--app-border);
   color: var(--app-muted);
-  transition: border-color var(--transition), color var(--transition);
+  transition:
+    border-color var(--transition),
+    color var(--transition);
 }
 
 .iconButton:hover {
@@ -395,7 +395,9 @@
   text-align: left;
   font-size: 13.5px;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .subItem:hover {

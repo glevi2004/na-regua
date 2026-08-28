@@ -1,6 +1,6 @@
-"use client";
+'use client'
 
-import { useState } from "react";
+import { useState } from 'react'
 import {
   excluirCustoFixo,
   gerarContasDeCustosFixos,
@@ -9,68 +9,65 @@ import {
   NOMES_BANCOS,
   salvarCustoFixo,
   salvarPlanoContas,
-} from "@/lib/financeiro-api";
-import type { CustoFixo, PlanoContas } from "@/lib/types";
-import { formatMoney } from "@/lib/format";
-import { Badge, Card, EmptyState, PageHeader, Stat } from "@/components/ui/UI";
-import { Button } from "@/components/ui/Button";
-import Toast from "@/components/ui/Toast";
-import { Spinner } from "@/components/auth/Fields";
-import { IconCalendar, IconPlus, IconTrash } from "@/components/Icons";
-import CampoTag from "@/components/app/CampoTag";
-import { COMANDOS_PLANO_CONTAS } from "@/lib/comandos";
-import ComandosWhatsApp from "@/components/app/ComandosWhatsApp";
-import ConfirmarDialog from "@/components/app/ConfirmarDialog";
-import styles from "./financeiro.module.css";
+} from '@/lib/financeiro-api'
+import type { CustoFixo, PlanoContas } from '@/lib/types'
+import { formatMoney } from '@/lib/format'
+import { Badge, Card, EmptyState, PageHeader, Stat } from '@/components/ui/UI'
+import { Button } from '@/components/ui/Button'
+import Toast from '@/components/ui/Toast'
+import { Spinner } from '@/components/auth/Fields'
+import { IconCalendar, IconPlus, IconTrash } from '@/components/Icons'
+import CampoTag from '@/components/app/CampoTag'
+import { COMANDOS_PLANO_CONTAS } from '@/lib/comandos'
+import ComandosWhatsApp from '@/components/app/ComandosWhatsApp'
+import ConfirmarDialog from '@/components/app/ConfirmarDialog'
+import styles from './financeiro.module.css'
 
 function paraNumero(valor: string): number {
-  const limpo = valor.replace(/\./g, "").replace(",", ".");
-  const n = Number(limpo);
-  return Number.isFinite(n) ? n : 0;
+  const limpo = valor.replace(/\./g, '').replace(',', '.')
+  const n = Number(limpo)
+  return Number.isFinite(n) ? n : 0
 }
 
 export default function PlanoDeContasView() {
-  const [planos, setPlanos] = useState<PlanoContas[]>(() => listarPlanos());
-  const [custos, setCustos] = useState<CustoFixo[]>(() => listarCustosFixos());
+  const [planos, setPlanos] = useState<PlanoContas[]>(() => listarPlanos())
+  const [custos, setCustos] = useState<CustoFixo[]>(() => listarCustosFixos())
 
-  const [novoPlano, setNovoPlano] = useState("");
-  const [salvandoPlano, setSalvandoPlano] = useState(false);
+  const [novoPlano, setNovoPlano] = useState('')
+  const [salvandoPlano, setSalvandoPlano] = useState(false)
 
-  const [editando, setEditando] = useState<CustoFixo | null>(null);
-  const [formAberto, setFormAberto] = useState(false);
-  const [excluindo, setExcluindo] = useState<CustoFixo | null>(null);
-  const [gerando, setGerando] = useState(false);
-  const [processando, setProcessando] = useState(false);
-  const [toast, setToast] = useState<{ msg: string; tone: "success" | "error" } | null>(null);
+  const [editando, setEditando] = useState<CustoFixo | null>(null)
+  const [formAberto, setFormAberto] = useState(false)
+  const [excluindo, setExcluindo] = useState<CustoFixo | null>(null)
+  const [gerando, setGerando] = useState(false)
+  const [processando, setProcessando] = useState(false)
+  const [toast, setToast] = useState<{ msg: string; tone: 'success' | 'error' } | null>(null)
 
-  const totalCustosFixos = custos.reduce((acc, c) => acc + c.valor, 0);
+  const totalCustosFixos = custos.reduce((acc, c) => acc + c.valor, 0)
   const gastoTotal = planos
-    .filter((p) => p.tipo === "despesa")
-    .reduce((acc, p) => acc + p.gastoMes, 0);
+    .filter((p) => p.tipo === 'despesa')
+    .reduce((acc, p) => acc + p.gastoMes, 0)
 
   /* ---------------------------------------------------------------- *
    * Plano de conta
    * ---------------------------------------------------------------- */
 
   async function criarPlano(event: React.FormEvent) {
-    event.preventDefault();
+    event.preventDefault()
 
-    setSalvandoPlano(true);
+    setSalvandoPlano(true)
     /* SUBSTITUIR POR: POST /financeiro/planos */
-    const r = await salvarPlanoContas(novoPlano);
-    setSalvandoPlano(false);
+    const r = await salvarPlanoContas(novoPlano)
+    setSalvandoPlano(false)
 
     if (!r.ok) {
-      setToast({ msg: r.error, tone: "error" });
-      return;
+      setToast({ msg: r.error, tone: 'error' })
+      return
     }
 
-    setPlanos((p) => [
-      ...p,
-      { id: r.id, nome: novoPlano.trim(), tipo: "despesa", gastoMes: 0 },
-    ]);
-    setNovoPlano("");
-    setToast({ msg: "Plano de conta criado.", tone: "success" });
+    setPlanos((p) => [...p, { id: r.id, nome: novoPlano.trim(), tipo: 'despesa', gastoMes: 0 }])
+    setNovoPlano('')
+    setToast({ msg: 'Plano de conta criado.', tone: 'success' })
   }
 
   /* ---------------------------------------------------------------- *
@@ -78,31 +75,31 @@ export default function PlanoDeContasView() {
    * ---------------------------------------------------------------- */
 
   async function confirmarExclusao() {
-    if (!excluindo) return;
+    if (!excluindo) return
 
-    setProcessando(true);
+    setProcessando(true)
     /* SUBSTITUIR POR: DELETE /financeiro/custos-fixos/:id */
-    await excluirCustoFixo(excluindo.id);
-    setProcessando(false);
+    await excluirCustoFixo(excluindo.id)
+    setProcessando(false)
 
-    setCustos((c) => c.filter((x) => x.id !== excluindo.id));
-    setExcluindo(null);
-    setToast({ msg: "Custo fixo excluido.", tone: "success" });
+    setCustos((c) => c.filter((x) => x.id !== excluindo.id))
+    setExcluindo(null)
+    setToast({ msg: 'Custo fixo excluido.', tone: 'success' })
   }
 
   async function gerarContas() {
-    setGerando(true);
+    setGerando(true)
     /* SUBSTITUIR POR: POST /financeiro/custos-fixos/gerar */
-    const r = await gerarContasDeCustosFixos(custos, "2026-08");
-    setGerando(false);
+    const r = await gerarContasDeCustosFixos(custos, '2026-08')
+    setGerando(false)
 
     setToast({
       msg:
         r.jaExistiam > 0
           ? `${r.geradas} conta(s) gerada(s). ${r.jaExistiam} ja existiam neste mes e foram puladas.`
           : `${r.geradas} conta(s) a pagar gerada(s) para agosto.`,
-      tone: "success",
-    });
+      tone: 'success',
+    })
   }
 
   return (
@@ -132,7 +129,7 @@ export default function PlanoDeContasView() {
         <Stat
           label="Custos fixos"
           value={String(custos.length)}
-          hint={formatMoney(totalCustosFixos) + " por mes"}
+          hint={formatMoney(totalCustosFixos) + ' por mes'}
         />
         <Stat label="Gasto no mes" value={formatMoney(gastoTotal)} hint="somando as despesas" />
       </div>
@@ -159,8 +156,8 @@ export default function PlanoDeContasView() {
               <li key={p.id} className={styles.plano}>
                 <span className={styles.planoNome}>
                   <strong>{p.nome}</strong>
-                  <Badge tone={p.tipo === "receita" ? "success" : "neutral"}>
-                    {p.tipo === "receita" ? "Receita" : "Despesa"}
+                  <Badge tone={p.tipo === 'receita' ? 'success' : 'neutral'}>
+                    {p.tipo === 'receita' ? 'Receita' : 'Despesa'}
                   </Badge>
                 </span>
                 <span className={styles.planoValor}>{formatMoney(p.gastoMes)}</span>
@@ -177,8 +174,8 @@ export default function PlanoDeContasView() {
               variant="secondary"
               size="sm"
               onClick={() => {
-                setEditando(null);
-                setFormAberto(true);
+                setEditando(null)
+                setFormAberto(true)
               }}
             >
               <IconPlus size={14} />
@@ -217,8 +214,8 @@ export default function PlanoDeContasView() {
                       type="button"
                       className={styles.custoBotao}
                       onClick={() => {
-                        setEditando(c);
-                        setFormAberto(true);
+                        setEditando(c)
+                        setFormAberto(true)
                       }}
                     >
                       Editar
@@ -249,20 +246,18 @@ export default function PlanoDeContasView() {
           planos={planos.map((p) => p.nome)}
           onSalvo={(salvo) => {
             setCustos((atual) =>
-              editando
-                ? atual.map((c) => (c.id === salvo.id ? salvo : c))
-                : [...atual, salvo],
-            );
-            setFormAberto(false);
-            setEditando(null);
+              editando ? atual.map((c) => (c.id === salvo.id ? salvo : c)) : [...atual, salvo],
+            )
+            setFormAberto(false)
+            setEditando(null)
             setToast({
-              msg: editando ? "Custo fixo atualizado." : "Custo fixo cadastrado.",
-              tone: "success",
-            });
+              msg: editando ? 'Custo fixo atualizado.' : 'Custo fixo cadastrado.',
+              tone: 'success',
+            })
           }}
           onCancelar={() => {
-            setFormAberto(false);
-            setEditando(null);
+            setFormAberto(false)
+            setEditando(null)
           }}
         />
       ) : null}
@@ -291,7 +286,7 @@ export default function PlanoDeContasView() {
         <Toast message={toast.msg} tone={toast.tone} onClose={() => setToast(null)} />
       ) : null}
     </>
-  );
+  )
 }
 
 /* ================================================================== *
@@ -304,29 +299,27 @@ function FormCustoFixo({
   onSalvo,
   onCancelar,
 }: {
-  custo: CustoFixo | null;
-  planos: string[];
-  onSalvo: (custo: CustoFixo) => void;
-  onCancelar: () => void;
+  custo: CustoFixo | null
+  planos: string[]
+  onSalvo: (custo: CustoFixo) => void
+  onCancelar: () => void
 }) {
-  const [nome, setNome] = useState(custo?.nome ?? "");
-  const [dia, setDia] = useState(String(custo?.diaVencimento ?? ""));
-  const [valor, setValor] = useState(
-    custo ? String(custo.valor).replace(".", ",") : "",
-  );
-  const [plano, setPlano] = useState(custo?.planoContasNome ?? "");
-  const [banco, setBanco] = useState(custo?.bancoNome ?? "");
+  const [nome, setNome] = useState(custo?.nome ?? '')
+  const [dia, setDia] = useState(String(custo?.diaVencimento ?? ''))
+  const [valor, setValor] = useState(custo ? String(custo.valor).replace('.', ',') : '')
+  const [plano, setPlano] = useState(custo?.planoContasNome ?? '')
+  const [banco, setBanco] = useState(custo?.bancoNome ?? '')
 
-  const [listaPlanos, setListaPlanos] = useState(planos);
-  const [listaBancos, setListaBancos] = useState(NOMES_BANCOS);
+  const [listaPlanos, setListaPlanos] = useState(planos)
+  const [listaBancos, setListaBancos] = useState(NOMES_BANCOS)
 
-  const [erro, setErro] = useState<string | null>(null);
-  const [salvando, setSalvando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null)
+  const [salvando, setSalvando] = useState(false)
 
   async function salvar(event: React.FormEvent) {
-    event.preventDefault();
-    setErro(null);
-    setSalvando(true);
+    event.preventDefault()
+    setErro(null)
+    setSalvando(true)
 
     /* SUBSTITUIR POR: POST/PUT /financeiro/custos-fixos */
     const r = await salvarCustoFixo({
@@ -336,12 +329,12 @@ function FormCustoFixo({
       valor: paraNumero(valor),
       planoContasNome: plano,
       bancoNome: banco,
-    });
-    setSalvando(false);
+    })
+    setSalvando(false)
 
     if (!r.ok) {
-      setErro(r.error);
-      return;
+      setErro(r.error)
+      return
     }
 
     onSalvo({
@@ -349,22 +342,29 @@ function FormCustoFixo({
       nome: nome.trim(),
       diaVencimento: Number(dia),
       valor: paraNumero(valor),
-      planoContasId: custo?.planoContasId ?? "",
+      planoContasId: custo?.planoContasId ?? '',
       planoContasNome: plano,
-      bancoId: custo?.bancoId ?? "",
+      bancoId: custo?.bancoId ?? '',
       bancoNome: banco,
-    });
+    })
   }
 
   return (
     <div className={styles.dialogRoot}>
-      <button type="button" className={styles.dialogBackdrop} onClick={onCancelar} aria-label="Fechar" />
+      <button
+        type="button"
+        className={styles.dialogBackdrop}
+        onClick={onCancelar}
+        aria-label="Fechar"
+      />
 
-      <div className={`${styles.dialogPainel} ${styles.dialogLargo}`} role="dialog" aria-modal="true">
+      <div
+        className={`${styles.dialogPainel} ${styles.dialogLargo}`}
+        role="dialog"
+        aria-modal="true"
+      >
         <header className={styles.dialogCabecalho}>
-          <h2 className={styles.dialogTitulo}>
-            {custo ? "Editar custo fixo" : "Novo custo fixo"}
-          </h2>
+          <h2 className={styles.dialogTitulo}>{custo ? 'Editar custo fixo' : 'Novo custo fixo'}</h2>
         </header>
 
         <form onSubmit={salvar} noValidate className={styles.formCampos}>
@@ -385,7 +385,7 @@ function FormCustoFixo({
               <input
                 className={styles.input}
                 value={dia}
-                onChange={(e) => setDia(e.target.value.replace(/\D/g, "").slice(0, 2))}
+                onChange={(e) => setDia(e.target.value.replace(/\D/g, '').slice(0, 2))}
                 placeholder="5"
                 inputMode="numeric"
               />
@@ -444,12 +444,12 @@ function FormCustoFixo({
                   Salvando...
                 </>
               ) : (
-                "Salvar"
+                'Salvar'
               )}
             </Button>
           </div>
         </form>
       </div>
     </div>
-  );
+  )
 }

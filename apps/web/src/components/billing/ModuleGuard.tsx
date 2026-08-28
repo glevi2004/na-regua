@@ -1,9 +1,9 @@
-"use client";
+'use client'
 
-import { usePathname } from "next/navigation";
-import type { ReactNode } from "react";
-import { isRotaBloqueada } from "@/lib/access";
-import LockedModuleOverlay from "./LockedModuleOverlay";
+import { usePathname } from 'next/navigation'
+import type { ReactNode } from 'react'
+import { isRotaBloqueada } from '@/lib/access'
+import LockedModuleOverlay from './LockedModuleOverlay'
 
 /**
  * Aplica o bloqueio por rota em um unico lugar, em vez de espalhar a
@@ -11,10 +11,10 @@ import LockedModuleOverlay from "./LockedModuleOverlay";
  * cobranca — quem decide e a regra em `lib/access.ts`.
  */
 export default function ModuleGuard({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
+  const pathname = usePathname()
 
   if (!isRotaBloqueada(pathname)) {
-    return <>{children}</>;
+    return <>{children}</>
   }
 
   return (
@@ -24,5 +24,5 @@ export default function ModuleGuard({ children }: { children: ReactNode }) {
     >
       {children}
     </LockedModuleOverlay>
-  );
+  )
 }

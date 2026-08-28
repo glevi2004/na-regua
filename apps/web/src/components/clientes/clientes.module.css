@@ -47,7 +47,9 @@
   border-radius: var(--radius-full);
   font-size: 13px;
   color: var(--app-muted);
-  transition: border-color var(--transition), color var(--transition),
+  transition:
+    border-color var(--transition),
+    color var(--transition),
     background-color var(--transition);
 }
 
@@ -73,8 +75,8 @@
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-areas:
-    "avatar principal status"
-    "avatar contato   status";
+    'avatar principal status'
+    'avatar contato   status';
   align-items: center;
   gap: 4px 13px;
   padding: 14px 12px;
@@ -169,7 +171,7 @@
 
   .item {
     grid-template-columns: auto minmax(0, 2fr) minmax(0, 1.2fr) minmax(0, 1.2fr) auto;
-    grid-template-areas: "avatar principal contato ultima status";
+    grid-template-areas: 'avatar principal contato ultima status';
   }
 
   .itemContato {

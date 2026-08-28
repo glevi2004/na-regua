@@ -19,7 +19,7 @@
 
 /* Brilho suave para o gradiente nao ficar chapado */
 .brandPanel::after {
-  content: "";
+  content: '';
   position: absolute;
   inset: -30% -20% auto -20%;
   height: 70%;

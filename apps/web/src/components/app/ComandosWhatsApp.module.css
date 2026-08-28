@@ -2,11 +2,7 @@
   padding: 22px;
   border: 1px solid var(--app-border);
   border-radius: var(--radius-lg);
-  background: linear-gradient(
-    150deg,
-    rgba(109, 51, 221, 0.16) 0%,
-    rgba(57, 200, 189, 0.08) 100%
-  );
+  background: linear-gradient(150deg, rgba(109, 51, 221, 0.16) 0%, rgba(57, 200, 189, 0.08) 100%);
 }
 
 .head {
@@ -57,7 +53,9 @@
   background: var(--app-surface);
   font-size: 13.5px;
   color: var(--app-text);
-  transition: border-color var(--transition), transform var(--transition);
+  transition:
+    border-color var(--transition),
+    transform var(--transition);
 }
 
 .chip:hover {

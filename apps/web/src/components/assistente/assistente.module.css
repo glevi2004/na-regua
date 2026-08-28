@@ -150,7 +150,9 @@
 }
 
 @keyframes pulsar {
-  0%, 60%, 100% {
+  0%,
+  60%,
+  100% {
     opacity: 0.3;
     transform: translateY(0);
   }
@@ -342,7 +344,9 @@
   font-size: 13px;
   color: var(--app-muted);
   text-align: left;
-  transition: border-color var(--transition), color var(--transition),
+  transition:
+    border-color var(--transition),
+    color var(--transition),
     transform var(--transition);
 }
 
@@ -389,7 +393,9 @@
   flex: none;
   border-radius: 50%;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .entradaBotao:hover {

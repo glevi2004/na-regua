@@ -1,0 +1,9 @@
+# Revisoes que o git blame deve ignorar: commits mecanicos que tocam muitos
+# arquivos sem mudar comportamento. Ative com:
+#
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+#
+# (o GitHub respeita este arquivo automaticamente na visao de blame)
+
+# style(repo): aplicar o Prettier do repositorio ao front-end da main
+afdc389ce49f160fbe4e748cd2910ee2b2d47886

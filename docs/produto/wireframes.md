@@ -1,6 +1,6 @@
 # ZapGestor — Wireframe 1
 
-> Fonte: [ZapGestor_Apresentacao.pdf](./ZapGestor_Apresentacao.pdf) · página 5 (módulos) e páginas 6–10 (campos e fluxos).
+> Fonte: [ZapGestor_Apresentacao.pdf](../assets/ZapGestor_Apresentacao.pdf) · página 5 (módulos) e páginas 6–10 (campos e fluxos).
 >
 > Cada tela abaixo corresponde a **um módulo** da estrutura mapeada: Empresa, Clientes/CRM, Produtos, Vendas, Contas a Pagar, Contas a Receber, Bancos, Plano de Contas, Agenda.
 
@@ -575,14 +575,14 @@ O assistente já cobre, por texto: cadastro de clientes, produtos e fornecedores
 
 ## Relação módulo × tela × origem no PDF
 
-| Módulo (pág. 5) | Tela | Detalhe no PDF |
-| --- | --- | --- |
-| Emp Empresa | 1. Empresa | pág. 6 |
-| Cli Clientes / CRM | 2. Clientes / CRM | pág. 6 |
-| Prod Produtos | 3. Produtos | pág. 7 |
-| Vnd Vendas | 4. Vendas (5 passos) | pág. 8 e 12 |
-| Pag Contas a Pagar | 5. Contas a Pagar | pág. 9 |
-| Rec Contas a Receber | 6. Contas a Receber | pág. 9 |
-| Bco Bancos | 7. Bancos | pág. 10 |
-| PdC Plano de Contas | 8. Plano de Contas | pág. 10 |
-| Agd Agenda | 9. Agenda | pág. 5 e 15 (sem campos detalhados) |
+| Módulo (pág. 5)      | Tela                 | Detalhe no PDF                      |
+| -------------------- | -------------------- | ----------------------------------- |
+| Emp Empresa          | 1. Empresa           | pág. 6                              |
+| Cli Clientes / CRM   | 2. Clientes / CRM    | pág. 6                              |
+| Prod Produtos        | 3. Produtos          | pág. 7                              |
+| Vnd Vendas           | 4. Vendas (5 passos) | pág. 8 e 12                         |
+| Pag Contas a Pagar   | 5. Contas a Pagar    | pág. 9                              |
+| Rec Contas a Receber | 6. Contas a Receber  | pág. 9                              |
+| Bco Bancos           | 7. Bancos            | pág. 10                             |
+| PdC Plano de Contas  | 8. Plano de Contas   | pág. 10                             |
+| Agd Agenda           | 9. Agenda            | pág. 5 e 15 (sem campos detalhados) |

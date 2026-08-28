@@ -1,0 +1,33 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: '09:00'
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: 'build(repo)'
+    groups:
+      # Um PR por grupo, nao um por pacote — dependabot barulhento vira ruido
+      # ignorado, e ai a atualizacao de seguranca passa despercebida.
+      dev:
+        dependency-type: development
+        update-types: [minor, patch]
+      producao:
+        dependency-type: production
+        update-types: [patch]
+    ignore:
+      # Expo e React Native so sobem junto com o SDK, nunca por dependabot
+      - dependency-name: expo
+      - dependency-name: react-native
+      - dependency-name: 'expo-*'
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: 'ci'

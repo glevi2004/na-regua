@@ -1,0 +1,88 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  TURBO_TELEMETRY_DISABLED: 1
+  DO_NOT_TRACK: 1
+
+jobs:
+  verificar:
+    name: Verificar
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      # Testes de integracao rodam contra Postgres de verdade — banco fingido
+      # nao tem transacao, RLS nem restricao de integridade, que e metade do
+      # que precisamos testar. Ver docs/engenharia/testes.md
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: naregua
+          POSTGRES_PASSWORD: naregua
+          POSTGRES_DB: naregua_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U naregua"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+      redis:
+        image: redis:7-alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 12
+
+    env:
+      DATABASE_URL: postgresql://naregua:naregua@localhost:5432/naregua_test
+      DATABASE_MIGRATION_URL: postgresql://naregua:naregua@localhost:5432/naregua_test
+      REDIS_URL: redis://localhost:6379
+      NODE_ENV: test
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # turbo --affected precisa do historico para comparar com a base
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Formatacao
+        run: pnpm format:check
+
+      - name: Fronteiras entre modulos
+        # A matriz de docs/arquitetura/principios.md, executavel.
+        # NAO desative para destravar um PR — ver code-style.md
+        run: pnpm boundaries
+
+      - name: Checagem de tipos
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Testes
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build

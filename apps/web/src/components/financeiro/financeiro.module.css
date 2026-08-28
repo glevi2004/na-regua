@@ -13,7 +13,9 @@
   border-radius: var(--radius-full);
   font-size: 13px;
   color: var(--app-muted);
-  transition: border-color var(--transition), color var(--transition),
+  transition:
+    border-color var(--transition),
+    color var(--transition),
     background-color var(--transition);
 }
 
@@ -79,9 +81,9 @@
   display: grid;
   grid-template-columns: 1fr auto;
   grid-template-areas:
-    "principal valores"
-    "vencimento situacao"
-    "acoes acoes";
+    'principal valores'
+    'vencimento situacao'
+    'acoes acoes';
   align-items: center;
   gap: 8px 14px;
   padding: 15px 0;
@@ -233,8 +235,8 @@
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-areas:
-    "dia principal valor"
-    "dia acoes acoes";
+    'dia principal valor'
+    'dia acoes acoes';
   align-items: center;
   gap: 6px 12px;
   padding: 13px 0;
@@ -295,7 +297,9 @@
   border-radius: var(--radius-full);
   font-size: 12px;
   color: var(--app-muted);
-  transition: border-color var(--transition), color var(--transition);
+  transition:
+    border-color var(--transition),
+    color var(--transition);
 }
 
 .custoBotao:hover {
@@ -372,7 +376,9 @@
   flex: none;
   border-radius: 50%;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .dialogFechar:hover:not(:disabled) {
@@ -443,7 +449,9 @@
   border-radius: var(--radius-full);
   font-size: 13.5px;
   color: var(--app-muted);
-  transition: background-color var(--transition), color var(--transition);
+  transition:
+    background-color var(--transition),
+    color var(--transition);
 }
 
 .baixaModoAtivo {
@@ -586,7 +594,7 @@
 @media (min-width: 900px) {
   .titulo {
     grid-template-columns: minmax(0, 2.2fr) minmax(0, 1fr) auto minmax(0, 1fr) auto;
-    grid-template-areas: "principal vencimento situacao valores acoes";
+    grid-template-areas: 'principal vencimento situacao valores acoes';
   }
 
   .tituloAcoes {
