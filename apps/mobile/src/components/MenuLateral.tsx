@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
-import { usePathname, useRouter } from "expo-router";
-import type { DrawerContentComponentProps } from "expo-router/drawer";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { encerrarSessao } from "@/lib/session";
-import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
+import { useState } from 'react'
+import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { usePathname, useRouter } from 'expo-router'
+import type { DrawerContentComponentProps } from 'expo-router/drawer'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { encerrarSessao } from '@/lib/session'
+import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
-type Item = { rota: string; rotulo: string };
-type Grupo = { grupo: string; itens: Item[] };
+type Item = { rota: string; rotulo: string }
+type Grupo = { grupo: string; itens: Item[] }
 
 /**
  * Modulos do app, agrupados como na sidebar do web.
@@ -18,87 +18,90 @@ type Grupo = { grupo: string; itens: Item[] };
  */
 const GRUPOS: Grupo[] = [
   {
-    grupo: "Operacao",
+    grupo: 'Operacao',
     itens: [
-      { rota: "/inicio", rotulo: "Tela principal" },
-      { rota: "/pdv", rotulo: "Nova venda" },
-      { rota: "/vendas", rotulo: "Vendas" },
-      { rota: "/agenda", rotulo: "Agenda" },
+      { rota: '/inicio', rotulo: 'Tela principal' },
+      { rota: '/pdv', rotulo: 'Nova venda' },
+      { rota: '/vendas', rotulo: 'Vendas' },
+      { rota: '/agenda', rotulo: 'Agenda' },
     ],
   },
   {
-    grupo: "Cadastros",
+    grupo: 'Cadastros',
     itens: [
-      { rota: "/clientes", rotulo: "Clientes" },
-      { rota: "/catalogo", rotulo: "Produtos" },
-      { rota: "/empresa", rotulo: "Empresa" },
+      { rota: '/clientes', rotulo: 'Clientes' },
+      { rota: '/catalogo', rotulo: 'Produtos' },
+      { rota: '/empresa', rotulo: 'Empresa' },
     ],
   },
   {
-    grupo: "Financeiro",
+    grupo: 'Financeiro',
     itens: [
-      { rota: "/contas-a-pagar", rotulo: "Contas a pagar" },
-      { rota: "/contas-a-receber", rotulo: "Contas a receber" },
-      { rota: "/plano-de-contas", rotulo: "Plano de contas" },
+      { rota: '/contas-a-pagar', rotulo: 'Contas a pagar' },
+      { rota: '/contas-a-receber', rotulo: 'Contas a receber' },
+      { rota: '/plano-de-contas', rotulo: 'Plano de contas' },
     ],
   },
   {
-    grupo: "Mais",
+    grupo: 'Mais',
     itens: [
-      { rota: "/crm", rotulo: "CRM" },
-      { rota: "/assistente", rotulo: "Assistente" },
-      { rota: "/assinatura", rotulo: "Assinatura" },
-      { rota: "/suporte", rotulo: "Suporte" },
+      { rota: '/crm', rotulo: 'CRM' },
+      { rota: '/assistente', rotulo: 'Assistente' },
+      { rota: '/assinatura', rotulo: 'Assinatura' },
+      { rota: '/suporte', rotulo: 'Suporte' },
     ],
   },
-];
+]
 
 export default function MenuLateral(props: DrawerContentComponentProps) {
-  const router = useRouter();
-  const caminho = usePathname();
-  const insets = useSafeAreaInsets();
+  const router = useRouter()
+  const caminho = usePathname()
+  const insets = useSafeAreaInsets()
 
   /* Abre ja no grupo onde a pessoa esta, para ela se localizar. */
   const [abertos, setAbertos] = useState<Set<string>>(() => {
-    const atual = GRUPOS.find((g) =>
-      g.itens.some((i) => caminho.endsWith(i.rota)),
-    );
-    return new Set([atual?.grupo ?? "Operacao"]);
-  });
+    const atual = GRUPOS.find((g) => g.itens.some((i) => caminho.endsWith(i.rota)))
+    return new Set([atual?.grupo ?? 'Operacao'])
+  })
 
   function alternarGrupo(grupo: string) {
     setAbertos((atual) => {
-      const novo = new Set(atual);
+      const novo = new Set(atual)
       if (novo.has(grupo)) {
-        novo.delete(grupo);
+        novo.delete(grupo)
       } else {
-        novo.add(grupo);
+        novo.add(grupo)
       }
-      return novo;
-    });
+      return novo
+    })
   }
 
   function navegar(rota: string) {
-    props.navigation.closeDrawer();
-    router.push(rota as never);
+    props.navigation.closeDrawer()
+    router.push(rota as never)
   }
 
   async function sair() {
-    await encerrarSessao();
-    props.navigation.closeDrawer();
-    router.replace("/login");
+    await encerrarSessao()
+    props.navigation.closeDrawer()
+    router.replace('/login')
   }
 
   return (
     <View style={[estilos.menu, { paddingTop: insets.top + espaco.lg }]}>
       <View style={estilos.marca}>
-        <View style={estilos.marcaSimbolo} />
+        <Image
+          source={require('../../assets/buddy-azul.png')}
+          style={estilos.marcaSimbolo}
+          resizeMode="cover"
+          accessibilityIgnoresInvertColors
+        />
         <Text style={estilos.marcaNome}>Ei Buddy</Text>
       </View>
 
       <ScrollView contentContainerStyle={estilos.lista}>
         {GRUPOS.map((g) => {
-          const aberto = abertos.has(g.grupo);
+          const aberto = abertos.has(g.grupo)
 
           return (
             <View key={g.grupo} style={estilos.grupo}>
@@ -114,7 +117,7 @@ export default function MenuLateral(props: DrawerContentComponentProps) {
 
               {aberto
                 ? g.itens.map((i) => {
-                    const ativo = caminho.endsWith(i.rota);
+                    const ativo = caminho.endsWith(i.rota)
                     return (
                       <Pressable
                         key={i.rota}
@@ -123,17 +126,15 @@ export default function MenuLateral(props: DrawerContentComponentProps) {
                         accessibilityRole="button"
                         accessibilityState={{ selected: ativo }}
                       >
-                        <Text
-                          style={[estilos.itemTexto, ativo && estilos.itemTextoAtivo]}
-                        >
+                        <Text style={[estilos.itemTexto, ativo && estilos.itemTextoAtivo]}>
                           {i.rotulo}
                         </Text>
                       </Pressable>
-                    );
+                    )
                   })
                 : null}
             </View>
-          );
+          )
         })}
       </ScrollView>
 
@@ -145,33 +146,36 @@ export default function MenuLateral(props: DrawerContentComponentProps) {
         <Text style={estilos.sairTexto}>Sair</Text>
       </Pressable>
     </View>
-  );
+  )
 }
 
 const estilos = StyleSheet.create({
-  menu: { flex: 1, backgroundColor: "#0b1029" },
+  menu: { flex: 1, backgroundColor: '#0b1029' },
 
   marca: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: espaco.md,
     paddingHorizontal: espaco.lg,
     paddingBottom: espaco.lg,
   },
   marcaSimbolo: {
-    width: 26,
-    height: 26,
-    borderRadius: 9,
+    /* 34 e nao 26: o Buddy e figura de corpo inteiro e nao sobrevive menor. */
+    width: 34,
+    height: 34,
+    borderRadius: 10,
+    /* Cor de espera enquanto a imagem carrega. */
     backgroundColor: cores.acento,
+    overflow: 'hidden',
   },
   marcaNome: { fontSize: fonte.medio, fontWeight: peso.pesado, color: cores.texto },
 
   lista: { paddingHorizontal: espaco.md, gap: espaco.sm, paddingBottom: espaco.lg },
   grupo: { gap: 2 },
   grupoCabecalho: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: espaco.md,
     paddingVertical: espaco.md,
   },
@@ -179,18 +183,18 @@ const estilos = StyleSheet.create({
     fontSize: fonte.micro,
     fontWeight: peso.forte,
     color: cores.textoFraco,
-    textTransform: "uppercase",
+    textTransform: 'uppercase',
     letterSpacing: 1,
   },
   seta: { fontSize: 16, color: cores.textoFraco },
-  setaAberta: { transform: [{ rotate: "180deg" }], color: cores.acento },
+  setaAberta: { transform: [{ rotate: '180deg' }], color: cores.acento },
 
   item: {
     paddingHorizontal: espaco.md,
     paddingVertical: espaco.md,
     borderRadius: raio.sm,
     minHeight: 44,
-    justifyContent: "center",
+    justifyContent: 'center',
   },
   itemAtivo: { backgroundColor: cores.sucessoFundo },
   itemTexto: { fontSize: fonte.pequeno, color: cores.textoFraco },
@@ -199,10 +203,10 @@ const estilos = StyleSheet.create({
   sair: {
     marginHorizontal: espaco.lg,
     paddingVertical: espaco.md,
-    alignItems: "center",
+    alignItems: 'center',
     borderWidth: 1,
     borderColor: cores.borda,
     borderRadius: raio.pill,
   },
   sairTexto: { fontSize: fonte.pequeno, fontWeight: peso.forte, color: cores.textoFraco },
-});
+})
