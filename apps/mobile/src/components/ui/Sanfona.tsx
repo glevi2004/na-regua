@@ -1,23 +1,16 @@
-import { useState, type ReactNode } from "react";
-import {
-  LayoutAnimation,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  UIManager,
-  View,
-} from "react-native";
-import { cores, espaco, fonte, peso, raio } from "@/theme/tokens";
+import { useState, type ReactNode } from 'react'
+import { Pressable, StyleSheet, Text, View } from 'react-native'
+import Animated, {
+  FadeIn,
+  FadeOut,
+  LinearTransition,
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated'
+import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
-/* LayoutAnimation precisa ser ligada explicitamente no Android antigo.
-   Sem isto a sanfona abre sem transicao naquele sistema. */
-if (
-  Platform.OS === "android" &&
-  UIManager.setLayoutAnimationEnabledExperimental
-) {
-  UIManager.setLayoutAnimationEnabledExperimental(true);
-}
+/** Duracao das transicoes, em ms. Curta: a sanfona e tocada o tempo todo. */
+const DURACAO = 180
 
 /**
  * Secao retratil.
@@ -28,6 +21,12 @@ if (
  *
  * O resumo no cabecalho (`resumo`) existe para nao ser preciso abrir a
  * secao so para saber se ha algo relevante dentro dela.
+ *
+ * A animacao usa Reanimated, nao `LayoutAnimation`: esta ultima e no-op na
+ * New Architecture, que o RN 0.86 liga por padrao. O Reanimated ainda roda
+ * a transicao na thread de UI, entao a sanfona continua fluida enquanto a
+ * thread de JS esta ocupada — que e o caso no balcao, com o carrinho sendo
+ * recalculado a cada bipe.
  */
 export default function Sanfona({
   titulo,
@@ -36,30 +35,27 @@ export default function Sanfona({
   inicialAberta = false,
   children,
 }: {
-  titulo: string;
+  titulo: string
   /** Numero ou valor mostrado fechado — evita abrir so para conferir. */
-  resumo?: string;
-  etiqueta?: ReactNode;
-  inicialAberta?: boolean;
-  children: ReactNode;
+  resumo?: string
+  etiqueta?: ReactNode
+  inicialAberta?: boolean
+  children: ReactNode
 }) {
-  const [aberta, setAberta] = useState(inicialAberta);
+  const [aberta, setAberta] = useState(inicialAberta)
 
-  function alternar() {
-    LayoutAnimation.configureNext(
-      LayoutAnimation.create(
-        180,
-        LayoutAnimation.Types.easeInEaseOut,
-        LayoutAnimation.Properties.opacity,
-      ),
-    );
-    setAberta((v) => !v);
-  }
+  /* A rotacao acompanha o estado em vez de trocar de estilo de uma vez. */
+  const estiloSeta = useAnimatedStyle(() => ({
+    transform: [{ rotate: withTiming(aberta ? '180deg' : '0deg', { duration: DURACAO }) }],
+  }))
 
   return (
-    <View style={estilos.bloco}>
+    /* `layout` anima a mudanca de altura do bloco quando o conteudo entra
+       ou sai — e, como toda sanfona tem esta prop, as vizinhas deslizam
+       junto em vez de saltarem para a nova posicao. */
+    <Animated.View style={estilos.bloco} layout={LinearTransition.duration(DURACAO)}>
       <Pressable
-        onPress={alternar}
+        onPress={() => setAberta((v) => !v)}
         style={estilos.cabecalho}
         accessibilityRole="button"
         accessibilityState={{ expanded: aberta }}
@@ -67,20 +63,28 @@ export default function Sanfona({
       >
         <View style={estilos.cabecalhoTexto}>
           <Text style={estilos.titulo}>{titulo}</Text>
-          {resumo && !aberta ? (
-            <Text style={estilos.resumo}>{resumo}</Text>
-          ) : null}
+          {resumo && !aberta ? <Text style={estilos.resumo}>{resumo}</Text> : null}
         </View>
 
         {etiqueta}
 
         {/* Seta em texto: sem dependencia de icone, e a rotacao e clara. */}
-        <Text style={[estilos.seta, aberta && estilos.setaAberta]}>⌄</Text>
+        <Animated.Text style={[estilos.seta, aberta && estilos.setaAberta, estiloSeta]}>
+          ⌄
+        </Animated.Text>
       </Pressable>
 
-      {aberta ? <View style={estilos.conteudo}>{children}</View> : null}
-    </View>
-  );
+      {aberta ? (
+        <Animated.View
+          style={estilos.conteudo}
+          entering={FadeIn.duration(DURACAO)}
+          exiting={FadeOut.duration(DURACAO / 2)}
+        >
+          {children}
+        </Animated.View>
+      ) : null}
+    </Animated.View>
+  )
 }
 
 const estilos = StyleSheet.create({
@@ -89,11 +93,12 @@ const estilos = StyleSheet.create({
     borderColor: cores.borda,
     borderRadius: raio.md,
     backgroundColor: cores.superficie,
-    overflow: "hidden",
+    /* Segura o conteudo dentro do bloco enquanto a altura anima. */
+    overflow: 'hidden',
   },
   cabecalho: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: espaco.md,
     padding: espaco.lg,
     /* Alvo de toque confortavel — a sanfona e tocada o tempo todo. */
@@ -102,16 +107,13 @@ const estilos = StyleSheet.create({
   cabecalhoTexto: { flex: 1, gap: 2 },
   titulo: { fontSize: fonte.corpo, fontWeight: peso.forte, color: cores.texto },
   resumo: { fontSize: fonte.micro, color: cores.textoFraco },
-  seta: {
-    fontSize: 18,
-    color: cores.textoFraco,
-    /* Fechada aponta para baixo; aberta gira para cima. */
-    transform: [{ rotate: "0deg" }],
-  },
-  setaAberta: { transform: [{ rotate: "180deg" }], color: cores.acento },
+  seta: { fontSize: 18, color: cores.textoFraco },
+  /* So a cor: a rotacao vem do estilo animado, e dois `transform` na mesma
+     pilha de estilos brigariam entre si. */
+  setaAberta: { color: cores.acento },
   conteudo: {
     padding: espaco.lg,
     paddingTop: 0,
     gap: espaco.md,
   },
-});
+})
