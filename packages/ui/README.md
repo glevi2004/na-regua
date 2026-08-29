@@ -2,8 +2,8 @@
 
 Tokens de design e componentes compartilhados entre web e mobile.
 
-**Estado:** 🔴 não implementado · 🚧 paleta bloqueada por
-[DEC-001](../../docs/decisoes/README.md#dec-001) / [QST-011](../../docs/decisoes/README.md#qst-011) · `NR-011`
+**Estado:** 🟢 tokens implementados · componentes ainda não · paleta provisória
+enquanto [DEC-001](../../docs/decisoes/README.md#dec-001) / [QST-011](../../docs/decisoes/README.md#qst-011) não fecham · `NR-011`
 
 ## Responsabilidade
 
@@ -30,9 +30,9 @@ paleta ProComércio (`#1E2A78` `#39C8BD` `#6D33DD`), as fontes (BC Alphapipe,
 BD Colonius) e **cinco paletas de marcas derivadas**. Ainda não se sabe se este
 produto é uma dessas marcas derivadas e, se for, qual — [QST-011](../../docs/decisoes/README.md#qst-011).
 
-**Mitigação:** comece com paleta provisória e troque os tokens quando a marca
-fechar. Tokens existem exatamente para que essa troca seja um arquivo, não uma
-refatoração. Não bloqueie a trilha 3 por causa disso.
+**Mitigação aplicada:** a paleta provisória é a do ProComércio e vive em
+[`src/tokens/color.ts`](src/tokens/color.ts). Quando a marca fechar, troca-se
+esse arquivo — os dois clientes acompanham sem refatoração.
 
 ## Restrições que vêm dos requisitos
 
@@ -52,6 +52,30 @@ cliente esperando**. Botão no topo da tela é botão que ela não alcança.
 Tokens são compartilhados; componentes primitivos são por plataforma
 (React DOM × React Native). Não force um sistema de componentes único entre os
 dois — o custo dessa abstração costuma superar o ganho.
+
+Os valores são números crus, sem unidade: o React Native só aceita número, e o
+web acrescenta `px` ao montar as variáveis CSS.
+
+**Como cada cliente consome:**
+
+| Cliente  | Caminho                                                                                  |
+| -------- | ---------------------------------------------------------------------------------------- |
+| `mobile` | [`src/theme/tokens.ts`](../../apps/mobile/src/theme/tokens.ts) — adaptador fino          |
+| `web`    | [`globals.css`](../../apps/web/src/app/globals.css) — variáveis CSS, guardadas por teste |
+
+O web precisa das cores como variável CSS e o React Native não lê CSS, então o
+valor aparece nos dois lugares. Em vez de gerar o CSS em tempo de build,
+[`globals.test.ts`](../../apps/web/src/app/globals.test.ts) compara os dois: trocar
+uma cor de um lado só reprova na CI.
+
+## Contraste é verificado, não prometido
+
+A RNF-055 exige 4.5:1. [`contrast.ts`](src/contrast.ts) implementa a razão da
+WCAG 2.1 e [`color.test.ts`](src/tokens/color.test.ts) roda cada par que aparece
+de verdade nas telas — nos dois temas.
+
+Foi assim que se descobriu que o `--text-muted` antigo (`#767c9b`) reprovava:
+4.10:1 sobre branco e 3.85:1 sobre `--bg-muted`. Está `#6a708c`.
 
 ## Variáveis de ambiente
 

@@ -1,8 +1,23 @@
 /**
- * Tokens de design e componentes compartilhados entre web e mobile.
+ * Tokens de design compartilhados entre web e mobile.
  *
- * A paleta depende de DEC-001 / QST-011 — o material de rebranding ProComercio
- * traz a paleta principal e cinco paletas de marcas derivadas, e ainda nao se
- * sabe qual delas e a deste produto.
+ * Tokens sao compartilhados; componentes primitivos nao. React DOM e React
+ * Native divergem o bastante para que um sistema de componentes unico custe
+ * mais do que rende — ver o README deste pacote.
  */
-export const PLACEHOLDER = 'ui' as const
+export {
+  brand,
+  color,
+  dark,
+  fontFamily,
+  fontSize,
+  fontWeight,
+  layout,
+  light,
+  lineHeight,
+  radius,
+  shadow,
+  spacing,
+} from './tokens/index.js'
+
+export { AA_LARGE_TEXT, AA_NORMAL_TEXT, contrastRatio, meetsAA } from './contrast.js'
