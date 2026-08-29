@@ -1,11 +1,15 @@
 /**
  * Schemas Zod — o contrato unico do sistema.
  *
- * Cada schema serve a TRES consumidores: validacao do corpo HTTP em apps/api,
- * tipos TypeScript em todo o monorepo, e definicao das tools do agente em
- * packages/agent. E isso que garante que app e WhatsApp aceitem exatamente os
- * mesmos campos. Ver docs/arquitetura/principios.md#4-contracts-e-o-contrato-unico
+ * Cada schema serve tres consumidores: valida o corpo HTTP na `api`, e o tipo
+ * TypeScript em todo o monorepo, e vira definicao de tool no `agent`. E o que
+ * torna estrutural a promessa de que app e WhatsApp fazem a mesma coisa.
  *
- * Ainda nao implementado. Ver NR-005 no docs/processo/task-ledger.md
+ * Valida forma, nunca regra: "o CPF tem 11 digitos" e aqui; "este cliente pode
+ * comprar fiado" e `core`.
  */
-export const PLACEHOLDER = 'contracts' as const
+export * from './common/index.js'
+export * from './company/company.js'
+export * from './customer/customer.js'
+export * from './product/product.js'
+export * from './sale/sale.js'
