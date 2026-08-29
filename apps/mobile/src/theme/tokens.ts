@@ -1,74 +1,68 @@
 /**
- * Tokens de design do Ei Buddy para React Native.
+ * Adaptador dos tokens compartilhados para o vocabulario deste app.
  *
- * Os mesmos valores do web (apps/web/src/app/globals.css), mas como
- * objeto TS: React Native nao tem CSS custom properties, entao o que la
- * e `var(--app-accent)` aqui e `cores.acento`.
+ * A fonte de verdade e `@na-regua/ui` (NR-011). Este arquivo existe por dois
+ * motivos:
  *
- * Manter os dois em sincronia e manual por enquanto. Quando existir o
- * pacote `packages/ui`, estes valores passam a morar la e os dois
- * clientes importam da mesma fonte.
+ * 1. O app usa o tema escuro em todas as telas, entao `cores` achata
+ *    `dark` + `brand` num objeto so — em vez de espalhar `dark.feedback.danger`
+ *    por 25 arquivos.
+ * 2. Os nomes em portugues sao ponte, nao escolha. O code-style do repo pede
+ *    identificador em ingles; renomear as 667 ocorrencias vira um diff mecanico
+ *    que enterraria a revisao deste PR. Fica como tarefa propria.
+ *
+ * Cor nova entra em `packages/ui`, nunca aqui.
  */
+import { brand, dark, fontSize, fontWeight, radius, spacing } from '@na-regua/ui'
 
 export const cores = {
   /* --- Marca --- */
-  primaria: '#1e2a78',
-  primariaEscura: '#16205c',
-  acento: '#39c8bd',
-  acentoEscuro: '#24a79d',
-  destaque: '#6d33dd',
+  primaria: brand.primary,
+  primariaEscura: brand.primaryDark,
+  acento: brand.accent,
+  acentoEscuro: brand.accentDark,
+  destaque: brand.highlight,
 
-  /* --- Superficies (tema escuro, igual ao painel web) --- */
-  fundo: '#0e1330',
-  superficie: '#161c42',
-  superficieAlta: '#1d2452',
-  borda: '#2a3268',
-  campo: 'rgba(255,255,255,0.04)',
+  /* --- Superficies --- */
+  fundo: dark.bg,
+  superficie: dark.surface,
+  superficieAlta: dark.surfaceRaised,
+  borda: dark.border,
+  campo: dark.field,
 
   /* --- Texto --- */
-  texto: '#eef0fb',
-  textoFraco: '#9aa2ce',
-  textoSobreAcento: '#06312e',
+  texto: dark.text,
+  textoFraco: dark.textMuted,
+  textoSobreAcento: dark.textOnAccent,
 
-  /* --- Estados. Ambar para atencao e vermelho para erro, os mesmos
-     significados do web — nunca o roxo da marca. --- */
-  atencao: '#fdb022',
-  atencaoFundo: 'rgba(253,176,34,0.16)',
-  erro: '#ff9c9c',
-  erroFundo: 'rgba(255,118,118,0.16)',
-  sucesso: '#39c8bd',
-  sucessoFundo: 'rgba(57,200,189,0.14)',
+  /* --- Estados --- */
+  atencao: dark.feedback.warning,
+  atencaoFundo: dark.feedback.warningBg,
+  erro: dark.feedback.danger,
+  erroFundo: dark.feedback.dangerBg,
+  sucesso: dark.feedback.success,
+  sucessoFundo: dark.feedback.successBg,
 } as const
 
-export const espaco = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 24,
-  xxl: 32,
-} as const
+export const espaco = spacing
 
 export const raio = {
-  sm: 8,
-  md: 14,
-  lg: 22,
-  pill: 999,
+  ...radius,
+  pill: radius.pill,
 } as const
 
 export const fonte = {
-  /* Tamanhos pensados para uso em pe, no balcao — nada abaixo de 12. */
-  micro: 12,
-  pequeno: 13,
-  corpo: 15,
-  medio: 17,
-  titulo: 21,
-  display: 28,
+  micro: fontSize.micro,
+  pequeno: fontSize.small,
+  corpo: fontSize.body,
+  medio: fontSize.medium,
+  titulo: fontSize.title,
+  display: fontSize.display,
 } as const
 
 export const peso = {
-  normal: '400',
-  medio: '500',
-  forte: '600',
-  pesado: '700',
+  normal: fontWeight.regular,
+  medio: fontWeight.medium,
+  forte: fontWeight.semibold,
+  pesado: fontWeight.bold,
 } as const

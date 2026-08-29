@@ -51,7 +51,10 @@
   /* Texto */
   --text: #131734;
   --text-secondary: #4b5171;
-  --text-muted: #767c9b;
+  /* Escurecido de #767c9b, que dava 4.10:1 sobre branco e 3.85:1 sobre
+     --bg-muted — abaixo do piso de 4.5:1 da RNF-055. Guardado por teste em
+     packages/ui. */
+  --text-muted: #6a708c;
   --text-on-brand: #ffffff;
 
   /* Superficies escuras (painel) */
