@@ -17,6 +17,7 @@
     "@na-regua/contracts": "workspace:*",
     "@na-regua/core": "workspace:*",
     "@na-regua/db": "workspace:*",
+    "@na-regua/env": "workspace:*",
     "@na-regua/money": "workspace:*",
     "fastify": "^5.2.0",
     "ioredis": "^5.4.2"

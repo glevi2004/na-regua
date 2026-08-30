@@ -14,6 +14,7 @@
 # Trilha 2 — Plataforma & Integracoes
 /apps/api/              @TRILHA-2
 /apps/worker/           @TRILHA-2
+/packages/env/          @TRILHA-2
 /packages/agent/        @TRILHA-2
 /packages/fiscal/       @TRILHA-2
 /packages/whatsapp/     @TRILHA-2

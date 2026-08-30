@@ -17,6 +17,7 @@
     "@na-regua/contracts": "workspace:*",
     "@na-regua/core": "workspace:*",
     "@na-regua/db": "workspace:*",
+    "@na-regua/env": "workspace:*",
     "@na-regua/money": "workspace:*",
     "bullmq": "^5.34.6",
     "ioredis": "^5.4.2"

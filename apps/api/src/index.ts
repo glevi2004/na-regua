@@ -1,11 +1,9 @@
 import Fastify from 'fastify'
-import { checkDatabase, checkRedis, shutdown } from './composition.js'
-
-const PORT = Number(process.env.API_PORT ?? 3333)
+import { checkDatabase, checkRedis, env, shutdown } from './composition.js'
 
 // RNF-058: log estruturado (JSON). requestId/companyId/userId entram com NR-030.
 const app = Fastify({
-  logger: { level: process.env.LOG_LEVEL ?? 'info' },
+  logger: { level: env.LOG_LEVEL },
 })
 
 /**
@@ -29,8 +27,8 @@ app.get('/health/live', async () => ({ status: 'ok' }))
 
 async function main(): Promise<void> {
   try {
-    await app.listen({ port: PORT, host: '0.0.0.0' })
-    app.log.info(`api ouvindo em http://localhost:${PORT} — saude em /health`)
+    await app.listen({ port: env.API_PORT, host: '0.0.0.0' })
+    app.log.info(`api ouvindo em http://localhost:${env.API_PORT} — saude em /health`)
   } catch (error) {
     app.log.error(error)
     process.exit(1)
