@@ -9,7 +9,15 @@
  * fronteiras na CI barra o PR — e com razao.
  */
 import { checkConnection, closeConnection, type DatabaseHealth } from '@na-regua/db'
+import { loadApiEnv } from '@na-regua/env'
 import { Redis } from 'ioredis'
+
+/**
+ * Validado aqui, na raiz de composicao, antes de qualquer I/O — NR-006. Se
+ * faltar variavel obrigatoria o processo lanca e nao sobe; ver
+ * packages/env/README.md.
+ */
+export const env = loadApiEnv()
 
 export type RedisHealth = {
   ok: boolean
@@ -19,7 +27,7 @@ export type RedisHealth = {
 
 let redis: Redis | undefined
 
-export function getRedis(url = process.env.REDIS_URL ?? 'redis://localhost:6379'): Redis {
+export function getRedis(url = env.REDIS_URL): Redis {
   redis ??= new Redis(url, {
     maxRetriesPerRequest: 1,
     lazyConnect: true,
@@ -45,7 +53,7 @@ export async function checkRedis(): Promise<RedisHealth> {
 }
 
 export async function checkDatabase(): Promise<DatabaseHealth> {
-  return checkConnection()
+  return checkConnection(env.DATABASE_URL)
 }
 
 export async function shutdown(): Promise<void> {

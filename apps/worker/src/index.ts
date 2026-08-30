@@ -1,9 +1,15 @@
+import { loadWorkerEnv } from '@na-regua/env'
 import { Queue, Worker } from 'bullmq'
 import { Redis } from 'ioredis'
 import { DEFAULT_JOB_OPTIONS, QUEUES, type QueueName } from './queues.js'
 
-const REDIS_URL = process.env.REDIS_URL ?? 'redis://localhost:6379'
-const connection = new Redis(REDIS_URL, { maxRetriesPerRequest: null })
+/**
+ * Validado no topo do processo, antes de qualquer conexao — NR-006. Antes
+ * disso, REDIS_URL ausente caia de volta para 'redis://localhost:6379' sem
+ * avisar: inofensivo em dev, perigoso se a mesma falta acontecer fora dele.
+ */
+const env = loadWorkerEnv()
+const connection = new Redis(env.REDIS_URL, { maxRetriesPerRequest: null })
 
 const log = (msg: string, extra: Record<string, unknown> = {}): void => {
   // RNF-058: log estruturado desde o inicio.
@@ -30,7 +36,7 @@ for (const name of Object.values(QUEUES)) {
   )
 }
 
-connection.on('ready', () => log('conectado ao Redis', { url: REDIS_URL }))
+connection.on('ready', () => log('conectado ao Redis', { url: env.REDIS_URL }))
 connection.on('error', (error: Error) =>
   console.error(JSON.stringify({ level: 'error', service: 'worker', msg: error.message })),
 )
