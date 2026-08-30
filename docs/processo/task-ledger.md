@@ -143,6 +143,7 @@ Objetivo: operar o ERP por mensagem e cobrar a mensalidade.
 | NR-049 | E2E do caminho crítico (3 fluxos)                    |   🟠   | `repo`   |   3 | —    |
 | NR-016 | `CHANGELOG` gerado dos commits + processo de release |   🟠   | `repo`   |   1 | —    |
 | NR-078 | `mobile`: agenda                                     |   🟢   | `mobile` |   2 | —    |
+| NR-079 | `web`: conteúdo real da landing                      |   🟢   | `web`    |   1 | —    |
 
 ---
 

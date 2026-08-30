@@ -14,7 +14,7 @@ export default function Pricing() {
           </h2>
           <p className="sectionLead">
             Sem escalonamento por funcionalidade e sem cobranca por usuario. Voce paga por empresa e
-            usa o sistema inteiro.
+            usa o sistema inteiro, do balcao ao assistente.
           </p>
         </header>
 
@@ -28,8 +28,14 @@ export default function Pricing() {
               <span className={styles.period}>{plan.period}</span>
             </p>
 
-            <Link href="/criar-conta" className={`btn btnPrimary ${styles.cta}`}>
-              Comecar teste gratuito
+            {/*
+              O plano vai na query para o cadastro saber de onde a pessoa veio.
+              Hoje ha um plano so, entao o valor e fixo — mas o parametro ja
+              existe para quando houver mais de um.
+              TODO: ler `plano` no formulario de criar conta (NR-075).
+            */}
+            <Link href="/criar-conta?plano=unico" className={`btn btnPrimary ${styles.cta}`}>
+              Comecar agora
               <IconArrowRight size={18} />
             </Link>
 

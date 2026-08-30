@@ -24,8 +24,8 @@ export default function CtaBuddy() {
             </h2>
 
             <p className={styles.lead}>
-              Crie sua conta em dois minutos e use todos os modulos por 14 dias. Sem instalacao, sem
-              cartao de credito e sem contrato de fidelidade.
+              Crie sua conta em dois minutos e use todos os modulos desde o primeiro dia. Sem
+              instalacao, sem contrato de fidelidade e sem cobranca por usuario.
             </p>
 
             <div className={styles.ctas}>
