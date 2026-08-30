@@ -2,8 +2,8 @@
 
 Fastify — REST, webhooks e runtime do agente.
 
-**Estado:** 🟡 sobe com `/health` real; sem rotas de negócio · `NR-009`, `NR-014`,
-`NR-026`, `NR-027`, `NR-030`
+**Estado:** 🟡 base pronta (contexto, erro padronizado, validação); sem rotas de
+negócio · `NR-014`, `NR-026`, `NR-027`, `NR-030`
 
 ## Responsabilidade
 
@@ -71,6 +71,47 @@ curl -s localhost:3333/health | jq
 | `/health/live` | só o processo; não toca em dependência externa                   |
 
 `/health` responder 200 sempre não serve para nada.
+
+## Formato de erro
+
+Um envelope só, para todo erro — cliente que trata um trata todos:
+
+```json
+{
+  "error": {
+    "code": "VALIDATION_FAILED",
+    "message": "Confira os campos indicados e tente de novo.",
+    "fields": [{ "path": "items.0.quantity", "message": "Quantidade minima e 1." }]
+  },
+  "requestId": "req-42"
+}
+```
+
+| `code`              | Status | Quando                                                      |
+| ------------------- | -----: | ----------------------------------------------------------- |
+| `VALIDATION_FAILED` |    400 | entrada não passou no schema de `contracts`                 |
+| `UNAUTHORIZED`      |    401 | sem credencial ou credencial inválida                       |
+| `FORBIDDEN`         |    403 | papel não permite — **nunca** para recurso de outra empresa |
+| `NOT_FOUND`         |    404 | não existe, ou é de outra empresa                           |
+| `CONFLICT`          |    409 | conflita com o estado atual                                 |
+| `RATE_LIMITED`      |    429 | limite estourado                                            |
+| `INTERNAL`          |    500 | inesperado — mensagem genérica                              |
+
+`fields` só vem preenchido em `VALIDATION_FAILED`; nos demais é `[]`.
+
+**Erro inesperado nunca vaza detalhe.** O 500 responde texto genérico e o erro
+real vai para o log. `requestId` correlaciona os dois — é o que o suporte pede
+em vez de "deu erro".
+
+## Contexto de execução
+
+`buildExecutionContext` monta `(empresa, usuário, papel, canal, requestId,
+idempotencyKey, now)` a partir do principal autenticado. É função pura, então
+testa sem servidor.
+
+**`companyId` vem do principal, nunca do corpo** — [princípio 8](../../docs/arquitetura/principios.md).
+Quem resolve o principal é a autenticação (`NR-014`, depende de DEC-008); até
+lá `requireContext` responde 401, que é melhor que inventar um contexto.
 
 ## Webhooks
 
