@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import Link from 'next/link'
-import { useEffect, useState } from 'react'
+import { type MouseEvent, useEffect, useState } from 'react'
 import { BRAND, nav } from '@/content/site'
 import { IconClose, IconMenu } from './Icons'
 import styles from './Header.module.css'
@@ -26,10 +26,36 @@ export default function Header() {
     }
   }, [open])
 
+  /**
+   * Volta ao topo pela marca.
+   *
+   * Era `href="#top"`, e depender da ancora trazia dois problemas juntos: a
+   * rolagem suave anima por uma pagina longa enquanto imagens abaixo da dobra
+   * ainda carregam e mudam a altura do documento, e o `#top` fica na URL, de
+   * modo que o refresh seguinte volta a saltar. Rolar explicitamente e limpar
+   * o hash remove as duas fontes de imprevisibilidade.
+   *
+   * O `href` continua ali para quem abre em outra aba ou navega sem JS.
+   */
+  function irAoTopo(evento: MouseEvent<HTMLAnchorElement>): void {
+    /* Deixa passar clique com modificador — abrir em nova aba tem de funcionar. */
+    if (evento.metaKey || evento.ctrlKey || evento.shiftKey || evento.button !== 0) return
+
+    evento.preventDefault()
+    setOpen(false)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.history.replaceState(null, '', window.location.pathname)
+  }
+
   return (
     <header className={`${styles.header} ${scrolled ? styles.scrolled : ''}`}>
       <div className={`container ${styles.inner}`}>
-        <a href="#top" className={styles.brand} aria-label={`${BRAND}, inicio`}>
+        <a
+          href="#top"
+          onClick={irAoTopo}
+          className={styles.brand}
+          aria-label={`${BRAND}, voltar ao topo`}
+        >
           <span className={styles.brandMark} aria-hidden="true">
             <Image src="/buddy-azul.png" alt="" fill className={styles.brandImg} sizes="34px" />
           </span>
