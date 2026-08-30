@@ -1,0 +1,57 @@
+.head {
+  max-width: 620px;
+}
+
+.cards {
+  display: grid;
+  gap: 1px;
+  margin-top: 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  /* O fundo pinta as calhas de 1px, criando a grade sem borda por celula. */
+  background: var(--border);
+  overflow: hidden;
+}
+
+.card {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 28px 24px;
+  background: var(--surface);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--brand-accent-soft);
+  color: var(--brand-accent-dark);
+}
+
+.title {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--brand-primary);
+}
+
+.text {
+  font-size: 15px;
+  color: var(--text-secondary);
+}
+
+@media (min-width: 640px) {
+  .cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1000px) {
+  .cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}

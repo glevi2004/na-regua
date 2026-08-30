@@ -84,65 +84,9 @@
   color: var(--text-secondary);
 }
 
-/* --- Faixa de segmentos --- */
-
-.verticals {
-  display: grid;
-  gap: 18px;
-  margin-top: 44px;
-  padding: 26px;
-  border-radius: var(--radius-lg);
-  background: var(--brand-gradient-subtle);
-  border: 1px solid var(--border);
-}
-
-.verticalsLabel {
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--text-secondary);
-}
-
-.verticalsList {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.vertical {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 9px 16px;
-  border-radius: var(--radius-full);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  font-family: var(--font-display);
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--brand-primary);
-  transition:
-    border-color var(--transition),
-    color var(--transition),
-    transform var(--transition);
-}
-
-.vertical:hover {
-  border-color: var(--brand-accent);
-  color: var(--brand-accent-dark);
-  transform: translateY(-2px);
-}
-
 @media (min-width: 640px) {
   .cards {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .verticals {
-    grid-template-columns: auto 1fr;
-    align-items: center;
-    gap: 28px;
-    padding: 24px 30px;
   }
 }
 

@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { trustMetrics } from '@/content/site'
+import { highlights } from '@/content/site'
 import { IconArrowRight, IconBolt, IconTrendUp } from './Icons'
 import styles from './Hero.module.css'
 
@@ -19,18 +19,18 @@ export default function Hero() {
         <div className={styles.copy}>
           <span className={styles.badge}>
             <IconBolt size={15} />
-            Gestao modular para o comercio
+            Gestao para pequenos e medios negocios
           </span>
 
           <h1 className={styles.title}>
-            Todo o seu negocio
-            <br />
-            em um so <span className="gradientText">fluxo</span>
+            Seu negocio inteiro,
+            <br />a um <span className="gradientText">WhatsApp</span> de distancia
           </h1>
 
           <p className={styles.lead}>
-            Vendas, financeiro, estoque e fiscal em modulos que conversam entre si. O que voce lanca
-            no balcao chega pronto no relatorio — sem planilha no meio do caminho.
+            Empresa, clientes, produtos, financeiro, vendas e CRM num sistema so. E o que voce
+            precisa saber — faturamento, quem deve, o que repor — voce pergunta por mensagem e
+            recebe a resposta pronta.
           </p>
 
           <div className={styles.ctas}>
@@ -43,7 +43,7 @@ export default function Hero() {
             </a>
           </div>
 
-          <p className={styles.note}>14 dias gratis · sem cartao de credito</p>
+          <p className={styles.note}>Plano unico, sem fidelidade. Cancele quando quiser.</p>
         </div>
 
         {/* Mockup ilustrativo do produto */}
@@ -104,13 +104,14 @@ export default function Hero() {
       </div>
 
       {/* Barra de confianca em movimento continuo */}
-      <div className={styles.marquee} aria-label="Numeros da plataforma">
+      {/* Capacidades do produto, nao metricas: cada item e uma tela que existe. */}
+      <div className={styles.marquee} aria-label="O que o sistema faz">
         <div className={styles.marqueeTrack}>
           {[0, 1].map((copy) => (
             <ul key={copy} className={styles.marqueeGroup} aria-hidden={copy === 1}>
-              {trustMetrics.map((metric) => (
-                <li key={metric} className={styles.marqueeItem}>
-                  {metric}
+              {highlights.map((item) => (
+                <li key={item} className={styles.marqueeItem}>
+                  {item}
                 </li>
               ))}
             </ul>

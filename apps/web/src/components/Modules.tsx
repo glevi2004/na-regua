@@ -1,31 +1,25 @@
 import type { ComponentType } from 'react'
-import { modules, verticals } from '@/content/site'
+import { modules } from '@/content/site'
 import {
   IconBag,
   IconBox,
-  IconHeart,
-  IconHome,
-  IconReceipt,
-  IconShirt,
+  IconCalendar,
   IconSparkles,
   IconStore,
-  IconUtensils,
+  IconUsers,
   IconWallet,
   type IconProps,
 } from './Icons'
 import styles from './Modules.module.css'
 
 const iconMap: Record<string, ComponentType<IconProps>> = {
-  bag: IconBag,
-  wallet: IconWallet,
-  box: IconBox,
-  receipt: IconReceipt,
-  sparkles: IconSparkles,
   store: IconStore,
-  home: IconHome,
-  utensils: IconUtensils,
-  heart: IconHeart,
-  shirt: IconShirt,
+  users: IconUsers,
+  box: IconBox,
+  wallet: IconWallet,
+  bag: IconBag,
+  calendar: IconCalendar,
+  sparkles: IconSparkles,
 }
 
 export default function Modules() {
@@ -35,11 +29,11 @@ export default function Modules() {
         <header className={styles.head}>
           <span className="eyebrow">Modulos</span>
           <h2 className="sectionTitle">
-            Cinco frentes, um <span className="gradientText">unico</span> banco de dados
+            Sete modulos, um <span className="gradientText">unico</span> banco de dados
           </h2>
           <p className="sectionLead">
-            Cada modulo resolve uma parte da operacao e devolve o resultado para os outros. Ligue so
-            o que precisa agora e acrescente o resto quando fizer sentido.
+            Cada modulo resolve uma parte da operacao e devolve o resultado para os outros. A venda
+            baixa o estoque, lanca o recebivel e emite a nota no mesmo passo.
           </p>
         </header>
 
@@ -56,22 +50,6 @@ export default function Modules() {
             )
           })}
         </ul>
-
-        {/* Ecossistema: o mesmo nucleo adaptado por segmento */}
-        <div className={styles.verticals}>
-          <p className={styles.verticalsLabel}>O mesmo nucleo, ajustado para cada segmento</p>
-          <ul className={styles.verticalsList}>
-            {verticals.map((v) => {
-              const Icon = iconMap[v.icon]
-              return (
-                <li key={v.label} className={styles.vertical}>
-                  {Icon ? <Icon size={19} /> : null}
-                  {v.label}
-                </li>
-              )
-            })}
-          </ul>
-        </div>
       </div>
     </section>
   )

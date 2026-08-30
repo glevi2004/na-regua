@@ -1,4 +1,4 @@
-import { IconBarcode, IconReceipt, IconSparkles, IconTrendUp } from './Icons'
+import { IconBarcode, IconCalendar, IconReceipt, IconSparkles, IconTrendUp } from './Icons'
 import styles from './FeatureVisuals.module.css'
 
 /* --------------------------------------------------------------------------
@@ -52,6 +52,7 @@ export function SalesVisual() {
         <span className={styles.payChip}>Debito</span>
         <span className={styles.payChip}>Credito</span>
         <span className={styles.payChip}>Dinheiro</span>
+        <span className={styles.payChip}>Carteira</span>
       </div>
 
       <div className={styles.fiscalNote}>
@@ -189,6 +190,57 @@ export function AssistantVisual() {
             <span className={styles.confirmNo}>Ajustar</span>
           </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+/* --------------------------------------------------------------------------
+   Pilar 4 — Clientes e CRM: pendencias em quadro e o proximo compromisso
+   -------------------------------------------------------------------------- */
+
+const board = [
+  {
+    column: 'A fazer',
+    cards: [
+      { title: 'Cobrar Restaurante Boa Mesa', meta: 'R$ 78,40 em aberto' },
+      { title: 'Retornar contato', meta: 'Padaria Sol LTDA' },
+    ],
+  },
+  {
+    column: 'Em andamento',
+    cards: [{ title: 'Orcamento de reposicao', meta: 'Joana Ribeiro' }],
+  },
+  {
+    column: 'Concluido',
+    cards: [{ title: 'Entrega confirmada', meta: 'Marcos Dias' }],
+  },
+]
+
+export function CrmVisual() {
+  return (
+    <div className={styles.card}>
+      <div className={styles.cardHead}>
+        <span className={styles.cardLabel}>Pendencias por cliente</span>
+      </div>
+
+      <div className={styles.board}>
+        {board.map((col) => (
+          <div key={col.column} className={styles.boardColumn}>
+            <span className={styles.boardTitle}>{col.column}</span>
+            {col.cards.map((item) => (
+              <div key={item.title} className={styles.boardCard}>
+                <strong>{item.title}</strong>
+                <span>{item.meta}</span>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+
+      <div className={styles.fiscalNote}>
+        <IconCalendar size={16} />
+        Compromissos sincronizados com o Google Agenda
       </div>
     </div>
   )
