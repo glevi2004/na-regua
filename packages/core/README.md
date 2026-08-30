@@ -2,7 +2,8 @@
 
 **O núcleo.** Casos de uso.
 
-**Estado:** 🔴 não implementado · `NR-021`, `NR-022`, `NR-023`, `NR-025`, `NR-028`…
+**Estado:** 🟡 vocabulário da borda pronto (`ExecutionContext`, `AppError`) ·
+casos de uso ainda não · `NR-021`, `NR-022`, `NR-023`, `NR-025`, `NR-028`…
 
 ## Responsabilidade
 
