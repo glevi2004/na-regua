@@ -2,7 +2,8 @@
 
 Schemas Zod — o contrato único do sistema.
 
-**Estado:** 🔴 não implementado · `NR-005`
+**Estado:** 🟢 schemas base (Company, User, Customer, Product, Sale) · `financial`,
+`fiscal` e `agent` ainda não · `NR-005`
 
 > ⚠️ **O pacote mais sensível do repositório.** Mudança aqui exige revisão das
 > três trilhas ([git-workflow](../../docs/engenharia/git-workflow.md#pull-requests)).
@@ -45,10 +46,20 @@ src/
 ├── customer/
 ├── product/
 ├── sale/
-├── financial/        contas a pagar e a receber
-├── fiscal/
-└── agent/            metadados de tool derivados dos schemas acima
+├── financial/        contas a pagar e a receber      (ainda não)
+├── fiscal/                                            (ainda não)
+└── agent/            metadados de tool derivados dos schemas acima (ainda não)
 ```
+
+## Entrada é `.strict()`
+
+Todo schema de entrada recusa chave desconhecida em vez de descartá-la. É o que
+faz a regra do `companyId` valer na prática: sem `.strict()`, um `companyId` no
+corpo seria silenciosamente ignorado — e ninguém descobriria que alguém tentou.
+Com ele, a requisição falha alto.
+
+O preço é que renomear um campo quebra o cliente antigo de imediato, em vez de
+degradar em silêncio. Para este pacote isso é o comportamento desejado.
 
 ## Convenções
 
