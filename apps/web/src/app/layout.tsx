@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Poppins, Inter } from 'next/font/google'
+import ScrollRestoration from '@/components/ScrollRestoration'
 import { BRAND } from '@/content/site'
 import './globals.css'
 
@@ -29,7 +30,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="pt-BR" className={`${poppins.variable} ${inter.variable}`}>
-      <body>{children}</body>
+      <body>
+        <ScrollRestoration />
+        {children}
+      </body>
     </html>
   )
 }
