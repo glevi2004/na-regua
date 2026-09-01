@@ -81,3 +81,89 @@ describe('serializacao', () => {
     expect(Money.parse('1234.56').format()).toContain('1.234,56')
   })
 })
+
+/**
+ * Caminhos que a suite original nao alcancava.
+ *
+ * Foram descobertos ao ligar o piso de cobertura do NR-010: o pacote estava em
+ * 86,95%, abaixo dos 90% que a RNF-068 exige, e o que faltava era justamente
+ * o comportamento de recusa — a parte que mais importa num tipo de dinheiro.
+ */
+describe('Money.fromCents', () => {
+  it('aceita bigint e number inteiro', () => {
+    expect(Money.fromCents(4990n).cents).toBe(4990n)
+    expect(Money.fromCents(4990).cents).toBe(4990n)
+  })
+
+  it('recusa numero fracionado — centavo nao tem casa decimal', () => {
+    expect(() => Money.fromCents(49.9)).toThrow(RangeError)
+  })
+})
+
+describe('parse recusa o que nao e valor', () => {
+  it.each(['R$', '-', 'abc', '  '])('recusa %s', (entrada) => {
+    expect(() => Money.parse(entrada)).toThrow(RangeError)
+  })
+
+  it('recusa sinal sobrando no meio dos digitos', () => {
+    expect(() => Money.parse('1-2-3')).toThrow(RangeError)
+  })
+
+  /*
+   * Dois casos que NAO sao recusados, descobertos ao escrever estes testes —
+   * ambos supunham o contrario. Ficam registrados porque sao o comportamento
+   * real, e porque vale a pergunta se deveriam ser:
+   *
+   *   - separador sozinho vira zero;
+   *   - um hifen perdido no meio e descartado, porque `replace('-', '')` tira
+   *     so a primeira ocorrencia. Com dois hifens sobra um e ai sim recusa,
+   *     que e o caso do teste acima.
+   */
+  it('trata separador sozinho como zero', () => {
+    expect(Money.parse(',').isZero()).toBe(true)
+    expect(Money.parse('.').isZero()).toBe(true)
+  })
+
+  it('descarta um hifen perdido no meio dos digitos', () => {
+    expect(Money.parse('1-2').toDecimalString()).toBe('12.00')
+  })
+})
+
+describe('subtracao', () => {
+  it('subtrai mantendo centavos exatos', () => {
+    expect(Money.parse('49.90').subtract(Money.parse('9.90')).toDecimalString()).toBe('40.00')
+  })
+
+  it('aceita resultado negativo — estorno passa do saldo', () => {
+    expect(Money.parse('10.00').subtract(Money.parse('25.50')).isNegative()).toBe(true)
+  })
+})
+
+describe('comparacao', () => {
+  it('reconhece zero e negativo', () => {
+    expect(Money.zero().isZero()).toBe(true)
+    expect(Money.parse('0.01').isZero()).toBe(false)
+    expect(Money.parse('-0.01').isNegative()).toBe(true)
+    expect(Money.parse('0.01').isNegative()).toBe(false)
+  })
+
+  it.each([
+    ['10.00', '20.00', -1],
+    ['20.00', '10.00', 1],
+    ['10.00', '10.00', 0],
+  ])('compara %s com %s', (a, b, esperado) => {
+    expect(Money.parse(a).compare(Money.parse(b))).toBe(esperado)
+  })
+
+  it('equals compara valor e moeda', () => {
+    expect(Money.parse('10.00').equals(Money.parse('10.00'))).toBe(true)
+    expect(Money.parse('10.00').equals(Money.parse('10.01'))).toBe(false)
+  })
+})
+
+/*
+ * `assertSameCurrency` nao tem teste porque nao ha como chama-lo com moedas
+ * diferentes: `Currency` tem um membro so (`'BRL'`), entao o tipo impede
+ * construir o caso. O `throw` e defesa para quando houver a segunda moeda —
+ * e ai o teste entra junto com ela.
+ */

@@ -197,6 +197,25 @@ pnpm --filter @na-regua/money test -- --watch
 
 Testes de integração exigem a infra local no ar (`pnpm infra:up`).
 
+## Piso de cobertura
+
+O mínimo da [RNF-068](../produto/requisitos-nao-funcionais.md) vive no
+`vitest.config.ts` de cada pacote, não num passo separado da CI — quem roda
+`pnpm test` na máquina vê a mesma reprovação que veria no PR. Portão que só
+existe no servidor é portão descoberto tarde.
+
+| Pacote      | Piso | De onde vem      |
+| ----------- | ---: | ---------------- |
+| `money`     |  90% | RNF-068          |
+| `domain`    |  90% | RNF-068          |
+| `core`      |  70% | RNF-068          |
+| `contracts` |  80% | README do pacote |
+| `env`       |  80% | README do pacote |
+
+Ficam fora da medição os barris (`src/index.ts`) e os arquivos só de tipo:
+não têm lógica, contariam 0% sem que exista o que testar e puxariam o número
+para baixo sem significado.
+
 ## Na CI
 
 | Verificação                                      | Bloqueia PR              |
@@ -213,10 +232,17 @@ Detalhes em [`ci-cd.md`](ci-cd.md).
 
 ## Estado atual
 
-| Módulo  | Testes                                                                 |
-| ------- | ---------------------------------------------------------------------- |
-| `money` | ✅ 21 testes, incluindo propriedade sobre 2.412 combinações de divisão |
-| Demais  | 🔴 nenhum — os módulos ainda são placeholder                           |
+| Módulo      | Testes                                                          | Cobertura |
+| ----------- | --------------------------------------------------------------- | --------: |
+| `money`     | ✅ 40, incluindo propriedade sobre 2.412 combinações de divisão |      100% |
+| `domain`    | ✅ 31                                                           |    98,61% |
+| `contracts` | ✅ 79, quase todos de rejeição                                  |    99,22% |
+| `env`       | ✅ 23                                                           |      100% |
+| `core`      | ✅ 16 — só `AppError`; os casos de uso ainda não existem        |      100% |
+| `api`       | ✅ 21 — borda HTTP: erro, contexto e validação                  |         — |
+| `ui`        | ✅ 24 — contraste WCAG dos tokens                               |         — |
+| `web`       | ✅ 35 — deriva entre `globals.css` e os tokens                  |         — |
+| Demais      | 🔴 nenhum — os módulos ainda são placeholder                    |         — |
 
 ## Documentos relacionados
 
