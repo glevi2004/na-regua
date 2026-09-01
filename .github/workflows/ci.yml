@@ -82,6 +82,9 @@ jobs:
         run: pnpm lint
 
       - name: Testes
+        # O piso de cobertura (RNF-068) vive no vitest.config.ts de cada
+        # pacote, entao `pnpm test` ja reprova aqui e na maquina de quem
+        # desenvolve — nao existe portao que so a CI enxerga.
         run: pnpm test
 
       - name: Build
