@@ -2,8 +2,8 @@
 
 Fastify — REST, webhooks e runtime do agente.
 
-**Estado:** 🟡 base pronta (contexto, erro padronizado, validação); sem rotas de
-negócio · `NR-014`, `NR-026`, `NR-027`, `NR-030`
+**Estado:** 🟡 base pronta (contexto, erro padronizado, validação,
+observabilidade); sem rotas de negócio · `NR-014`, `NR-026`, `NR-027`
 
 ## Responsabilidade
 
@@ -138,9 +138,52 @@ use um parser que preserve o corpo bruto.
 
 ## Observabilidade
 
-Log estruturado em JSON com `requestId`, `companyId` e `userId` em toda
-requisição — [RNF-058](../../docs/produto/requisitos-nao-funcionais.md). Hoje só
-o nível básico existe; o contexto completo entra com `NR-030`.
+Log estruturado em JSON — [RNF-058](../../docs/produto/requisitos-nao-funcionais.md).
+
+**`requestId`** vem do cabeçalho `x-request-id` quando o chamador manda um, e é
+gerado quando não manda. Volta sempre na resposta, no mesmo cabeçalho — é o que
+o suporte pede em vez de "deu erro".
+
+O id que chega de fora é **sanitizado**: no máximo 64 caracteres, sem espaço
+nem quebra de linha. Aceitar o valor cru deixaria qualquer cliente escrever no
+nosso log, e uma quebra de linha forja uma entrada inteira.
+
+**`companyId` e `userId`** entram no logger da requisição em `preHandler`,
+depois que a autenticação resolve o principal. Enquanto `NR-014` não existe,
+nada popula `request.principal` e o bind não acontece — log sem `companyId` é
+melhor que log com um `companyId` inventado.
+
+### O que nunca entra no log
+
+O Fastify não serializa cabeçalho nem corpo por padrão: registra só
+`method`, `url`, `host` e `remoteAddress`. Essa é a primeira barreira, e é a
+que de fato impede o `Authorization` de vazar.
+
+A segunda é a lista de `redact` do pino, para quando algum log passar um
+objeto adiante: senha, token, CPF, CNPJ, e-mail e telefone viram `[oculto]` —
+[RNF-034](../../docs/produto/requisitos-nao-funcionais.md).
+
+### Chamada a provedor externo
+
+`withExternalCallLogging` mede a duração e, na falha, registra requisição e
+resposta **mascaradas** — [RNF-059](../../docs/produto/requisitos-nao-funcionais.md).
+Quando a integração quebra, a pergunta é sempre a mesma: o que mandamos, o que
+voltou, quanto demorou.
+
+O mascaramento decide pelo **nome da chave**, não pelo formato do valor: um CPF
+sem pontuação é indistinguível de um número de pedido.
+
+```ts
+const cobranca = await withExternalCallLogging(request.log, {
+  operation: 'pagmaxx.criarCobranca',
+  request: entrada,
+  run: () => gateway.criar(entrada),
+})
+```
+
+> Hoje vive em `apps/api`. Quando o primeiro adapter existir, ele também vai
+> precisar — e aí o mascaramento se muda para um pacote compartilhado, em vez
+> de ser copiado.
 
 ## Variáveis de ambiente
 
