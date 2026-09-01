@@ -182,15 +182,15 @@ pnpm --filter @na-regua/mobile dev   Expo (à parte, exige aparelho ou simulador
 
 Seja realista sobre o que existe hoje:
 
-| Componente                 | Estado                                                                     |
-| -------------------------- | -------------------------------------------------------------------------- |
-| Workspace, infra local, CI | ✅ funcionando                                                             |
-| `packages/money`           | ✅ implementado, 21 testes                                                 |
-| Demais pacotes             | 🔴 placeholder — cada `index.ts` aponta a decisão ou tarefa que o destrava |
-| `apps/api`                 | 🟡 sobe, com `/health` real; sem rotas de negócio                          |
-| `apps/worker`              | 🟡 conecta e registra as filas; sem consumidores                           |
-| `apps/web`, `apps/mobile`  | 🟡 scaffold                                                                |
-| Banco de dados             | 🔴 **sem schema** — bloqueado por [DEC-002](../decisoes/README.md#dec-002) |
+| Componente                 | Estado                                                                                       |
+| -------------------------- | -------------------------------------------------------------------------------------------- |
+| Workspace, infra local, CI | ✅ funcionando                                                                               |
+| `packages/money`           | ✅ implementado, 21 testes                                                                   |
+| Demais pacotes             | 🔴 placeholder — cada `index.ts` aponta a decisão ou tarefa que o destrava                   |
+| `apps/api`                 | 🟡 sobe, com `/health` real; sem rotas de negócio                                            |
+| `apps/worker`              | 🟡 conecta e registra as filas; sem consumidores                                             |
+| `apps/web`, `apps/mobile`  | 🟡 scaffold                                                                                  |
+| Banco de dados             | 🔴 **sem schema** — destrava em `NR-007` ([ADR-0001](../decisoes/adr/0001-rls-por-linha.md)) |
 
 O que fazer a seguir está no [Task Ledger](../processo/task-ledger.md).
 

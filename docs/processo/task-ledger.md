@@ -42,7 +42,7 @@ os adapters existem
 | ------------------------- | ----------------------------------- |
 | Total                     | 54 tarefas · 152 dias-desenvolvedor |
 | ✅ Concluídas             | 4 (11 dias)                         |
-| 🚧 Bloqueadas por decisão | 15 (51 dias)                        |
+| 🚧 Bloqueadas por decisão | 13 (46 dias)                        |
 | Por trilha                | 🔵 17 · 🟠 24 · 🟢 12               |
 
 ---
@@ -64,8 +64,8 @@ Objetivo: as três trilhas conseguem trabalhar em paralelo sem esperar uma à ou
 | NR-004 | `domain`: cálculo de venda — custo, imposto, tarifa de cartão, parcelas         |   🔵   | `domain`     |   3 | NR-003 | —                   | RF-040, RF-041, RF-038  |   ✅   |
 | NR-005 | `contracts`: schemas base (Company, Customer, Product, Sale)                    |   🔵   | `contracts`  |   2 | NR-003 | —                   | RNF-027                 |   ⬜   |
 | NR-006 | Configuração tipada: validar variáveis de ambiente na inicialização             |   🟠   | `repo`       |   1 | NR-001 | —                   | —                       |   ⬜   |
-| NR-007 | `db`: estratégia multi-tenant, RLS e teste de isolamento                        |   🔵   | `db`         |   3 | NR-005 | **DEC-002**         | RF-121, RF-122, RNF-021 |   🚧   |
-| NR-008 | `db`: schema de cadastros (companies, users, customers, products)               |   🔵   | `db`         |   2 | NR-007 | DEC-002             | RF-001, RF-009, RF-017  |   🚧   |
+| NR-007 | `db`: estratégia multi-tenant, RLS e teste de isolamento                        |   🔵   | `db`         |   3 | NR-005 | —                   | RF-121, RF-122, RNF-021 |   ⬜   |
+| NR-008 | `db`: schema de cadastros (companies, users, customers, products)               |   🔵   | `db`         |   2 | NR-007 | —                   | RF-001, RF-009, RF-017  |   ⬜   |
 | NR-009 | `api`: base — contexto de execução, erro padronizado, validação por `contracts` |   🟠   | `api`        |   2 | NR-005 | —                   | RNF-027, RNF-054        |   ⬜   |
 | NR-010 | Qualidade: lint com type-checking e piso de cobertura na CI                     |   🟠   | `repo`       |   1 | NR-001 | —                   | RNF-068                 |   ⬜   |
 | NR-011 | `ui`: tokens de design (cor, tipografia, espaçamento)                           |   🟢   | `ui`         |   2 | —      | **DEC-001**/QST-011 | RNF-055                 |   🚧   |
@@ -155,7 +155,7 @@ O que atrasa o MVP inteiro se atrasar:
 flowchart LR
     N3["NR-003<br/>money ✅"] --> N4["NR-004<br/>domain ✅"]
     N3 --> N5["NR-005<br/>contracts"]
-    N5 --> N7["NR-007<br/>db + RLS<br/>🚧 DEC-002"]
+    N5 --> N7["NR-007<br/>db + RLS"]
     N7 --> N8["NR-008<br/>cadastros"]
     N8 --> N20["NR-020<br/>vendas"]
     N4 --> N22
@@ -165,24 +165,21 @@ flowchart LR
     N22 --> N40["NR-040<br/>porta fiscal"]
     N40 --> N42["NR-042<br/>NFC-e<br/>🚧 DEC-004"]
 
-    style N7 fill:#7c2d12,color:#fff
     style N42 fill:#7c2d12,color:#fff
     style N3 fill:#14532d,color:#fff
     style N4 fill:#14532d,color:#fff
 ```
 
-**NR-007 é o nó mais crítico do projeto.** Ele bloqueia todo o schema, e está
-travado por [DEC-002](../decisoes/README.md#dec-002). Enquanto essa decisão não
-fechar, a trilha 1 só consegue avançar em `contracts` (NR-005) — cerca de 2 dias
-de trabalho. `domain` (NR-004) já está feito. Depois disso ela para.
-
-**Prazo real para DEC-002: 5 dias úteis a partir do início da Sprint 1.**
+**NR-007 continua o nó mais crítico do projeto** — bloqueia todo o schema —
+mas [DEC-002](../decisoes/README.md#dec-002) fechou:
+[ADR-0001](../decisoes/adr/0001-rls-por-linha.md) (RLS por linha). O gargalo
+agora é `contracts` (NR-005): sem ele, NR-007 não começa. `domain` (NR-004) já
+está feito.
 
 ## Bloqueios por decisão
 
 | Decisão                                                                           | Tarefas travadas       | Dias parados |
 | --------------------------------------------------------------------------------- | ---------------------- | -----------: |
-| [DEC-002](../decisoes/README.md#dec-002) multi-tenant                             | NR-007, NR-008         |            5 |
 | [DEC-008](../decisoes/README.md#dec-008) autenticação                             | NR-012, NR-013, NR-014 |            9 |
 | [DEC-009](../decisoes/README.md#dec-009) hospedagem                               | NR-015                 |            3 |
 | [DEC-004](../decisoes/README.md#dec-004) fiscal                                   | NR-042                 |            5 |
@@ -193,7 +190,7 @@ de trabalho. `domain` (NR-004) já está feito. Depois disso ela para.
 | [DEC-005](../decisoes/README.md#dec-005) Open Finance                             | NR-048                 |            4 |
 | [DEC-001](../decisoes/README.md#dec-001) nome/marca                               | NR-011                 |            2 |
 
-**51 dos 152 dias-desenvolvedor estão bloqueados por 10 decisões** — 34% do
+**46 dos 152 dias-desenvolvedor estão bloqueados por 9 decisões** — 30% do
 backlog. Decidir é, hoje, a atividade de maior retorno do projeto, mais do que
 escrever código.
 

@@ -45,13 +45,13 @@ PR**, e a linha sai da tabela de abertas.
 | Estado             | Qtd | Quais                                                |
 | ------------------ | --: | ---------------------------------------------------- |
 | 🔴 Aberta          |  10 | DEC-003, 004, 005, 007, 008, 009, 011, 012, 013, 015 |
-| 🟡 Em análise      |   4 | DEC-001, 002, 006, 010                               |
+| 🟡 Em análise      |   3 | DEC-001, 006, 010                                    |
 | ⚪ Adiada          |   1 | DEC-014                                              |
-| 🟢 Decidida        |   0 | —                                                    |
+| 🟢 Decidida        |   1 | DEC-002                                              |
 | ❓ Pergunta aberta |  12 | QST-001 a QST-012                                    |
 
-**Bloqueando o MVP agora:** DEC-002, DEC-003, DEC-004, DEC-008, DEC-009.
-Essas cinco travam trabalho de implementação já na Sprint 1.
+**Bloqueando o MVP agora:** DEC-003, DEC-004, DEC-008, DEC-009.
+Essas quatro travam trabalho de implementação já na Sprint 1.
 
 ---
 
@@ -93,30 +93,6 @@ página, não um fato → [QST-011](#qst-011).
 documentação usa **ZapGestor** como nome de trabalho e o escopo dos pacotes é
 `@na-regua/*` — deliberadamente atrelado ao **repositório**, que não muda com a
 marca, para que a decisão não force renomear pacote nenhum.
-
----
-
-### DEC-002 — Estratégia multi-tenant
-
-|              |                                                                                                                                   |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**   | 🟡 Em análise                                                                                                                     |
-| **Dono**     | Trilha 1 — Núcleo & Dados                                                                                                         |
-| **Prazo**    | **Sprint 1** — bloqueia o início de `packages/db`                                                                                 |
-| **Bloqueia** | `NR-020` em diante · [RF-121](../produto/requisitos-funcionais.md), [RF-122](../produto/requisitos-funcionais.md) · todo o schema |
-
-**Contexto.** Herdada da apresentação comercial ("estrutura do banco de dados por
-login/empresa"). É a decisão mais cara de reverter do projeto: muda toda tabela,
-todo repositório e o contexto de execução.
-
-Análise completa em [`arquitetura/dados.md`](../arquitetura/dados.md#multi-tenant).
-
-**Recomendação: RLS por linha** — `company_id` em toda tabela + política no
-PostgreSQL. Único caminho que atende
-[RNF-021](../produto/requisitos-nao-funcionais.md) (isolamento imposto pelo
-banco) e [RNF-016](../produto/requisitos-nao-funcionais.md) (1.000 empresas) ao
-mesmo tempo. Schema por empresa não escala para migrations; filtro só na
-aplicação não é isolamento.
 
 ---
 
@@ -453,12 +429,23 @@ atualização de documento — e às vezes abre uma `DEC`.
 
 ## Decisões tomadas
 
-Nenhuma ainda. Quando a primeira `DEC` fechar, ela vira uma ADR em
-[`adr/`](adr/) e aparece aqui:
+Fechadas viram ADR em [`adr/`](adr/). A âncora `DEC-xxx` permanece para os
+links que já apontam para cá.
 
-| ADR | Decisão | Data |
-| --- | ------- | ---- |
-| —   | —       | —    |
+| ADR                                   | Decisão                                   | Data       |
+| ------------------------------------- | ----------------------------------------- | ---------- |
+| [ADR-0001](adr/0001-rls-por-linha.md) | Isolamento multi-tenant por RLS por linha | 2026-09-01 |
+
+### <a id="dec-002"></a>DEC-002 — Estratégia multi-tenant
+
+|             |                                                       |
+| ----------- | ----------------------------------------------------- |
+| **Status**  | 🟢 Decidida — [ADR-0001](adr/0001-rls-por-linha.md)   |
+| **Escolha** | RLS por linha (`company_id` + política no PostgreSQL) |
+| **Data**    | 2026-09-01                                            |
+
+Consequências no código: [`dados.md`](../arquitetura/dados.md#multi-tenant).
+Materialização em `packages/db` (`NR-007`).
 
 ## Documentos relacionados
 
