@@ -2,13 +2,12 @@
 
 Schema Drizzle, migrations, políticas RLS e repositórios.
 
-**Estado:** 🟡 só conexão e verificação de saúde · 🚧 schema bloqueado por
-[DEC-002](../../docs/decisoes/README.md#dec-002) · `NR-007`, `NR-008`, `NR-020`
+**Estado:** 🟡 só conexão e verificação de saúde · schema pendente (`NR-007`,
+`NR-008`, `NR-020`) · isolamento:
+[ADR-0001](../../docs/decisoes/adr/0001-rls-por-linha.md)
 
-> [!WARNING]
-> **Não implemente schema antes de DEC-002.** A estratégia multi-tenant define
-> se existe `company_id` em toda tabela, e é a decisão mais cara de reverter do
-> projeto. Ver [`dados.md`](../../docs/arquitetura/dados.md#multi-tenant).
+Isolamento entre empresas é **RLS por linha** (`company_id` + política no
+PostgreSQL). Ver [`dados.md`](../../docs/arquitetura/dados.md#multi-tenant).
 
 ## Responsabilidade
 
@@ -35,7 +34,7 @@ violação real.
 
 ## Isolamento multi-tenant
 
-Recomendação: **RLS por linha**.
+Decisão: **RLS por linha** ([ADR-0001](../../docs/decisoes/adr/0001-rls-por-linha.md)).
 
 ```sql
 ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
