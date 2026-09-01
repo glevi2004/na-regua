@@ -27,11 +27,30 @@ export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    /**
+     * Liga o type-checking do typescript-eslint — NR-010.
+     *
+     * `projectService` deixa o ESLint pedir tipos ao TypeScript em vez de
+     * so olhar a arvore sintatica. Custa tempo de lint, e paga em regra que
+     * sintaxe sozinha nao consegue expressar: saber se algo e uma Promise
+     * exige o tipo, nao o texto.
+     */
+    languageOptions: {
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
     rules: {
       // `any` desliga o compilador exatamente onde ele mais serviria.
       '@typescript-eslint/no-explicit-any': 'error',
-      // Promise nao aguardada e a origem mais comum de erro que some.
-      '@typescript-eslint/no-floating-promises': 'off', // exige type-checking; ligar com NR-010
+      // Promise nao aguardada e a origem mais comum de erro que some: a
+      // funcao retorna, o erro acontece depois e ninguem captura.
+      '@typescript-eslint/no-floating-promises': 'error',
+      // async passado onde se espera void — o `await` some e o erro tambem.
+      '@typescript-eslint/no-misused-promises': 'error',
+      // `await` em algo que nao e Promise: ou sobra, ou falta um `async`.
+      '@typescript-eslint/await-thenable': 'error',
       '@typescript-eslint/no-unused-vars': [
         'error',
         { argsIgnorePattern: '^_', varsIgnorePattern: '^_' },
