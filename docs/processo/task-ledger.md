@@ -52,10 +52,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      57 |  155 |
-| ✅ Concluídas                 |      17 |   34 |
+| ✅ Concluídas                 |      18 |   36 |
 | 🚧 Bloqueadas por decisão     |      13 |   46 |
 | 🚧 Bloqueadas por dependência |      25 |   70 |
-| ⬜ A fazer, pode começar hoje |       2 |    5 |
+| ⬜ A fazer, pode começar hoje |       1 |    3 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -63,9 +63,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 > As somas saem das linhas deste arquivo e fecham com o
 > [`monday-import.csv`](monday-import.csv) que `pnpm ledger:csv` gera.
 
-**Dos 121 dias-desenvolvedor que faltam, 116 não podem começar hoje** — 96% do
-trabalho restante. O que sobra são 5 dias: o consumidor de fila (NR-041) e a
-porta do WhatsApp (NR-045).
+**Dos 119 dias-desenvolvedor que faltam, 116 não podem começar hoje** — 97% do
+trabalho restante. O que sobra são 3 dias, numa tarefa só: o consumidor de fila
+(NR-041). Depois dela, **nenhuma tarefa do backlog pode começar** sem que uma
+decisão feche.
 
 ---
 
@@ -138,7 +139,7 @@ Objetivo: operar o ERP por mensagem e cobrar a mensalidade.
 | ID     | Tarefa                                                        | Trilha | Módulo            | Est | Dep            | Bloq             | US/RF                  | Status |
 | ------ | ------------------------------------------------------------- | :----: | ----------------- | --: | -------------- | ---------------- | ---------------------- | :----: |
 | NR-031 | `core`: exportação completa e anonimização (LGPD)             |   🔵   | `core`            |   3 | NR-028         | NR-028 → DEC-002 | RF-125–128             |   🚧   |
-| NR-045 | `whatsapp`: porta `MessageSender` + adapter falso             |   🟠   | `whatsapp` `core` |   2 | NR-005         | —                | RF-015                 |   ⬜   |
+| NR-045 | `whatsapp`: porta `MessageSender` + adapter falso             |   🟠   | `whatsapp` `core` |   2 | NR-005         | —                | RF-015                 |   ✅   |
 | NR-046 | `whatsapp`: adapter real, webhook e consentimento             |   🟠   | `whatsapp`        |   4 | NR-045         | **DEC-003**      | RF-016, RF-094, RF-095 |   🚧   |
 | NR-060 | `agent`: runtime com tools geradas de `contracts`             |   🟠   | `agent`           |   5 | NR-046, NR-005 | **DEC-007**      | RF-096–102             |   🚧   |
 | NR-061 | `agent`: confirmação de ação sensível, com expiração          |   🟠   | `agent`           |   2 | NR-060         | NR-060 → DEC-007 | RF-103, RF-104         |   🚧   |
@@ -201,8 +202,8 @@ flowchart LR
 travado por [DEC-002](../decisoes/README.md#dec-002). `domain` (NR-004) e
 `contracts` (NR-005) já estão prontos — então, enquanto essa decisão não fechar,
 a trilha 1 **não tem nenhuma tarefa disponível**. As outras duas ficam com o que
-não depende de schema: a porta do WhatsApp e o consumidor de fila, 5 dias
-somados.
+não depende de schema: o consumidor de fila (NR-041), 3 dias — e mais nada
+depois dele.
 
 **Prazo real para DEC-002: 5 dias úteis a partir do início da Sprint 1.**
 
@@ -223,8 +224,8 @@ somados.
 | [DEC-012](../decisoes/README.md#dec-012) usuário e cupons                         | NR-075         |          — |            3 |
 | [DEC-001](../decisoes/README.md#dec-001) nome/marca                               | — (NR-011 ✅)  |          — |            0 |
 
-**116 dos 121 dias-desenvolvedor restantes estão bloqueados por 12 decisões** —
-96% do que falta. Decidir é, hoje, a atividade de maior retorno do projeto,
+**116 dos 119 dias-desenvolvedor restantes estão bloqueados por 12 decisões** —
+97% do que falta. Decidir é, hoje, a atividade de maior retorno do projeto,
 mais do que escrever código.
 
 Cada tarefa é contada **uma vez**, na decisão que aparece na sua própria coluna
