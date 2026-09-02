@@ -52,10 +52,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      57 |  155 |
-| ✅ Concluídas                 |      16 |   32 |
+| ✅ Concluídas                 |      17 |   34 |
 | 🚧 Bloqueadas por decisão     |      13 |   46 |
 | 🚧 Bloqueadas por dependência |      25 |   70 |
-| ⬜ A fazer, pode começar hoje |       3 |    7 |
+| ⬜ A fazer, pode começar hoje |       2 |    5 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -63,10 +63,9 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 > As somas saem das linhas deste arquivo e fecham com o
 > [`monday-import.csv`](monday-import.csv) que `pnpm ledger:csv` gera.
 
-**Dos 123 dias-desenvolvedor que faltam, 116 não podem começar hoje** — 94% do
-trabalho restante. O que sobra são 7 dias: as duas portas com adapter falso que
-restam (NR-043, NR-045) e o consumidor de fila (NR-041), liberado agora que a
-porta fiscal (NR-040) está pronta.
+**Dos 121 dias-desenvolvedor que faltam, 116 não podem começar hoje** — 96% do
+trabalho restante. O que sobra são 5 dias: o consumidor de fila (NR-041) e a
+porta do WhatsApp (NR-045).
 
 ---
 
@@ -127,7 +126,7 @@ Objetivo: emitir NFC-e e controlar contas a pagar e receber.
 | NR-040 | `fiscal`: porta `InvoiceIssuer` + adapter falso                        |   🟠   | `fiscal` `core`   |   2 | NR-005 | —                | RF-045                 |   ✅   |
 | NR-041 | `worker`: consumidores de fila (emissão, mensagem, cobrança)           |   🟠   | `worker`          |   3 | NR-040 | —                | RNF-004, RF-130        |   ⬜   |
 | NR-042 | `fiscal`: adapter real, contingência e guarda de XML                   |   🟠   | `fiscal`          |   5 | NR-040 | **DEC-004**      | RF-045–054             |   🚧   |
-| NR-043 | `payments`: porta `PaymentGateway` + adapter falso                     |   🟠   | `payments` `core` |   2 | NR-005 | —                | RF-063                 |   ⬜   |
+| NR-043 | `payments`: porta `PaymentGateway` + adapter falso                     |   🟠   | `payments` `core` |   2 | NR-005 | —                | RF-063                 |   ✅   |
 | NR-044 | `payments`: adapter PagMaxx — Pix, link de pagamento, webhook com HMAC |   🟠   | `payments`        |   4 | NR-043 | DEC-006, DEC-015 | RF-034, RF-068         |   🚧   |
 | NR-073 | `mobile`: pagamento, resumo com líquido e margem                       |   🟢   | `mobile`          |   3 | NR-071 | NR-071 → DEC-002 | US-018–020             |   🚧   |
 | NR-074 | `web`: contas a pagar e a receber                                      |   🟢   | `web`             |   4 | NR-029 | NR-029 → DEC-002 | E6, E7                 |   🚧   |
@@ -202,8 +201,8 @@ flowchart LR
 travado por [DEC-002](../decisoes/README.md#dec-002). `domain` (NR-004) e
 `contracts` (NR-005) já estão prontos — então, enquanto essa decisão não fechar,
 a trilha 1 **não tem nenhuma tarefa disponível**. As outras duas ficam com o que
-não depende de schema: as portas com adapter falso e o consumidor de fila,
-7 dias somados.
+não depende de schema: a porta do WhatsApp e o consumidor de fila, 5 dias
+somados.
 
 **Prazo real para DEC-002: 5 dias úteis a partir do início da Sprint 1.**
 
@@ -224,8 +223,8 @@ não depende de schema: as portas com adapter falso e o consumidor de fila,
 | [DEC-012](../decisoes/README.md#dec-012) usuário e cupons                         | NR-075         |          — |            3 |
 | [DEC-001](../decisoes/README.md#dec-001) nome/marca                               | — (NR-011 ✅)  |          — |            0 |
 
-**116 dos 123 dias-desenvolvedor restantes estão bloqueados por 12 decisões** —
-94% do que falta. Decidir é, hoje, a atividade de maior retorno do projeto,
+**116 dos 121 dias-desenvolvedor restantes estão bloqueados por 12 decisões** —
+96% do que falta. Decidir é, hoje, a atividade de maior retorno do projeto,
 mais do que escrever código.
 
 Cada tarefa é contada **uma vez**, na decisão que aparece na sua própria coluna

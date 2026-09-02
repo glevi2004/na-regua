@@ -49,7 +49,7 @@ describe('classificacao fiscal', () => {
     ['12345', 'curto'],
     ['090111101', 'longo'],
     ['', 'vazio'],
-  ])('recusa NCM %s (%s)', (entrada) => {
+  ])('recusa NCM %s (%s)', (entrada, _motivo) => {
     const r = ncmSchema.safeParse(entrada)
     expect(r.success).toBe(false)
     if (!r.success) expect(r.error.issues[0]?.message).toBe('NCM invalido. Deve ter 8 digitos.')
@@ -87,7 +87,7 @@ describe('chave de acesso', () => {
     ['4'.repeat(45), '45 digitos'],
     ['4'.repeat(43) + 'a', 'com letra'],
     ['', 'vazia'],
-  ])('recusa chave com %s (%s)', (entrada) => {
+  ])('recusa chave com %s (%s)', (entrada, _motivo) => {
     const r = accessKeySchema.safeParse(entrada)
     expect(r.success).toBe(false)
     if (!r.success) {
@@ -123,7 +123,7 @@ describe('item da nota', () => {
     [{ ...item, unitPriceCents: -1 }, 'preco negativo'],
     [{ ...item, unitOfMeasure: 'duzia' }, 'unidade inexistente'],
     [{ ...item, description: '' }, 'sem descricao'],
-  ])('recusa %o (%s)', (entrada) => {
+  ])('recusa %o (%s)', (entrada, _motivo) => {
     expect(invoiceItemSchema.safeParse(entrada).success).toBe(false)
   })
 
@@ -182,7 +182,7 @@ describe('pedido de emissao', () => {
     [{ ...pedido, companyId: '' }, 'sem empresa'],
     [{ ...pedido, requestedAt: '2026-09-02T13:00:00' }, 'instante sem fuso'],
     [{ ...pedido, requestedAt: '2026-09-02' }, 'so a data'],
-  ])('recusa %o (%s)', (entrada) => {
+  ])('recusa %o (%s)', (entrada, _motivo) => {
     expect(issueInvoiceRequestSchema.safeParse(entrada).success).toBe(false)
   })
 

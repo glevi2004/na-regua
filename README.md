@@ -22,8 +22,8 @@
 | 🟡 Scaffold    | `api` (com `/health` real), `worker` (filas registradas), `web`, `mobile`                             |
 | 🔴 A fazer     | todos os demais módulos — **o banco ainda não tem schema**                                            |
 
-**116 dos 123 dias-desenvolvedor que faltam estão bloqueados por 12 decisões em
-aberto** — 94% do trabalho restante, e 73 desses dias dependem de uma só, a
+**116 dos 121 dias-desenvolvedor que faltam estão bloqueados por 12 decisões em
+aberto** — 96% do trabalho restante, e 73 desses dias dependem de uma só, a
 DEC-002. Decidir é hoje a atividade de maior retorno do projeto. Ver
 [Decisões](docs/decisoes/README.md) e [Task Ledger](docs/processo/task-ledger.md).
 

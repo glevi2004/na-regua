@@ -252,6 +252,21 @@ export interface SubscriptionProvider {
 `packages/payments` implementa `PaymentGateway` sobre a PagMaxx.
 `packages/billing` implementa `SubscriptionProvider` sobre `/subscriptions/*`.
 
+> [!NOTE]
+> **O esboço acima é de antes da porta existir. A porta real (`NR-043`) ajustou
+> duas assinaturas dele**, porque nenhuma das duas é implementável sob a regra
+> `adapter-nao-importa-core`:
+>
+> - `fetchFeeTable(): Promise<CardFeeTable>` → `fetchFeeQuotes(): FeeQuoteResult`.
+>   `CardFeeTable` mora em `packages/domain`, e a CI proíbe `payments → domain`.
+>   O adapter cota; `core` traduz.
+> - `refund(paymentId, amount?: Money)` → `refund(RefundRequest)`. Dinheiro
+>   atravessa a porta em centavo inteiro, como no resto de `contracts`.
+>
+> A porta também ganhou `readWebhook`, que o esboço não previa: validar o HMAC é
+> do adapter, porque o segredo é configuração dele. Ver
+> [`packages/payments`](../../../packages/payments/README.md#onde-a-porta-se-afasta-do-esboço-do-pagmaxxmd).
+
 Dois adapters, um fornecedor — porque são **dois problemas de negócio**: o
 dinheiro do lojista e a nossa mensalidade. Se um dia a mensalidade migrar para
 outro provedor, o pagamento do lojista não é afetado.
