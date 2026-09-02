@@ -1,5 +1,5 @@
 import Fastify from 'fastify'
-import { checkDatabase, checkRedis, env, shutdown } from './composition.js'
+import { checkDatabase, checkIsolation, checkRedis, env, shutdown } from './composition.js'
 import { registerErrorHandler } from './plugins/error-handler.js'
 import { buildLoggerOptions, generateRequestId, registerLogging } from './plugins/logging.js'
 
@@ -36,6 +36,33 @@ app.get('/health', async (_request, reply) => {
 app.get('/health/live', async () => ({ status: 'ok' }))
 
 async function main(): Promise<void> {
+  /*
+   * Antes de abrir a porta: a conexao desta api esta MESMO sujeita a RLS?
+   *
+   * Um papel superusuario ou com BYPASSRLS ignora a politica e faz toda
+   * consulta devolver as linhas de todas as lojas, sem erro nenhum. Aconteceu
+   * num ambiente real e so a CI notou. Subir assim e pior que nao subir.
+   */
+  const isolamento = await checkIsolation()
+
+  if (isolamento.status === 'bypassed') {
+    app.log.fatal(isolamento.reason)
+    await shutdown()
+    process.exit(1)
+  }
+
+  if (isolamento.status === 'unknown') {
+    /* Banco fora do ar e indisponibilidade, nao falha de seguranca: `/health`
+       ja responde 503 e o orquestrador ja sabe. Recusar subir aqui deixaria
+       nem o `/health/live` de pe. */
+    app.log.warn(
+      { motivo: isolamento.reason },
+      'nao foi possivel verificar o isolamento entre empresas na subida',
+    )
+  } else {
+    app.log.info({ papel: isolamento.role }, 'isolamento entre empresas em vigor')
+  }
+
   try {
     await app.listen({ port: env.API_PORT, host: '0.0.0.0' })
     app.log.info(`api ouvindo em http://localhost:${env.API_PORT} — saude em /health`)
