@@ -34,7 +34,13 @@ jobs:
         # nao tem como seguir o padrao. Exigir aqui tornava toda atualizacao de
         # dependencia impossivel de mesclar — inclusive as de seguranca, o
         # oposto do que a RNF-029 quer.
-        if: github.actor != 'dependabot[bot]'
+        #
+        # A isencao olha a BRANCH, nao o ator. Com `github.actor` o check
+        # dependia de quem disparou a rodada: bastava um humano editar a
+        # descricao do PR para o evento vir em nome dele, a excecao nao valer e
+        # o PR reprovar por um nome de branch que ninguem pode mudar. Aconteceu
+        # no #11. O head_ref e propriedade do PR e nao muda conforme quem mexe.
+        if: ${{ !startsWith(github.head_ref, 'dependabot/') }}
         env:
           BRANCH: ${{ github.head_ref }}
         run: |
@@ -50,7 +56,7 @@ jobs:
 
       - name: Referencia a tarefa no titulo ou no corpo
         # Idem: atualizacao de dependencia nao sai de tarefa do ledger.
-        if: github.actor != 'dependabot[bot]'
+        if: ${{ !startsWith(github.head_ref, 'dependabot/') }}
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
