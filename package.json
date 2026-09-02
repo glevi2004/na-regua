@@ -40,7 +40,7 @@
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^9.1.2",
     "husky": "^9.1.7",
-    "lint-staged": "^15.5.2",
+    "lint-staged": "^17.4.1",
     "prettier": "^3.4.2",
     "tsx": "^4.23.13",
     "turbo": "^2.10.12",
