@@ -36,12 +36,20 @@ export async function conectarComoAplicacao(
   adminUrl: string,
 ): Promise<ConexaoDeAplicacao> {
   try {
+    /*
+     * O `EXCEPTION` nao e zelo excessivo: os arquivos de teste rodam em
+     * paralelo, e entre o `IF NOT EXISTS` e o `CREATE ROLE` cabe outra
+     * execucao criando o mesmo papel. Sem ele, um dos arquivos falha com
+     * "role already exists" e o motivo real (a corrida) fica escondido.
+     */
     await adminSql.unsafe(`
       DO $$
       BEGIN
         IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = '${PAPEL_DE_TESTE}') THEN
           CREATE ROLE ${PAPEL_DE_TESTE} LOGIN PASSWORD '${SENHA_DE_TESTE}';
         END IF;
+      EXCEPTION WHEN duplicate_object THEN
+        NULL;
       END
       $$
     `)

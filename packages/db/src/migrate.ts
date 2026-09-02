@@ -21,6 +21,14 @@ import postgres from 'postgres'
 const AQUI = dirname(fileURLToPath(import.meta.url))
 const PASTA = join(AQUI, 'migrations')
 
+/**
+ * Chave da trava de aplicacao das migrations.
+ *
+ * Numero arbitrario e fixo: o que importa e que todas as execucoes usem o
+ * mesmo. Nao derivar de hash de texto para nao mudar sem ninguem perceber.
+ */
+const TRAVA_DE_MIGRATION = 8_452_301
+
 export type Migration = {
   readonly version: string
   readonly sql: string
@@ -63,6 +71,25 @@ export async function migrate(url: string, pasta = PASTA): Promise<MigrationResu
   const sql = postgres(url, { max: 1, onnotice: () => {} })
 
   try {
+    /*
+     * Trava de aplicacao: so uma execucao aplica migration por vez. As outras
+     * esperam aqui e, quando entram, ja encontram tudo aplicado.
+     *
+     * Nao e precaucao teorica. Sem ela, tres arquivos de teste rodando em
+     * paralelo chamaram `migrate()` ao mesmo tempo e o Postgres respondeu
+     * `duplicate key value violates unique constraint
+     * "pg_type_typname_nsp_index"` — dois `CREATE TABLE` da mesma tabela em
+     * sessoes diferentes colidem no catalogo, porque criar tabela cria um tipo
+     * com o mesmo nome. O mesmo vale em producao com duas instancias subindo
+     * juntas, que e o caso normal em deploy.
+     *
+     * `pg_advisory_lock` e de SESSAO, nao de transacao: a trava precisa
+     * sobreviver as varias transacoes do laco abaixo. Por isso o unlock no
+     * `finally` — e por isso `max: 1`, para trava e unlock cairem na mesma
+     * conexao.
+     */
+    await sql`SELECT pg_advisory_lock(${TRAVA_DE_MIGRATION})`
+
     await sql`
       CREATE TABLE IF NOT EXISTS schema_migrations (
         version    text PRIMARY KEY,
@@ -125,6 +152,9 @@ export async function migrate(url: string, pasta = PASTA): Promise<MigrationResu
 
     return { aplicadas, jaEstavam }
   } finally {
+    /* Solta a trava antes de fechar. Fechar a conexao ja soltaria, mas
+       depender disso torna o unlock invisivel para quem le. */
+    await sql`SELECT pg_advisory_unlock(${TRAVA_DE_MIGRATION})`.catch(() => undefined)
     await sql.end({ timeout: 5 })
   }
 }
