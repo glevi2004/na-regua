@@ -12,7 +12,6 @@ import type { StatusTitulo } from '@/lib/types'
 import { daysUntil, describeDueDate, formatDate, formatMoney } from '@/lib/format'
 import Cabecalho from '@/components/Cabecalho'
 import Sanfona from '@/components/ui/Sanfona'
-import Botao from '@/components/ui/Botao'
 import { Etiqueta, Vazio } from '@/components/ui/Cartao'
 import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
@@ -76,6 +75,18 @@ export default function ContasView({ tipo }: { tipo: 'pagar' | 'receber' }) {
   function pedirBaixa(linha: Linha) {
     const saldo = linha.valor - linha.baixado
 
+    async function confirmar() {
+      /* SUBSTITUIR POR: POST /financeiro/titulos/:id/baixas */
+      const r = await baixarTitulo(linha.id, saldo, saldo)
+      if (!r.ok) {
+        Alert.alert('Nao deu certo', r.error)
+        return
+      }
+      setLinhas((atual) =>
+        atual.map((l) => (l.id === linha.id ? { ...l, baixado: l.valor, status: r.status } : l)),
+      )
+    }
+
     /* Baixa mexe em dinheiro: confirma antes, com o valor a vista.
        A baixa parcial fica no web — no celular, digitar valor com fila
        atras e mais risco que ajuda. */
@@ -86,25 +97,34 @@ export default function ContasView({ tipo }: { tipo: 'pagar' | 'receber' }) {
         { text: 'Voltar', style: 'cancel' },
         {
           text: 'Confirmar',
-          onPress: async () => {
-            /* SUBSTITUIR POR: POST /financeiro/titulos/:id/baixas */
-            const r = await baixarTitulo(linha.id, saldo, saldo)
-            if (!r.ok) {
-              Alert.alert('Nao deu certo', r.error)
-              return
-            }
-            setLinhas((atual) =>
-              atual.map((l) =>
-                l.id === linha.id ? { ...l, baixado: l.valor, status: r.status } : l,
-              ),
-            )
-          },
+          /* `void`: dispara sem esperar, e isso fica dito em vez de implicito. */
+          onPress: () => void confirmar(),
         },
       ],
     )
   }
 
   function pedirEstorno(linha: Linha) {
+    async function estornar() {
+      /* SUBSTITUIR POR: DELETE /financeiro/titulos/:id/baixas/:baixaId */
+      const r = await estornarTitulo(linha.id)
+      if (!r.ok) {
+        Alert.alert('Nao deu certo', r.error)
+        return
+      }
+      setLinhas((atual) =>
+        atual.map((l) =>
+          l.id === linha.id
+            ? {
+                ...l,
+                baixado: 0,
+                status: daysUntil(l.vencimento) < 0 ? 'vencido' : 'aberto',
+              }
+            : l,
+        ),
+      )
+    }
+
     Alert.alert(
       'Estornar baixa',
       `A baixa sera desfeita e o titulo volta para em aberto.\n\n${linha.contraparte}`,
@@ -113,25 +133,8 @@ export default function ContasView({ tipo }: { tipo: 'pagar' | 'receber' }) {
         {
           text: 'Estornar',
           style: 'destructive',
-          onPress: async () => {
-            /* SUBSTITUIR POR: DELETE /financeiro/titulos/:id/baixas/:baixaId */
-            const r = await estornarTitulo(linha.id)
-            if (!r.ok) {
-              Alert.alert('Nao deu certo', r.error)
-              return
-            }
-            setLinhas((atual) =>
-              atual.map((l) =>
-                l.id === linha.id
-                  ? {
-                      ...l,
-                      baixado: 0,
-                      status: daysUntil(l.vencimento) < 0 ? 'vencido' : 'aberto',
-                    }
-                  : l,
-              ),
-            )
-          },
+          /* `void`: dispara sem esperar, e isso fica dito em vez de implicito. */
+          onPress: () => void estornar(),
         },
       ],
     )
