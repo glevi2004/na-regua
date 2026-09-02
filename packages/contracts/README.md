@@ -2,8 +2,8 @@
 
 Schemas Zod — o contrato único do sistema.
 
-**Estado:** 🟢 schemas base (Company, User, Customer, Product, Sale) · `financial`,
-`fiscal` e `agent` ainda não · `NR-005`
+**Estado:** 🟢 schemas base (Company, User, Customer, Product, Sale) e agenda ·
+`financial`, `fiscal` e `agent` ainda não · `NR-005`, `NR-034`
 
 > ⚠️ **O pacote mais sensível do repositório.** Mudança aqui exige revisão das
 > três trilhas ([git-workflow](../../docs/engenharia/git-workflow.md#pull-requests)).

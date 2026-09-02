@@ -9,6 +9,7 @@ export {
 export {
   barcodeSchema,
   dateSchema,
+  dateTimeSchema,
   emailSchema,
   idSchema,
   moneyCentsSchema,
