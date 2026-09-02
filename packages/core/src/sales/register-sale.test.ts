@@ -87,6 +87,30 @@ describe('registerSale — o caminho comum', () => {
     expect(unitOfWork.estoque.get(CAFE.id)).toBe(7)
   })
 
+  /**
+   * A baixa da venda e o movimento de estoque mais frequente da loja — RF-024.
+   * Sem esta linha, a trilha responderia "por que o saldo caiu?" com silencio
+   * exatamente onde a resposta quase sempre esta.
+   */
+  it('a baixa deixa rastro na trilha, com a venda e quem operou', async () => {
+    const resultado = await registerSale(
+      deps(),
+      contexto({ userId: 'joana' }),
+      venda({
+        items: [{ productId: CAFE.id, quantity: 3, unitPriceCents: 1990 }],
+        payments: [{ method: 'cash', amountCents: 5970 }],
+      }),
+    )
+
+    expect(unitOfWork.movimentos).toHaveLength(1)
+    const [mov] = unitOfWork.movimentos
+    expect(mov?.kind).toBe('sale')
+    expect(mov?.quantityDelta).toBe(-3)
+    expect(mov?.balanceAfter).toBe(7)
+    expect(mov?.saleId).toBe(resultado.sale.id)
+    expect(mov?.createdBy).toBe('joana')
+  })
+
   it('guarda o preco praticado e o custo do cadastro', async () => {
     /* O balcao negociou 15,00 num produto de 19,90. */
     await registerSale(

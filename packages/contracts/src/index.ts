@@ -11,6 +11,7 @@
 export * from './common/index.js'
 export * from './company/company.js'
 export * from './customer/customer.js'
+export * from './inventory/movement.js'
 export * from './invoice/invoice.js'
 export * from './messaging/sender.js'
 export * from './payment/gateway.js'

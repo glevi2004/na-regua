@@ -1,5 +1,6 @@
+import type { MovementKind } from '@na-regua/contracts'
 import type { CardFeeTable, DiscountPolicy, TaxRules } from '@na-regua/domain'
-import type { CompanyId } from '../context.js'
+import type { CompanyId, UserId } from '../context.js'
 import type {
   CompanySettingsRepository,
   NewSale,
@@ -24,10 +25,23 @@ export type VendaGravada = RegisteredSale & {
   readonly dados: NewSale
 }
 
+/** O que a baixa da venda deixa na trilha de estoque — RF-024. */
+export type MovimentoDaVenda = {
+  readonly productId: string
+  readonly kind: MovementKind
+  readonly quantityDelta: number
+  readonly balanceAfter: number
+  readonly saleId: string
+  readonly createdBy: UserId
+  readonly createdAt: Date
+}
+
 export class InMemoryUnitOfWork implements UnitOfWork {
   readonly vendas: VendaGravada[] = []
   /** Estoque por produto, para conferir a baixa. */
   readonly estoque = new Map<string, number>()
+  /** Trilha de estoque gerada pela venda — RF-024. */
+  readonly movimentos: MovimentoDaVenda[] = []
   private readonly produtos = new Map<string, SaleProductSnapshot & { companyId: CompanyId }>()
   private sequencia = 0
   /** Liga para simular falha no meio da transacao, depois de gravar a venda. */
@@ -42,6 +56,7 @@ export class InMemoryUnitOfWork implements UnitOfWork {
     /* Fotografia do estado antes de abrir: e o que o rollback restaura. */
     const vendasAntes = [...this.vendas]
     const estoqueAntes = new Map(this.estoque)
+    const movimentosAntes = [...this.movimentos]
     const sequenciaAntes = this.sequencia
 
     try {
@@ -51,6 +66,8 @@ export class InMemoryUnitOfWork implements UnitOfWork {
       this.vendas.push(...vendasAntes)
       this.estoque.clear()
       for (const [k, v] of estoqueAntes) this.estoque.set(k, v)
+      this.movimentos.length = 0
+      this.movimentos.push(...movimentosAntes)
       this.sequencia = sequenciaAntes
       throw erro
     }
@@ -92,11 +109,22 @@ export class InMemoryUnitOfWork implements UnitOfWork {
         return gravada
       },
 
-      decreaseStock: async (itens) => {
+      decreaseStock: async (itens, origem) => {
         for (const item of itens) {
           const atual = this.estoque.get(item.productId) ?? 0
           /* Permite negativo: RF-028 deixa o operador prosseguir sem saldo. */
-          this.estoque.set(item.productId, atual - item.quantity)
+          const novo = atual - item.quantity
+          this.estoque.set(item.productId, novo)
+          /* A baixa da venda tambem e movimento de estoque — RF-024. */
+          this.movimentos.push({
+            productId: item.productId,
+            kind: 'sale',
+            quantityDelta: -item.quantity,
+            balanceAfter: novo,
+            saleId: origem.saleId,
+            createdBy: origem.createdBy,
+            createdAt: origem.createdAt,
+          })
         }
       },
 

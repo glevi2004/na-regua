@@ -234,8 +234,11 @@ export async function registerSale(
       createdAt: ctx.now,
     })
 
+    /* A baixa carrega autoria para virar linha na trilha de estoque — RF-024.
+       Depois do insertSale porque so aqui a venda tem id. */
     await tx.decreaseStock(
       input.items.map((i) => ({ productId: i.productId, quantity: i.quantity })),
+      { saleId: venda.id, createdBy: ctx.userId, createdAt: ctx.now },
     )
 
     return { sale: venda, replayed: false, stockWarnings: avisos }
