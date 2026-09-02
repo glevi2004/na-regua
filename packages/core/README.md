@@ -2,8 +2,8 @@
 
 **O núcleo.** Casos de uso.
 
-**Estado:** 🟡 vocabulário da borda pronto (`ExecutionContext`, `AppError`) ·
-casos de uso ainda não · `NR-021`, `NR-022`, `NR-023`, `NR-025`, `NR-028`…
+**Estado:** 🟡 agenda implementada (NR-034) · cadastros e venda ainda não ·
+`NR-021`, `NR-022`, `NR-023`, `NR-025`, `NR-028`…
 
 ## Responsabilidade
 
@@ -70,16 +70,39 @@ transação e publicado depois.
 src/
 ├── index.ts
 ├── context.ts          ExecutionContext, tipo UseCase
+├── app-error.ts        erro tipado que a api traduz para HTTP
+├── authorization.ts    verificação de papel — aqui, nunca no handler
 ├── ports/              interfaces implementadas pelos adapters
+│   ├── appointment-repository.ts   ✅
+│   ├── reminder-scheduler.ts       ✅
 │   ├── invoice-issuer.ts
 │   ├── message-sender.ts
 │   ├── payment-gateway.ts
 │   ├── bank-statement-provider.ts
 │   └── subscription-provider.ts
+├── schedule/           ✅ agenda e lembretes (NR-034)
 ├── company/  customer/  product/  inventory/
 ├── sale/  financial/  banking/  accounting/
 └── audit/
 ```
+
+## O molde: agenda (NR-034)
+
+A agenda é o primeiro caso de uso completo e serve de referência para os
+próximos. O que ela demonstra:
+
+| Decisão                                   | Onde aparece                                                             |
+| ----------------------------------------- | ------------------------------------------------------------------------ |
+| A porta é declarada **aqui**, não em `db` | [`ports/appointment-repository.ts`](src/ports/appointment-repository.ts) |
+| `companyId` em toda assinatura da porta   | o isolamento não depende de o chamador lembrar de filtrar                |
+| Papel verificado no caso de uso           | [`authorization.ts`](src/authorization.ts) — senão o WhatsApp não aplica |
+| Efeito externo fora da transação          | o lembrete é agendado **depois** de salvar                               |
+| Cancela, não apaga                        | [RNF-040](../../docs/produto/requisitos-nao-funcionais.md)               |
+| Recurso de outra empresa → `NOT_FOUND`    | 403 confirmaria que o id existe                                          |
+
+**Testado com repositório em memória, sem Postgres.** É para isso que a porta
+existe. O fake aplica o filtro por empresa de verdade — fake que só devolve
+sucesso esconde exatamente o que precisa ser testado.
 
 ## Testes
 

@@ -91,3 +91,15 @@ export const rateSchema = z
 export const dateSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'Data invalida. Use o formato AAAA-MM-DD.')
+
+/**
+ * Instante em ISO 8601 com fuso, sempre UTC no armazenamento.
+ *
+ * Exige o fuso explicito porque "2026-09-02T14:00" sem ele significa coisas
+ * diferentes para cada cliente — e compromisso marcado uma hora errado e
+ * exatamente o problema que a agenda deveria resolver. Ver ambientes.md: TZ e
+ * de exibicao, armazenamento e sempre UTC.
+ */
+export const dateTimeSchema = z
+  .string()
+  .datetime({ offset: true, message: 'Data e hora invalidas. Use ISO 8601 com fuso.' })

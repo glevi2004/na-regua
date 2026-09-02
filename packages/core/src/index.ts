@@ -6,11 +6,25 @@
  * aplicativo ou do WhatsApp. Tambem e aqui que as PORTAS dos adapters sao
  * declaradas. Ver docs/arquitetura/principios.md#1-core-e-o-nucleo
  *
- * Os casos de uso em si ainda nao existem — NR-021 em diante. O que ja esta
- * aqui e o vocabulario que `apps/api` precisa para montar a borda: o contexto
- * de execucao e o erro tipado que ele traduz para HTTP (NR-009).
+ * A agenda (NR-034) e o primeiro caso de uso completo e serve de molde para os
+ * proximos: porta declarada aqui, repositorio injetado, teste com implementacao
+ * em memoria. Cadastros e venda vem com NR-021 e NR-022.
  */
 export { AppError, isAppError } from './app-error.js'
 export type { AppErrorCode, FieldIssue } from './app-error.js'
 
-export type { Channel, CompanyId, ExecutionContext, UseCase, UserId } from './execution-context.js'
+export { assertCanWrite } from './authorization.js'
+
+export type { Channel, CompanyId, ExecutionContext, UseCase, UserId } from './context.js'
+
+/* --- Portas: interfaces que db e worker implementam --- */
+export type { AppointmentRepository, NewAppointment } from './ports/appointment-repository.js'
+export type { ReminderScheduler } from './ports/reminder-scheduler.js'
+
+/* --- Agenda — NR-034 --- */
+export { cancelAppointment } from './schedule/cancel-appointment.js'
+export type { CancelAppointmentDeps } from './schedule/cancel-appointment.js'
+export { createAppointment, reminderFireAt } from './schedule/create-appointment.js'
+export type { CreateAppointmentDeps } from './schedule/create-appointment.js'
+export { listDayAppointments } from './schedule/list-day-appointments.js'
+export type { DayAgenda, ListDayAppointmentsDeps } from './schedule/list-day-appointments.js'
