@@ -65,7 +65,7 @@ Varredura das [decisões em aberto](../decisoes/README.md):
 
 É o ritual mais fácil de pular e o mais caro de pular, e a DEC-002 é a prova:
 fechá-la liberou **26 tarefas e 73 dias** de uma vez
-([ADR-0001](../decisoes/adr/0001-rls-por-linha.md)). Restam **43 dos 116
+([ADR-0001](../decisoes/adr/0001-rls-por-linha.md)). Restam **43 dos 114
 dias-desenvolvedor bloqueados por 11 decisões**
 ([ledger](task-ledger.md#bloqueios-por-decisão)).
 

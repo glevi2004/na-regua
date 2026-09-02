@@ -2,7 +2,7 @@
 
 Schema Drizzle, migrations, políticas RLS e repositórios.
 
-**Estado:** 🟢 isolamento multi-tenant implementado e testado (`NR-007`) · 🟡 tabelas de negócio pendentes (`NR-008`, `NR-020`)
+**Estado:** 🟢 isolamento (`NR-007`) e cadastros (`NR-008`) · 🟡 vendas e financeiro pendentes (`NR-020`)
 
 Isolamento entre empresas é **RLS por linha** (`company_id` + política no
 PostgreSQL). Ver [`dados.md`](../../docs/arquitetura/dados.md#multi-tenant).
@@ -102,6 +102,43 @@ aparece sob concorrência. Há um teste dedicado a ele.
 Para o que é legitimamente global — migrations, tarefas de plataforma — existe
 `withPlatformScope`. Nomeado assim, e não `withoutTenant`, para que quem lê a
 chamada veja uma exceção consciente e não um esquecimento.
+
+## Tabelas
+
+| Tabela          | Tenant                | Migration        |
+| --------------- | --------------------- | ---------------- |
+| `companies`     | **é** o tenant (`id`) | `0002_cadastros` |
+| `users`         | via `company_users`   | `0002_cadastros` |
+| `company_users` | `company_id`          | `0002_cadastros` |
+| `categories`    | `company_id`          | `0002_cadastros` |
+| `customers`     | `company_id`          | `0002_cadastros` |
+| `products`      | `company_id`          | `0002_cadastros` |
+
+Dois casos fogem do `company_id`, e os dois de propósito:
+
+**`companies` é o próprio tenant.** A coluna que a identifica é o `id`, então
+ela usa `enable_root_tenant_isolation`. Consequência prática: **a empresa nasce
+sob o próprio tenant** — o `id` é gerado na aplicação e o contexto já é ele:
+
+```ts
+const id = randomUUID()
+await withTenant(sql, id, (tx) => tx`INSERT INTO companies (id, ...) VALUES (${id}, ...)`)
+```
+
+Parece incômodo e é a propriedade que se quer. A alternativa seria uma política
+de INSERT com `WITH CHECK (true)`, que abriria exatamente o buraco que o resto
+fecha: qualquer contexto gravando linha de qualquer empresa.
+
+**`users` não tem `company_id`** porque a mesma pessoa opera mais de uma loja —
+uma identidade por empresa duplicaria a pessoa e as credenciais dela. Mas não
+ter `company_id` não pode significar ser visível a todos: e-mail e telefone são
+dado pessoal. A política passa por `company_users`, então só se enxerga quem tem
+vínculo com a empresa do contexto.
+
+Isso tem uma consequência que morde: **`INSERT INTO users ... RETURNING` volta
+vazio.** O `RETURNING` aplica a política de `SELECT`, e no instante do insert o
+vínculo em `company_users` ainda não existe. Gere o `id` na aplicação e insira
+os dois na mesma transação.
 
 ## Dois papéis de banco
 
