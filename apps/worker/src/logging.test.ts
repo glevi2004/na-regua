@@ -1,0 +1,37 @@
+import { describe, expect, it } from 'vitest'
+import { safeUrl } from './logging.js'
+
+/**
+ * `REDIS_URL` e `DATABASE_URL` sao marcadas como segredo em ambientes.md e
+ * carregam credencial no proprio texto. O worker logava a URL inteira ao
+ * conectar — RNF-022.
+ */
+describe('safeUrl', () => {
+  it('remove usuario e senha da URL de conexao', () => {
+    const saida = safeUrl('redis://admin:senhaSuperSecreta@redis.interno:6379')
+
+    expect(saida).not.toContain('senhaSuperSecreta')
+    expect(saida).not.toContain('admin')
+    expect(saida).toBe('redis://redis.interno:6379')
+  })
+
+  it('mantem host e porta, que e o que ajuda a diagnosticar', () => {
+    expect(safeUrl('redis://localhost:6379')).toBe('redis://localhost:6379')
+  })
+
+  it('indica quando a porta e a padrao', () => {
+    expect(safeUrl('rediss://redis.exemplo.com')).toBe('rediss://redis.exemplo.com:(padrao)')
+  })
+
+  it('funciona para Postgres tambem', () => {
+    const saida = safeUrl('postgresql://naregua:naregua@localhost:5432/naregua')
+
+    expect(saida).not.toContain('naregua:naregua')
+    expect(saida).toBe('postgresql://localhost:5432')
+  })
+
+  /* Na duvida, omite: imprimir texto nao parseado pode publicar credencial. */
+  it.each(['nao-e-url', '', 'redis//sem-dois-pontos'])('omite %j quando nao parseia', (entrada) => {
+    expect(safeUrl(entrada)).toBe('[url invalida]')
+  })
+})

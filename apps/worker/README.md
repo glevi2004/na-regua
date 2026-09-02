@@ -2,7 +2,8 @@
 
 BullMQ — filas e jobs agendados.
 
-**Estado:** 🟡 conecta e registra as filas; sem consumidores · `NR-041`
+**Estado:** 🟡 conecta, registra as filas e loga falha de job; sem
+consumidores · `NR-041`
 
 ## Responsabilidade
 
@@ -33,6 +34,20 @@ handler HTTP — desempacota o job, monta o contexto, chama o caso de uso.
 > **Nome de fila nunca usa `:`.** O BullMQ o reserva como separador de chave no
 > Redis e recusa o nome em tempo de execução — `Queue name cannot contain :`.
 > Convenção: `<domínio>-<ação>`.
+
+## Observabilidade
+
+Log em JSON com `queue`, `jobId` e `attempt` — o worker não tem requisição
+HTTP, então é o job que correlaciona. `attempt` distingue uma falha que se
+repete de falhas diferentes, que sem ele são indistinguíveis.
+
+Falha de job sai em `error` com fila, id, tentativa e teto de tentativas —
+[RNF-062](../../docs/produto/requisitos-nao-funcionais.md) exige que ela fique
+visível, e "algo falhou" não é visibilidade.
+
+> **URL de conexão nunca vai inteira para o log.** `REDIS_URL` e
+> `DATABASE_URL` carregam usuário e senha no próprio texto. `safeUrl` deixa só
+> protocolo, host e porta — [RNF-022](../../docs/produto/requisitos-nao-funcionais.md).
 
 ## Política padrão de job
 

@@ -1,11 +1,17 @@
 import Fastify from 'fastify'
 import { checkDatabase, checkRedis, env, shutdown } from './composition.js'
 import { registerErrorHandler } from './plugins/error-handler.js'
+import { buildLoggerOptions, generateRequestId, registerLogging } from './plugins/logging.js'
 
-// RNF-058: log estruturado (JSON). companyId/userId entram com NR-030.
+// RNF-058: log estruturado (JSON) com requestId, companyId e userId.
 const app = Fastify({
-  logger: { level: env.LOG_LEVEL },
+  logger: buildLoggerOptions(env.LOG_LEVEL),
+  /* Reaproveita o x-request-id de quem chamou, para a operacao ser seguivel
+     entre servicos. Ver plugins/logging.ts sobre por que ele e sanitizado. */
+  genReqId: generateRequestId,
 })
+
+registerLogging(app)
 
 /* Antes de qualquer rota: erro de rota nao registrada tambem passa por aqui. */
 registerErrorHandler(app)
