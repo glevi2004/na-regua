@@ -180,16 +180,17 @@ despercebida junto com o resto.
 
 ## Estado atual
 
-| Item              | Estado                                                                        |
-| ----------------- | ----------------------------------------------------------------------------- |
-| `ci.yml`          | ✅ escrito; os 6 comandos passam localmente                                   |
-| `pr-checks.yml`   | ✅ escrito; commitlint verificado                                             |
-| `security.yml`    | ✅ escrito                                                                    |
-| Hooks locais      | ✅ husky + commitlint + lint-staged                                           |
-| `CODEOWNERS`      | 🟡 escrito com placeholders `@TRILHA-1/2/3` — **trocar pelos usuários reais** |
-| Branch protection | 🔴 manual, ainda não configurada                                              |
-| Deploy            | 🔴 esqueleto — [DEC-009](../decisoes/README.md#dec-009)                       |
-| Build mobile      | 🔴 esqueleto — falta conta EAS                                                |
+| Item              | Estado                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------------- |
+| `ci.yml`          | ✅ escrito; os 6 comandos passam localmente                                                       |
+| `pr-checks.yml`   | ✅ escrito; commitlint verificado                                                                 |
+| `security.yml`    | ✅ escrito                                                                                        |
+| Hooks locais      | ✅ husky + commitlint + lint-staged                                                               |
+| Changelog         | ✅ `pnpm changelog` — gerado dos commits ([git-workflow](git-workflow.md#como-cortar-um-release)) |
+| `CODEOWNERS`      | 🟡 escrito com placeholders `@TRILHA-1/2/3` — **trocar pelos usuários reais**                     |
+| Branch protection | 🔴 manual, ainda não configurada                                                                  |
+| Deploy            | 🔴 esqueleto — [DEC-009](../decisoes/README.md#dec-009)                                           |
+| Build mobile      | 🔴 esqueleto — falta conta EAS                                                                    |
 
 ## Documentos relacionados
 
