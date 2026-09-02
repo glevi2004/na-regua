@@ -231,12 +231,35 @@ PR grande demais? Divida em: (1) refactor sem mudança de comportamento,
 | ---------------- | ----------------------------------------------------------------- |
 | Pacotes internos | `private: true`, versão fixa `0.0.0` — não publicamos em registry |
 | Monorepo         | tag única `v0.x.y` (SemVer)                                       |
-| `CHANGELOG.md`   | gerado dos Conventional Commits no momento do release             |
+| `CHANGELOG.md`   | gerado dos Conventional Commits por `pnpm changelog`              |
+
+### Como cortar um release
 
 ```bash
+git switch main && git pull --rebase
+
+pnpm changelog                 # confere o que entrou, ainda como "Não lançado"
+pnpm changelog v0.4.0          # fecha a seção com a versão e a data
+
+git add CHANGELOG.md
+git commit -m "chore(repo): changelog da v0.4.0"
+
 git tag -a v0.4.0 -m "v0.4.0"
-git push origin v0.4.0
+git push origin main v0.4.0
 ```
+
+**Qual número usar.** Enquanto estamos em `0.x`, a regra prática é: `fix` sozinho
+sobe o patch; qualquer `feat` sobe o minor; `BREAKING CHANGE` também sobe o minor,
+porque em `0.x` o major é reservado para a primeira versão estável.
+
+**O que o script faz e o que não faz.** Ele lê os Conventional Commits desde a
+última tag e agrupa por tipo e escopo. Não cria tag, não faz bump de versão em
+`package.json` e não publica nada — os pacotes são privados e a versão deles é
+fixa em `0.0.0` de propósito.
+
+A referência da tarefa sai do rodapé `Refs:`, e **só dele**. Um `NR-xxx` citado
+no meio do texto do commit não vira referência — senão "enquanto o NR-014 não
+existe" atribuiria o commit ao NR-014.
 
 Migrar para tags por aplicação (`api-v1.2.0`) quando os deploys deixarem de ser
 sincronizados — [DEC-014](../decisoes/README.md#dec-014). Hoje seria cerimônia

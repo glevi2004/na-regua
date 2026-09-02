@@ -27,7 +27,8 @@
     "infra:redis": "docker compose -f infra/docker-compose.yml exec redis redis-cli",
     "prepare": "husky",
     "commitlint": "commitlint",
-    "ledger:csv": "node scripts/ledger-to-csv.mjs"
+    "ledger:csv": "node scripts/ledger-to-csv.mjs",
+    "changelog": "node scripts/changelog.mjs"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.8.1",
