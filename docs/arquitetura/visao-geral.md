@@ -152,15 +152,15 @@ validações e a auditoria.
 
 ## Decisões estruturais tomadas
 
-| Decisão                | Escolha                    | Por quê                                                                                       |
-| ---------------------- | -------------------------- | --------------------------------------------------------------------------------------------- |
-| Organização do código  | Monorepo                   | Contrato compartilhado entre 4 apps; mudança em `contracts` precisa ser atômica               |
-| Gerenciador de pacotes | pnpm + Turborepo           | Cache de tarefas e execução por pacote afetado; `node-linker=hoisted` por causa do Metro/Expo |
-| Linguagem              | TypeScript em todo o stack | Um tipo de venda compartilhado entre backend, app e agente                                    |
-| Estilo de API          | REST                       | Público e superfície pequenos; GraphQL não se paga aqui                                       |
-| ORM                    | Drizzle                    | SQL explícito e tipado, essencial para trabalhar com RLS sem surpresa                         |
-| Isolamento             | RLS no PostgreSQL          | Isolamento que não depende de o desenvolvedor lembrar do `WHERE`                              |
-| Validação              | Zod em `contracts`         | O mesmo schema serve a HTTP, tipos e tools do agente                                          |
+| Decisão                | Escolha                    | Por quê                                                                                                              |
+| ---------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| Organização do código  | Monorepo                   | Contrato compartilhado entre 4 apps; mudança em `contracts` precisa ser atômica                                      |
+| Gerenciador de pacotes | pnpm + Turborepo           | Cache de tarefas e execução por pacote afetado; `node-linker=hoisted` por causa do Metro/Expo                        |
+| Linguagem              | TypeScript em todo o stack | Um tipo de venda compartilhado entre backend, app e agente                                                           |
+| Estilo de API          | REST                       | Público e superfície pequenos; GraphQL não se paga aqui                                                              |
+| ORM                    | Drizzle                    | SQL explícito e tipado, essencial para trabalhar com RLS sem surpresa                                                |
+| Isolamento             | RLS no PostgreSQL          | Isolamento que não depende de o desenvolvedor lembrar do `WHERE` — [ADR-0001](../decisoes/adr/0001-rls-por-linha.md) |
+| Validação              | Zod em `contracts`         | O mesmo schema serve a HTTP, tipos e tools do agente                                                                 |
 
 ## Decisões estruturais ainda em aberto
 
@@ -168,7 +168,6 @@ Estas **não** estão decididas e não devem ser assumidas em código:
 
 | Tema                            | Decisão                                  | Impacto se decidida errado                       |
 | ------------------------------- | ---------------------------------------- | ------------------------------------------------ |
-| Estratégia multi-tenant         | [DEC-002](../decisoes/README.md#dec-002) | Muda todo o `db` e o contexto de `core`          |
 | Hospedagem e deploy             | [DEC-009](../decisoes/README.md#dec-009) | Define `infra/` e os workflows de deploy         |
 | Autenticação                    | [DEC-008](../decisoes/README.md#dec-008) | Afeta api, web, mobile e o vínculo do WhatsApp   |
 | LLM e recuperação de informação | [DEC-007](../decisoes/README.md#dec-007) | Define o runtime do `agent` e o custo por tenant |

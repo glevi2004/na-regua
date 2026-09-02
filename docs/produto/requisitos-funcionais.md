@@ -248,7 +248,6 @@ Quem implementa o quê. Base para a divisão de trilhas em
 
 | Decisão                                                    | Requisitos bloqueados                          |
 | ---------------------------------------------------------- | ---------------------------------------------- |
-| [DEC-002](../decisoes/README.md#dec-002) multi-tenant      | RF-121, RF-122                                 |
 | [DEC-003](../decisoes/README.md#dec-003) provedor WhatsApp | RF-015, RF-016, RF-048, RF-068, RF-094, RF-095 |
 | [DEC-004](../decisoes/README.md#dec-004) provedor fiscal   | RF-045 a RF-054                                |
 | [DEC-005](../decisoes/README.md#dec-005) Open Finance      | RF-074 a RF-077                                |

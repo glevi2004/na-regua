@@ -5,8 +5,8 @@ Name,Group,Trilha,Status,Priority,Estimate (d),Sprint,Depends on,Blocked by,Modu
 "NR-004 — domain: cálculo de venda — custo, imposto, tarifa de cartão, parcelas",,Trilha 1 — Nucleo & Dados,Done,Medium,3,Backlog,NR-003,,domain,"RF-040, RF-041, RF-038",docs/processo/task-ledger.md
 "NR-005 — contracts: schemas base (Company, Customer, Product, Sale)",,Trilha 1 — Nucleo & Dados,Done,Medium,2,Backlog,NR-003,,contracts,RNF-027,docs/processo/task-ledger.md
 NR-006 — Configuração tipada: validar variáveis de ambiente na inicialização,,Trilha 2 — Plataforma & Integracoes,Done,Medium,1,Backlog,NR-001,,repo,—,docs/processo/task-ledger.md
-"NR-007 — db: estratégia multi-tenant, RLS e teste de isolamento",,Trilha 1 — Nucleo & Dados,Blocked,High,3,Backlog,NR-005,DEC-002,db,"RF-121, RF-122, RNF-021",docs/processo/task-ledger.md
-"NR-008 — db: schema de cadastros (companies, users, customers, products)",,Trilha 1 — Nucleo & Dados,Blocked,High,2,Backlog,NR-007,DEC-002,db,"RF-001, RF-009, RF-017",docs/processo/task-ledger.md
+"NR-007 — db: estratégia multi-tenant, RLS e teste de isolamento",,Trilha 1 — Nucleo & Dados,Not started,Medium,3,Backlog,NR-005,,db,"RF-121, RF-122, RNF-021",docs/processo/task-ledger.md
+"NR-008 — db: schema de cadastros (companies, users, customers, products)",,Trilha 1 — Nucleo & Dados,Not started,Medium,2,Backlog,NR-007,,db,"RF-001, RF-009, RF-017",docs/processo/task-ledger.md
 "NR-009 — api: base — contexto de execução, erro padronizado, validação por contracts",,Trilha 2 — Plataforma & Integracoes,Done,Medium,2,Backlog,NR-005,,api,"RNF-027, RNF-054",docs/processo/task-ledger.md
 NR-010 — Qualidade: lint com type-checking e piso de cobertura na CI,,Trilha 2 — Plataforma & Integracoes,Done,Medium,1,Backlog,NR-001,,repo,RNF-068,docs/processo/task-ledger.md
 "NR-011 — ui: tokens de design (cor, tipografia, espaçamento)",,Trilha 3 — Clientes,Done,High,2,Backlog,,DEC-001/QST-011,ui,RNF-055,docs/processo/task-ledger.md
@@ -14,28 +14,28 @@ NR-012 — mobile: shell de navegação e sessão,,Trilha 3 — Clientes,Done,Hi
 NR-013 — web: shell de layout e sessão,,Trilha 3 — Clientes,Blocked,High,2,Backlog,NR-011,DEC-008,web,US-059,docs/processo/task-ledger.md
 "NR-014 — Autenticação: login, papéis, usuário em várias empresas",,Trilha 2 — Plataforma & Integracoes,Blocked,High,4,Backlog,NR-009,DEC-008,api core,"RF-119, RF-120, RF-005",docs/processo/task-ledger.md
 NR-015 — infra: definir hospedagem e preencher os workflows de deploy,,Trilha 2 — Plataforma & Integracoes,Blocked,High,3,Backlog,,DEC-009,infra,"RNF-064, RNF-013",docs/processo/task-ledger.md
-NR-020 — db: schema de vendas e financeiro,,Trilha 1 — Nucleo & Dados,Blocked,High,3,Backlog,NR-008,NR-008 → DEC-002,db,"RF-027–044, RF-063",docs/processo/task-ledger.md
-"NR-021 — core: casos de uso de cadastro (empresa, cliente, produto)",,Trilha 1 — Nucleo & Dados,Blocked,High,3,Backlog,NR-008,NR-008 → DEC-002,core,RF-001–019,docs/processo/task-ledger.md
-"NR-022 — core: registerSale — transação única com estoque, recebível e auditoria",,Trilha 1 — Nucleo & Dados,Blocked,High,4,Backlog,"NR-020, NR-004",NR-020 → DEC-002,core,"RF-034–039, RNF-046",docs/processo/task-ledger.md
-NR-023 — core: movimentação de estoque e ajuste com autoria,,Trilha 1 — Nucleo & Dados,Blocked,High,2,Backlog,NR-021,NR-021 → DEC-002,core,RF-022–024,docs/processo/task-ledger.md
+NR-020 — db: schema de vendas e financeiro,,Trilha 1 — Nucleo & Dados,Not started,Medium,3,Backlog,NR-008,,db,"RF-027–044, RF-063",docs/processo/task-ledger.md
+"NR-021 — core: casos de uso de cadastro (empresa, cliente, produto)",,Trilha 1 — Nucleo & Dados,Not started,Medium,3,Backlog,NR-008,,core,RF-001–019,docs/processo/task-ledger.md
+"NR-022 — core: registerSale — transação única com estoque, recebível e auditoria",,Trilha 1 — Nucleo & Dados,Not started,Medium,4,Backlog,"NR-020, NR-004",,core,"RF-034–039, RNF-046",docs/processo/task-ledger.md
+NR-023 — core: movimentação de estoque e ajuste com autoria,,Trilha 1 — Nucleo & Dados,Not started,Medium,2,Backlog,NR-021,,core,RF-022–024,docs/processo/task-ledger.md
 "NR-024 — domain: desconto, limite por papel, troco",,Trilha 1 — Nucleo & Dados,Done,Medium,2,Backlog,NR-004,,domain,"RF-030, RF-031, RF-035",docs/processo/task-ledger.md
-NR-025 — core: trilha de auditoria somente-inserção,,Trilha 1 — Nucleo & Dados,Blocked,High,2,Backlog,NR-020,NR-020 → DEC-002,core,"RF-123, RF-124",docs/processo/task-ledger.md
-NR-026 — api: rotas de cadastro,,Trilha 2 — Plataforma & Integracoes,Blocked,High,2,Backlog,"NR-021, NR-009",NR-021 → DEC-002,api,RF-001–019,docs/processo/task-ledger.md
-NR-027 — api: rota de venda com chave de idempotência,,Trilha 2 — Plataforma & Integracoes,Blocked,High,2,Backlog,NR-022,NR-022 → DEC-002,api,"RF-036, RNF-043",docs/processo/task-ledger.md
+NR-025 — core: trilha de auditoria somente-inserção,,Trilha 1 — Nucleo & Dados,Not started,Medium,2,Backlog,NR-020,,core,"RF-123, RF-124",docs/processo/task-ledger.md
+NR-026 — api: rotas de cadastro,,Trilha 2 — Plataforma & Integracoes,Not started,Medium,2,Backlog,"NR-021, NR-009",,api,RF-001–019,docs/processo/task-ledger.md
+NR-027 — api: rota de venda com chave de idempotência,,Trilha 2 — Plataforma & Integracoes,Not started,Medium,2,Backlog,NR-022,,api,"RF-036, RNF-043",docs/processo/task-ledger.md
 "NR-030 — api: observabilidade — requestId, log estruturado, rastreamento",,Trilha 2 — Plataforma & Integracoes,Done,Medium,2,Backlog,NR-009,,api worker,"RNF-058, RNF-059",docs/processo/task-ledger.md
-NR-070 — mobile: cadastro de produto com leitor de código de barras,,Trilha 3 — Clientes,Blocked,High,3,Backlog,NR-026,NR-026 → DEC-002,mobile,"US-009, RF-017",docs/processo/task-ledger.md
-"NR-071 — mobile: carrinho, seleção de cliente e fechamento de venda",,Trilha 3 — Clientes,Blocked,High,5,Backlog,NR-027,NR-027 → DEC-002,mobile,US-014–019,docs/processo/task-ledger.md
-NR-072 — web: backoffice de cadastros,,Trilha 3 — Clientes,Blocked,High,3,Backlog,NR-026,NR-026 → DEC-002,web,"E1, E2, E3",docs/processo/task-ledger.md
-"NR-028 — core: contas a pagar e a receber, com recorrência",,Trilha 1 — Nucleo & Dados,Blocked,High,3,Backlog,NR-020,NR-020 → DEC-002,core,RF-055–067,docs/processo/task-ledger.md
-"NR-029 — core: baixa, baixa parcial e estorno",,Trilha 1 — Nucleo & Dados,Blocked,High,2,Backlog,NR-028,NR-028 → DEC-002,core,"RF-059, RF-066, RF-067",docs/processo/task-ledger.md
+NR-070 — mobile: cadastro de produto com leitor de código de barras,,Trilha 3 — Clientes,Not started,Medium,3,Backlog,NR-026,,mobile,"US-009, RF-017",docs/processo/task-ledger.md
+"NR-071 — mobile: carrinho, seleção de cliente e fechamento de venda",,Trilha 3 — Clientes,Not started,Medium,5,Backlog,NR-027,,mobile,US-014–019,docs/processo/task-ledger.md
+NR-072 — web: backoffice de cadastros,,Trilha 3 — Clientes,Not started,Medium,3,Backlog,NR-026,,web,"E1, E2, E3",docs/processo/task-ledger.md
+"NR-028 — core: contas a pagar e a receber, com recorrência",,Trilha 1 — Nucleo & Dados,Not started,Medium,3,Backlog,NR-020,,core,RF-055–067,docs/processo/task-ledger.md
+"NR-029 — core: baixa, baixa parcial e estorno",,Trilha 1 — Nucleo & Dados,Not started,Medium,2,Backlog,NR-028,,core,"RF-059, RF-066, RF-067",docs/processo/task-ledger.md
 NR-040 — fiscal: porta InvoiceIssuer + adapter falso,,Trilha 2 — Plataforma & Integracoes,Done,Medium,2,Backlog,NR-005,,fiscal core,RF-045,docs/processo/task-ledger.md
 "NR-041 — worker: consumidores de fila (emissão, mensagem, cobrança)",,Trilha 2 — Plataforma & Integracoes,Not started,Medium,3,Backlog,NR-040,,worker,"RNF-004, RF-130",docs/processo/task-ledger.md
 "NR-042 — fiscal: adapter real, contingência e guarda de XML",,Trilha 2 — Plataforma & Integracoes,Blocked,High,5,Backlog,NR-040,DEC-004,fiscal,RF-045–054,docs/processo/task-ledger.md
 NR-043 — payments: porta PaymentGateway + adapter falso,,Trilha 2 — Plataforma & Integracoes,Done,Medium,2,Backlog,NR-005,,payments core,RF-063,docs/processo/task-ledger.md
 "NR-044 — payments: adapter PagMaxx — Pix, link de pagamento, webhook com HMAC",,Trilha 2 — Plataforma & Integracoes,Blocked,High,4,Backlog,NR-043,"DEC-006, DEC-015",payments,"RF-034, RF-068",docs/processo/task-ledger.md
-"NR-073 — mobile: pagamento, resumo com líquido e margem",,Trilha 3 — Clientes,Blocked,High,3,Backlog,NR-071,NR-071 → DEC-002,mobile,US-018–020,docs/processo/task-ledger.md
-NR-074 — web: contas a pagar e a receber,,Trilha 3 — Clientes,Blocked,High,4,Backlog,NR-029,NR-029 → DEC-002,web,"E6, E7",docs/processo/task-ledger.md
-NR-031 — core: exportação completa e anonimização (LGPD),,Trilha 1 — Nucleo & Dados,Blocked,High,3,Backlog,NR-028,NR-028 → DEC-002,core,RF-125–128,docs/processo/task-ledger.md
+"NR-073 — mobile: pagamento, resumo com líquido e margem",,Trilha 3 — Clientes,Not started,Medium,3,Backlog,NR-071,,mobile,US-018–020,docs/processo/task-ledger.md
+NR-074 — web: contas a pagar e a receber,,Trilha 3 — Clientes,Not started,Medium,4,Backlog,NR-029,,web,"E6, E7",docs/processo/task-ledger.md
+NR-031 — core: exportação completa e anonimização (LGPD),,Trilha 1 — Nucleo & Dados,Not started,Medium,3,Backlog,NR-028,,core,RF-125–128,docs/processo/task-ledger.md
 NR-045 — whatsapp: porta MessageSender + adapter falso,,Trilha 2 — Plataforma & Integracoes,Done,Medium,2,Backlog,NR-005,,whatsapp core,RF-015,docs/processo/task-ledger.md
 "NR-046 — whatsapp: adapter real, webhook e consentimento",,Trilha 2 — Plataforma & Integracoes,Blocked,High,4,Backlog,NR-045,DEC-003,whatsapp,"RF-016, RF-094, RF-095",docs/processo/task-ledger.md
 NR-060 — agent: runtime com tools geradas de contracts,,Trilha 2 — Plataforma & Integracoes,Blocked,High,5,Backlog,"NR-046, NR-005",DEC-007,agent,RF-096–102,docs/processo/task-ledger.md
@@ -43,16 +43,16 @@ NR-060 — agent: runtime com tools geradas de contracts,,Trilha 2 — Plataform
 NR-062 — agent: contexto de conversa isolado por empresa,,Trilha 2 — Plataforma & Integracoes,Blocked,High,3,Backlog,NR-060,DEC-011,agent,"RF-105, RF-106",docs/processo/task-ledger.md
 "NR-063 — billing: assinatura, trial, inadimplência e estado restrito",,Trilha 2 — Plataforma & Integracoes,Blocked,High,4,Backlog,NR-044,DEC-010,billing,RF-110–118,docs/processo/task-ledger.md
 "NR-075 — web: planos, assinatura e cupom",,Trilha 3 — Clientes,Blocked,High,3,Backlog,NR-063,DEC-012,web,E12,docs/processo/task-ledger.md
-"NR-032 — core: plano de contas, classificação e DRE simplificado",,Trilha 1 — Nucleo & Dados,Blocked,High,4,Backlog,NR-028,NR-028 → DEC-002,core,RF-081–088,docs/processo/task-ledger.md
-NR-033 — core: conciliação com sugestão por valor e data,,Trilha 1 — Nucleo & Dados,Blocked,High,3,Backlog,NR-032,NR-032 → DEC-002,core,RF-078–080,docs/processo/task-ledger.md
-NR-047 — banking: importação de OFX/CSV,,Trilha 2 — Plataforma & Integracoes,Blocked,High,3,Backlog,NR-033,NR-033 → DEC-002,banking,"RF-076, RF-077",docs/processo/task-ledger.md
+"NR-032 — core: plano de contas, classificação e DRE simplificado",,Trilha 1 — Nucleo & Dados,Not started,Medium,4,Backlog,NR-028,,core,RF-081–088,docs/processo/task-ledger.md
+NR-033 — core: conciliação com sugestão por valor e data,,Trilha 1 — Nucleo & Dados,Not started,Medium,3,Backlog,NR-032,,core,RF-078–080,docs/processo/task-ledger.md
+NR-047 — banking: importação de OFX/CSV,,Trilha 2 — Plataforma & Integracoes,Not started,Medium,3,Backlog,NR-033,,banking,"RF-076, RF-077",docs/processo/task-ledger.md
 NR-048 — banking: Open Finance,,Trilha 2 — Plataforma & Integracoes,Blocked,High,4,Backlog,NR-047,DEC-005,banking,"RF-074, RF-075",docs/processo/task-ledger.md
-NR-076 — web: conciliação bancária,,Trilha 3 — Clientes,Blocked,High,3,Backlog,NR-033,NR-033 → DEC-002,web,US-038,docs/processo/task-ledger.md
-"NR-077 — Relatórios: DRE, ranking e faturamento, no app e no assistente",,Trilha 3 — Clientes,Blocked,High,4,Backlog,NR-032,NR-032 → DEC-002,web mobile,"US-041, US-053",docs/processo/task-ledger.md
+NR-076 — web: conciliação bancária,,Trilha 3 — Clientes,Not started,Medium,3,Backlog,NR-033,,web,US-038,docs/processo/task-ledger.md
+"NR-077 — Relatórios: DRE, ranking e faturamento, no app e no assistente",,Trilha 3 — Clientes,Not started,Medium,4,Backlog,NR-032,,web mobile,"US-041, US-053",docs/processo/task-ledger.md
 NR-016 — CHANGELOG gerado dos commits + processo de release,,Trilha 2 — Plataforma & Integracoes,Done,Medium,1,Backlog,,,repo,—,docs/processo/task-ledger.md
 NR-034 — core: agenda e lembretes,,Trilha 1 — Nucleo & Dados,Done,Medium,2,Backlog,,,core,RF-089–093,docs/processo/task-ledger.md
-NR-035 — db: schema de agenda (appointments),,Trilha 1 — Nucleo & Dados,Blocked,High,1,Backlog,NR-008,NR-008 → DEC-002,db,"RF-089, RF-090",docs/processo/task-ledger.md
-NR-036 — api: rotas de agenda,,Trilha 2 — Plataforma & Integracoes,Blocked,High,1,Backlog,NR-035,NR-035 → DEC-002,api,RF-089–093,docs/processo/task-ledger.md
-NR-049 — E2E do caminho crítico (3 fluxos),,Trilha 2 — Plataforma & Integracoes,Blocked,High,3,Backlog,NR-071,NR-071 → DEC-002,repo,RNF-068,docs/processo/task-ledger.md
-NR-078 — mobile: agenda,,Trilha 3 — Clientes,Blocked,High,2,Backlog,NR-036,NR-036 → DEC-002,mobile,US-043–045,docs/processo/task-ledger.md
+NR-035 — db: schema de agenda (appointments),,Trilha 1 — Nucleo & Dados,Not started,Medium,1,Backlog,NR-008,,db,"RF-089, RF-090",docs/processo/task-ledger.md
+NR-036 — api: rotas de agenda,,Trilha 2 — Plataforma & Integracoes,Not started,Medium,1,Backlog,NR-035,,api,RF-089–093,docs/processo/task-ledger.md
+NR-049 — E2E do caminho crítico (3 fluxos),,Trilha 2 — Plataforma & Integracoes,Not started,Medium,3,Backlog,NR-071,,repo,RNF-068,docs/processo/task-ledger.md
+NR-078 — mobile: agenda,,Trilha 3 — Clientes,Not started,Medium,2,Backlog,NR-036,,mobile,US-043–045,docs/processo/task-ledger.md
 NR-079 — web: conteúdo real da landing,,Trilha 3 — Clientes,Done,Medium,1,Backlog,,,web,—,docs/processo/task-ledger.md

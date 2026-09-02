@@ -9,17 +9,17 @@ define as **regras**; o pacote as materializa em schema Drizzle.
 
 ## Multi-tenant
 
-> [!WARNING]
-> **A estratégia de isolamento é [DEC-002](../decisoes/README.md#dec-002) e
-> ainda está em aberto.** Este documento descreve a opção recomendada (RLS por
-> linha). Nada em `packages/db` deve ser implementado antes da decisão fechar —
-> ela muda o schema inteiro.
+> Isolamento entre empresas é **RLS por linha**: `company_id` em toda tabela de
+> negócio e política no PostgreSQL.
+> [ADR-0001](../decisoes/adr/0001-rls-por-linha.md) (origem
+> [DEC-002](../decisoes/README.md#dec-002)). A materialização em `packages/db` é
+> a `NR-007`.
 
 ### As opções
 
 | Opção                                                              | Isolamento                   | Custo operacional            | Migrations                   | Veredito                                                                           |
 | ------------------------------------------------------------------ | ---------------------------- | ---------------------------- | ---------------------------- | ---------------------------------------------------------------------------------- |
-| **RLS por linha** — `company_id` em toda tabela, política no banco | Alto (imposto pelo Postgres) | Baixo — um banco, um schema  | Uma vez para todos           | ✅ **Recomendada**                                                                 |
+| **RLS por linha** — `company_id` em toda tabela, política no banco | Alto (imposto pelo Postgres) | Baixo — um banco, um schema  | Uma vez para todos           | ✅ **Escolhida** ([ADR-0001](../decisoes/adr/0001-rls-por-linha.md))               |
 | Schema por empresa                                                 | Muito alto                   | Alto — N schemas para migrar | N execuções, uma pode falhar | ❌ inviável com 1.000 tenants ([RNF-016](../produto/requisitos-nao-funcionais.md)) |
 | Banco por empresa                                                  | Máximo                       | Muito alto                   | Inviável                     | ❌ fora de escala para o público-alvo                                              |
 | Filtro só na aplicação                                             | **Nenhum de verdade**        | Baixo                        | Simples                      | ❌ um `WHERE` esquecido vaza dados entre lojas                                     |
@@ -61,8 +61,8 @@ E um teste automatizado, rodando na CI, que tenta ler dados de outro
 
 ## Modelo de dados
 
-Visão lógica. Não é o schema final — o schema nasce em `packages/db` depois de
-[DEC-002](../decisoes/README.md#dec-002).
+Visão lógica. Não é o schema final — o schema nasce em `packages/db`
+(`NR-007`, `NR-008`, `NR-020`).
 
 ```mermaid
 erDiagram
@@ -267,4 +267,4 @@ Backup não testado não é backup. O teste mensal é requisito, não boa práti
 - [`packages/db`](../../packages/db/README.md) — implementação do schema
 - [Princípios](principios.md) — a regra de dependência que `db` respeita
 - [Segurança](seguranca.md) — como o isolamento se conecta à autorização
-- [DEC-002](../decisoes/README.md#dec-002) — a decisão que ainda bloqueia isto
+- [ADR-0001](../decisoes/adr/0001-rls-por-linha.md) — isolamento multi-tenant por RLS

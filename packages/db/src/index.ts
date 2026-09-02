@@ -1,11 +1,14 @@
 /**
  * Schema Drizzle, migrations, politicas RLS e repositorios.
  *
- * O schema depende de DEC-002 (estrategia multi-tenant) e NAO deve ser
- * implementado antes dela — ver docs/arquitetura/dados.md#multi-tenant.
+ * A estrategia de isolamento esta decidida: RLS por linha, `company_id` em toda
+ * tabela de negocio mais politica no PostgreSQL — ADR-0001, origem DEC-002.
+ * Ver docs/arquitetura/dados.md#multi-tenant para as consequencias que valem
+ * para todo o codigo (FORCE ROW LEVEL SECURITY, consulta sem `app.company_id`
+ * falha, migrations com papel separado).
  *
  * Por enquanto este pacote so expoe a conexao e a verificacao de saude usadas
- * pela raiz de composicao de apps/api e apps/worker.
+ * pela raiz de composicao de apps/api e apps/worker. O schema nasce na NR-007.
  */
 import postgres from 'postgres'
 
