@@ -2,7 +2,7 @@
 
 Schema Drizzle, migrations, políticas RLS e repositórios.
 
-**Estado:** 🟢 isolamento (`NR-007`) e cadastros (`NR-008`) · 🟡 vendas e financeiro pendentes (`NR-020`)
+**Estado:** 🟢 isolamento (`NR-007`), cadastros (`NR-008`), vendas e financeiro (`NR-020`)
 
 Isolamento entre empresas é **RLS por linha** (`company_id` + política no
 PostgreSQL). Ver [`dados.md`](../../docs/arquitetura/dados.md#multi-tenant).
@@ -105,14 +105,22 @@ chamada veja uma exceção consciente e não um esquecimento.
 
 ## Tabelas
 
-| Tabela          | Tenant                | Migration        |
-| --------------- | --------------------- | ---------------- |
-| `companies`     | **é** o tenant (`id`) | `0002_cadastros` |
-| `users`         | via `company_users`   | `0002_cadastros` |
-| `company_users` | `company_id`          | `0002_cadastros` |
-| `categories`    | `company_id`          | `0002_cadastros` |
-| `customers`     | `company_id`          | `0002_cadastros` |
-| `products`      | `company_id`          | `0002_cadastros` |
+| Tabela              | Tenant                | Migration                  |
+| ------------------- | --------------------- | -------------------------- |
+| `companies`         | **é** o tenant (`id`) | `0002_cadastros`           |
+| `users`             | via `company_users`   | `0002_cadastros`           |
+| `company_users`     | `company_id`          | `0002_cadastros`           |
+| `categories`        | `company_id`          | `0002_cadastros`           |
+| `customers`         | `company_id`          | `0002_cadastros`           |
+| `products`          | `company_id`          | `0002_cadastros`           |
+| `company_counters`  | `company_id`          | `0003_vendas_e_financeiro` |
+| `sales`             | `company_id`          | `0003_vendas_e_financeiro` |
+| `sale_items`        | `company_id`          | `0003_vendas_e_financeiro` |
+| `payments`          | `company_id`          | `0003_vendas_e_financeiro` |
+| `receivables`       | `company_id`          | `0003_vendas_e_financeiro` |
+| `settlements`       | `company_id`          | `0003_vendas_e_financeiro` |
+| `sale_returns`      | `company_id`          | `0003_vendas_e_financeiro` |
+| `sale_return_items` | `company_id`          | `0003_vendas_e_financeiro` |
 
 Dois casos fogem do `company_id`, e os dois de propósito:
 

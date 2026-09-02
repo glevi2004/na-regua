@@ -22,11 +22,11 @@
 | 🟡 Scaffold    | `api` (com `/health` real), `worker` (filas registradas), `web`, `mobile`                             |
 | 🔴 A fazer     | todos os demais módulos — **o banco ainda não tem schema**                                            |
 
-**43 dos 114 dias-desenvolvedor que faltam estão bloqueados por 11 decisões em
-aberto** — 38% do trabalho restante. A DEC-002 fechou por
+**43 dos 111 dias-desenvolvedor que faltam estão bloqueados por 11 decisões em
+aberto** — 39% do trabalho restante. A DEC-002 fechou por
 [ADR-0001](docs/decisoes/adr/0001-rls-por-linha.md), o isolamento por RLS está
-em `packages/db` (`NR-007`) e os cadastros no schema (`NR-008`); o próximo
-passo é a `NR-020`, vendas e financeiro. Ver
+em `packages/db` (`NR-007`), com cadastros, vendas e financeiro no schema
+(`NR-008`, `NR-020`); o próximo passo é a `NR-022`, o `registerSale`. Ver
 [Decisões](docs/decisoes/README.md) e [Task Ledger](docs/processo/task-ledger.md).
 
 ---
