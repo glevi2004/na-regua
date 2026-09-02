@@ -2,7 +2,7 @@
 
 Adapter de emissão fiscal — NFC-e e NFS-e.
 
-**Estado:** 🔴 não implementado · 🚧 bloqueado por [DEC-004](../../docs/decisoes/README.md#dec-004) · `NR-040`, `NR-042`
+**Estado:** 🟡 porta e adapter falso prontos (`NR-040`) · 🚧 adapter real bloqueado por [DEC-004](../../docs/decisoes/README.md#dec-004) (`NR-042`)
 
 ## Responsabilidade
 
@@ -25,17 +25,57 @@ A proibição de importar `core` é verificada na CI pela regra
 `adapter-nao-importa-core`. Adapter que conhece `core` não é substituível — e
 substituibilidade é a única razão de ele existir.
 
-## O que a porta precisa cobrir
+### Como o adapter satisfaz uma porta que não pode importar
 
-| Capacidade                                              | Requisito                                                                                                    |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Emitir NFC-e a partir de uma venda fechada              | [RF-045](../../docs/produto/requisitos-funcionais.md)                                                        |
-| Validar NCM, CFOP e CST/CSOSN **antes** de transmitir   | [RF-046](../../docs/produto/requisitos-funcionais.md)                                                        |
-| Traduzir rejeição da SEFAZ em mensagem compreensível    | [RF-047](../../docs/produto/requisitos-funcionais.md)                                                        |
-| Cancelar dentro do prazo legal, com justificativa       | [RF-050](../../docs/produto/requisitos-funcionais.md)                                                        |
-| Emitir em contingência e retransmitir em ordem          | [RF-052](../../docs/produto/requisitos-funcionais.md), [RF-053](../../docs/produto/requisitos-funcionais.md) |
-| Guardar XML por ≥ 5 anos                                | [RNF-037](../../docs/produto/requisitos-nao-funcionais.md)                                                   |
-| Numeração sequencial sem lacuna, mesmo sob concorrência | [RNF-039](../../docs/produto/requisitos-nao-funcionais.md)                                                   |
+Consequência direta dessa proibição: **nenhum tipo da porta `InvoiceIssuer` mora
+em `core`.** Todos vêm de [`contracts`](../contracts/README.md)
+(`IssueInvoiceRequest`, `InvoiceIssueResult`, `CancelInvoiceRequest`,
+`InvoiceCancellation`). O adapter satisfaz a porta **estruturalmente**, e o
+TypeScript confere a compatibilidade na raiz de composição, onde os dois se
+encontram.
+
+É o que diferencia esta porta de `AppointmentRepository`, cujos tipos podem
+morar em `core` porque quem a implementa é `db` — e `db` tem permissão para
+importar `core`.
+
+## O que a porta cobre
+
+| Capacidade                                              | Requisito                                                                                                    | Estado                                        |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ | --------------------------------------------- |
+| Emitir NFC-e a partir de uma venda fechada              | [RF-045](../../docs/produto/requisitos-funcionais.md)                                                        | ✅ porta + falso · real em `NR-042`           |
+| Validar NCM, CFOP e CST/CSOSN **antes** de transmitir   | [RF-046](../../docs/produto/requisitos-funcionais.md)                                                        | ✅ o falso valida e não transmite             |
+| Traduzir rejeição da SEFAZ em mensagem compreensível    | [RF-047](../../docs/produto/requisitos-funcionais.md)                                                        | ✅ estrutura · tabela de códigos em `NR-042`  |
+| Cancelar dentro do prazo legal, com justificativa       | [RF-050](../../docs/produto/requisitos-funcionais.md)                                                        | ✅ porta + falso · o **prazo** é de `core`    |
+| Emitir em contingência e retransmitir em ordem          | [RF-052](../../docs/produto/requisitos-funcionais.md), [RF-053](../../docs/produto/requisitos-funcionais.md) | ✅ contingência · retransmissão em `NR-041`   |
+| Guardar XML por ≥ 5 anos                                | [RNF-037](../../docs/produto/requisitos-nao-funcionais.md)                                                   | ✅ a porta entrega o XML · guardar é de `db`  |
+| Numeração sequencial sem lacuna, mesmo sob concorrência | [RNF-039](../../docs/produto/requisitos-nao-funcionais.md)                                                   | ✅ no falso · no real é o provedor que numera |
+
+**RF-053 não tem superfície na porta ainda**, e isso é deliberado:
+retransmitir em ordem exige o consumidor de fila, que entra com `NR-041`.
+Inventar um método sem consumidor seria desenhar às cegas. O falso já mantém as
+notas em contingência na ordem de emissão (`pendentesDeRetransmissao`), então o
+trabalho tem por onde começar.
+
+## Rejeição e contingência são resultado, não exceção
+
+A decisão de projeto mais importante da porta. `issue` devolve uma união
+discriminada:
+
+```ts
+type InvoiceIssueResult =
+  | { status: 'authorized'; accessKey; number; series; danfeUrl; xml; issuedAt }
+  | { status: 'contingency'; accessKey; number; series; xml; issuedAt; reason }
+  | { status: 'rejected'; rejection: { code; message } }
+```
+
+Se rejeição fosse exceção, o `catch` mais próximo poderia desfazer a transação
+da venda — e [RF-047](../../docs/produto/requisitos-funcionais.md) e
+[RF-052](../../docs/produto/requisitos-funcionais.md) exigem o contrário: **a
+venda permanece registrada mesmo quando a nota não sai.** O tipo obriga quem
+chama a decidir o que fazer nos três casos.
+
+Exceção fica reservada ao que é falha de infraestrutura de verdade — token
+inválido, certificado vencido, resposta ilegível. Aí o job deve ser retentado.
 
 ## Certificado digital A1
 
@@ -51,6 +91,15 @@ A venda **fecha antes da nota**. A SEFAZ é instável e o balcão não pode para
 por causa disso — [RNF-004](../../docs/produto/requisitos-nao-funcionais.md).
 A emissão vai para a fila `invoice-issue`.
 
+Por isso o pedido de emissão carrega o `companyId` **dentro** dele, e não como
+parâmetro separado: quem emite é um job, e o pedido precisa ser serializável
+inteiro. Continua valendo que o tenant vem do `ExecutionContext`, nunca do
+cliente ([princípio 8](../../docs/arquitetura/principios.md)).
+
+E é também por isso que `issue` é **idempotente por `saleId`**: fila
+reprocessa, e nota duplicada não é inconveniência, é problema fiscal que o
+lojista resolve com o contador — [RNF-043](../../docs/produto/requisitos-nao-funcionais.md).
+
 ## Modo falso
 
 `FISCAL_PROVIDER=fake` responde de forma determinística, sem rede. Isso permite
@@ -58,7 +107,30 @@ que o sistema suba local sem credencial nenhuma e que o trabalho não espere a
 decisão do fornecedor.
 
 **O adapter falso implementa a mesma porta, inclusive os caminhos de erro.**
-Falso que só devolve sucesso esconde exatamente o que precisa ser testado.
+Falso que só devolve sucesso esconde exatamente o que precisa ser testado — e na
+emissão fiscal rejeição e contingência são o caso comum, não a exceção.
+
+```ts
+import { createFakeInvoiceIssuer } from '@na-regua/fiscal'
+
+const emissor = createFakeInvoiceIssuer()
+const emissorOffline = createFakeInvoiceIssuer({ sefazDisponivel: false })
+```
+
+| Opção                    | O que provoca                                                  |
+| ------------------------ | -------------------------------------------------------------- |
+| `sefazDisponivel: false` | contingência — RF-052                                          |
+| `rejeitarCom`            | rejeição com código e mensagem escolhidos — RF-047             |
+| `falhaDeInfraestrutura`  | **lança**, porque não é resultado fiscal — é job para retentar |
+
+`configurar()` troca as opções no meio do teste, para simular SEFAZ que cai e
+volta.
+
+A chave de acesso segue o layout real —
+`cUF AAMM CNPJ mod série nNF tpEmis cNF cDV`, 44 dígitos, com dígito
+verificador módulo 11 calculado. Não é capricho: chave que passa em validador
+exercita o schema, o campo do banco e a tela do mesmo jeito que a real. Falso
+com formato de brinquedo esconde erro de formato para descobrir em produção.
 
 ## Testes
 
@@ -68,9 +140,31 @@ Falso que só devolve sucesso esconde exatamente o que precisa ser testado.
 | Contra sandbox do provedor | manual ou agendado, fora do PR                 |
 | Corpo de webhook gravado   | CI — inclusive os casos estranhos documentados |
 
+A suíte de contrato vive em
+[`src/invoice-issuer-contract.ts`](src/invoice-issuer-contract.ts) e **não
+conhece o falso**, só a porta. Quando o adapter real entrar, ele chama
+`verificarContratoDoEmissor` com a própria implementação — e ou passa, ou não é
+substituível:
+
+```ts
+verificarContratoDoEmissor('FakeInvoiceIssuer', () => createFakeInvoiceIssuer())
+```
+
+Ela não é exportada pelo `index.ts` de propósito: importa `vitest`, que é
+dependência de desenvolvimento. Quem a usa está dentro deste pacote.
+
+O que **não** está na suíte compartilhada é injeção de falha específica de
+provedor — SEFAZ fora do ar, rejeição forçada. Isso depende de sandbox e roda
+fora do PR; no falso vira teste próprio em
+[`src/fake-issuer.test.ts`](src/fake-issuer.test.ts).
+
 ## Variáveis de ambiente
 
 `FISCAL_PROVIDER`, `FISCAL_API_TOKEN`, `FISCAL_ENVIRONMENT`.
 O certificado A1 **não** é variável de ambiente: é dado por empresa, cifrado.
+
+A escolha do provedor por `FISCAL_PROVIDER` acontece na raiz de composição e
+entra com `NR-042`, junto do adapter real — hoje existe só um provedor para
+escolher.
 
 Ver [`ambientes.md`](../../docs/engenharia/ambientes.md).
