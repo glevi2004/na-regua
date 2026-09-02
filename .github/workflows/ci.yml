@@ -70,6 +70,13 @@ jobs:
       - name: Formatacao
         run: pnpm format:check
 
+      - name: Ledger confere com os resumos
+        # Os numeros do painel, da carga por trilha e da tabela de bloqueios
+        # sao escritos a mao e ja divergiram das linhas — total errado, trilha
+        # com uma tarefa de menos, uma tarefa contada duas vezes. Resumo errado
+        # e pior que resumo nenhum: e dele que sai o que entra na sprint.
+        run: pnpm ledger:check
+
       - name: Fronteiras entre modulos
         # A matriz de docs/arquitetura/principios.md, executavel.
         # NAO desative para destravar um PR — ver code-style.md
