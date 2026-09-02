@@ -127,6 +127,23 @@ export type RegisteredSale = {
 }
 
 /**
+ * Autoria da baixa de estoque feita pela venda — RF-024, NR-023.
+ *
+ * A baixa da venda e o movimento de estoque mais frequente da loja. Sem estes
+ * tres campos ela seria o unico que nao entra na trilha, e a trilha passaria a
+ * responder "por que o saldo caiu?" com um silencio exatamente onde a resposta
+ * quase sempre esta.
+ *
+ * Vem como parametro, e nao lido do contexto pelo implementador, porque quem
+ * implementa a porta e `db` — e `db` nao conhece `ExecutionContext`.
+ */
+export type StockMovementOrigin = {
+  readonly saleId: string
+  readonly createdBy: UserId
+  readonly createdAt: Date
+}
+
+/**
  * Escopo transacional emprestado pelo `UnitOfWork`.
  *
  * Tudo aqui roda na MESMA transacao. Se qualquer passo falhar, nao sobra venda
@@ -153,7 +170,10 @@ export type SaleTransaction = {
    * contagem do sistema atrasa. Recusar aqui seria travar a venda por causa de
    * um numero, e o produto esta na mao do cliente.
    */
-  decreaseStock(itens: readonly { productId: string; quantity: number }[]): Promise<void>
+  decreaseStock(
+    itens: readonly { productId: string; quantity: number }[],
+    origem: StockMovementOrigin,
+  ): Promise<void>
 
   /**
    * Procura venda ja gravada com esta chave — RF-036, RNF-043.

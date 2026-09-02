@@ -51,10 +51,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      57 |  155 |
-| ✅ Concluídas                 |      24 |   52 |
+| ✅ Concluídas                 |      25 |   54 |
 | 🚧 Bloqueadas por decisão     |      11 |   41 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |      21 |   60 |
+| ⬜ A fazer, pode começar hoje |      20 |   58 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -65,9 +65,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 **A DEC-002 fechou** — [ADR-0001](../decisoes/adr/0001-rls-por-linha.md), RLS
 por linha, com o isolamento já materializado em `packages/db` (NR-007) e os
 cadastros, vendas e financeiro no schema (NR-008, NR-020) e os casos de uso de
-cadastro e o `registerSale` em `core` (NR-021, NR-022). Dos 103 dias que
-faltam, **60 podem começar hoje**, em 21 tarefas; 43 seguem bloqueados por 11
-decisões. A próxima da fila é a NR-027, a rota de venda.
+cadastro, o `registerSale` e a movimentação de estoque em `core` (NR-021,
+NR-022, NR-023), e a agenda no schema (NR-035). Dos 101 dias que faltam,
+**58 podem começar hoje**, em 20 tarefas; 43 seguem bloqueados por 11
+decisões. A próxima da fila **não é** a NR-027 — ver a nota abaixo.
 
 ---
 
@@ -107,7 +108,7 @@ Objetivo: registrar uma venda de ponta a ponta pelo aplicativo.
 | NR-020 | `db`: schema de vendas e financeiro                                         |   🔵   | `db`           |   3 | NR-008         | —    | RF-027–044, RF-063     |   ✅   |
 | NR-021 | `core`: casos de uso de cadastro (empresa, cliente, produto)                |   🔵   | `core`         |   3 | NR-008         | —    | RF-001–019             |   ✅   |
 | NR-022 | `core`: `registerSale` — transação única com estoque, recebível e auditoria |   🔵   | `core`         |   4 | NR-020, NR-004 | —    | RF-034–039, RNF-046    |   ✅   |
-| NR-023 | `core`: movimentação de estoque e ajuste com autoria                        |   🔵   | `core`         |   2 | NR-021         | —    | RF-022–024             |   ⬜   |
+| NR-023 | `core`: movimentação de estoque e ajuste com autoria                        |   🔵   | `core`         |   2 | NR-021         | —    | RF-022–024             |   ✅   |
 | NR-024 | `domain`: desconto, limite por papel, troco                                 |   🔵   | `domain`       |   2 | NR-004         | —    | RF-030, RF-031, RF-035 |   ✅   |
 | NR-025 | `core`: trilha de auditoria somente-inserção                                |   🔵   | `core`         |   2 | NR-020         | —    | RF-123, RF-124         |   ⬜   |
 | NR-026 | `api`: rotas de cadastro                                                    |   🟠   | `api`          |   2 | NR-021, NR-009 | —    | RF-001–019             |   ⬜   |
@@ -212,8 +213,21 @@ provando que empresa não lê, grava, altera nem apaga linha de outra
 pagamentos, recebíveis e a baixa de estoque juntos, com idempotência pela chave
 do contexto e rollback provado em teste (RNF-046).
 
-**O nó agora é a NR-027**, a rota de venda: é ela que liga o PDV (NR-071) ao
-caso de uso, e é o último elo antes de a venda existir de ponta a ponta.
+**O nó agora é uma tarefa que não existe no ledger.** A NR-027 (rota de venda)
+aparece como desbloqueada porque a NR-022 fechou, mas ela não é executável:
+`registerSale` precisa de `UnitOfWork`, `SaleTransaction`, `SaleProductReader` e
+`CompanySettingsRepository`, e **`packages/db` não implementa nenhuma dessas
+portas** — ele exporta hoje apenas `getClient`, `migrate`, `withTenant` e o
+guarda de RLS. As quatro tarefas de `db` no ledger (NR-007, NR-008, NR-020,
+NR-035) são todas de _schema_; nenhuma cria repositório.
+
+O mesmo vale para a NR-026 (rotas de cadastro), pelas portas da NR-021.
+
+Enquanto essa tarefa não for criada e feita, uma rota de `api` só pode ser
+ligada a um _fake_ — o que não é uma rota. **Fica como pendência de
+planejamento, não de código.** As tarefas de `core` (NR-023 ✅, NR-025, NR-028)
+seguem executáveis, porque declaram portas e testam contra repositório em
+memória, que é o desenho pretendido.
 
 ## Bloqueios por decisão
 

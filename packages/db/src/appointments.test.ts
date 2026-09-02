@@ -115,9 +115,25 @@ describe.skipIf(!DATABASE_URL)('schema de agenda — NR-035', () => {
       await admin?.end({ timeout: 5 })
       return
     }
-    for (const empresa of [empresaA, empresaB].filter(Boolean)) {
+    const empresas = [empresaA, empresaB].filter(Boolean)
+
+    /*
+     * Duas passadas, e nao uma por empresa. A CI encontrou o motivo:
+     * `DELETE FROM customers` da empresa A falhava com violacao de chave
+     * estrangeira porque um compromisso da empresa B — criado pelo teste de FK
+     * cross-tenant abaixo — ainda apontava para o cliente dela.
+     *
+     * Nao e defeito do schema: e o `ON DELETE RESTRICT` funcionando. Apagar o
+     * cliente enquanto alguem o referencia deixaria a referencia pendurada.
+     * A limpeza e que precisa respeitar a ordem das dependencias, e como o
+     * vinculo atravessa empresas, ela tem de esvaziar TODOS os compromissos
+     * antes de tocar em qualquer cliente.
+     */
+    for (const empresa of empresas) {
+      await withTenant(sql, empresa, (tx) => tx`DELETE FROM appointments`)
+    }
+    for (const empresa of empresas) {
       await withTenant(sql, empresa, async (tx) => {
-        await tx`DELETE FROM appointments`
         await tx`DELETE FROM customers`
         await tx`DELETE FROM companies`
       })
@@ -362,41 +378,42 @@ describe.skipIf(!DATABASE_URL)('schema de agenda — NR-035', () => {
     })
 
     /**
-     * Integridade entre lojas na FK.
+     * Integridade entre lojas na FK — comportamento MEDIDO, nao suposto.
      *
      * As checagens de chave estrangeira do Postgres rodam por gatilhos internos
-     * que NAO passam pela politica de RLS. Entao apontar para o cliente da
-     * vizinha pode ser aceito no INSERT — o precedente e o mesmo em
-     * `sales.customer_id`, que tambem usa FK simples.
+     * (`ri_triggers.c`) que **nao passam pela politica de RLS**. A consequencia
+     * ficou provada na CI, e do jeito util: a limpeza da suite falhou com
      *
-     * Este teste nao crava qual dos dois acontece, porque o que importa para o
-     * isolamento e outra coisa: mesmo que a linha entre, ela nao pode revelar
-     * NADA do cliente da outra loja. E isso que fica asseverado. O resultado
-     * observado vai para a saida do teste, para virar decisao de time em vez de
-     * suposicao — se o INSERT passar, cabe avaliar FK composta
-     * `(company_id, customer_id)` numa tarefa propria, para `sales` tambem.
+     *   update or delete on table "customers" violates foreign key constraint
+     *   "appointments_customer_id_fkey"  —  Key is still referenced
+     *
+     * ou seja, o INSERT da empresa B apontando para o cliente da empresa A
+     * **entrou**. O mesmo vale para `sales.customer_id`, que usa FK simples
+     * igual.
+     *
+     * O teste fixa esse comportamento de proposito. Nao porque ele seja
+     * desejavel, mas porque ele e real: se um dia alguem adotar FK composta
+     * `(company_id, customer_id)` — o que exigiria UNIQUE em
+     * `customers (company_id, id)` e valeria para `sales` tambem —, este teste
+     * reprova e obriga a mudanca a ser deliberada, em vez de silenciosa.
+     *
+     * O que NAO muda nos dois casos, e e o que protege o lojista: a empresa B
+     * pode guardar o id, e nao consegue ler nada sobre a pessoa.
      */
-    it('nao vaza o cliente da vizinha por compromisso apontado para ele', async () => {
-      let aceitou = true
-      try {
-        await withTenant(
+    it('aceita a FK cross-tenant no INSERT — gatilho de FK ignora RLS', async () => {
+      await expect(
+        withTenant(
           sql,
           empresaB,
           (tx) => tx`
             INSERT INTO appointments (company_id, title, starts_at, customer_id)
             VALUES (${empresaB}, ${'Aponta pra fora'}, ${'2027-01-07T13:00:00Z'}, ${clienteA})
           `,
-        )
-      } catch {
-        aceitou = false
-      }
+        ),
+      ).resolves.toBeDefined()
+    })
 
-      console.log(
-        `[NR-035] FK cross-tenant no INSERT: ${aceitou ? 'ACEITA' : 'RECUSADA'} pelo Postgres.`,
-      )
-
-      /* A propriedade que vale nos dois casos: a empresa B nao le o cliente da
-         empresa A, tenha ou nao conseguido apontar para ele. */
+    it('mas o cliente da vizinha continua ilegivel — o id nao vira dado', async () => {
       const vazou = await withTenant(
         sql,
         empresaB,

@@ -22,14 +22,17 @@
 | 🟡 Scaffold    | `api` (com `/health` real), `worker` (filas registradas), `web`, `mobile`                              |
 | 🔴 A fazer     | `agent`, `fiscal`, `whatsapp`, `payments`, `banking`, `billing` — nenhum adapter real ainda            |
 
-**43 dos 103 dias-desenvolvedor que faltam estão bloqueados por 11 decisões em
-aberto** — 42% do trabalho restante. A DEC-002 fechou por
+**43 dos 101 dias-desenvolvedor que faltam estão bloqueados por 11 decisões em
+aberto** — 43% do trabalho restante. A DEC-002 fechou por
 [ADR-0001](docs/decisoes/adr/0001-rls-por-linha.md), o isolamento por RLS está
 em `packages/db` (`NR-007`), com cadastros, vendas e financeiro no schema
 (`NR-008`, `NR-020`), com os cadastros e o `registerSale` em `core` (`NR-021`,
-`NR-022`) e a agenda no schema (`NR-035`); o próximo passo é a `NR-027`, a
-rota de venda. Ver
-[Decisões](docs/decisoes/README.md) e [Task Ledger](docs/processo/task-ledger.md).
+`NR-022`) e a movimentação de estoque (`NR-023`), e a agenda no schema
+(`NR-035`). O próximo passo esbarra numa tarefa que **falta no ledger**:
+nenhuma cria os repositórios Postgres por trás das portas de `core`, e sem eles
+as rotas de `api` só se ligariam a _fakes_.
+Ver [Decisões](docs/decisoes/README.md) e
+[Task Ledger](docs/processo/task-ledger.md).
 
 ---
 

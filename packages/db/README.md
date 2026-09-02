@@ -111,6 +111,41 @@ Ambiente mal configurado tem de **derrubar o processo**, não vazar dado em
 silêncio. E é por isso que os testes de isolamento criam um papel comum e
 conectam com ele: com a conexão de administrador, eles mediriam o vazio.
 
+### E um quarto, que nenhum `FORCE` cobre: a chave estrangeira
+
+**As checagens de FK não passam pela política.** Elas rodam por gatilhos
+internos do Postgres (`ri_triggers.c`) com privilégio próprio. Consequência
+concreta, medida na CI: um `INSERT` em `appointments` com o `customer_id` de
+**outra empresa** é aceito.
+
+```sql
+-- contexto = empresa B, cliente = da empresa A
+INSERT INTO appointments (company_id, title, starts_at, customer_id)
+VALUES (<B>, 'Aponta pra fora', now(), <cliente de A>);   -- passa
+```
+
+O mesmo vale para `sales.customer_id` e para toda FK simples entre tabelas de
+negócio.
+
+**O que isso não é:** vazamento de dado. A empresa B guarda um `uuid` e não
+consegue ler nada sobre a pessoa — a política continua valendo em toda leitura
+de `customers`. O prejuízo é de integridade, não de sigilo: fica uma referência
+que nenhum `JOIN` do tenant resolve.
+
+**Como fechar, se um dia valer a pena:** FK composta, o que exige um
+`UNIQUE (company_id, id)` na tabela referenciada.
+
+```sql
+UNIQUE (company_id, id)                                   -- em customers
+FOREIGN KEY (company_id, customer_id)
+  REFERENCES customers (company_id, id)                   -- em quem aponta
+```
+
+Não foi feito porque valeria para `sales` também e mudaria schema já mesclado —
+é decisão de time, não de um PR. Há teste fixando o comportamento atual em
+[`appointments.test.ts`](src/appointments.test.ts), então a mudança, se vier,
+reprova o teste e será deliberada.
+
 ## Como o tenant chega ao banco
 
 `withTenant` é o único lugar do sistema que define `app.company_id`:
