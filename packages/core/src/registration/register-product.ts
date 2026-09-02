@@ -1,0 +1,88 @@
+import type { CreateProductInput, ProductOutput } from '@na-regua/contracts'
+import { AppError } from '../app-error.js'
+import { assertCanWrite } from '../authorization.js'
+import type { ExecutionContext } from '../context.js'
+import type { ProductRepository } from '../ports/registration-repositories.js'
+
+export type RegisterProductDeps = {
+  readonly products: ProductRepository
+}
+
+/**
+ * Gera o codigo interno de um produto sem codigo de barras — RF-019.
+ *
+ * Formato `PROD-0001`, sequencial por empresa. Deliberadamente NAO e o id nem
+ * um trecho de uuid: este codigo vai na etiqueta escrita a mao e e ditado no
+ * telefone, entao precisa ser curto e sem caractere ambiguo. `a1b2c3` na
+ * etiqueta de granel volta como `alb2c3`.
+ *
+ * A regra do formato vive aqui, em `core`, e nao no repositorio: quem informa o
+ * fato (quantos produtos existem) e `db`; quem decide como o codigo se parece e
+ * o nucleo.
+ */
+export function generateInternalCode(existingCount: number): string {
+  return `PROD-${String(existingCount + 1).padStart(4, '0')}`
+}
+
+/**
+ * Cadastra produto — RF-017, RF-018, RF-019.
+ *
+ * Com codigo de barras: procura antes de criar. Ler um EAN que ja existe e o
+ * caso comum de reposicao, e criar um segundo cadastro deixaria a loja com dois
+ * precos para o mesmo produto — que e como se descobre o problema, no dia em
+ * que o caixa cobra o barato.
+ */
+export async function registerProduct(
+  deps: RegisterProductDeps,
+  ctx: ExecutionContext,
+  input: CreateProductInput,
+): Promise<ProductOutput> {
+  assertCanWrite(ctx)
+
+  if (input.barcode !== undefined) {
+    const existente = await deps.products.findByBarcode(ctx.companyId, input.barcode)
+    if (existente) {
+      throw AppError.conflict(
+        `Este codigo de barras ja esta em "${existente.description}". ` +
+          'Edite o produto existente em vez de criar outro.',
+      )
+    }
+  }
+
+  /*
+   * Codigo interno para todo produto, com ou sem codigo de barras: e por ele
+   * que o lojista se refere ao item quando o leitor nao le — etiqueta amassada,
+   * granel, produto sem embalagem.
+   */
+  const internalCode = generateInternalCode(await deps.products.countAll(ctx.companyId))
+
+  return deps.products.create({
+    companyId: ctx.companyId,
+    description: input.description,
+    barcode: input.barcode,
+    internalCode,
+    unitOfMeasure: input.unitOfMeasure,
+    salePriceCents: input.salePriceCents,
+    costPriceCents: input.costPriceCents,
+    taxRate: input.taxRate,
+    minStock: input.minStock,
+    categoryId: input.categoryId,
+    createdBy: ctx.userId,
+    createdAt: ctx.now,
+  })
+}
+
+/**
+ * Localiza produto pelo codigo de barras lido — RF-018.
+ *
+ * Devolve `undefined` em vez de lancar: no PDV, "nao achei" e resposta normal
+ * e leva a tela de cadastro (RF-017). Excecao aqui faria o caminho comum
+ * passar por `catch`.
+ */
+export async function findProductByBarcode(
+  deps: RegisterProductDeps,
+  ctx: ExecutionContext,
+  barcode: string,
+): Promise<ProductOutput | undefined> {
+  return deps.products.findByBarcode(ctx.companyId, barcode)
+}

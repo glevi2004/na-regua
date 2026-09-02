@@ -51,10 +51,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      57 |  155 |
-| ✅ Concluídas                 |      21 |   44 |
+| ✅ Concluídas                 |      22 |   47 |
 | 🚧 Bloqueadas por decisão     |      11 |   41 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |      24 |   68 |
+| ⬜ A fazer, pode começar hoje |      23 |   65 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -64,9 +64,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 
 **A DEC-002 fechou** — [ADR-0001](../decisoes/adr/0001-rls-por-linha.md), RLS
 por linha, com o isolamento já materializado em `packages/db` (NR-007) e os
-cadastros, vendas e financeiro no schema (NR-008, NR-020). Dos 111 dias que
-faltam, **68 podem começar hoje**, em 24 tarefas; 43 seguem bloqueados por 11
-decisões. A próxima da fila é a NR-022, o `registerSale`.
+cadastros, vendas e financeiro no schema (NR-008, NR-020) e os casos de uso de
+cadastro em `core` (NR-021). Dos 108 dias que faltam, **65 podem começar
+hoje**, em 23 tarefas; 43 seguem bloqueados por 11 decisões. A próxima da fila
+é a NR-022, o `registerSale`.
 
 ---
 
@@ -104,7 +105,7 @@ Objetivo: registrar uma venda de ponta a ponta pelo aplicativo.
 | ID     | Tarefa                                                                      | Trilha | Módulo         | Est | Dep            | Bloq | US/RF                  | Status |
 | ------ | --------------------------------------------------------------------------- | :----: | -------------- | --: | -------------- | ---- | ---------------------- | :----: |
 | NR-020 | `db`: schema de vendas e financeiro                                         |   🔵   | `db`           |   3 | NR-008         | —    | RF-027–044, RF-063     |   ✅   |
-| NR-021 | `core`: casos de uso de cadastro (empresa, cliente, produto)                |   🔵   | `core`         |   3 | NR-008         | —    | RF-001–019             |   ⬜   |
+| NR-021 | `core`: casos de uso de cadastro (empresa, cliente, produto)                |   🔵   | `core`         |   3 | NR-008         | —    | RF-001–019             |   ✅   |
 | NR-022 | `core`: `registerSale` — transação única com estoque, recebível e auditoria |   🔵   | `core`         |   4 | NR-020, NR-004 | —    | RF-034–039, RNF-046    |   ⬜   |
 | NR-023 | `core`: movimentação de estoque e ajuste com autoria                        |   🔵   | `core`         |   2 | NR-021         | —    | RF-022–024             |   ⬜   |
 | NR-024 | `domain`: desconto, limite por papel, troco                                 |   🔵   | `domain`       |   2 | NR-004         | —    | RF-030, RF-031, RF-035 |   ✅   |
@@ -226,8 +227,8 @@ o PDV (NR-071).
 | [DEC-012](../decisoes/README.md#dec-012) usuário e cupons                             | NR-075         |          — |            3 |
 | [DEC-001](../decisoes/README.md#dec-001) nome/marca                                   | — (NR-011 ✅)  |          — |            0 |
 
-**43 dos 111 dias-desenvolvedor restantes estão bloqueados por 11 decisões** —
-39% do que falta. Decidir continua rendendo, mas deixou de ser a única coisa que
+**43 dos 108 dias-desenvolvedor restantes estão bloqueados por 11 decisões** —
+40% do que falta. Decidir continua rendendo, mas deixou de ser a única coisa que
 rende: com a DEC-002 fechada, existem 76 dias de trabalho liberado para tocar em
 paralelo às decisões que faltam.
 
