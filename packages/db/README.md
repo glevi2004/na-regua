@@ -150,6 +150,7 @@ chamada veja uma exceção consciente e não um esquecimento.
 | `settlements`       | `company_id`          | `0003_vendas_e_financeiro` |
 | `sale_returns`      | `company_id`          | `0003_vendas_e_financeiro` |
 | `sale_return_items` | `company_id`          | `0003_vendas_e_financeiro` |
+| `appointments`      | `company_id`          | `0006_agenda`              |
 
 Dois casos fogem do `company_id`, e os dois de propósito:
 
