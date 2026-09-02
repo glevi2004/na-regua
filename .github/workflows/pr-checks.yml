@@ -30,6 +30,11 @@ jobs:
         run: echo "$PR_TITLE" | pnpm commitlint
 
       - name: Nome da branch segue a convencao
+        # O dependabot nomeia as branches dele (dependabot/npm_and_yarn/...) e
+        # nao tem como seguir o padrao. Exigir aqui tornava toda atualizacao de
+        # dependencia impossivel de mesclar — inclusive as de seguranca, o
+        # oposto do que a RNF-029 quer.
+        if: github.actor != 'dependabot[bot]'
         env:
           BRANCH: ${{ github.head_ref }}
         run: |
@@ -44,6 +49,8 @@ jobs:
           echo "Branch OK: $BRANCH"
 
       - name: Referencia a tarefa no titulo ou no corpo
+        # Idem: atualizacao de dependencia nao sai de tarefa do ledger.
+        if: github.actor != 'dependabot[bot]'
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
