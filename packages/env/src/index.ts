@@ -17,6 +17,8 @@ export type { BaseEnv } from './base.js'
 export { apiEnvSchema, loadApiEnv } from './api.js'
 export type { ApiEnv } from './api.js'
 
+export { loadMigrationEnv, migrationEnvSchema } from './migration.js'
+export type { MigrationEnv } from './migration.js'
 export { loadWorkerEnv, workerEnvSchema } from './worker.js'
 export type { WorkerEnv } from './worker.js'
 

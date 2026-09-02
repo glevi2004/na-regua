@@ -22,9 +22,11 @@
 | 🟡 Scaffold    | `api` (com `/health` real), `worker` (filas registradas), `web`, `mobile`                             |
 | 🔴 A fazer     | todos os demais módulos — **o banco ainda não tem schema**                                            |
 
-**116 dos 119 dias-desenvolvedor que faltam estão bloqueados por 12 decisões em
-aberto** — 97% do trabalho restante, e 73 desses dias dependem de uma só, a
-DEC-002. Decidir é hoje a atividade de maior retorno do projeto. Ver
+**43 dos 116 dias-desenvolvedor que faltam estão bloqueados por 11 decisões em
+aberto** — 37% do trabalho restante. A DEC-002 fechou por
+[ADR-0001](docs/decisoes/adr/0001-rls-por-linha.md) e a `NR-007` já
+materializou o isolamento por RLS em `packages/db`; o próximo passo é a
+`NR-008`, o schema de cadastros. Ver
 [Decisões](docs/decisoes/README.md) e [Task Ledger](docs/processo/task-ledger.md).
 
 ---

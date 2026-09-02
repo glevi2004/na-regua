@@ -27,7 +27,9 @@
     "infra:redis": "docker compose -f infra/docker-compose.yml exec redis redis-cli",
     "prepare": "husky",
     "commitlint": "commitlint",
+    "db:migrate": "pnpm --filter @na-regua/db migrate",
     "ledger:csv": "node scripts/ledger-to-csv.mjs",
+    "ledger:check": "node scripts/ledger-check.mjs",
     "changelog": "node scripts/changelog.mjs"
   },
   "devDependencies": {

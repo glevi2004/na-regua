@@ -363,6 +363,9 @@ importers:
       '@na-regua/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@na-regua/env':
+        specifier: workspace:*
+        version: link:../env
       '@na-regua/money':
         specifier: workspace:*
         version: link:../money
@@ -370,6 +373,9 @@ importers:
         specifier: ^3.4.5
         version: 3.4.9
     devDependencies:
+      tsx:
+        specifier: ^4.23.13
+        version: 4.23.13
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
