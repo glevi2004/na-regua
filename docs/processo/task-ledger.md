@@ -52,10 +52,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      57 |  155 |
-| ✅ Concluídas                 |      15 |   30 |
+| ✅ Concluídas                 |      16 |   32 |
 | 🚧 Bloqueadas por decisão     |      13 |   46 |
 | 🚧 Bloqueadas por dependência |      25 |   70 |
-| ⬜ A fazer, pode começar hoje |       4 |    9 |
+| ⬜ A fazer, pode começar hoje |       3 |    7 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -63,9 +63,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 > As somas saem das linhas deste arquivo e fecham com o
 > [`monday-import.csv`](monday-import.csv) que `pnpm ledger:csv` gera.
 
-**Dos 125 dias-desenvolvedor que faltam, 116 não podem começar hoje** — 93% do
-trabalho restante. O que sobra são 9 dias: as três portas com adapter falso
-(NR-040, NR-043, NR-045) e o consumidor de fila atrás delas (NR-041).
+**Dos 123 dias-desenvolvedor que faltam, 116 não podem começar hoje** — 94% do
+trabalho restante. O que sobra são 7 dias: as duas portas com adapter falso que
+restam (NR-043, NR-045) e o consumidor de fila (NR-041), liberado agora que a
+porta fiscal (NR-040) está pronta.
 
 ---
 
@@ -123,7 +124,7 @@ Objetivo: emitir NFC-e e controlar contas a pagar e receber.
 | ------ | ---------------------------------------------------------------------- | :----: | ----------------- | --: | ------ | ---------------- | ---------------------- | :----: |
 | NR-028 | `core`: contas a pagar e a receber, com recorrência                    |   🔵   | `core`            |   3 | NR-020 | NR-020 → DEC-002 | RF-055–067             |   🚧   |
 | NR-029 | `core`: baixa, baixa parcial e estorno                                 |   🔵   | `core`            |   2 | NR-028 | NR-028 → DEC-002 | RF-059, RF-066, RF-067 |   🚧   |
-| NR-040 | `fiscal`: porta `InvoiceIssuer` + adapter falso                        |   🟠   | `fiscal` `core`   |   2 | NR-005 | —                | RF-045                 |   ⬜   |
+| NR-040 | `fiscal`: porta `InvoiceIssuer` + adapter falso                        |   🟠   | `fiscal` `core`   |   2 | NR-005 | —                | RF-045                 |   ✅   |
 | NR-041 | `worker`: consumidores de fila (emissão, mensagem, cobrança)           |   🟠   | `worker`          |   3 | NR-040 | —                | RNF-004, RF-130        |   ⬜   |
 | NR-042 | `fiscal`: adapter real, contingência e guarda de XML                   |   🟠   | `fiscal`          |   5 | NR-040 | **DEC-004**      | RF-045–054             |   🚧   |
 | NR-043 | `payments`: porta `PaymentGateway` + adapter falso                     |   🟠   | `payments` `core` |   2 | NR-005 | —                | RF-063                 |   ⬜   |
@@ -186,7 +187,7 @@ flowchart LR
     N20 --> N22["NR-022<br/>registerSale"]
     N22 --> N27["NR-027<br/>rota de venda"]
     N27 --> N71["NR-071<br/>PDV mobile"]
-    N22 --> N40["NR-040<br/>porta fiscal"]
+    N22 --> N40["NR-040<br/>porta fiscal ✅"]
     N40 --> N42["NR-042<br/>NFC-e<br/>🚧 DEC-004"]
 
     style N7 fill:#7c2d12,color:#fff
@@ -194,13 +195,15 @@ flowchart LR
     style N3 fill:#14532d,color:#fff
     style N4 fill:#14532d,color:#fff
     style N5 fill:#14532d,color:#fff
+    style N40 fill:#14532d,color:#fff
 ```
 
 **NR-007 é o nó mais crítico do projeto.** Ele bloqueia todo o schema, e está
 travado por [DEC-002](../decisoes/README.md#dec-002). `domain` (NR-004) e
 `contracts` (NR-005) já estão prontos — então, enquanto essa decisão não fechar,
 a trilha 1 **não tem nenhuma tarefa disponível**. As outras duas ficam com o que
-não depende de schema: as três portas com adapter falso, 6 dias somados.
+não depende de schema: as portas com adapter falso e o consumidor de fila,
+7 dias somados.
 
 **Prazo real para DEC-002: 5 dias úteis a partir do início da Sprint 1.**
 
@@ -221,8 +224,8 @@ não depende de schema: as três portas com adapter falso, 6 dias somados.
 | [DEC-012](../decisoes/README.md#dec-012) usuário e cupons                         | NR-075         |          — |            3 |
 | [DEC-001](../decisoes/README.md#dec-001) nome/marca                               | — (NR-011 ✅)  |          — |            0 |
 
-**116 dos 125 dias-desenvolvedor restantes estão bloqueados por 12 decisões** —
-93% do que falta. Decidir é, hoje, a atividade de maior retorno do projeto,
+**116 dos 123 dias-desenvolvedor restantes estão bloqueados por 12 decisões** —
+94% do que falta. Decidir é, hoje, a atividade de maior retorno do projeto,
 mais do que escrever código.
 
 Cada tarefa é contada **uma vez**, na decisão que aparece na sua própria coluna

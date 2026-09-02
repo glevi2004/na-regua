@@ -17,8 +17,9 @@ export { assertCanWrite } from './authorization.js'
 
 export type { Channel, CompanyId, ExecutionContext, UseCase, UserId } from './context.js'
 
-/* --- Portas: interfaces que db e worker implementam --- */
+/* --- Portas: interfaces que db, worker e os adapters implementam --- */
 export type { AppointmentRepository, NewAppointment } from './ports/appointment-repository.js'
+export type { InvoiceIssuer } from './ports/invoice-issuer.js'
 export type { ReminderScheduler } from './ports/reminder-scheduler.js'
 
 /* --- Agenda — NR-034 --- */
