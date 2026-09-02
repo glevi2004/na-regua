@@ -20,9 +20,33 @@ export type { Channel, CompanyId, ExecutionContext, UseCase, UserId } from './co
 /* --- Portas: interfaces que db, worker e os adapters implementam --- */
 export type { AppointmentRepository, NewAppointment } from './ports/appointment-repository.js'
 export type { InvoiceIssuer } from './ports/invoice-issuer.js'
+export type {
+  CompanyRepository,
+  CustomerRepository,
+  NewCompany,
+  NewCustomer,
+  NewProduct,
+  ProductRepository,
+} from './ports/registration-repositories.js'
 export type { MessageSender } from './ports/message-sender.js'
 export type { PaymentGateway } from './ports/payment-gateway.js'
 export type { ReminderScheduler } from './ports/reminder-scheduler.js'
+
+/* --- Cadastros — NR-021 --- */
+export { registerCompany } from './registration/register-company.js'
+export type { RegisterCompanyDeps } from './registration/register-company.js'
+export { assertIdentifiable, registerCustomer } from './registration/register-customer.js'
+export type {
+  RegisterCustomerDeps,
+  RegisterCustomerOptions,
+  RegisterCustomerResult,
+} from './registration/register-customer.js'
+export {
+  findProductByBarcode,
+  generateInternalCode,
+  registerProduct,
+} from './registration/register-product.js'
+export type { RegisterProductDeps } from './registration/register-product.js'
 
 /* --- Agenda — NR-034 --- */
 export { cancelAppointment } from './schedule/cancel-appointment.js'

@@ -67,6 +67,14 @@ export const productOutputSchema = z.object({
   id: idSchema,
   description: z.string(),
   barcode: z.string().nullable(),
+  /**
+   * Codigo interno, gerado quando nao ha codigo de barras — RF-019.
+   *
+   * Sai no output porque e por ele que o lojista se refere ao item quando o
+   * leitor nao le: etiqueta amassada, granel, produto sem embalagem. Codigo
+   * gerado que a tela nao mostra nao serve para nada.
+   */
+  internalCode: z.string().min(1),
   unitOfMeasure: unitOfMeasureSchema,
   salePriceCents: z.number().int(),
   costPriceCents: z.number().int(),

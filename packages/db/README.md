@@ -2,7 +2,7 @@
 
 Schema Drizzle, migrations, políticas RLS e repositórios.
 
-**Estado:** 🟢 isolamento multi-tenant implementado e testado (`NR-007`) · 🟡 tabelas de negócio pendentes (`NR-008`, `NR-020`)
+**Estado:** 🟢 isolamento (`NR-007`), cadastros (`NR-008`), vendas e financeiro (`NR-020`)
 
 Isolamento entre empresas é **RLS por linha** (`company_id` + política no
 PostgreSQL). Ver [`dados.md`](../../docs/arquitetura/dados.md#multi-tenant).
@@ -82,6 +82,35 @@ resposta: alguém conclui que a loja não vendeu nada hoje.
 | `company_id` vem do contexto, nunca do cliente   | [princípio 8](../../docs/arquitetura/principios.md)                                       |
 | Recurso de outro tenant responde 404, não 403    | 403 confirma que o recurso existe                                                         |
 
+### Três jeitos de escapar da política, e o `FORCE` cobre um
+
+Descoberto pela CI, do jeito caro: oito testes vermelhos mostrando linhas de
+duas empresas onde deveria haver uma.
+
+| Quem escapa           | `FORCE` resolve? |
+| --------------------- | ---------------- |
+| dono da tabela        | **sim**          |
+| papel com `BYPASSRLS` | não              |
+| **superusuário**      | não              |
+
+Superusuário ignora RLS inteiramente — e é o pior caso possível porque **não dá
+erro nenhum**: a política existe, `pg_class` mostra `relforcerowsecurity`
+ligado, o teste que lê metadado passa, e toda consulta devolve as linhas de
+todas as empresas. Era o caso da CI, onde a aplicação usava o `POSTGRES_USER`
+do contêiner.
+
+Por isso existe `assertRlsEnforced`, que a raiz de composição chama na subida:
+
+```ts
+import { assertRlsEnforced, getClient } from '@na-regua/db'
+
+await assertRlsEnforced(getClient())
+```
+
+Ambiente mal configurado tem de **derrubar o processo**, não vazar dado em
+silêncio. E é por isso que os testes de isolamento criam um papel comum e
+conectam com ele: com a conexão de administrador, eles mediriam o vazio.
+
 ## Como o tenant chega ao banco
 
 `withTenant` é o único lugar do sistema que define `app.company_id`:
@@ -102,6 +131,51 @@ aparece sob concorrência. Há um teste dedicado a ele.
 Para o que é legitimamente global — migrations, tarefas de plataforma — existe
 `withPlatformScope`. Nomeado assim, e não `withoutTenant`, para que quem lê a
 chamada veja uma exceção consciente e não um esquecimento.
+
+## Tabelas
+
+| Tabela              | Tenant                | Migration                  |
+| ------------------- | --------------------- | -------------------------- |
+| `companies`         | **é** o tenant (`id`) | `0002_cadastros`           |
+| `users`             | via `company_users`   | `0002_cadastros`           |
+| `company_users`     | `company_id`          | `0002_cadastros`           |
+| `categories`        | `company_id`          | `0002_cadastros`           |
+| `customers`         | `company_id`          | `0002_cadastros`           |
+| `products`          | `company_id`          | `0002_cadastros`           |
+| `company_counters`  | `company_id`          | `0003_vendas_e_financeiro` |
+| `sales`             | `company_id`          | `0003_vendas_e_financeiro` |
+| `sale_items`        | `company_id`          | `0003_vendas_e_financeiro` |
+| `payments`          | `company_id`          | `0003_vendas_e_financeiro` |
+| `receivables`       | `company_id`          | `0003_vendas_e_financeiro` |
+| `settlements`       | `company_id`          | `0003_vendas_e_financeiro` |
+| `sale_returns`      | `company_id`          | `0003_vendas_e_financeiro` |
+| `sale_return_items` | `company_id`          | `0003_vendas_e_financeiro` |
+
+Dois casos fogem do `company_id`, e os dois de propósito:
+
+**`companies` é o próprio tenant.** A coluna que a identifica é o `id`, então
+ela usa `enable_root_tenant_isolation`. Consequência prática: **a empresa nasce
+sob o próprio tenant** — o `id` é gerado na aplicação e o contexto já é ele:
+
+```ts
+const id = randomUUID()
+await withTenant(sql, id, (tx) => tx`INSERT INTO companies (id, ...) VALUES (${id}, ...)`)
+```
+
+Parece incômodo e é a propriedade que se quer. A alternativa seria uma política
+de INSERT com `WITH CHECK (true)`, que abriria exatamente o buraco que o resto
+fecha: qualquer contexto gravando linha de qualquer empresa.
+
+**`users` não tem `company_id`** porque a mesma pessoa opera mais de uma loja —
+uma identidade por empresa duplicaria a pessoa e as credenciais dela. Mas não
+ter `company_id` não pode significar ser visível a todos: e-mail e telefone são
+dado pessoal. A política passa por `company_users`, então só se enxerga quem tem
+vínculo com a empresa do contexto.
+
+Isso tem uma consequência que morde: **`INSERT INTO users ... RETURNING` volta
+vazio.** O `RETURNING` aplica a política de `SELECT`, e no instante do insert o
+vínculo em `company_users` ainda não existe. Gere o `id` na aplicação e insira
+os dois na mesma transação.
 
 ## Dois papéis de banco
 

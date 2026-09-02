@@ -20,6 +20,10 @@ export type { DatabaseHealth } from './connection.js'
 export { lerMigrations, migrate } from './migrate.js'
 export type { Migration, MigrationResult } from './migrate.js'
 
+/* --- Guarda: a conexao da aplicacao pode ignorar RLS? --- */
+export { assertRlsEnforced, checkRlsEnforcement } from './rls-guard.js'
+export type { RlsStatus } from './rls-guard.js'
+
 /* --- Isolamento: a ponte entre o ExecutionContext e a politica de RLS --- */
 export { withPlatformScope, withTenant } from './tenant.js'
 export type { TenantId } from './tenant.js'
