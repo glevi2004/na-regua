@@ -3,14 +3,14 @@ Name,Group,Trilha,Status,Priority,Estimate (d),Sprint,Depends on,Blocked by,Modu
 "NR-002 — Base de documentação: produto, arquitetura, engenharia, decisões",Sprint 0 — Fundação,Compartilhada,Done,Medium,4,Sprint 0,,,docs,,docs/processo/task-ledger.md
 "NR-003 — packages/money — centavos, allocate sem perda de resto, 21 testes",Sprint 0 — Fundação,Trilha 1 — Nucleo & Dados,Done,Medium,1,Sprint 0,,,money,,docs/processo/task-ledger.md
 "NR-004 — domain: cálculo de venda — custo, imposto, tarifa de cartão, parcelas",Sprint 1 — Núcleo mínimo,Trilha 1 — Nucleo & Dados,Done,Medium,3,Sprint 1,NR-003,,domain,"RF-040, RF-041, RF-038",docs/processo/task-ledger.md
-"NR-005 — contracts: schemas base (Company, Customer, Product, Sale)",Sprint 1 — Núcleo mínimo,Trilha 1 — Nucleo & Dados,Not started,Medium,2,Sprint 1,NR-003,,contracts,RNF-027,docs/processo/task-ledger.md
-NR-006 — Configuração tipada: validar variáveis de ambiente na inicialização,Sprint 1 — Núcleo mínimo,Trilha 2 — Plataforma & Integracoes,Not started,Medium,1,Sprint 1,NR-001,,repo,—,docs/processo/task-ledger.md
+"NR-005 — contracts: schemas base (Company, Customer, Product, Sale)",Sprint 1 — Núcleo mínimo,Trilha 1 — Nucleo & Dados,Done,Medium,2,Sprint 1,NR-003,,contracts,RNF-027,docs/processo/task-ledger.md
+NR-006 — Configuração tipada: validar variáveis de ambiente na inicialização,Sprint 1 — Núcleo mínimo,Trilha 2 — Plataforma & Integracoes,Done,Medium,1,Sprint 1,NR-001,,repo,—,docs/processo/task-ledger.md
 "NR-007 — db: estratégia multi-tenant, RLS e teste de isolamento",Sprint 1 — Núcleo mínimo,Trilha 1 — Nucleo & Dados,Blocked,High,3,Sprint 1,NR-005,DEC-002,db,"RF-121, RF-122, RNF-021",docs/processo/task-ledger.md
 "NR-008 — db: schema de cadastros (companies, users, customers, products)",Sprint 1 — Núcleo mínimo,Trilha 1 — Nucleo & Dados,Blocked,High,2,Sprint 1,NR-007,DEC-002,db,"RF-001, RF-009, RF-017",docs/processo/task-ledger.md
-"NR-009 — api: base — contexto de execução, erro padronizado, validação por contracts",Sprint 1 — Núcleo mínimo,Trilha 2 — Plataforma & Integracoes,Not started,Medium,2,Sprint 1,NR-005,,api,"RNF-027, RNF-054",docs/processo/task-ledger.md
-NR-010 — Qualidade: lint com type-checking e piso de cobertura na CI,Sprint 1 — Núcleo mínimo,Trilha 2 — Plataforma & Integracoes,Not started,Medium,1,Sprint 1,NR-001,,repo,RNF-068,docs/processo/task-ledger.md
-"NR-011 — ui: tokens de design (cor, tipografia, espaçamento)",Sprint 1 — Núcleo mínimo,Trilha 3 — Clientes,Blocked,High,2,Sprint 1,,DEC-001/QST-011,ui,RNF-055,docs/processo/task-ledger.md
-NR-012 — mobile: shell de navegação e sessão,Sprint 1 — Núcleo mínimo,Trilha 3 — Clientes,Blocked,High,3,Sprint 1,NR-011,DEC-008,mobile,US-059,docs/processo/task-ledger.md
+"NR-009 — api: base — contexto de execução, erro padronizado, validação por contracts",Sprint 1 — Núcleo mínimo,Trilha 2 — Plataforma & Integracoes,Done,Medium,2,Sprint 1,NR-005,,api,"RNF-027, RNF-054",docs/processo/task-ledger.md
+NR-010 — Qualidade: lint com type-checking e piso de cobertura na CI,Sprint 1 — Núcleo mínimo,Trilha 2 — Plataforma & Integracoes,Done,Medium,1,Sprint 1,NR-001,,repo,RNF-068,docs/processo/task-ledger.md
+"NR-011 — ui: tokens de design (cor, tipografia, espaçamento)",Sprint 1 — Núcleo mínimo,Trilha 3 — Clientes,Done,High,2,Sprint 1,,DEC-001/QST-011,ui,RNF-055,docs/processo/task-ledger.md
+NR-012 — mobile: shell de navegação e sessão,Sprint 1 — Núcleo mínimo,Trilha 3 — Clientes,Done,High,3,Sprint 1,NR-011,DEC-008,mobile,US-059,docs/processo/task-ledger.md
 NR-013 — web: shell de layout e sessão,Sprint 1 — Núcleo mínimo,Trilha 3 — Clientes,Blocked,High,2,Sprint 1,NR-011,DEC-008,web,US-059,docs/processo/task-ledger.md
 "NR-014 — Autenticação: login, papéis, usuário em várias empresas",Sprint 1 — Núcleo mínimo,Trilha 2 — Plataforma & Integracoes,Blocked,High,4,Sprint 1,NR-009,DEC-008,api core,"RF-119, RF-120, RF-005",docs/processo/task-ledger.md
 NR-015 — infra: definir hospedagem e preencher os workflows de deploy,Sprint 1 — Núcleo mínimo,Trilha 2 — Plataforma & Integracoes,Blocked,High,3,Sprint 1,,DEC-009,infra,"RNF-064, RNF-013",docs/processo/task-ledger.md
@@ -18,11 +18,11 @@ NR-020 — db: schema de vendas e financeiro,Sprint 2 — Cadastros e venda,Tril
 "NR-021 — core: casos de uso de cadastro (empresa, cliente, produto)",Sprint 2 — Cadastros e venda,Trilha 1 — Nucleo & Dados,Not started,Medium,3,Sprint 2,NR-008,,core,RF-001–019,docs/processo/task-ledger.md
 "NR-022 — core: registerSale — transação única com estoque, recebível e auditoria",Sprint 2 — Cadastros e venda,Trilha 1 — Nucleo & Dados,Not started,Medium,4,Sprint 2,"NR-020, NR-004",,core,"RF-034–039, RNF-046",docs/processo/task-ledger.md
 NR-023 — core: movimentação de estoque e ajuste com autoria,Sprint 2 — Cadastros e venda,Trilha 1 — Nucleo & Dados,Not started,Medium,2,Sprint 2,NR-021,,core,RF-022–024,docs/processo/task-ledger.md
-"NR-024 — domain: desconto, limite por papel, troco",Sprint 2 — Cadastros e venda,Trilha 1 — Nucleo & Dados,Not started,Medium,2,Sprint 2,NR-004,,domain,"RF-030, RF-031, RF-035",docs/processo/task-ledger.md
+"NR-024 — domain: desconto, limite por papel, troco",Sprint 2 — Cadastros e venda,Trilha 1 — Nucleo & Dados,Done,Medium,2,Sprint 2,NR-004,,domain,"RF-030, RF-031, RF-035",docs/processo/task-ledger.md
 NR-025 — core: trilha de auditoria somente-inserção,Sprint 2 — Cadastros e venda,Trilha 1 — Nucleo & Dados,Not started,Medium,2,Sprint 2,NR-020,,core,"RF-123, RF-124",docs/processo/task-ledger.md
 NR-026 — api: rotas de cadastro,Sprint 2 — Cadastros e venda,Trilha 2 — Plataforma & Integracoes,Not started,Medium,2,Sprint 2,"NR-021, NR-009",,api,RF-001–019,docs/processo/task-ledger.md
 NR-027 — api: rota de venda com chave de idempotência,Sprint 2 — Cadastros e venda,Trilha 2 — Plataforma & Integracoes,Not started,Medium,2,Sprint 2,NR-022,,api,"RF-036, RNF-043",docs/processo/task-ledger.md
-"NR-030 — api: observabilidade — requestId, log estruturado, rastreamento",Sprint 2 — Cadastros e venda,Trilha 2 — Plataforma & Integracoes,Not started,Medium,2,Sprint 2,NR-009,,api worker,"RNF-058, RNF-059",docs/processo/task-ledger.md
+"NR-030 — api: observabilidade — requestId, log estruturado, rastreamento",Sprint 2 — Cadastros e venda,Trilha 2 — Plataforma & Integracoes,Done,Medium,2,Sprint 2,NR-009,,api worker,"RNF-058, RNF-059",docs/processo/task-ledger.md
 NR-070 — mobile: cadastro de produto com leitor de código de barras,Sprint 2 — Cadastros e venda,Trilha 3 — Clientes,Not started,Medium,3,Sprint 2,NR-026,,mobile,"US-009, RF-017",docs/processo/task-ledger.md
 "NR-071 — mobile: carrinho, seleção de cliente e fechamento de venda",Sprint 2 — Cadastros e venda,Trilha 3 — Clientes,Not started,Medium,5,Sprint 2,NR-027,,mobile,US-014–019,docs/processo/task-ledger.md
 NR-072 — web: backoffice de cadastros,Sprint 2 — Cadastros e venda,Trilha 3 — Clientes,Not started,Medium,3,Sprint 2,NR-026,,web,"E1, E2, E3",docs/processo/task-ledger.md
@@ -49,7 +49,8 @@ NR-047 — banking: importação de OFX/CSV,Sprint 5 — Bancos e relatórios,Tr
 NR-048 — banking: Open Finance,Sprint 5 — Bancos e relatórios,Trilha 2 — Plataforma & Integracoes,Blocked,High,4,Sprint 5,NR-047,DEC-005,banking,"RF-074, RF-075",docs/processo/task-ledger.md
 NR-076 — web: conciliação bancária,Sprint 5 — Bancos e relatórios,Trilha 3 — Clientes,Not started,Medium,3,Sprint 5,NR-033,,web,US-038,docs/processo/task-ledger.md
 "NR-077 — Relatórios: DRE, ranking e faturamento, no app e no assistente",Sprint 5 — Bancos e relatórios,Trilha 3 — Clientes,Not started,Medium,4,Sprint 5,NR-032,,web mobile,"US-041, US-053",docs/processo/task-ledger.md
-NR-034 — core: agenda e lembretes,Backlog,Trilha 1 — Nucleo & Dados,Not started,Low,2,Backlog,,,core,,docs/processo/task-ledger.md
+NR-016 — CHANGELOG gerado dos commits + processo de release,Backlog,Trilha 2 — Plataforma & Integracoes,Done,Low,1,Backlog,,,repo,,docs/processo/task-ledger.md
+NR-034 — core: agenda e lembretes,Backlog,Trilha 1 — Nucleo & Dados,Done,Low,2,Backlog,,,core,,docs/processo/task-ledger.md
 NR-049 — E2E do caminho crítico (3 fluxos),Backlog,Trilha 2 — Plataforma & Integracoes,Not started,Low,3,Backlog,,,repo,,docs/processo/task-ledger.md
-NR-016 — CHANGELOG gerado dos commits + processo de release,Backlog,Trilha 2 — Plataforma & Integracoes,Not started,Low,1,Backlog,,,repo,,docs/processo/task-ledger.md
 NR-078 — mobile: agenda,Backlog,Trilha 3 — Clientes,Not started,Low,2,Backlog,,,mobile,,docs/processo/task-ledger.md
+NR-079 — web: conteúdo real da landing,Backlog,Trilha 3 — Clientes,Done,Low,1,Backlog,,,web,,docs/processo/task-ledger.md

@@ -40,7 +40,8 @@
     "web": "expo start --web",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
-    "clean": "rm -rf .expo .turbo"
+    "clean": "rm -rf .expo .turbo",
+    "lint": "eslint src app"
   },
   "private": true
 }

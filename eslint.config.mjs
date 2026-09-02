@@ -64,6 +64,40 @@ export default tseslint.config(
     },
   },
   {
+    /**
+     * React Native — apps/mobile.
+     *
+     * Duas regras precisam de ajuste aqui, e nenhum deles e "a regra incomoda":
+     */
+    files: ['apps/mobile/**/*.{ts,tsx}'],
+    rules: {
+      /*
+       * `onPress={handler}` com handler async e o idioma do React Native, e a
+       * regra nao consegue ver que estes handlers foram escritos para NAO
+       * lancar: a camada de dados devolve `{ ok: false, erro }` em vez de
+       * excecao. Desligado so para atributo de JSX — em property e argumento a
+       * regra continua valendo.
+       *
+       * O risco residual e real e fica registrado: quando as chamadas HTTP de
+       * verdade entrarem no lugar dos mocks, elas PODEM lancar, e cada handler
+       * vai precisar tratar. Ver os blocos `SUBSTITUIR POR:` em src/lib.
+       */
+      '@typescript-eslint/no-misused-promises': [
+        'error',
+        { checksVoidReturn: { attributes: false } },
+      ],
+      /*
+       * `require()` de imagem e como o empacotador do React Native resolve
+       * asset estatico — trocar por `import` quebra a resolucao. Liberado
+       * apenas para arquivo de midia, nao para modulo.
+       */
+      '@typescript-eslint/no-require-imports': [
+        'error',
+        { allow: ['\\.(png|jpe?g|gif|svg|webp|ttf|otf)$'] },
+      ],
+    },
+  },
+  {
     // Teste pode ser mais solto: um `any` num fixture nao vaza para producao.
     files: ['**/*.test.ts', '**/*.spec.ts'],
     rules: { '@typescript-eslint/no-explicit-any': 'off' },

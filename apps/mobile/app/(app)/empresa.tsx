@@ -9,7 +9,7 @@ import Sanfona from '@/components/ui/Sanfona'
 import Campo from '@/components/ui/Campo'
 import Botao from '@/components/ui/Botao'
 import { Etiqueta } from '@/components/ui/Cartao'
-import { cores, espaco, fonte, peso } from '@/theme/tokens'
+import { cores, espaco, fonte } from '@/theme/tokens'
 
 /**
  * Dados da empresa.
