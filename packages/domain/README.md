@@ -2,7 +2,7 @@
 
 Regras de negócio puras.
 
-**Estado:** 🟡 NR-004 implementado · 31 testes · NR-024 pendente (desconto, limite por papel, troco)
+**Estado:** 🟢 NR-004 e NR-024 implementados · 73 testes · 99% de cobertura
 
 ## Responsabilidade
 
@@ -26,7 +26,44 @@ export function calculateInstallmentPlan(
   cardFees: CardFeeTable,
   at: Date,
 ): InstallmentPlan
+
+export function applyDiscount(
+  base: Money,
+  discount: Discount, // em valor ou em percentual
+  policy: DiscountPolicy, // teto do papel, já resolvido
+): DiscountResult
+
+export function calculateChange(total: Money, payments: PaymentInput[]): Money
 ```
+
+### Desconto — RF-030, RF-031
+
+`applyDiscount` serve ao item e à venda: a diferença está na base que se passa,
+não na regra. Compor as duas coisas é de `core` (NR-022).
+
+O **teto do papel chega resolvido**, em percentual. `domain` não recebe o papel
+nem consulta configuração — descobrir que `staff` tem 10% é leitura de dado da
+empresa, e portanto de `core`. Aqui só se aplica o limite, que é cálculo.
+
+Duas recusas, por motivos diferentes:
+
+| Recusa                      | Por quê                                                           |
+| --------------------------- | ----------------------------------------------------------------- |
+| `DISCOUNT_EXCEEDS_TOTAL`    | total negativo é a loja pagando para vender                       |
+| `DISCOUNT_ABOVE_ROLE_LIMIT` | alçada — bloqueia **com o motivo**, não corta no teto em silêncio |
+
+O teto vale também para desconto em **valor**: R$ 15 numa venda de R$ 100 são
+15%, e o limite se aplica igual. É por isso que `DiscountResult` devolve
+`effectiveRate`.
+
+### Troco — RF-035
+
+Só `cash` gera troco. Pix, cartão e carteira transferem o valor exato; tratar
+uma sobra ali transformaria erro de digitação em saída de caixa.
+
+A sobra é medida sobre o que foi pago **em dinheiro**, não sobre a soma de
+tudo. Numa venda de R$ 100 paga com R$ 60 em Pix e R$ 50 em dinheiro, o troco
+é R$ 10.
 
 **O que não faz:** ler banco, chamar API, orquestrar caso de uso, decidir
 autorização. Isso é `core`. Também **não** chama Focus (NFC-e) nem PagMaxx no
