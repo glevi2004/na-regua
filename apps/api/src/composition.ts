@@ -8,7 +8,13 @@
  * Se um import de `db` ou de adapter aparecer fora daqui, a verificacao de
  * fronteiras na CI barra o PR — e com razao.
  */
-import { checkConnection, closeConnection, type DatabaseHealth } from '@na-regua/db'
+import {
+  assertRlsEnforced,
+  checkConnection,
+  closeConnection,
+  getClient,
+  type DatabaseHealth,
+} from '@na-regua/db'
 import { loadApiEnv } from '@na-regua/env'
 import { Redis } from 'ioredis'
 
@@ -54,6 +60,45 @@ export async function checkRedis(): Promise<RedisHealth> {
 
 export async function checkDatabase(): Promise<DatabaseHealth> {
   return checkConnection(env.DATABASE_URL)
+}
+
+export type IsolationCheck =
+  | { readonly status: 'enforced'; readonly role: string }
+  /** Nao deu para verificar: banco fora do ar na subida. */
+  | { readonly status: 'unknown'; readonly reason: string }
+  | { readonly status: 'bypassed'; readonly reason: string }
+
+/**
+ * Verifica, na subida, que a conexao da aplicacao esta sujeita a RLS.
+ *
+ * A CI encontrou isto do jeito caro: em um ambiente real o isolamento entre
+ * empresas nao estava em vigor, porque a aplicacao conectava com um papel
+ * superusuario — e superusuario ignora politica de RLS inteiramente, `FORCE
+ * ROW LEVEL SECURITY` incluido. Nada dava erro; toda consulta simplesmente
+ * devolvia as linhas de todas as lojas.
+ *
+ * A distincao entre os tres desfechos e o ponto:
+ *
+ * - **`bypassed`** e configuracao errada e vaza dado entre lojas. Derruba o
+ *   processo. Melhor nao subir que subir sem isolamento.
+ * - **`unknown`** e banco fora do ar na subida, que e indisponibilidade e nao
+ *   falha de seguranca. A api sobe: `/health` ja responde 503, o orquestrador
+ *   ja sabe, e recusar subir aqui deixaria nem o `/health/live` de pe.
+ * - **`enforced`** e o caso normal.
+ */
+export async function checkIsolation(): Promise<IsolationCheck> {
+  try {
+    const status = await assertRlsEnforced(getClient(env.DATABASE_URL))
+    return { status: 'enforced', role: status.role }
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error)
+
+    /* A mensagem do `assertRlsEnforced` e a unica que significa "configurado
+       errado". Qualquer outra falha e do caminho ate o banco. */
+    return reason.includes('IGNORA as politicas de RLS')
+      ? { status: 'bypassed', reason }
+      : { status: 'unknown', reason }
+  }
 }
 
 export async function shutdown(): Promise<void> {
