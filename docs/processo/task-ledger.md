@@ -51,10 +51,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      57 |  155 |
-| ✅ Concluídas                 |      24 |   53 |
+| ✅ Concluídas                 |      25 |   54 |
 | 🚧 Bloqueadas por decisão     |      11 |   41 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |      21 |   59 |
+| ⬜ A fazer, pode começar hoje |      20 |   58 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -65,8 +65,9 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 **A DEC-002 fechou** — [ADR-0001](../decisoes/adr/0001-rls-por-linha.md), RLS
 por linha, com o isolamento já materializado em `packages/db` (NR-007) e os
 cadastros, vendas e financeiro no schema (NR-008, NR-020) e os casos de uso de
-cadastro e o `registerSale` em `core` (NR-021, NR-022). Dos 102 dias que
-faltam, **59 podem começar hoje**, em 21 tarefas; 43 seguem bloqueados por 11
+cadastro, o `registerSale` e a movimentação de estoque em `core` (NR-021,
+NR-022, NR-023), e a agenda no schema (NR-035). Dos 101 dias que faltam,
+**58 podem começar hoje**, em 20 tarefas; 43 seguem bloqueados por 11
 decisões. A próxima da fila **não é** a NR-027 — ver a nota abaixo.
 
 ---
@@ -165,7 +166,7 @@ Objetivo: operar o ERP por mensagem e cobrar a mensalidade.
 | ------ | ---------------------------------------------------- | :----: | -------- | --: | ------ | ---- | -------------- | :----: |
 | NR-016 | `CHANGELOG` gerado dos commits + processo de release |   🟠   | `repo`   |   1 | —      | —    | —              |   ✅   |
 | NR-034 | `core`: agenda e lembretes                           |   🔵   | `core`   |   2 | —      | —    | RF-089–093     |   ✅   |
-| NR-035 | `db`: schema de agenda (`appointments`)              |   🔵   | `db`     |   1 | NR-008 | —    | RF-089, RF-090 |   ⬜   |
+| NR-035 | `db`: schema de agenda (`appointments`)              |   🔵   | `db`     |   1 | NR-008 | —    | RF-089, RF-090 |   ✅   |
 | NR-036 | `api`: rotas de agenda                               |   🟠   | `api`    |   1 | NR-035 | —    | RF-089–093     |   ⬜   |
 | NR-049 | E2E do caminho crítico (3 fluxos)                    |   🟠   | `repo`   |   3 | NR-071 | —    | RNF-068        |   ⬜   |
 | NR-078 | `mobile`: agenda                                     |   🟢   | `mobile` |   2 | NR-036 | —    | US-043–045     |   ⬜   |
