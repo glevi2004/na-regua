@@ -51,10 +51,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      57 |  155 |
-| ✅ Concluídas                 |      22 |   47 |
+| ✅ Concluídas                 |      23 |   51 |
 | 🚧 Bloqueadas por decisão     |      11 |   41 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |      23 |   65 |
+| ⬜ A fazer, pode começar hoje |      22 |   61 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -65,9 +65,9 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 **A DEC-002 fechou** — [ADR-0001](../decisoes/adr/0001-rls-por-linha.md), RLS
 por linha, com o isolamento já materializado em `packages/db` (NR-007) e os
 cadastros, vendas e financeiro no schema (NR-008, NR-020) e os casos de uso de
-cadastro em `core` (NR-021). Dos 108 dias que faltam, **65 podem começar
-hoje**, em 23 tarefas; 43 seguem bloqueados por 11 decisões. A próxima da fila
-é a NR-022, o `registerSale`.
+cadastro e o `registerSale` em `core` (NR-021, NR-022). Dos 104 dias que
+faltam, **61 podem começar hoje**, em 22 tarefas; 43 seguem bloqueados por 11
+decisões. A próxima da fila é a NR-027, a rota de venda.
 
 ---
 
@@ -106,7 +106,7 @@ Objetivo: registrar uma venda de ponta a ponta pelo aplicativo.
 | ------ | --------------------------------------------------------------------------- | :----: | -------------- | --: | -------------- | ---- | ---------------------- | :----: |
 | NR-020 | `db`: schema de vendas e financeiro                                         |   🔵   | `db`           |   3 | NR-008         | —    | RF-027–044, RF-063     |   ✅   |
 | NR-021 | `core`: casos de uso de cadastro (empresa, cliente, produto)                |   🔵   | `core`         |   3 | NR-008         | —    | RF-001–019             |   ✅   |
-| NR-022 | `core`: `registerSale` — transação única com estoque, recebível e auditoria |   🔵   | `core`         |   4 | NR-020, NR-004 | —    | RF-034–039, RNF-046    |   ⬜   |
+| NR-022 | `core`: `registerSale` — transação única com estoque, recebível e auditoria |   🔵   | `core`         |   4 | NR-020, NR-004 | —    | RF-034–039, RNF-046    |   ✅   |
 | NR-023 | `core`: movimentação de estoque e ajuste com autoria                        |   🔵   | `core`         |   2 | NR-021         | —    | RF-022–024             |   ⬜   |
 | NR-024 | `domain`: desconto, limite por papel, troco                                 |   🔵   | `domain`       |   2 | NR-004         | —    | RF-030, RF-031, RF-035 |   ✅   |
 | NR-025 | `core`: trilha de auditoria somente-inserção                                |   🔵   | `core`         |   2 | NR-020         | —    | RF-123, RF-124         |   ⬜   |
@@ -185,7 +185,7 @@ flowchart LR
     N7 --> N8["NR-008<br/>cadastros ✅"]
     N8 --> N20["NR-020<br/>vendas ✅"]
     N4 --> N22
-    N20 --> N22["NR-022<br/>registerSale"]
+    N20 --> N22["NR-022<br/>registerSale ✅"]
     N22 --> N27["NR-027<br/>rota de venda"]
     N27 --> N71["NR-071<br/>PDV mobile"]
     N22 --> N40["NR-040<br/>porta fiscal ✅"]
@@ -199,6 +199,7 @@ flowchart LR
     style N7 fill:#14532d,color:#fff
     style N8 fill:#14532d,color:#fff
     style N20 fill:#14532d,color:#fff
+    style N22 fill:#14532d,color:#fff
 ```
 
 **NR-007 era o nó mais crítico do projeto, e está feito.** O isolamento por RLS
@@ -207,9 +208,12 @@ liga o `ExecutionContext` à política, e doze testes contra Postgres de verdade
 provando que empresa não lê, grava, altera nem apaga linha de outra
 ([ADR-0001](../decisoes/adr/0001-rls-por-linha.md)).
 
-**O nó agora é a NR-022**, o `registerSale`: a transação única que grava venda,
-estoque, recebível e auditoria juntos. Atrás dele vêm a rota de venda (NR-027) e
-o PDV (NR-071).
+**O `registerSale` está feito** — a transação única que grava venda, itens,
+pagamentos, recebíveis e a baixa de estoque juntos, com idempotência pela chave
+do contexto e rollback provado em teste (RNF-046).
+
+**O nó agora é a NR-027**, a rota de venda: é ela que liga o PDV (NR-071) ao
+caso de uso, e é o último elo antes de a venda existir de ponta a ponta.
 
 ## Bloqueios por decisão
 
@@ -227,8 +231,8 @@ o PDV (NR-071).
 | [DEC-012](../decisoes/README.md#dec-012) usuário e cupons                             | NR-075         |          — |            3 |
 | [DEC-001](../decisoes/README.md#dec-001) nome/marca                                   | — (NR-011 ✅)  |          — |            0 |
 
-**43 dos 108 dias-desenvolvedor restantes estão bloqueados por 11 decisões** —
-40% do que falta. Decidir continua rendendo, mas deixou de ser a única coisa que
+**43 dos 104 dias-desenvolvedor restantes estão bloqueados por 11 decisões** —
+41% do que falta. Decidir continua rendendo, mas deixou de ser a única coisa que
 rende: com a DEC-002 fechada, existem 76 dias de trabalho liberado para tocar em
 paralelo às decisões que faltam.
 
@@ -251,7 +255,7 @@ passou a ser retrabalho: trocar os tokens quando a marca fechar.
 
 | Trilha                          | Tarefas | Dias | Observação                                       |
 | ------------------------------- | ------: | ---: | ------------------------------------------------ |
-| 🔵 1 — Núcleo & Dados           |      18 |   45 | é o gargalo; a fila dela segue em NR-022         |
+| 🔵 1 — Núcleo & Dados           |      18 |   45 | é o gargalo; a fila dela segue em NR-023         |
 | 🟠 2 — Plataforma & Integrações |      25 |   68 | a mais carregada e a mais bloqueada (9 decisões) |
 | 🟢 3 — Clientes                 |      13 |   38 | depende de schema, mas já não está bloqueada     |
 | Compartilhada                   |       1 |    4 | documentação (NR-002)                            |

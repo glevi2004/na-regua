@@ -28,9 +28,26 @@ export type {
   NewProduct,
   ProductRepository,
 } from './ports/registration-repositories.js'
+export type {
+  CompanySettingsRepository,
+  NewReceivable,
+  NewSale,
+  NewSaleItem,
+  NewSalePayment,
+  RegisteredSale,
+  SaleProductReader,
+  SaleProductSnapshot,
+  SaleSettings,
+  SaleTransaction,
+  UnitOfWork,
+} from './ports/sale-writers.js'
 export type { MessageSender } from './ports/message-sender.js'
 export type { PaymentGateway } from './ports/payment-gateway.js'
 export type { ReminderScheduler } from './ports/reminder-scheduler.js'
+
+/* --- Venda — NR-022 --- */
+export { registerSale } from './sales/register-sale.js'
+export type { RegisterSaleDeps, RegisterSaleResult, StockWarning } from './sales/register-sale.js'
 
 /* --- Cadastros — NR-021 --- */
 export { registerCompany } from './registration/register-company.js'

@@ -5,6 +5,13 @@
  * parametro. Ver docs/arquitetura/principios.md#2-domain-e-puro
  */
 export { applyDiscount } from './apply-discount.js'
+/*
+ * Exportados porque `core` precisa da tarifa POR PAGAMENTO, e nao so do total
+ * da venda: o recebivel de debito guarda o valor liquido previsto (RF-063), e
+ * `calculateSaleTotals` devolve a tarifa somada. `calculateInstallmentPlan`
+ * cobre o credito e recusa as outras formas de proposito.
+ */
+export { calculateCardFeeAmount, isCardPayment } from './calculate-card-fee.js'
 export { calculateChange } from './calculate-change.js'
 export { calculateInstallmentPlan } from './calculate-installment-plan.js'
 export { calculateSaleTotals } from './calculate-sale-totals.js'
