@@ -17,6 +17,21 @@ import postgres, { type Sql } from 'postgres'
 export const PAPEL_DE_TESTE = 'naregua_rls_test'
 const SENHA_DE_TESTE = 'naregua_rls_test'
 
+/**
+ * CNPJ de teste com EXATAMENTE 14 digitos, exigencia do CHECK da tabela.
+ *
+ * `Date.now()` tem 13 digitos; um digito de prefixo fecha os 14 e distingue as
+ * empresas criadas no mesmo milissegundo. A primeira versao montava 13 digitos
+ * e a CI reprovou com `companies_cnpj_digitos` — o CHECK fez o trabalho dele.
+ */
+export function cnpjDeTeste(prefixo: string): string {
+  const cnpj = `${prefixo}${Date.now()}`
+  if (!/^\d{14}$/.test(cnpj)) {
+    throw new Error(`cnpjDeTeste gerou "${cnpj}", que nao tem 14 digitos.`)
+  }
+  return cnpj
+}
+
 export type ConexaoDeAplicacao = {
   /** Conexao com o papel comum — sujeita a RLS. */
   readonly sql: Sql

@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import postgres, { type Sql } from 'postgres'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { migrate } from './migrate.js'
-import { conectarComoAplicacao, type ConexaoDeAplicacao } from './test-support.js'
+import { cnpjDeTeste, conectarComoAplicacao, type ConexaoDeAplicacao } from './test-support.js'
 import { withTenant } from './tenant.js'
 
 /**
@@ -57,11 +57,16 @@ describe.skipIf(!DATABASE_URL)('schema de cadastros — NR-008', () => {
     aplicacao = await conectarComoAplicacao(admin, DATABASE_URL!)
     sql = aplicacao.sql
 
-    /* CNPJ com 14 digitos e unico global: sufixo por execucao evita colidir
-       com o que ficou de uma rodada anterior no mesmo banco. */
-    const marca = String(Date.now()).slice(-8)
-    empresaA = await criarEmpresa(`1${marca}0001`, 'Mercearia A')
-    empresaB = await criarEmpresa(`2${marca}0002`, 'Mercearia B')
+    /*
+     * CNPJ com EXATAMENTE 14 digitos, e unico global.
+     *
+     * A primeira versao montava `1${marca}0001` com uma marca de 8 digitos e
+     * dava 13 — a CI reprovou com `companies_cnpj_digitos`. `Date.now()` tem
+     * 13 digitos, entao um digito de prefixo fecha 14 na conta, e o prefixo
+     * distingue as duas empresas criadas no mesmo milissegundo.
+     */
+    empresaA = await criarEmpresa(cnpjDeTeste('1'), 'Mercearia A')
+    empresaB = await criarEmpresa(cnpjDeTeste('2'), 'Mercearia B')
   }, 60_000)
 
   afterAll(async () => {

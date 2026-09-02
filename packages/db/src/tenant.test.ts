@@ -58,7 +58,9 @@ describe.skipIf(!DATABASE_URL)('isolamento entre empresas — RNF-021, RF-121, R
     const resultado = await migrate(MIGRATION_URL!)
     /* Se a migration nao rodou, nada abaixo faz sentido — falhar aqui e mais
        claro que dezenove erros de "funcao current_company_id nao existe". */
-    expect([...resultado.aplicadas, ...resultado.jaEstavam]).toContain('0001_tenant_isolation')
+    const todas = [...resultado.aplicadas, ...resultado.jaEstavam]
+    expect(todas).toContain('0001_tenant_isolation')
+    expect(todas).toContain('0004_erro_claro_sem_tenant')
 
     admin = postgres(DATABASE_URL!, { max: 3, onnotice: () => {} })
 
@@ -164,13 +166,19 @@ describe.skipIf(!DATABASE_URL)('isolamento entre empresas — RNF-021, RF-121, R
 
   it('consulta sem empresa no contexto FALHA', async () => {
     /*
-     * O coracao da RF-121. Se `current_company_id()` usasse `missing_ok`, isto
-     * devolveria zero linhas em silencio — e vazio parece resposta: alguem
-     * conclui que a loja nao vendeu nada hoje.
+     * O coracao da RF-121: vazio pareceria resposta, e alguem concluiria que a
+     * loja nao vendeu nada hoje.
+     *
+     * A mensagem casada e a NOSSA, e nao a do Postgres, e isso importa. A
+     * primeira versao apostava no erro do proprio `current_setting`, que so
+     * acontece na primeira vez: depois de a variavel ser definida na sessao,
+     * le-la devolve string vazia, e a consulta passava a falhar no cast para
+     * uuid — com a mensagem `invalid input syntax for type uuid: ""`, que nao
+     * diz nada sobre tenant faltando. Ver migration 0004.
      */
     await expect(
       withPlatformScope(sql, (tx) => tx.unsafe(`SELECT * FROM ${TABELA}`)),
-    ).rejects.toThrow(/app\.company_id|unrecognized configuration parameter/i)
+    ).rejects.toThrow(/sem empresa no contexto/i)
   })
 
   it('nao grava linha no company_id de outra empresa', async () => {
@@ -227,7 +235,7 @@ describe.skipIf(!DATABASE_URL)('isolamento entre empresas — RNF-021, RF-121, R
 
     await expect(
       withPlatformScope(sql, (tx) => tx.unsafe(`SELECT * FROM ${TABELA}`)),
-    ).rejects.toThrow(/app\.company_id|unrecognized configuration parameter/i)
+    ).rejects.toThrow(/sem empresa no contexto/i)
   })
 
   it('recusa isolar tabela sem company_id, em vez de aceitar em silencio', async () => {

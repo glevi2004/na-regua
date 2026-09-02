@@ -2,7 +2,7 @@ import { randomUUID } from 'node:crypto'
 import postgres, { type Sql } from 'postgres'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { migrate } from './migrate.js'
-import { conectarComoAplicacao, type ConexaoDeAplicacao } from './test-support.js'
+import { cnpjDeTeste, conectarComoAplicacao, type ConexaoDeAplicacao } from './test-support.js'
 import { withTenant } from './tenant.js'
 
 /**
@@ -77,9 +77,9 @@ describe.skipIf(!DATABASE_URL)('vendas e financeiro — NR-020', () => {
     aplicacao = await conectarComoAplicacao(admin, DATABASE_URL!)
     sql = aplicacao.sql
 
-    const marca = String(Date.now()).slice(-8)
-    empresaA = await criarEmpresa(`3${marca}0001`, 'Loja de Vendas A')
-    empresaB = await criarEmpresa(`4${marca}0002`, 'Loja de Vendas B')
+    /* 14 digitos exatos — ver o comentario em schema.test.ts. */
+    empresaA = await criarEmpresa(cnpjDeTeste('3'), 'Loja de Vendas A')
+    empresaB = await criarEmpresa(cnpjDeTeste('4'), 'Loja de Vendas B')
 
     produtoA = randomUUID()
     await withTenant(
