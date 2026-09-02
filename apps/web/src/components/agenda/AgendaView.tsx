@@ -2,19 +2,15 @@
 
 import { useEffect, useMemo, useState } from 'react'
 import {
-  conectarGoogle,
   criarEvento,
   DIAS_SEMANA,
-  desconectarGoogle,
   excluirEvento,
   HOJE,
   LEMBRETES,
   listarEventos,
   montarMes,
   NOMES_MESES,
-  statusGoogle,
   type Evento,
-  type StatusGoogle,
 } from '@/lib/agenda-api'
 import { formatDate } from '@/lib/format'
 import { Badge, Card, EmptyState, PageHeader } from '@/components/ui/UI'
@@ -34,26 +30,10 @@ export default function AgendaView() {
   const [mes, setMes] = useState(MES_INICIAL)
   const [diaSelecionado, setDiaSelecionado] = useState(HOJE)
 
-  const [google, setGoogle] = useState<StatusGoogle | null>(null)
-  const [mexendoGoogle, setMexendoGoogle] = useState(false)
-
   const [criando, setCriando] = useState(false)
   const [excluindo, setExcluindo] = useState<Evento | null>(null)
   const [processando, setProcessando] = useState(false)
   const [toast, setToast] = useState<{ msg: string; tone: 'success' | 'error' } | null>(null)
-
-  /* SUBSTITUIR POR: GET /agenda/google/status */
-  useEffect(() => {
-    let cancelado = false
-    async function carregar() {
-      const s = await statusGoogle()
-      if (!cancelado) setGoogle(s)
-    }
-    void carregar()
-    return () => {
-      cancelado = true
-    }
-  }, [])
 
   const grade = useMemo(() => montarMes(ano, mes), [ano, mes])
 
@@ -89,30 +69,6 @@ export default function AgendaView() {
     setMes(d.getUTCMonth())
   }
 
-  /* ---------------------------------------------------------------- *
-   * Google
-   * ---------------------------------------------------------------- */
-
-  async function conectar() {
-    setMexendoGoogle(true)
-    /* SUBSTITUIR POR: window.location.href = "/agenda/google/authorize" */
-    const r = await conectarGoogle()
-    setMexendoGoogle(false)
-    setGoogle(r.status)
-    setToast({ msg: 'Google Agenda conectado.', tone: 'success' })
-  }
-
-  async function desconectar() {
-    setMexendoGoogle(true)
-    /* SUBSTITUIR POR: DELETE /agenda/google */
-    await desconectarGoogle()
-    setMexendoGoogle(false)
-    setGoogle({ conectado: false, conta: null, ultimaSincronizacao: null })
-    /* Eventos vindos do Google saem da lista ao desconectar. */
-    setEventos((atual) => atual.filter((e) => e.origem !== 'google'))
-    setToast({ msg: 'Google Agenda desconectado.', tone: 'success' })
-  }
-
   async function confirmarExclusao() {
     if (!excluindo) return
     setProcessando(true)
@@ -135,57 +91,6 @@ export default function AgendaView() {
           </Button>
         }
       />
-
-      {/* --- Conexao com o Google --- */}
-      <div className={styles.googleBox}>
-        {google === null ? (
-          <p className={styles.googleCarregando}>
-            <Spinner size={15} />
-            Verificando conexao...
-          </p>
-        ) : google.conectado ? (
-          <>
-            <span className={styles.googleIcone} aria-hidden="true">
-              <IconCalendar size={18} />
-            </span>
-            <div className={styles.googleTexto}>
-              <strong>Google Agenda conectado</strong>
-              <span>
-                {google.conta}
-                {google.ultimaSincronizacao
-                  ? ` · sincronizado as ${google.ultimaSincronizacao.slice(11, 16)}`
-                  : ''}
-              </span>
-            </div>
-            <Button variant="secondary" size="sm" onClick={desconectar} disabled={mexendoGoogle}>
-              {mexendoGoogle ? <Spinner size={14} /> : null}
-              Desconectar
-            </Button>
-          </>
-        ) : (
-          <>
-            <span className={`${styles.googleIcone} ${styles.googleOff}`} aria-hidden="true">
-              <IconCalendar size={18} />
-            </span>
-            <div className={styles.googleTexto}>
-              <strong>Google Agenda desconectado</strong>
-              <span>
-                Conecte para que os compromissos apareçam nos dois lugares, sem digitar duas vezes.
-              </span>
-            </div>
-            <Button size="sm" onClick={conectar} disabled={mexendoGoogle}>
-              {mexendoGoogle ? (
-                <>
-                  <Spinner size={14} />
-                  Conectando...
-                </>
-              ) : (
-                'Conectar'
-              )}
-            </Button>
-          </>
-        )}
-      </div>
 
       <div className={styles.grid}>
         {/* --- Calendario --- */}
@@ -240,12 +145,7 @@ export default function AgendaView() {
                   {doDiaLista.length > 0 ? (
                     <span className={styles.diaMarcas} aria-hidden="true">
                       {doDiaLista.slice(0, 3).map((e) => (
-                        <span
-                          key={e.id}
-                          className={`${styles.diaMarca} ${
-                            e.origem === 'google' ? styles.marcaGoogle : ''
-                          }`}
-                        />
+                        <span key={e.id} className={styles.diaMarca} />
                       ))}
                     </span>
                   ) : null}
@@ -284,18 +184,6 @@ export default function AgendaView() {
                   </span>
 
                   <span className={styles.eventoTags}>
-                    {/* Distingue o que veio do Google do que nasceu aqui */}
-                    {e.origem === 'google' ? (
-                      <Badge tone="info">Google</Badge>
-                    ) : (
-                      <Badge>No app</Badge>
-                    )}
-                    {e.lembreteMinutos !== null ? (
-                      <span className={styles.eventoLembrete}>
-                        <IconBell size={12} />
-                        {e.lembreteMinutos >= 1440 ? '1 dia' : `${e.lembreteMinutos} min`}
-                      </span>
-                    ) : null}
                     <button
                       type="button"
                       className={styles.eventoExcluir}
@@ -345,11 +233,6 @@ export default function AgendaView() {
                         {e.data === HOJE ? 'hoje' : formatDate(e.data)} · {e.horaInicio}
                       </span>
                     </span>
-                    {e.origem === 'google' ? (
-                      <span className={styles.proximoGoogle} title="Do Google Agenda">
-                        G
-                      </span>
-                    ) : null}
                   </button>
                 </li>
               ))}
@@ -365,9 +248,7 @@ export default function AgendaView() {
             setEventos((atual) => [...atual, novo])
             setCriando(false)
             setToast({
-              msg: google?.conectado
-                ? 'Compromisso criado e enviado ao Google Agenda.'
-                : 'Compromisso criado.',
+              msg: 'Compromisso criado.',
               tone: 'success',
             })
           }}
@@ -378,11 +259,7 @@ export default function AgendaView() {
       {excluindo ? (
         <ConfirmarDialog
           titulo="Excluir compromisso"
-          descricao={
-            excluindo.origem === 'google'
-              ? 'O compromisso sera removido tambem do Google Agenda.'
-              : 'O compromisso sera removido da agenda.'
-          }
+          descricao={'O compromisso sera removido da agenda.'}
           tom="perigo"
           rotuloConfirmar="Excluir"
           processando={processando}
@@ -460,7 +337,6 @@ function FormCompromisso({
       horaInicio,
       horaFim,
       local: local.trim(),
-      origem: 'app',
       lembreteMinutos: lembrete,
     })
   }

@@ -22,8 +22,7 @@ const ROTULO_TIPO: Record<Compromisso['tipo'], string> = {
  * Agenda do dia.
  *
  * Versao enxuta: no celular o que importa e "o que tenho para hoje e
- * amanha". Calendario mensal, criacao de compromisso e sincronizacao com
- * o Google ficam no web.
+ * amanha". Calendario mensal e criacao de compromisso ficam no web.
  */
 export default function Agenda() {
   const [concluidos, setConcluidos] = useState<Set<string>>(

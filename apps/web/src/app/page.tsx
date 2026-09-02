@@ -90,7 +90,7 @@ export default function Home() {
             'Busca por CPF ou CNPJ e importacao por planilha',
             'Historico de compras e o que esta em aberto',
             'Pendencias e contatos em quadro estilo Kanban',
-            'Agenda integrada ao Google Agenda',
+            'Agenda de compromissos com lembrete antes da hora',
           ]}
           visual={<CrmVisual />}
           reverse
