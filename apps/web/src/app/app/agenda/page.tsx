@@ -4,7 +4,7 @@ import AgendaView from '@/components/agenda/AgendaView'
 
 export const metadata: Metadata = {
   title: `Agenda — ${BRAND}`,
-  description: 'Compromissos, entregas e vencimentos, com integracao ao Google Agenda.',
+  description: 'Compromissos, entregas e vencimentos, com lembrete antes da hora.',
 }
 
 export default function AgendaPage() {

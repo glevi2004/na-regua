@@ -8,6 +8,12 @@
  *
  * O primeiro escopo usou metricas e depoimentos ficticios para dar forma ao
  * layout. Eles sairam. Os pontos onde dado real entra estao marcados com TODO.
+ *
+ * A integracao com Google Agenda saiu junto, aqui e nos dois apps: ela nao
+ * aparecia em requisito, user story nem decisao — os RF-089 a RF-093 descrevem
+ * agenda propria com lembrete, sem integracao externa. Anunciar o que nao esta
+ * no roadmap e a mesma falha das metricas inventadas, so que mais dificil de
+ * perceber, porque desta vez havia codigo por tras.
  */
 
 /**
@@ -92,7 +98,7 @@ export const modules = [
     name: 'CRM e Agenda',
     tag: 'Pendencias e compromissos',
     description:
-      'Pendencias e contatos em quadro estilo Kanban, com agenda de compromissos integrada ao Google Agenda.',
+      'Pendencias e contatos em quadro estilo Kanban, com agenda de compromissos e lembrete antes da hora.',
   },
   {
     id: 'assistente',
@@ -162,7 +168,7 @@ export const plan = {
     'Empresa, clientes, produtos e estoque',
     'Vendas com emissao de NFC-e e NFS-e',
     'Financeiro: plano de contas, contas a pagar e a receber',
-    'CRM em quadro Kanban e agenda integrada ao Google Agenda',
+    'CRM em quadro Kanban e agenda com lembrete de compromisso',
     'Assistente de IA pelo WhatsApp',
     'Importacao de clientes e produtos por planilha',
     'Usuarios ilimitados por empresa',

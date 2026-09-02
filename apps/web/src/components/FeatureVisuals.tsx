@@ -240,7 +240,7 @@ export function CrmVisual() {
 
       <div className={styles.fiscalNote}>
         <IconCalendar size={16} />
-        Compromissos sincronizados com o Google Agenda
+        Lembrete disparado antes da hora do compromisso
       </div>
     </div>
   )

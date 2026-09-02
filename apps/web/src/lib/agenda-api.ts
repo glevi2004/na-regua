@@ -5,23 +5,9 @@
  *
  *  | Funcao            | Endpoint esperado              | Disparo            |
  *  |-------------------|--------------------------------|--------------------|
- *  | statusGoogle      | GET  /agenda/google/status     | abertura da tela   |
- *  | conectarGoogle    | GET  /agenda/google/authorize  | botao conectar     |
- *  | desconectarGoogle | DELETE /agenda/google          | botao desconectar  |
  *  | listarEventos     | GET  /agenda/eventos?de=&ate=  | troca de mes       |
  *  | criarEvento       | POST /agenda/eventos           | novo compromisso   |
  *  | excluirEvento     | DELETE /agenda/eventos/:id     | excluir            |
- *
- * SOBRE O OAUTH: o fluxo NAO acontece no navegador com client secret. O
- * botao "Conectar" manda o usuario para /agenda/google/authorize no NOSSO
- * backend, que redireciona ao Google e recebe o callback. O refresh token
- * fica no servidor — nunca chega ao front. O front so pergunta "esta
- * conectado?" e mostra o resultado.
- *
- * SINCRONIZACAO EM DUAS VIAS: o backend precisa guardar o `googleEventId`
- * de cada evento e usar webhook (push notifications da API do Google) para
- * saber quando algo mudou la. Polling a cada carregamento de tela nao da
- * conta e estoura cota.
  *
  * LEMBRETES: o campo `lembreteMinutos` ja existe no modelo porque a
  * comunicacao do produto e por WhatsApp — quando o worker de lembretes
@@ -34,50 +20,8 @@ const delay = (ms: number) => new Promise((r) => setTimeout(r, ms))
 export const HOJE = '2026-08-24'
 
 /* -------------------------------------------------------------------------- */
-/* Conexao com o Google                                                       */
-/* -------------------------------------------------------------------------- */
-
-export type StatusGoogle = {
-  conectado: boolean
-  conta: string | null
-  ultimaSincronizacao: string | null
-}
-
-/** SUBSTITUIR POR: GET /agenda/google/status */
-export async function statusGoogle(): Promise<StatusGoogle> {
-  await delay(400)
-  return { conectado: false, conta: null, ultimaSincronizacao: null }
-}
-
-/**
- * SUBSTITUIR POR: redirecionar para GET /agenda/google/authorize
- *
- * Na versao real esta funcao vira `window.location.href = "/agenda/google/authorize"`
- * e o retorno acontece pelo callback, nao por promessa.
- */
-export async function conectarGoogle(): Promise<{ ok: true; status: StatusGoogle }> {
-  await delay(1400)
-  return {
-    ok: true,
-    status: {
-      conectado: true,
-      conta: 'marina@solnascente.com.br',
-      ultimaSincronizacao: `${HOJE}T09:12:00`,
-    },
-  }
-}
-
-/** SUBSTITUIR POR: DELETE /agenda/google */
-export async function desconectarGoogle(): Promise<{ ok: true }> {
-  await delay(700)
-  return { ok: true }
-}
-
-/* -------------------------------------------------------------------------- */
 /* Eventos                                                                    */
 /* -------------------------------------------------------------------------- */
-
-export type OrigemEvento = 'app' | 'google'
 
 export type Evento = {
   id: string
@@ -88,7 +32,6 @@ export type Evento = {
   horaInicio: string
   horaFim: string
   local: string
-  origem: OrigemEvento
   /** Minutos antes do compromisso para avisar no WhatsApp. */
   lembreteMinutos: number | null
 }
@@ -104,7 +47,6 @@ export function listarEventos(): Evento[] {
       horaInicio: '14:00',
       horaFim: '14:30',
       local: '',
-      origem: 'app',
       lembreteMinutos: 30,
     },
     {
@@ -115,7 +57,6 @@ export function listarEventos(): Evento[] {
       horaInicio: '08:30',
       horaFim: '09:30',
       local: 'Rua Xavier da Silva, 88',
-      origem: 'app',
       lembreteMinutos: 60,
     },
     {
@@ -125,8 +66,7 @@ export function listarEventos(): Evento[] {
       data: '2026-08-26',
       horaInicio: '16:00',
       horaFim: '17:00',
-      local: 'https://meet.google.com/exemplo',
-      origem: 'google',
+      local: 'Sala de reuniao',
       lembreteMinutos: 15,
     },
     {
@@ -137,7 +77,6 @@ export function listarEventos(): Evento[] {
       horaInicio: '10:00',
       horaFim: '10:15',
       local: '',
-      origem: 'app',
       lembreteMinutos: null,
     },
     {
@@ -148,7 +87,6 @@ export function listarEventos(): Evento[] {
       horaInicio: '12:00',
       horaFim: '13:30',
       local: 'Restaurante Boa Mesa',
-      origem: 'google',
       lembreteMinutos: 30,
     },
     {
@@ -159,7 +97,6 @@ export function listarEventos(): Evento[] {
       horaInicio: '18:00',
       horaFim: '20:00',
       local: 'Loja',
-      origem: 'app',
       lembreteMinutos: 60,
     },
   ]

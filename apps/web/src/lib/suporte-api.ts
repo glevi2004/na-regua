@@ -137,7 +137,7 @@ export function listarChamados(): Chamado[] {
     {
       id: 'ch-3',
       protocolo: '2026-0811',
-      assunto: 'Como conectar a conta do Google Agenda',
+      assunto: 'Como configurar o lembrete de compromisso',
       categoria: 'tecnico',
       status: 'encerrado',
       abertoEm: '2026-08-11',
@@ -148,7 +148,7 @@ export function listarChamados(): Chamado[] {
           id: 'm-5',
           autor: 'cliente',
           autorNome: 'Marina Alves',
-          texto: 'Nao acho onde conecto minha agenda do Google.',
+          texto: 'Nao acho onde configuro o aviso antes da hora.',
           anexo: null,
           data: '2026-08-11',
         },
