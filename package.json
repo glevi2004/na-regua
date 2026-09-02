@@ -28,6 +28,7 @@
     "prepare": "husky",
     "commitlint": "commitlint",
     "ledger:csv": "node scripts/ledger-to-csv.mjs",
+    "ledger:check": "node scripts/ledger-check.mjs",
     "changelog": "node scripts/changelog.mjs"
   },
   "devDependencies": {

@@ -207,19 +207,19 @@ Fechar essa decisão liberou 26 tarefas de uma vez — o backlog disponível sai
 
 ## Bloqueios por decisão
 
-| Decisão                                                                           | Diretas        | Em cascata | Dias parados |
-| --------------------------------------------------------------------------------- | -------------- | ---------: | -----------: |
-| [DEC-007](../decisoes/README.md#dec-007) LLM                                      | NR-060         |          1 |            7 |
-| [DEC-008](../decisoes/README.md#dec-008) autenticação                             | NR-013, NR-014 |          — |            6 |
-| [DEC-004](../decisoes/README.md#dec-004) fiscal                                   | NR-042         |          — |            5 |
-| [DEC-003](../decisoes/README.md#dec-003) WhatsApp                                 | NR-046         |          — |            4 |
-| [DEC-010](../decisoes/README.md#dec-010) cobrança                                 | NR-063         |          — |            4 |
-| [DEC-006](../decisoes/README.md#dec-006)/[015](../decisoes/README.md#dec-015) PSP | NR-044         |          — |            4 |
-| [DEC-005](../decisoes/README.md#dec-005) Open Finance                             | NR-048         |          — |            4 |
-| [DEC-009](../decisoes/README.md#dec-009) hospedagem                               | NR-015         |          — |            3 |
-| [DEC-011](../decisoes/README.md#dec-011) contexto da conversa                     | NR-062         |          — |            3 |
-| [DEC-012](../decisoes/README.md#dec-012) usuário e cupons                         | NR-075         |          — |            3 |
-| [DEC-001](../decisoes/README.md#dec-001) nome/marca                               | — (NR-011 ✅)  |          — |            0 |
+| Decisão                                                                               | Diretas        | Em cascata | Dias parados |
+| ------------------------------------------------------------------------------------- | -------------- | ---------: | -----------: |
+| [DEC-007](../decisoes/README.md#dec-007) LLM                                          | NR-060         |          1 |            7 |
+| [DEC-008](../decisoes/README.md#dec-008) autenticação                                 | NR-013, NR-014 |          — |            6 |
+| [DEC-004](../decisoes/README.md#dec-004) fiscal                                       | NR-042         |          — |            5 |
+| [DEC-003](../decisoes/README.md#dec-003) WhatsApp                                     | NR-046         |          — |            4 |
+| [DEC-010](../decisoes/README.md#dec-010) cobrança                                     | NR-063         |          — |            4 |
+| [DEC-006](../decisoes/README.md#dec-006)/[DEC-015](../decisoes/README.md#dec-015) PSP | NR-044         |          — |            4 |
+| [DEC-005](../decisoes/README.md#dec-005) Open Finance                                 | NR-048         |          — |            4 |
+| [DEC-009](../decisoes/README.md#dec-009) hospedagem                                   | NR-015         |          — |            3 |
+| [DEC-011](../decisoes/README.md#dec-011) contexto da conversa                         | NR-062         |          — |            3 |
+| [DEC-012](../decisoes/README.md#dec-012) usuário e cupons                             | NR-075         |          — |            3 |
+| [DEC-001](../decisoes/README.md#dec-001) nome/marca                                   | — (NR-011 ✅)  |          — |            0 |
 
 **43 dos 119 dias-desenvolvedor restantes estão bloqueados por 11 decisões** —
 36% do que falta. Decidir continua rendendo, mas deixou de ser a única coisa que
