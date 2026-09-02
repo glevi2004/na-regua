@@ -10,6 +10,11 @@ export type DomainErrorCode =
   | 'INVALID_QUANTITY'
   | 'CARD_FEE_NOT_FOUND'
   | 'NOT_CREDIT_PAYMENT'
+  /* NR-024 — desconto e troco */
+  | 'INVALID_DISCOUNT'
+  | 'DISCOUNT_EXCEEDS_TOTAL'
+  | 'DISCOUNT_ABOVE_ROLE_LIMIT'
+  | 'INVALID_CHANGE'
 
 export class DomainError extends Error {
   readonly code: DomainErrorCode
