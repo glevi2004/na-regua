@@ -12,14 +12,17 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests",
     "clean": "rm -rf dist .turbo",
-    "lint": "eslint src"
+    "lint": "eslint src",
+    "migrate": "tsx --env-file-if-exists=../../.env src/bin/migrate.ts"
   },
   "dependencies": {
     "@na-regua/contracts": "workspace:*",
+    "@na-regua/env": "workspace:*",
     "@na-regua/money": "workspace:*",
     "postgres": "^3.4.5"
   },
   "devDependencies": {
+    "tsx": "^4.23.13",
     "typescript": "^5.7.2",
     "vitest": "^3.2.6"
   }

@@ -2,9 +2,7 @@
 
 Schema Drizzle, migrations, políticas RLS e repositórios.
 
-**Estado:** 🟡 só conexão e verificação de saúde · schema pendente (`NR-007`,
-`NR-008`, `NR-020`) · isolamento:
-[ADR-0001](../../docs/decisoes/adr/0001-rls-por-linha.md)
+**Estado:** 🟢 isolamento multi-tenant implementado e testado (`NR-007`) · 🟡 tabelas de negócio pendentes (`NR-008`, `NR-020`)
 
 Isolamento entre empresas é **RLS por linha** (`company_id` + política no
 PostgreSQL). Ver [`dados.md`](../../docs/arquitetura/dados.md#multi-tenant).
@@ -36,13 +34,45 @@ violação real.
 
 Decisão: **RLS por linha** ([ADR-0001](../../docs/decisoes/adr/0001-rls-por-linha.md)).
 
-```sql
-ALTER TABLE sales ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sales FORCE ROW LEVEL SECURITY;
+Toda tabela de negócio chama uma função, em vez de repetir o bloco de política:
 
-CREATE POLICY tenant_isolation ON sales
-  USING (company_id = current_setting('app.company_id')::uuid);
+```sql
+CREATE TABLE sales (
+  id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  company_id uuid NOT NULL,
+  -- ...
+);
+
+SELECT enable_tenant_isolation('sales');
 ```
+
+**Por que uma função e não o SQL repetido:** política escrita à mão em trinta
+lugares é política escrita errado em um deles — e o único jeito de descobrir
+qual é vazando dado entre lojas. Com a função existe uma definição só, e mudar
+a regra é mudar um lugar.
+
+A função ([`0001_tenant_isolation.sql`](src/migrations/0001_tenant_isolation.sql))
+faz três coisas, e **recusa** a tabela que não tenha `company_id` — ligar RLS
+numa tabela sem a coluna passaria, e a política falharia só na primeira consulta
+em produção:
+
+```sql
+ALTER TABLE %s ENABLE ROW LEVEL SECURITY;
+ALTER TABLE %s FORCE ROW LEVEL SECURITY;
+CREATE POLICY tenant_isolation ON %s
+  USING      (company_id = current_company_id())
+  WITH CHECK (company_id = current_company_id());
+```
+
+**`WITH CHECK` é a metade que costuma faltar.** `USING` filtra o que se lê,
+atualiza e apaga; `WITH CHECK` filtra o que se **grava**. Sem ele, um `INSERT`
+com o `company_id` do vizinho entra, e um `UPDATE` consegue mover a linha para
+outra empresa. Ler errado é vazamento; gravar errado é vazamento que fica.
+
+`current_company_id()` usa `current_setting('app.company_id')` **sem**
+`missing_ok`. Com ele, a variável ausente viraria `NULL`, a comparação daria
+`NULL` e a consulta devolveria zero linhas em silêncio — e vazio parece
+resposta: alguém conclui que a loja não vendeu nada hoje.
 
 | Regra                                            | Motivo                                                                                    |
 | ------------------------------------------------ | ----------------------------------------------------------------------------------------- |
@@ -51,6 +81,27 @@ CREATE POLICY tenant_isolation ON sales
 | Consulta sem `app.company_id` **falha**          | [RF-121](../../docs/produto/requisitos-funcionais.md) — falhar é melhor que retornar tudo |
 | `company_id` vem do contexto, nunca do cliente   | [princípio 8](../../docs/arquitetura/principios.md)                                       |
 | Recurso de outro tenant responde 404, não 403    | 403 confirma que o recurso existe                                                         |
+
+## Como o tenant chega ao banco
+
+`withTenant` é o único lugar do sistema que define `app.company_id`:
+
+```ts
+import { withTenant } from '@na-regua/db'
+
+const vendas = await withTenant(sql, ctx.companyId, (tx) => tx`SELECT * FROM sales`)
+```
+
+O terceiro argumento do `set_config` é `true`, e é ele que importa: torna o
+ajuste **local à transação**. Sem ele a variável ficaria na _conexão_ — e
+conexão volta para o pool. A requisição seguinte, de outra empresa, pegaria a
+conexão com o tenant anterior ainda definido e leria os dados da loja errada.
+É o vazamento mais fácil de escrever e o mais difícil de notar, porque só
+aparece sob concorrência. Há um teste dedicado a ele.
+
+Para o que é legitimamente global — migrations, tarefas de plataforma — existe
+`withPlatformScope`. Nomeado assim, e não `withoutTenant`, para que quem lê a
+chamada veja uma exceção consciente e não um esquecimento.
 
 ## Dois papéis de banco
 
