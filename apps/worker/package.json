@@ -19,7 +19,7 @@
     "@na-regua/db": "workspace:*",
     "@na-regua/env": "workspace:*",
     "@na-regua/money": "workspace:*",
-    "bullmq": "^5.34.6",
+    "bullmq": "^6.3.2",
     "ioredis": "^5.4.2"
   },
   "devDependencies": {
