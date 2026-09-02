@@ -38,12 +38,16 @@ os adapters existem
 
 ## Painel
 
-|                           |                                     |
-| ------------------------- | ----------------------------------- |
-| Total                     | 54 tarefas · 152 dias-desenvolvedor |
-| ✅ Concluídas             | 4 (11 dias)                         |
-| 🚧 Bloqueadas por decisão | 15 (51 dias)                        |
-| Por trilha                | 🔵 17 · 🟠 24 · 🟢 12               |
+|                           |            |
+| ------------------------- | ---------- |
+| Total                     | 55 tarefas |
+| ✅ Concluídas             | 15         |
+| 🚧 Bloqueadas por decisão | 13         |
+| ⬜ A fazer                | 27         |
+
+> **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
+> ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
+> exceção — foi mesclado antes de a convenção de rodapé existir (PR #15).
 
 ---
 
@@ -62,14 +66,14 @@ Objetivo: as três trilhas conseguem trabalhar em paralelo sem esperar uma à ou
 | ID     | Tarefa                                                                          | Trilha | Módulo       | Est | Dep    | Bloq                | US/RF                   | Status |
 | ------ | ------------------------------------------------------------------------------- | :----: | ------------ | --: | ------ | ------------------- | ----------------------- | :----: |
 | NR-004 | `domain`: cálculo de venda — custo, imposto, tarifa de cartão, parcelas         |   🔵   | `domain`     |   3 | NR-003 | —                   | RF-040, RF-041, RF-038  |   ✅   |
-| NR-005 | `contracts`: schemas base (Company, Customer, Product, Sale)                    |   🔵   | `contracts`  |   2 | NR-003 | —                   | RNF-027                 |   ⬜   |
-| NR-006 | Configuração tipada: validar variáveis de ambiente na inicialização             |   🟠   | `repo`       |   1 | NR-001 | —                   | —                       |   ⬜   |
+| NR-005 | `contracts`: schemas base (Company, Customer, Product, Sale)                    |   🔵   | `contracts`  |   2 | NR-003 | —                   | RNF-027                 |   ✅   |
+| NR-006 | Configuração tipada: validar variáveis de ambiente na inicialização             |   🟠   | `repo`       |   1 | NR-001 | —                   | —                       |   ✅   |
 | NR-007 | `db`: estratégia multi-tenant, RLS e teste de isolamento                        |   🔵   | `db`         |   3 | NR-005 | **DEC-002**         | RF-121, RF-122, RNF-021 |   🚧   |
 | NR-008 | `db`: schema de cadastros (companies, users, customers, products)               |   🔵   | `db`         |   2 | NR-007 | DEC-002             | RF-001, RF-009, RF-017  |   🚧   |
-| NR-009 | `api`: base — contexto de execução, erro padronizado, validação por `contracts` |   🟠   | `api`        |   2 | NR-005 | —                   | RNF-027, RNF-054        |   ⬜   |
-| NR-010 | Qualidade: lint com type-checking e piso de cobertura na CI                     |   🟠   | `repo`       |   1 | NR-001 | —                   | RNF-068                 |   ⬜   |
-| NR-011 | `ui`: tokens de design (cor, tipografia, espaçamento)                           |   🟢   | `ui`         |   2 | —      | **DEC-001**/QST-011 | RNF-055                 |   🚧   |
-| NR-012 | `mobile`: shell de navegação e sessão                                           |   🟢   | `mobile`     |   3 | NR-011 | DEC-008             | US-059                  |   🚧   |
+| NR-009 | `api`: base — contexto de execução, erro padronizado, validação por `contracts` |   🟠   | `api`        |   2 | NR-005 | —                   | RNF-027, RNF-054        |   ✅   |
+| NR-010 | Qualidade: lint com type-checking e piso de cobertura na CI                     |   🟠   | `repo`       |   1 | NR-001 | —                   | RNF-068                 |   ✅   |
+| NR-011 | `ui`: tokens de design (cor, tipografia, espaçamento)                           |   🟢   | `ui`         |   2 | —      | **DEC-001**/QST-011 | RNF-055                 |   ✅   |
+| NR-012 | `mobile`: shell de navegação e sessão                                           |   🟢   | `mobile`     |   3 | NR-011 | DEC-008             | US-059                  |   ✅   |
 | NR-013 | `web`: shell de layout e sessão                                                 |   🟢   | `web`        |   2 | NR-011 | DEC-008             | US-059                  |   🚧   |
 | NR-014 | Autenticação: login, papéis, usuário em várias empresas                         |   🟠   | `api` `core` |   4 | NR-009 | **DEC-008**         | RF-119, RF-120, RF-005  |   🚧   |
 | NR-015 | `infra`: definir hospedagem e preencher os workflows de deploy                  |   🟠   | `infra`      |   3 | —      | **DEC-009**         | RNF-064, RNF-013        |   🚧   |
@@ -84,11 +88,11 @@ Objetivo: registrar uma venda de ponta a ponta pelo aplicativo.
 | NR-021 | `core`: casos de uso de cadastro (empresa, cliente, produto)                |   🔵   | `core`         |   3 | NR-008         | —    | RF-001–019             |   ⬜   |
 | NR-022 | `core`: `registerSale` — transação única com estoque, recebível e auditoria |   🔵   | `core`         |   4 | NR-020, NR-004 | —    | RF-034–039, RNF-046    |   ⬜   |
 | NR-023 | `core`: movimentação de estoque e ajuste com autoria                        |   🔵   | `core`         |   2 | NR-021         | —    | RF-022–024             |   ⬜   |
-| NR-024 | `domain`: desconto, limite por papel, troco                                 |   🔵   | `domain`       |   2 | NR-004         | —    | RF-030, RF-031, RF-035 |   ⬜   |
+| NR-024 | `domain`: desconto, limite por papel, troco                                 |   🔵   | `domain`       |   2 | NR-004         | —    | RF-030, RF-031, RF-035 |   ✅   |
 | NR-025 | `core`: trilha de auditoria somente-inserção                                |   🔵   | `core`         |   2 | NR-020         | —    | RF-123, RF-124         |   ⬜   |
 | NR-026 | `api`: rotas de cadastro                                                    |   🟠   | `api`          |   2 | NR-021, NR-009 | —    | RF-001–019             |   ⬜   |
 | NR-027 | `api`: rota de venda com chave de idempotência                              |   🟠   | `api`          |   2 | NR-022         | —    | RF-036, RNF-043        |   ⬜   |
-| NR-030 | `api`: observabilidade — `requestId`, log estruturado, rastreamento         |   🟠   | `api` `worker` |   2 | NR-009         | —    | RNF-058, RNF-059       |   ⬜   |
+| NR-030 | `api`: observabilidade — `requestId`, log estruturado, rastreamento         |   🟠   | `api` `worker` |   2 | NR-009         | —    | RNF-058, RNF-059       |   ✅   |
 | NR-070 | `mobile`: cadastro de produto com leitor de código de barras                |   🟢   | `mobile`       |   3 | NR-026         | —    | US-009, RF-017         |   ⬜   |
 | NR-071 | `mobile`: carrinho, seleção de cliente e fechamento de venda                |   🟢   | `mobile`       |   5 | NR-027         | —    | US-014–019             |   ⬜   |
 | NR-072 | `web`: backoffice de cadastros                                              |   🟢   | `web`          |   3 | NR-026         | —    | E1, E2, E3             |   ⬜   |
@@ -137,13 +141,13 @@ Objetivo: operar o ERP por mensagem e cobrar a mensalidade.
 
 ## Backlog
 
-| ID     | Tarefa                                               | Trilha | Módulo   | Est | Bloq |
-| ------ | ---------------------------------------------------- | :----: | -------- | --: | ---- |
-| NR-034 | `core`: agenda e lembretes                           |   🔵   | `core`   |   2 | —    |
-| NR-049 | E2E do caminho crítico (3 fluxos)                    |   🟠   | `repo`   |   3 | —    |
-| NR-016 | `CHANGELOG` gerado dos commits + processo de release |   🟠   | `repo`   |   1 | —    |
-| NR-078 | `mobile`: agenda                                     |   🟢   | `mobile` |   2 | —    |
-| NR-079 | `web`: conteúdo real da landing                      |   🟢   | `web`    |   1 | —    |
+| ID     | Tarefa                                               | Trilha | Módulo   | Est | Bloq | Status |
+| ------ | ---------------------------------------------------- | :----: | -------- | --: | ---- | :----: |
+| NR-016 | `CHANGELOG` gerado dos commits + processo de release |   🟠   | `repo`   |   1 | —    |   ✅   |
+| NR-034 | `core`: agenda e lembretes                           |   🔵   | `core`   |   2 | —    |   ✅   |
+| NR-049 | E2E do caminho crítico (3 fluxos)                    |   🟠   | `repo`   |   3 | —    |   ⬜   |
+| NR-078 | `mobile`: agenda                                     |   🟢   | `mobile` |   2 | —    |   ⬜   |
+| NR-079 | `web`: conteúdo real da landing                      |   🟢   | `web`    |   1 | —    |   ✅   |
 
 ---
 
