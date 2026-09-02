@@ -64,10 +64,18 @@ module.exports = {
     },
     {
       name: 'sem-orfao',
-      comment: 'Arquivo que ninguem importa e nao exporta nada.',
+      comment:
+        'Arquivo que ninguem importa e nao exporta nada. Limitado a packages/: os ' +
+        'apps usam o alias @/ declarado no tsconfig de cada um, e o cruiser roda ' +
+        'com um tsconfig so (tsconfig.base.json, que nao tem paths). Sem resolver ' +
+        'o alias ele nao enxerga quem importa e acusa arquivo vivo — content/site.ts, ' +
+        'com 34 importadores, aparecia como orfao. Manter a regra ligada nos apps ' +
+        'enterrava o sinal real em ruido: dos 17 avisos, 3 eram codigo morto de ' +
+        'verdade. Procurar codigo morto em apps pede outra ferramenta.',
       severity: 'warn',
       from: {
         orphan: true,
+        path: '^packages/',
         // index.ts de pacote e ponto de entrada publico, nao orfao.
         pathNot: '(\\.(d\\.ts|test\\.ts|config\\.(ts|js|mjs|cjs))|src/index\\.ts)$',
       },
