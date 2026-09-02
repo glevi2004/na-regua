@@ -1,6 +1,8 @@
 import postgres, { type Sql } from 'postgres'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { assertRlsEnforced, checkRlsEnforcement } from './rls-guard.js'
 import { migrate } from './migrate.js'
+import { conectarComoAplicacao, type ConexaoDeAplicacao } from './test-support.js'
 import { withPlatformScope, withTenant } from './tenant.js'
 
 /**
@@ -15,11 +17,26 @@ import { withPlatformScope, withTenant } from './tenant.js'
  * subiu a infra nao deveria ver falha vermelha. **Com** `DATABASE_URL` definida
  * e banco inalcancavel, ela FALHA: na CI a variavel esta sempre definida, e
  * pular ali significaria um portao que nao guarda nada.
+ *
+ * As asserções rodam com um papel COMUM, criado aqui, e nao com a conexao de
+ * administrador. A primeira versao desta suite usava a conexao de
+ * administrador e a CI reprovou mostrando linhas de duas empresas onde deveria
+ * haver uma: na CI a aplicacao usa o `POSTGRES_USER` do contedor, que e
+ * superusuario — e superusuario ignora RLS inteiramente, `FORCE` inclusive.
+ * Com a conexao errada, esta suite mediria o vazio.
  */
 
 const DATABASE_URL = process.env.DATABASE_URL
-/* Sem papel separado (o caso da CI), migration e aplicacao usam a mesma
-   conexao. O FORCE RLS e o que mantem o teste honesto nesse cenario. */
+/*
+ * Sem papel separado (o caso da CI), a URL de migration e a mesma da
+ * aplicacao. Isso e aceitavel para a migration em si — ela nao precisa de
+ * BYPASSRLS para criar funcao.
+ *
+ * Uma versao anterior deste comentario dizia que "o FORCE RLS mantem o teste
+ * honesto nesse cenario". Estava errado, e a CI provou: FORCE cobre o DONO da
+ * tabela e nao cobre superusuario. As asserções passaram a rodar por um papel
+ * comum justamente por isso.
+ */
 const MIGRATION_URL = process.env.DATABASE_MIGRATION_URL ?? DATABASE_URL
 
 const EMPRESA_A = '11111111-1111-4111-8111-111111111111'
@@ -29,7 +46,11 @@ const EMPRESA_B = '22222222-2222-4222-8222-222222222222'
 const TABELA = 'nr007_isolamento'
 
 describe.skipIf(!DATABASE_URL)('isolamento entre empresas — RNF-021, RF-121, RF-122', () => {
+  /** Conexao de administrador: cria tabela, papel e concessoes. */
+  let admin: Sql
+  /** Conexao da aplicacao, com papel comum — e nela que o isolamento vale. */
   let sql: Sql
+  let aplicacao: ConexaoDeAplicacao
   let idDeA: string
   let idDeB: string
 
@@ -39,17 +60,21 @@ describe.skipIf(!DATABASE_URL)('isolamento entre empresas — RNF-021, RF-121, R
        claro que dezenove erros de "funcao current_company_id nao existe". */
     expect([...resultado.aplicadas, ...resultado.jaEstavam]).toContain('0001_tenant_isolation')
 
-    sql = postgres(DATABASE_URL!, { max: 3, onnotice: () => {} })
+    admin = postgres(DATABASE_URL!, { max: 3, onnotice: () => {} })
 
-    await sql.unsafe(`DROP TABLE IF EXISTS ${TABELA}`)
-    await sql.unsafe(`
+    await admin.unsafe(`DROP TABLE IF EXISTS ${TABELA}`)
+    await admin.unsafe(`
       CREATE TABLE ${TABELA} (
         id         uuid PRIMARY KEY DEFAULT gen_random_uuid(),
         company_id uuid NOT NULL,
         rotulo     text NOT NULL
       )
     `)
-    await sql.unsafe(`SELECT enable_tenant_isolation('${TABELA}')`)
+    await admin.unsafe(`SELECT enable_tenant_isolation('${TABELA}')`)
+
+    /* Depois da tabela existir: as concessoes cobrem o que ja esta la. */
+    aplicacao = await conectarComoAplicacao(admin, DATABASE_URL!)
+    sql = aplicacao.sql
 
     /* A propria semeadura ja depende do isolamento: com FORCE RLS e WITH CHECK,
        nao existe insert sem tenant definido. */
@@ -58,9 +83,37 @@ describe.skipIf(!DATABASE_URL)('isolamento entre empresas — RNF-021, RF-121, R
   }, 60_000)
 
   afterAll(async () => {
-    if (!sql) return
-    await sql.unsafe(`DROP TABLE IF EXISTS ${TABELA}`)
-    await sql.end({ timeout: 5 })
+    if (aplicacao) await aplicacao.encerrar()
+    if (!admin) return
+    await admin.unsafe(`DROP TABLE IF EXISTS ${TABELA}`)
+    await admin.end({ timeout: 5 })
+  })
+
+  it('a conexao sob teste nao pode escapar da politica', async () => {
+    /*
+     * O teste que faltava. Sem ele, a suite inteira pode passar a medir o
+     * vazio no dia em que alguem apontar `DATABASE_URL` para um superusuario —
+     * que foi exatamente o que aconteceu na CI.
+     */
+    const status = await checkRlsEnforcement(sql)
+    expect(status.isSuperuser).toBe(false)
+    expect(status.bypassesRls).toBe(false)
+    await expect(assertRlsEnforced(sql)).resolves.toMatchObject({ enforced: true })
+  })
+
+  it('a conexao de administrador da CI ESCAPA da politica, e o guarda avisa', async () => {
+    const status = await checkRlsEnforcement(admin)
+
+    /*
+     * Nao e sempre verdade — depende de como o ambiente foi montado. Quando
+     * for, `assertRlsEnforced` tem de recusar: e o que impede a aplicacao de
+     * subir com o isolamento desligado sem que nada avise.
+     */
+    if (status.enforced) {
+      await expect(assertRlsEnforced(admin)).resolves.toMatchObject({ enforced: true })
+      return
+    }
+    await expect(assertRlsEnforced(admin)).rejects.toThrow(/IGNORA as politicas de RLS/)
   })
 
   async function inserir(empresa: string, rotulo: string): Promise<string> {
@@ -178,17 +231,18 @@ describe.skipIf(!DATABASE_URL)('isolamento entre empresas — RNF-021, RF-121, R
   })
 
   it('recusa isolar tabela sem company_id, em vez de aceitar em silencio', async () => {
-    await sql.unsafe(`DROP TABLE IF EXISTS nr007_sem_tenant`)
-    await sql.unsafe(`CREATE TABLE nr007_sem_tenant (id uuid PRIMARY KEY, rotulo text)`)
+    /* DDL e do administrador: a aplicacao nao cria tabela, e nem deveria. */
+    await admin.unsafe(`DROP TABLE IF EXISTS nr007_sem_tenant`)
+    await admin.unsafe(`CREATE TABLE nr007_sem_tenant (id uuid PRIMARY KEY, rotulo text)`)
 
     try {
       /* Ligar RLS numa tabela sem a coluna passaria, e a politica falharia so
          na primeira consulta em producao. */
       await expect(
-        sql.unsafe(`SELECT enable_tenant_isolation('nr007_sem_tenant')`),
+        admin.unsafe(`SELECT enable_tenant_isolation('nr007_sem_tenant')`),
       ).rejects.toThrow(/company_id/)
     } finally {
-      await sql.unsafe(`DROP TABLE IF EXISTS nr007_sem_tenant`)
+      await admin.unsafe(`DROP TABLE IF EXISTS nr007_sem_tenant`)
     }
   })
 

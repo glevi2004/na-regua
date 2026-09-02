@@ -82,6 +82,35 @@ resposta: alguém conclui que a loja não vendeu nada hoje.
 | `company_id` vem do contexto, nunca do cliente   | [princípio 8](../../docs/arquitetura/principios.md)                                       |
 | Recurso de outro tenant responde 404, não 403    | 403 confirma que o recurso existe                                                         |
 
+### Três jeitos de escapar da política, e o `FORCE` cobre um
+
+Descoberto pela CI, do jeito caro: oito testes vermelhos mostrando linhas de
+duas empresas onde deveria haver uma.
+
+| Quem escapa           | `FORCE` resolve? |
+| --------------------- | ---------------- |
+| dono da tabela        | **sim**          |
+| papel com `BYPASSRLS` | não              |
+| **superusuário**      | não              |
+
+Superusuário ignora RLS inteiramente — e é o pior caso possível porque **não dá
+erro nenhum**: a política existe, `pg_class` mostra `relforcerowsecurity`
+ligado, o teste que lê metadado passa, e toda consulta devolve as linhas de
+todas as empresas. Era o caso da CI, onde a aplicação usava o `POSTGRES_USER`
+do contêiner.
+
+Por isso existe `assertRlsEnforced`, que a raiz de composição chama na subida:
+
+```ts
+import { assertRlsEnforced, getClient } from '@na-regua/db'
+
+await assertRlsEnforced(getClient())
+```
+
+Ambiente mal configurado tem de **derrubar o processo**, não vazar dado em
+silêncio. E é por isso que os testes de isolamento criam um papel comum e
+conectam com ele: com a conexão de administrador, eles mediriam o vazio.
+
 ## Como o tenant chega ao banco
 
 `withTenant` é o único lugar do sistema que define `app.company_id`:

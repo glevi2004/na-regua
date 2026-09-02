@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import postgres, { type Sql } from 'postgres'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { migrate } from './migrate.js'
+import { conectarComoAplicacao, type ConexaoDeAplicacao } from './test-support.js'
 import { withTenant } from './tenant.js'
 
 /**
@@ -13,7 +14,9 @@ import { withTenant } from './tenant.js'
  * so existe em documento e regra que ja foi quebrada — so ninguem percebeu
  * ainda. Aqui ela reprova o PR.
  *
- * Como em `tenant.test.ts`: pulada sem `DATABASE_URL`, executada na CI.
+ * Como em `tenant.test.ts`: pulada sem `DATABASE_URL`, executada na CI, e com
+ * as asserções rodando por um papel COMUM — com a conexao de administrador,
+ * superusuario ignora RLS e a suite mediria o vazio.
  */
 
 const DATABASE_URL = process.env.DATABASE_URL
@@ -23,7 +26,11 @@ const MIGRATION_URL = process.env.DATABASE_MIGRATION_URL ?? DATABASE_URL
 const NAO_TENANT = new Set(['schema_migrations'])
 
 describe.skipIf(!DATABASE_URL)('schema de cadastros — NR-008', () => {
+  /** Administrador: papel de teste, concessoes e leitura de catalogo. */
+  let admin: Sql
+  /** Aplicacao, com papel comum — e nela que o isolamento vale. */
   let sql: Sql
+  let aplicacao: ConexaoDeAplicacao
   let empresaA: string
   let empresaB: string
 
@@ -46,7 +53,9 @@ describe.skipIf(!DATABASE_URL)('schema de cadastros — NR-008', () => {
     const r = await migrate(MIGRATION_URL!)
     expect([...r.aplicadas, ...r.jaEstavam]).toContain('0002_cadastros')
 
-    sql = postgres(DATABASE_URL!, { max: 3, onnotice: () => {} })
+    admin = postgres(DATABASE_URL!, { max: 3, onnotice: () => {} })
+    aplicacao = await conectarComoAplicacao(admin, DATABASE_URL!)
+    sql = aplicacao.sql
 
     /* CNPJ com 14 digitos e unico global: sufixo por execucao evita colidir
        com o que ficou de uma rodada anterior no mesmo banco. */
@@ -56,7 +65,10 @@ describe.skipIf(!DATABASE_URL)('schema de cadastros — NR-008', () => {
   }, 60_000)
 
   afterAll(async () => {
-    if (!sql) return
+    if (!sql) {
+      await admin?.end({ timeout: 5 })
+      return
+    }
     /* Limpa o que este teste criou, na ordem das dependencias. Sem o tenant
        definido nada disso e visivel, entao a limpeza tambem passa por ele. */
     for (const empresa of [empresaA, empresaB].filter(Boolean)) {
@@ -71,11 +83,12 @@ describe.skipIf(!DATABASE_URL)('schema de cadastros — NR-008', () => {
            Limpar identidade orfa e tarefa de plataforma, nao de teste. */
       })
     }
-    await sql.end({ timeout: 5 })
+    await aplicacao.encerrar()
+    await admin.end({ timeout: 5 })
   })
 
   it('toda tabela de negocio nasce com RLS habilitado E forcado', async () => {
-    const tabelas = await sql<
+    const tabelas = await admin<
       { relname: string; relrowsecurity: boolean; relforcerowsecurity: boolean }[]
     >`
       SELECT c.relname, c.relrowsecurity, c.relforcerowsecurity
@@ -96,7 +109,7 @@ describe.skipIf(!DATABASE_URL)('schema de cadastros — NR-008', () => {
   })
 
   it('toda tabela com company_id tem a politica tenant_isolation', async () => {
-    const semPolitica = await sql<{ relname: string }[]>`
+    const semPolitica = await admin<{ relname: string }[]>`
       SELECT c.relname
       FROM pg_class c
       JOIN pg_namespace n ON n.oid = c.relnamespace
@@ -370,7 +383,7 @@ describe.skipIf(!DATABASE_URL)('schema de cadastros — NR-008', () => {
      *
      * A chave primaria fica de fora: `id` e unico global por construcao.
      */
-    const fora = await sql<{ tabela: string; indice: string; primeira: string }[]>`
+    const fora = await admin<{ tabela: string; indice: string; primeira: string }[]>`
       SELECT c.relname AS tabela, i.relname AS indice, a.attname AS primeira
       FROM pg_index x
       JOIN pg_class c ON c.oid = x.indrelid

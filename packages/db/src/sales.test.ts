@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto'
 import postgres, { type Sql } from 'postgres'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { migrate } from './migrate.js'
+import { conectarComoAplicacao, type ConexaoDeAplicacao } from './test-support.js'
 import { withTenant } from './tenant.js'
 
 /**
@@ -12,14 +13,19 @@ import { withTenant } from './tenant.js'
  * numeracao sem repeticao sob concorrencia, idempotencia do fechamento, venda
  * que nunca desaparece, e baixa que soma.
  *
- * Como as outras de `db`: pulada sem `DATABASE_URL`, executada na CI.
+ * Como as outras de `db`: pulada sem `DATABASE_URL`, executada na CI, e com as
+ * asserções rodando por um papel COMUM — com a conexao de administrador,
+ * superusuario ignora RLS e o teste de isolamento no fim mediria o vazio.
  */
 
 const DATABASE_URL = process.env.DATABASE_URL
 const MIGRATION_URL = process.env.DATABASE_MIGRATION_URL ?? DATABASE_URL
 
 describe.skipIf(!DATABASE_URL)('vendas e financeiro — NR-020', () => {
+  let admin: Sql
+  /** Aplicacao, com papel comum — e nela que o isolamento vale. */
   let sql: Sql
+  let aplicacao: ConexaoDeAplicacao
   let empresaA: string
   let empresaB: string
   let produtoA: string
@@ -67,7 +73,9 @@ describe.skipIf(!DATABASE_URL)('vendas e financeiro — NR-020', () => {
     const r = await migrate(MIGRATION_URL!)
     expect([...r.aplicadas, ...r.jaEstavam]).toContain('0003_vendas_e_financeiro')
 
-    sql = postgres(DATABASE_URL!, { max: 6, onnotice: () => {} })
+    admin = postgres(DATABASE_URL!, { max: 6, onnotice: () => {} })
+    aplicacao = await conectarComoAplicacao(admin, DATABASE_URL!)
+    sql = aplicacao.sql
 
     const marca = String(Date.now()).slice(-8)
     empresaA = await criarEmpresa(`3${marca}0001`, 'Loja de Vendas A')
@@ -86,7 +94,10 @@ describe.skipIf(!DATABASE_URL)('vendas e financeiro — NR-020', () => {
   }, 60_000)
 
   afterAll(async () => {
-    if (!sql) return
+    if (!sql) {
+      await admin?.end({ timeout: 5 })
+      return
+    }
     for (const empresa of [empresaA, empresaB].filter(Boolean)) {
       await withTenant(sql, empresa, async (tx) => {
         await tx`DELETE FROM sale_return_items`
@@ -101,7 +112,8 @@ describe.skipIf(!DATABASE_URL)('vendas e financeiro — NR-020', () => {
         await tx`DELETE FROM companies`
       })
     }
-    await sql.end({ timeout: 5 })
+    await aplicacao.encerrar()
+    await admin.end({ timeout: 5 })
   })
 
   describe('numeracao', () => {
