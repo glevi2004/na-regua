@@ -51,10 +51,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      57 |  155 |
-| ✅ Concluídas                 |      25 |   54 |
+| ✅ Concluídas                 |      26 |   56 |
 | 🚧 Bloqueadas por decisão     |      11 |   41 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |      20 |   58 |
+| ⬜ A fazer, pode começar hoje |      19 |   56 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -66,8 +66,8 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 por linha, com o isolamento já materializado em `packages/db` (NR-007) e os
 cadastros, vendas e financeiro no schema (NR-008, NR-020) e os casos de uso de
 cadastro, o `registerSale` e a movimentação de estoque em `core` (NR-021,
-NR-022, NR-023), e a agenda no schema (NR-035). Dos 101 dias que faltam,
-**58 podem começar hoje**, em 20 tarefas; 43 seguem bloqueados por 11
+NR-022, NR-023), a agenda no schema (NR-035) e a trilha de auditoria
+(NR-025). Dos 99 dias que faltam, **56 podem começar hoje**, em 19 tarefas; 43 seguem bloqueados por 11
 decisões. A próxima da fila **não é** a NR-027 — ver a nota abaixo.
 
 ---
@@ -110,7 +110,7 @@ Objetivo: registrar uma venda de ponta a ponta pelo aplicativo.
 | NR-022 | `core`: `registerSale` — transação única com estoque, recebível e auditoria |   🔵   | `core`         |   4 | NR-020, NR-004 | —    | RF-034–039, RNF-046    |   ✅   |
 | NR-023 | `core`: movimentação de estoque e ajuste com autoria                        |   🔵   | `core`         |   2 | NR-021         | —    | RF-022–024             |   ✅   |
 | NR-024 | `domain`: desconto, limite por papel, troco                                 |   🔵   | `domain`       |   2 | NR-004         | —    | RF-030, RF-031, RF-035 |   ✅   |
-| NR-025 | `core`: trilha de auditoria somente-inserção                                |   🔵   | `core`         |   2 | NR-020         | —    | RF-123, RF-124         |   ⬜   |
+| NR-025 | `core`: trilha de auditoria somente-inserção                                |   🔵   | `core`         |   2 | NR-020         | —    | RF-123, RF-124         |   ✅   |
 | NR-026 | `api`: rotas de cadastro                                                    |   🟠   | `api`          |   2 | NR-021, NR-009 | —    | RF-001–019             |   ⬜   |
 | NR-027 | `api`: rota de venda com chave de idempotência                              |   🟠   | `api`          |   2 | NR-022         | —    | RF-036, RNF-043        |   ⬜   |
 | NR-030 | `api`: observabilidade — `requestId`, log estruturado, rastreamento         |   🟠   | `api` `worker` |   2 | NR-009         | —    | RNF-058, RNF-059       |   ✅   |

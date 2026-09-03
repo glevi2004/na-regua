@@ -19,6 +19,9 @@ export type { Channel, CompanyId, ExecutionContext, UseCase, UserId } from './co
 
 /* --- Portas: interfaces que db, worker e os adapters implementam --- */
 export type { AppointmentRepository, NewAppointment } from './ports/appointment-repository.js'
+export { camposAlterados } from './audit/changed-fields.js'
+export type { Alteracao } from './audit/changed-fields.js'
+export type { AuditTrail, NewAuditEntry, TransactionalAuditTrail } from './ports/audit-trail.js'
 export { adjustStock } from './inventory/adjust-stock.js'
 export type { AdjustStockDeps } from './inventory/adjust-stock.js'
 export { checkStock, estaAbaixoDoMinimo } from './inventory/check-stock.js'

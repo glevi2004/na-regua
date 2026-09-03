@@ -8,6 +8,7 @@
  * Valida forma, nunca regra: "o CPF tem 11 digitos" e aqui; "este cliente pode
  * comprar fiado" e `core`.
  */
+export * from './audit/entry.js'
 export * from './common/index.js'
 export * from './company/company.js'
 export * from './customer/customer.js'
