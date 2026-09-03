@@ -24,6 +24,8 @@ export {
   ocorrenciasDaRecorrencia,
 } from './due-date.js'
 export type { FaixaDeVencimento, Frequencia } from './due-date.js'
+export { aplicarBaixa, estornarBaixa, situacaoPorValor } from './settlement.js'
+export type { ResultadoDaBaixa, SituacaoDoTitulo } from './settlement.js'
 export type { DomainErrorCode } from './domain-error.js'
 export { DEFAULT_SETTLEMENT_DAYS, MAX_CREDIT_INSTALLMENTS } from './types/card-fee-table.js'
 export type { CardBrand, CardFeeRate, CardFeeTable } from './types/card-fee-table.js'

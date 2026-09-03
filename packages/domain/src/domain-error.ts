@@ -18,6 +18,10 @@ export type DomainErrorCode =
   /* NR-028 — vencimento e recorrencia */
   | 'INVALID_DATE'
   | 'INVALID_RECURRENCE'
+  /* NR-029 — baixa e estorno */
+  | 'INVALID_SETTLEMENT'
+  | 'SETTLEMENT_EXCEEDS_BALANCE'
+  | 'ALREADY_SETTLED'
 
 export class DomainError extends Error {
   readonly code: DomainErrorCode
