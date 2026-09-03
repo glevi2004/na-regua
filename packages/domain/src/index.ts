@@ -16,6 +16,14 @@ export { calculateChange } from './calculate-change.js'
 export { calculateInstallmentPlan } from './calculate-installment-plan.js'
 export { calculateSaleTotals } from './calculate-sale-totals.js'
 export { DomainError } from './domain-error.js'
+export {
+  diasEntre,
+  diasNoMes,
+  estaVencida,
+  faixaDeVencimento,
+  ocorrenciasDaRecorrencia,
+} from './due-date.js'
+export type { FaixaDeVencimento, Frequencia } from './due-date.js'
 export type { DomainErrorCode } from './domain-error.js'
 export { DEFAULT_SETTLEMENT_DAYS, MAX_CREDIT_INSTALLMENTS } from './types/card-fee-table.js'
 export type { CardBrand, CardFeeRate, CardFeeTable } from './types/card-fee-table.js'

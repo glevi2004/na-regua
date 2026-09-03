@@ -61,6 +61,24 @@ export type { PaymentGateway } from './ports/payment-gateway.js'
 export type { ReminderScheduler } from './ports/reminder-scheduler.js'
 
 /* --- Venda — NR-022 --- */
+export { createPayable } from './payables/create-payable.js'
+export type { CreatePayableDeps } from './payables/create-payable.js'
+export { endRecurrence } from './payables/end-recurrence.js'
+export type { EndRecurrenceDeps, EndRecurrenceResult } from './payables/end-recurrence.js'
+export { listPayables } from './payables/list-payables.js'
+export type {
+  GrupoDeVencimento,
+  ListPayablesDeps,
+  PayablesAgrupadas,
+} from './payables/list-payables.js'
+export type {
+  IdGenerator,
+  NewPayable,
+  PayableFilter,
+  PayableQueries,
+  PayableTransaction,
+  PayableUnitOfWork,
+} from './ports/payable-repository.js'
 export { registerSale } from './sales/register-sale.js'
 export type { RegisterSaleDeps, RegisterSaleResult, StockWarning } from './sales/register-sale.js'
 
