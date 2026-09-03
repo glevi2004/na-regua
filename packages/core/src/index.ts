@@ -11,6 +11,19 @@
  * em memoria. Cadastros e venda vem com NR-021 e NR-022.
  */
 export { AppError, isAppError } from './app-error.js'
+export { buildDre } from './accounting/build-dre.js'
+export type { BuildDreDeps } from './accounting/build-dre.js'
+export { classifyEntry, suggestAccount } from './accounting/classify.js'
+export type { Sugestao } from './accounting/classify.js'
+export { PLANO_DE_CONTAS_PADRAO } from './accounting/default-chart.js'
+export type { ContaPadrao } from './accounting/default-chart.js'
+export { createAccount, deleteAccount, renameAccount } from './accounting/manage-accounts.js'
+export type { ChartDeps } from './accounting/manage-accounts.js'
+export type {
+  ChartOfAccountsRepository,
+  LancamentoClassificado,
+  NewAccount,
+} from './ports/chart-of-accounts.js'
 export type { AppErrorCode, FieldIssue } from './app-error.js'
 
 export { assertCanWrite } from './authorization.js'

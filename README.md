@@ -22,8 +22,8 @@
 | 🟡 Scaffold    | `api` (com `/health` real), `worker` (filas registradas), `web`, `mobile`                              |
 | 🔴 A fazer     | `agent`, `fiscal`, `whatsapp`, `payments`, `banking`, `billing` — nenhum adapter real ainda            |
 
-**43 dos 91 dias-desenvolvedor que faltam estão bloqueados por 11 decisões em
-aberto** — 47% do trabalho restante. A DEC-002 fechou por
+**43 dos 87 dias-desenvolvedor que faltam estão bloqueados por 11 decisões em
+aberto** — 49% do trabalho restante. A DEC-002 fechou por
 [ADR-0001](docs/decisoes/adr/0001-rls-por-linha.md), o isolamento por RLS está
 em `packages/db` (`NR-007`), com cadastros, vendas e financeiro no schema
 (`NR-008`, `NR-020`), com os cadastros e o `registerSale` em `core` (`NR-021`,

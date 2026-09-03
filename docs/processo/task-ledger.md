@@ -51,10 +51,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      57 |  155 |
-| ✅ Concluídas                 |      29 |   64 |
+| ✅ Concluídas                 |      30 |   68 |
 | 🚧 Bloqueadas por decisão     |      11 |   41 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |      16 |   48 |
+| ⬜ A fazer, pode começar hoje |      15 |   44 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -67,8 +67,8 @@ por linha, com o isolamento já materializado em `packages/db` (NR-007) e os
 cadastros, vendas e financeiro no schema (NR-008, NR-020) e os casos de uso de
 cadastro, o `registerSale` e a movimentação de estoque em `core` (NR-021,
 NR-022, NR-023), a agenda no schema (NR-035) e a trilha de auditoria
-(NR-025) e as contas a pagar com baixa e estorno (NR-028, NR-029) e os consumidores de fila (NR-041). Dos 91 dias que faltam,
-**48 podem começar hoje**, em 16 tarefas; 43 seguem bloqueados por 11
+(NR-025) e as contas a pagar com baixa e estorno (NR-028, NR-029) os consumidores de fila (NR-041) e o plano de contas com DRE (NR-032). Dos 87
+dias que faltam, **44 podem começar hoje**, em 15 tarefas; 43 seguem bloqueados por 11
 decisões. A próxima da fila **não é** a NR-027 — ver a nota abaixo.
 
 ---
@@ -154,7 +154,7 @@ Objetivo: operar o ERP por mensagem e cobrar a mensalidade.
 
 | ID     | Tarefa                                                         | Trilha | Módulo         | Est | Dep    | Bloq        | US/RF          | Status |
 | ------ | -------------------------------------------------------------- | :----: | -------------- | --: | ------ | ----------- | -------------- | :----: |
-| NR-032 | `core`: plano de contas, classificação e DRE simplificado      |   🔵   | `core`         |   4 | NR-028 | —           | RF-081–088     |   ⬜   |
+| NR-032 | `core`: plano de contas, classificação e DRE simplificado      |   🔵   | `core`         |   4 | NR-028 | —           | RF-081–088     |   ✅   |
 | NR-033 | `core`: conciliação com sugestão por valor e data              |   🔵   | `core`         |   3 | NR-032 | —           | RF-078–080     |   ⬜   |
 | NR-047 | `banking`: importação de OFX/CSV                               |   🟠   | `banking`      |   3 | NR-033 | —           | RF-076, RF-077 |   ⬜   |
 | NR-048 | `banking`: Open Finance                                        |   🟠   | `banking`      |   4 | NR-047 | **DEC-005** | RF-074, RF-075 |   🚧   |

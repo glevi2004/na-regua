@@ -22,6 +22,8 @@ export type DomainErrorCode =
   | 'INVALID_SETTLEMENT'
   | 'SETTLEMENT_EXCEEDS_BALANCE'
   | 'ALREADY_SETTLED'
+  /* NR-032 — DRE */
+  | 'INVALID_DRE_ENTRY'
 
 export class DomainError extends Error {
   readonly code: DomainErrorCode
