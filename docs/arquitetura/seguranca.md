@@ -78,15 +78,43 @@ flowchart TD
 - O vínculo é confirmado por código enviado ao próprio número
   ([RF-094](../produto/requisitos-funcionais.md))
 - Perda ou troca de chip exige revincular — não há recuperação automática
-- A confirmação de ação sensível existe **também** como controle de segurança,
-  não só de usabilidade: se alguém obtiver acesso ao aparelho, ainda precisa
-  confirmar cada lançamento
+- A confirmação explícita de ação com valor ([RF-103](../produto/requisitos-funcionais.md))
+  é controle de **usabilidade**: evita o lançamento por engano
 
-> [!NOTE]
-> A robustez desse vínculo é uma pergunta em aberto —
-> [DEC-008](../decisoes/README.md#dec-008). Depender só do número é o padrão da
-> categoria, mas herda a fragilidade do SIM swap. O contrapeso hoje é a
-> confirmação explícita e a trilha de auditoria.
+> [!WARNING]
+> Este documento afirmava que a confirmação explícita contrabalançava o SIM
+> swap. **Não contrabalança.** A confirmação chega e é respondida no mesmo
+> canal: quem fez o SIM swap tem o número, recebe o pedido e responde "sim".
+> Confirmação em banda não é segundo fator — é o primeiro fator perguntando
+> duas vezes. A correção está na
+> [ADR-0002](../decisoes/adr/0002-autenticacao-identidade-propria.md).
+
+### O que o vínculo do número não autoriza
+
+O número prova **continuidade de conversa**, não identidade forte. Ele basta
+para ler e para registrar operação reversível e auditada — lançar uma venda,
+lançar uma conta, consultar o caixa. O pior caso é dado sujo, e para isso já
+existem a trilha de auditoria e o estorno.
+
+Estas exigem sessão do aplicativo, que é o **segundo canal**:
+
+| Operação                                                                          | Por quê                                               |
+| --------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| Vincular o número a outro aparelho ou usuário                                     | É a operação que entrega todas as outras              |
+| Convidar usuário ou mudar papel ([RF-005](../produto/requisitos-funcionais.md))   | Cria credencial nova; é escalada de privilégio        |
+| Trocar a conta bancária de repasse                                                | Redireciona o dinheiro sem mexer em nenhum lançamento |
+| Exportar ou anonimizar a base ([RF-125](../produto/requisitos-funcionais.md)–128) | Exfiltração completa numa mensagem                    |
+
+O eixo é **tipo de ação**, e não valor. Um piso monetário — "acima de R$ X pede
+segundo canal" — foi recusado por duas razões: transforma o ataque em
+aritmética, porque quem controla o número faz N operações abaixo da linha; e
+não existe linha boa, porque o movimento diário de uma loja de bairro e de uma
+com quatro funcionários difere em uma ordem de grandeza. Cada operação da
+tabela tem a propriedade de que **uma única execução já é o dano**.
+
+A regra vive em `core`, ao lado de `assertCanWrite`, e não no handler HTTP: se
+ficasse no handler, o canal WhatsApp não a aplicaria — que é exatamente o canal
+contra o qual ela existe ([princípio 1](principios.md#1-core-e-o-nucleo)).
 
 ## Autorização
 

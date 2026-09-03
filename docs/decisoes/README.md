@@ -42,16 +42,21 @@ PR**, e a linha sai da tabela de abertas.
 
 ## Painel
 
-| Estado             | Qtd | Quais                                                |
-| ------------------ | --: | ---------------------------------------------------- |
-| 🔴 Aberta          |  10 | DEC-003, 004, 005, 007, 008, 009, 011, 012, 013, 015 |
-| 🟡 Em análise      |   3 | DEC-001, 006, 010                                    |
-| ⚪ Adiada          |   1 | DEC-014                                              |
-| 🟢 Decidida        |   1 | DEC-002                                              |
-| ❓ Pergunta aberta |  12 | QST-001 a QST-012                                    |
+| Estado             | Qtd | Quais                                           |
+| ------------------ | --: | ----------------------------------------------- |
+| 🔴 Aberta          |   9 | DEC-003, 004, 005, 007, 009, 011, 012, 013, 015 |
+| 🟡 Em análise      |   3 | DEC-001, 006, 010                               |
+| ⚪ Adiada          |   1 | DEC-014                                         |
+| 🟢 Decidida        |   2 | DEC-002, 008                                    |
+| ❓ Pergunta aberta |  12 | QST-001 a QST-012                               |
 
-**Bloqueando o MVP agora:** DEC-003, DEC-004, DEC-008, DEC-009.
-Essas quatro travam trabalho de implementação já na Sprint 1.
+**Bloqueando o MVP agora:** DEC-003, DEC-004, DEC-009.
+Essas três travam trabalho de implementação já na Sprint 1.
+
+A DEC-008 fechou — [ADR-0002](adr/0002-autenticacao-identidade-propria.md).
+A DEC-009 continua aberta e agora **decide uma escolha de configuração, não de
+código**: a autenticação já tem porta, e a hospedagem só define qual
+implementação a composição injeta.
 
 ---
 
@@ -216,34 +221,6 @@ e é o que sustenta [RF-101](../produto/requisitos-funcionais.md).
 
 Busca semântica pode ser útil depois, para documentação e ajuda — não para dado
 financeiro.
-
----
-
-### DEC-008 — Autenticação e vínculo do número de WhatsApp
-
-|              |                                                                                                                                               |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**   | 🔴 Aberta                                                                                                                                     |
-| **Dono**     | Trilha 2 + Trilha 1                                                                                                                           |
-| **Prazo**    | **Sprint 1**                                                                                                                                  |
-| **Bloqueia** | [RF-005](../produto/requisitos-funcionais.md), RF-119, RF-120 · api, web, mobile · [E11](../produto/user-stories.md#e11--assistente-whatsapp) |
-
-**Duas perguntas juntas, porque a segunda depende da primeira:**
-
-1. **Autenticação:** solução própria vs. gerenciada (Auth0, Clerk, Supabase Auth,
-   Better Auth). Critérios: custo por usuário ativo, suporte a um usuário em
-   várias empresas, segundo fator para `platform_admin`
-   ([RNF-025](../produto/requisitos-nao-funcionais.md)), e não amarrar o vendor
-   ao modelo de dados.
-
-2. **Vínculo telefone ↔ identidade:** herdada da apresentação. Hoje o desenho
-   trata o número vinculado como credencial
-   ([`seguranca.md`](../arquitetura/seguranca.md#autenticação-do-canal-whatsapp)),
-   o que herda a fragilidade do SIM swap. Contrapesos atuais: confirmação
-   explícita de toda ação com valor e trilha de auditoria.
-
-**A decidir explicitamente:** o vínculo por número é suficiente, ou uma ação
-acima de certo valor exige confirmação por um segundo canal?
 
 ---
 
@@ -432,9 +409,10 @@ atualização de documento — e às vezes abre uma `DEC`.
 Fechadas viram ADR em [`adr/`](adr/). A âncora `DEC-xxx` permanece para os
 links que já apontam para cá.
 
-| ADR                                   | Decisão                                   | Data       |
-| ------------------------------------- | ----------------------------------------- | ---------- |
-| [ADR-0001](adr/0001-rls-por-linha.md) | Isolamento multi-tenant por RLS por linha | 2026-09-01 |
+| ADR                                                     | Decisão                                               | Data       |
+| ------------------------------------------------------- | ----------------------------------------------------- | ---------- |
+| [ADR-0001](adr/0001-rls-por-linha.md)                   | Isolamento multi-tenant por RLS por linha             | 2026-09-01 |
+| [ADR-0002](adr/0002-autenticacao-identidade-propria.md) | Identidade e autorização próprias, prova terceirizada | 2026-09-03 |
 
 ### <a id="dec-002"></a>DEC-002 — Estratégia multi-tenant
 
@@ -446,6 +424,29 @@ links que já apontam para cá.
 
 Consequências no código: [`dados.md`](../arquitetura/dados.md#multi-tenant).
 Materialização em `packages/db` (`NR-007`).
+
+### <a id="dec-008"></a>DEC-008 — Autenticação e vínculo do número de WhatsApp
+
+|             |                                                                              |
+| ----------- | ---------------------------------------------------------------------------- |
+| **Status**  | 🟢 Decidida — [ADR-0002](adr/0002-autenticacao-identidade-propria.md)        |
+| **Escolha** | Identidade, papel e sessão são nossos; a prova de identidade entra por porta |
+| **Data**    | 2026-09-03                                                                   |
+
+**A segunda pergunta também foi respondida:** o vínculo do número **não** basta
+para operação que muda acesso ou tira valor de dentro, e o eixo é **tipo de
+ação**, não valor — piso monetário transforma o ataque em aritmética. A tabela
+das operações que exigem segundo canal está em
+[`seguranca.md`](../arquitetura/seguranca.md#o-que-o-vínculo-do-número-não-autoriza).
+
+**O que a ADR corrigiu:** a documentação afirmava que a confirmação explícita de
+`RF-103` contrabalançava o SIM swap. Não contrabalança — ela chega e é
+respondida no mesmo canal que o atacante controla. Segue valendo como controle
+de usabilidade.
+
+Escolher entre provedor gerenciado e biblioteca auto-hospedada depende da
+[DEC-009](#dec-009) e **não bloqueia código**: as duas implementam a mesma
+porta.
 
 ## Documentos relacionados
 

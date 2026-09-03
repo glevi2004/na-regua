@@ -110,8 +110,15 @@ idempotencyKey, now)` a partir do principal autenticado. É função pura, entã
 testa sem servidor.
 
 **`companyId` vem do principal, nunca do corpo** — [princípio 8](../../docs/arquitetura/principios.md).
-Quem resolve o principal é a autenticação (`NR-014`, depende de DEC-008); até
-lá `requireContext` responde 401, que é melhor que inventar um contexto.
+Quem resolve o principal é a autenticação (`NR-014`); até ela existir,
+`requireContext` responde 401, que é melhor que inventar um contexto.
+
+A DEC-008 fechou pela
+[ADR-0002](../../docs/decisoes/adr/0002-autenticacao-identidade-propria.md): o
+papel e a sessão são **nossos**, e o provedor externo só prova identidade, por
+trás da porta `IdentityProvider`. Consequência para este app: o principal sai
+de `company_users`, e não de um _claim_ de token de terceiro — trocar de
+provedor não toca em rota nenhuma.
 
 ## Webhooks
 

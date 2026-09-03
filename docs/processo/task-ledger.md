@@ -52,9 +52,9 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 | ----------------------------- | ------: | ---: |
 | Total                         |      58 |  157 |
 | ✅ Concluídas                 |      32 |   73 |
-| 🚧 Bloqueadas por decisão     |      11 |   41 |
+| 🚧 Bloqueadas por decisão     |       9 |   35 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |      14 |   41 |
+| ⬜ A fazer, pode começar hoje |      16 |   47 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -96,8 +96,8 @@ Objetivo: as três trilhas conseguem trabalhar em paralelo sem esperar uma à ou
 | NR-010 | Qualidade: lint com type-checking e piso de cobertura na CI                     |   🟠   | `repo`       |   1 | NR-001 | —                   | RNF-068                 |   ✅   |
 | NR-011 | `ui`: tokens de design (cor, tipografia, espaçamento)                           |   🟢   | `ui`         |   2 | —      | **DEC-001**/QST-011 | RNF-055                 |   ✅   |
 | NR-012 | `mobile`: shell de navegação e sessão                                           |   🟢   | `mobile`     |   3 | NR-011 | DEC-008             | US-059                  |   ✅   |
-| NR-013 | `web`: shell de layout e sessão                                                 |   🟢   | `web`        |   2 | NR-011 | DEC-008             | US-059                  |   🚧   |
-| NR-014 | Autenticação: login, papéis, usuário em várias empresas                         |   🟠   | `api` `core` |   4 | NR-009 | **DEC-008**         | RF-119, RF-120, RF-005  |   🚧   |
+| NR-013 | `web`: shell de layout e sessão                                                 |   🟢   | `web`        |   2 | NR-011 | —                   | US-059                  |   ⬜   |
+| NR-014 | Autenticação: login, papéis, usuário em várias empresas                         |   🟠   | `api` `core` |   4 | NR-009 | —                   | RF-119, RF-120, RF-005  |   ⬜   |
 | NR-015 | `infra`: definir hospedagem e preencher os workflows de deploy                  |   🟠   | `infra`      |   3 | —      | **DEC-009**         | RNF-064, RNF-013        |   🚧   |
 
 ## Sprint 2 — Cadastros e venda
@@ -233,24 +233,23 @@ memória, que é o desenho pretendido.
 
 ## Bloqueios por decisão
 
-| Decisão                                                                               | Diretas        | Em cascata | Dias parados |
-| ------------------------------------------------------------------------------------- | -------------- | ---------: | -----------: |
-| [DEC-007](../decisoes/README.md#dec-007) LLM                                          | NR-060         |          1 |            7 |
-| [DEC-008](../decisoes/README.md#dec-008) autenticação                                 | NR-013, NR-014 |          — |            6 |
-| [DEC-004](../decisoes/README.md#dec-004) fiscal                                       | NR-042         |          — |            5 |
-| [DEC-003](../decisoes/README.md#dec-003) WhatsApp                                     | NR-046         |          — |            4 |
-| [DEC-010](../decisoes/README.md#dec-010) cobrança                                     | NR-063         |          — |            4 |
-| [DEC-006](../decisoes/README.md#dec-006)/[DEC-015](../decisoes/README.md#dec-015) PSP | NR-044         |          — |            4 |
-| [DEC-005](../decisoes/README.md#dec-005) Open Finance                                 | NR-048         |          — |            4 |
-| [DEC-009](../decisoes/README.md#dec-009) hospedagem                                   | NR-015         |          — |            3 |
-| [DEC-011](../decisoes/README.md#dec-011) contexto da conversa                         | NR-062         |          — |            3 |
-| [DEC-012](../decisoes/README.md#dec-012) usuário e cupons                             | NR-075         |          — |            3 |
-| [DEC-001](../decisoes/README.md#dec-001) nome/marca                                   | — (NR-011 ✅)  |          — |            0 |
+| Decisão                                                                               | Diretas       | Em cascata | Dias parados |
+| ------------------------------------------------------------------------------------- | ------------- | ---------: | -----------: |
+| [DEC-007](../decisoes/README.md#dec-007) LLM                                          | NR-060        |          1 |            7 |
+| [DEC-004](../decisoes/README.md#dec-004) fiscal                                       | NR-042        |          — |            5 |
+| [DEC-003](../decisoes/README.md#dec-003) WhatsApp                                     | NR-046        |          — |            4 |
+| [DEC-010](../decisoes/README.md#dec-010) cobrança                                     | NR-063        |          — |            4 |
+| [DEC-006](../decisoes/README.md#dec-006)/[DEC-015](../decisoes/README.md#dec-015) PSP | NR-044        |          — |            4 |
+| [DEC-005](../decisoes/README.md#dec-005) Open Finance                                 | NR-048        |          — |            4 |
+| [DEC-009](../decisoes/README.md#dec-009) hospedagem                                   | NR-015        |          — |            3 |
+| [DEC-011](../decisoes/README.md#dec-011) contexto da conversa                         | NR-062        |          — |            3 |
+| [DEC-012](../decisoes/README.md#dec-012) usuário e cupons                             | NR-075        |          — |            3 |
+| [DEC-001](../decisoes/README.md#dec-001) nome/marca                                   | — (NR-011 ✅) |          — |            0 |
 
-**43 dos 104 dias-desenvolvedor restantes estão bloqueados por 11 decisões** —
-41% do que falta. Decidir continua rendendo, mas deixou de ser a única coisa que
-rende: com a DEC-002 fechada, existem 76 dias de trabalho liberado para tocar em
-paralelo às decisões que faltam.
+**35 dos 84 dias-desenvolvedor restantes estão bloqueados por 10 decisões** —
+42% do que falta. Decidir continua rendendo, mas deixou de ser a única coisa que
+rende: existem 47 dias de trabalho liberado para tocar em paralelo às decisões
+que faltam.
 
 Cada tarefa é contada **uma vez**, na decisão que aparece na sua própria coluna
 `Bloq`. Uma tarefa pode estar atrás de mais de uma: NR-075 espera a DEC-012 e,
@@ -260,6 +259,14 @@ via NR-063, também a DEC-010 — somar as duas contaria o mesmo dia duas vezes.
 [DEC-007](../decisoes/README.md#dec-007), com 7 dias. O bloqueio deixou de ser
 concentrado, e isso muda a estratégia: antes valia parar tudo para decidir uma
 coisa; agora vale decidir enquanto o trabalho liberado anda.
+
+A [DEC-008](../decisoes/README.md#dec-008) fechou pela
+[ADR-0002](../decisoes/adr/0002-autenticacao-identidade-propria.md) e devolveu
+6 dias — `NR-013` e `NR-014`. Vale registrar como ela fechou, porque o padrão
+serve para as que faltam: a decisão travada era **qual provedor**, e o que
+travava o código era **quem é dono do papel e da sessão**. Separadas, a segunda
+foi decidida na hora e a primeira virou escolha de configuração que espera a
+[DEC-009](../decisoes/README.md#dec-009) sem parar nada.
 
 A [DEC-001](../decisoes/README.md#dec-001) não trava mais tarefa nenhuma. NR-011
 foi entregue com a paleta provisória de
