@@ -122,6 +122,24 @@ export {
 } from './registration/register-product.js'
 export type { RegisterProductDeps } from './registration/register-product.js'
 
+/* --- LGPD: exportacao e anonimizacao — NR-031 --- */
+export { anonymizeCustomer, NOME_ANONIMIZADO } from './privacy/anonymize-customer.js'
+export type { AnonymizeDeps } from './privacy/anonymize-customer.js'
+export {
+  COLECOES_DA_EXPORTACAO,
+  exportCompanyData,
+  LINHAS_POR_PAGINA,
+} from './privacy/export-company-data.js'
+export type { ExportDeps, ExportResult } from './privacy/export-company-data.js'
+export type {
+  AnonymizationCounts,
+  CustomerPersonalData,
+  DataSubjectRepository,
+  ExportPage,
+  ExportSink,
+  ExportSource,
+} from './ports/privacy.js'
+
 /* --- Importacao de extrato — NR-047 --- */
 export { importStatement } from './banking/import-statement.js'
 export type { ImportStatementDeps } from './banking/import-statement.js'
