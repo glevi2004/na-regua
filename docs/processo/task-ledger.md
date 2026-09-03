@@ -51,10 +51,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      58 |  158 |
-| ✅ Concluídas                 |      34 |   79 |
+| ✅ Concluídas                 |      35 |   81 |
 | 🚧 Bloqueadas por decisão     |       9 |   35 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |      14 |   42 |
+| ⬜ A fazer, pode começar hoje |      13 |   40 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -67,9 +67,9 @@ por linha, com o isolamento já materializado em `packages/db` (NR-007) e os
 cadastros, vendas e financeiro no schema (NR-008, NR-020) e os casos de uso de
 cadastro, o `registerSale` e a movimentação de estoque em `core` (NR-021,
 NR-022, NR-023), a agenda no schema (NR-035) e a trilha de auditoria
-(NR-025) e as contas a pagar com baixa e estorno (NR-028, NR-029) os consumidores de fila (NR-041) e o plano de contas com DRE (NR-032). Dos 87
-dias que faltam, **44 podem começar hoje**, em 15 tarefas; 43 seguem bloqueados por 11
-decisões. A próxima da fila **não é** a NR-027 — ver a nota abaixo.
+(NR-025) e as contas a pagar com baixa e estorno (NR-028, NR-029) os consumidores de fila (NR-041) e o plano de contas com DRE (NR-032). Dos 85
+dias que faltam, **40 podem começar hoje**, em 13 tarefas; 43 seguem bloqueados
+por 11 decisões. A NR-027 saiu: a rota de venda agora e real — ver a nota abaixo.
 
 ---
 
@@ -113,7 +113,7 @@ Objetivo: registrar uma venda de ponta a ponta pelo aplicativo.
 | NR-024 | `domain`: desconto, limite por papel, troco                                 |   🔵   | `domain`       |   2 | NR-004         | —    | RF-030, RF-031, RF-035 |   ✅   |
 | NR-025 | `core`: trilha de auditoria somente-inserção                                |   🔵   | `core`         |   2 | NR-020         | —    | RF-123, RF-124         |   ✅   |
 | NR-026 | `api`: rotas de cadastro                                                    |   🟠   | `api`          |   2 | NR-021, NR-009 | —    | RF-001–019             |   ⬜   |
-| NR-027 | `api`: rota de venda com chave de idempotência                              |   🟠   | `api`          |   2 | NR-022         | —    | RF-036, RNF-043        |   ⬜   |
+| NR-027 | `api`: rota de venda com chave de idempotência                              |   🟠   | `api`          |   2 | NR-022         | —    | RF-036, RNF-043        |   ✅   |
 | NR-030 | `api`: observabilidade — `requestId`, log estruturado, rastreamento         |   🟠   | `api` `worker` |   2 | NR-009         | —    | RNF-058, RNF-059       |   ✅   |
 | NR-070 | `mobile`: cadastro de produto com leitor de código de barras                |   🟢   | `mobile`       |   3 | NR-026         | —    | US-009, RF-017         |   ⬜   |
 | NR-071 | `mobile`: carrinho, seleção de cliente e fechamento de venda                |   🟢   | `mobile`       |   5 | NR-027         | —    | US-014–019             |   ⬜   |
@@ -215,21 +215,22 @@ provando que empresa não lê, grava, altera nem apaga linha de outra
 pagamentos, recebíveis e a baixa de estoque juntos, com idempotência pela chave
 do contexto e rollback provado em teste (RNF-046).
 
-**O nó agora é uma tarefa que não existe no ledger.** A NR-027 (rota de venda)
-aparece como desbloqueada porque a NR-022 fechou, mas ela não é executável:
-`registerSale` precisa de `UnitOfWork`, `SaleTransaction`, `SaleProductReader` e
-`CompanySettingsRepository`, e **`packages/db` não implementa nenhuma dessas
-portas** — ele exporta hoje apenas `getClient`, `migrate`, `withTenant` e o
-guarda de RLS. As quatro tarefas de `db` no ledger (NR-007, NR-008, NR-020,
-NR-035) são todas de _schema_; nenhuma cria repositório.
+**A NR-027 destravou, e o nó encolheu.** Esta nota dizia que a rota de venda
+não era executável porque `packages/db` não implementava porta nenhuma. Isso
+mudou: `createSaleUnitOfWork` e `createUserDirectory` existem agora, e a
+NR-027 foi feita contra o repositório **real** — Postgres, transação com tenant
+definido, idempotência pelo índice único.
 
-O mesmo vale para a NR-026 (rotas de cadastro), pelas portas da NR-021.
+A configuração de venda (alíquota, tarifas de cartão, teto de desconto) segue
+sem tabela, e por isso a rota usa `createDefaultSaleSettings` de `core` — que
+é o que a própria porta `CompanySettingsRepository` prevê ("quem implementa
+hoje devolve a configuração que tiver"). Quando as tabelas existirem, muda uma
+função na raiz de composição.
 
-Enquanto essa tarefa não for criada e feita, uma rota de `api` só pode ser
-ligada a um _fake_ — o que não é uma rota. **Fica como pendência de
-planejamento, não de código.** As tarefas de `core` (NR-023 ✅, NR-025, NR-028)
-seguem executáveis, porque declaram portas e testam contra repositório em
-memória, que é o desenho pretendido.
+**O que continua bloqueado:** a NR-026 (rotas de cadastro) e a NR-036 (rotas de
+agenda) precisam de repositórios de cliente, produto e compromisso, e nenhum
+existe. Segue como **pendência de planejamento**: nenhuma tarefa do ledger cria
+esses repositórios, e uma rota ligada a um _fake_ não é uma rota.
 
 ## Bloqueios por decisão
 

@@ -103,6 +103,7 @@ export type {
   SettlementUnitOfWork,
   TituloSnapshot,
 } from './ports/settlement-writers.js'
+export { createDefaultSaleSettings } from './sales/default-settings.js'
 export { registerSale } from './sales/register-sale.js'
 export type { RegisterSaleDeps, RegisterSaleResult, StockWarning } from './sales/register-sale.js'
 

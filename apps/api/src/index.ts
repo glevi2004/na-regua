@@ -1,7 +1,15 @@
 import Fastify from 'fastify'
-import { checkDatabase, checkIsolation, checkRedis, env, shutdown } from './composition.js'
+import {
+  buildSaleDeps,
+  checkDatabase,
+  checkIsolation,
+  checkRedis,
+  env,
+  shutdown,
+} from './composition.js'
 import { registerErrorHandler } from './plugins/error-handler.js'
 import { buildLoggerOptions, generateRequestId, registerLogging } from './plugins/logging.js'
+import { registerSaleRoutes } from './routes/sales.js'
 
 // RNF-058: log estruturado (JSON) com requestId, companyId e userId.
 const app = Fastify({
@@ -34,6 +42,10 @@ app.get('/health', async (_request, reply) => {
 
 /** Liveness: o processo esta de pe? Nao toca em dependencia externa. */
 app.get('/health/live', async () => ({ status: 'ok' }))
+
+/* Rotas de negocio. `buildSaleDeps()` abre a conexao, entao e chamada aqui e
+   nao no topo do modulo — ver o comentario em composition.ts. */
+registerSaleRoutes(app, buildSaleDeps())
 
 async function main(): Promise<void> {
   /*
