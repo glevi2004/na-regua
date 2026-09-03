@@ -210,7 +210,7 @@ describe.skipIf(!DATABASE_URL)('registerSale sobre o banco — NR-022, NR-027', 
 
     await expect(
       createSaleUnitOfWork(sql).transaction(empresa, async (tx) => {
-        await tx.insertSale({
+        const parcial = await tx.insertSale({
           channel: 'app',
           grossAmountCents: 1990,
           discountCents: 0,
@@ -225,8 +225,14 @@ describe.skipIf(!DATABASE_URL)('registerSale sobre o banco — NR-022, NR-027', 
           createdBy: usuario,
           createdAt: new Date(),
         })
+        /*
+         * O saleId tem de ser o da venda que acabou de ser gravada:
+         * `inventory_movements.sale_id` tem chave estrangeira para `sales`, e
+         * um uuid aleatorio viola a FK — o teste falharia pelo motivo errado e
+         * diria que a transacao desfez quando ela nem chegou ao ponto.
+         */
         await tx.decreaseStock([{ productId: produto, quantity: 1 }], {
-          saleId: randomUUID(),
+          saleId: parcial.id,
           createdBy: usuario,
           createdAt: new Date(),
         })
@@ -240,10 +246,23 @@ describe.skipIf(!DATABASE_URL)('registerSale sobre o banco — NR-022, NR-027', 
   })
 
   it('a trilha de estoque e somente-insercao — RF-124', async () => {
+    /*
+     * Cria o proprio movimento em vez de pegar o que outro teste deixou.
+     * Depender de sobra torna o resultado funcao da ORDEM — e quando os
+     * primeiros testes falharam na CI, este falhou com "expected undefined to
+     * be truthy", escondendo que a protecao nunca foi exercitada.
+     */
+    const venda = await registerSale(deps(), contexto(), {
+      items: [{ productId: produto, quantity: 1, unitPriceCents: 1990 }],
+      payments: [{ method: 'cash', amountCents: 1990 }],
+    })
+
     const [mov] = await withTenant(
       sql,
       empresa,
-      (tx) => tx<{ id: string }[]>`SELECT id FROM inventory_movements LIMIT 1`,
+      (tx) => tx<{ id: string }[]>`
+        SELECT id FROM inventory_movements WHERE sale_id = ${venda.sale.id}
+      `,
     )
     expect(mov?.id).toBeTruthy()
 

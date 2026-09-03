@@ -10,6 +10,23 @@ import type { Sql, TransactionSql } from 'postgres'
 import { withTenant } from './tenant.js'
 
 /**
+ * Converte o que o driver devolve para o tipo que a porta declara.
+ *
+ * Coluna `bigint` volta como STRING no postgres.js — de proposito, para nao
+ * perder precisao em valores acima de 2^53. Mas as portas de `core` declaram
+ * `number`, e `Money.fromCents` aceita `bigint | number`: uma string entra por
+ * ali, e o primeiro calculo estoura com "Cannot mix BigInt and other types".
+ *
+ * Foi exatamente o que a CI mostrou. E o mesmo tipo de erro que o adapter de
+ * pagamento tem com decimal do provedor: a representacao do mundo externo tem
+ * de virar a do sistema na BORDA, e nao no meio do calculo.
+ *
+ * Centavo cabe com folga em `number` — 2^53 centavos sao noventa trilhoes de
+ * reais — entao a conversao aqui nao perde nada.
+ */
+const numero = (valor: unknown): number => Number(valor)
+
+/**
  * Implementacao da `UnitOfWork` da venda — RNF-046.
  *
  * A seta aponta para dentro: `core` declara a porta, `db` implementa. Por isso
@@ -41,7 +58,7 @@ function escopo(tx: TransactionSql, companyId: string): SaleTransaction {
          * Sem filtro por `company_id`: a politica de RLS ja restringe, e
          * repetir o filtro aqui daria a impressao de que ele e o que protege.
          */
-        return tx<SaleProductSnapshot[]>`
+        const linhas = await tx<Record<string, unknown>[]>`
           SELECT id,
                  description,
                  unit_of_measure  AS "unitOfMeasure",
@@ -53,6 +70,18 @@ function escopo(tx: TransactionSql, companyId: string): SaleTransaction {
            WHERE id = ANY(${ids as unknown as string[]}::uuid[])
              AND deleted_at IS NULL
         `
+
+        return linhas.map((l): SaleProductSnapshot => ({
+          id: l.id as string,
+          description: l.description as string,
+          unitOfMeasure: l.unitOfMeasure as string,
+          salePriceCents: numero(l.salePriceCents),
+          costPriceCents: numero(l.costPriceCents),
+          stockQuantity: numero(l.stockQuantity),
+          /* `numeric` tambem volta string, e `null` tem de continuar `null`:
+               produto sem aliquota propria herda a do regime. */
+          taxRate: l.taxRate === null ? null : numero(l.taxRate),
+        }))
       },
     },
 
@@ -61,7 +90,7 @@ function escopo(tx: TransactionSql, companyId: string): SaleTransaction {
     decreaseStock: async (itens, origem) => baixarEstoque(tx, companyId, itens, origem),
 
     findByIdempotencyKey: async (key) => {
-      const [linha] = await tx<RegisteredSale[]>`
+      const [linha] = await tx<Record<string, unknown>[]>`
         SELECT id,
                number,
                gross_amount_cents AS "grossAmountCents",
@@ -71,7 +100,7 @@ function escopo(tx: TransactionSql, companyId: string): SaleTransaction {
           FROM sales
          WHERE idempotency_key = ${key}
       `
-      return linha
+      return linha === undefined ? undefined : vendaGravada(linha)
     },
   }
 }
@@ -92,7 +121,7 @@ async function inserirVenda(
   const [contador] = await tx<{ next_counter: string }[]>`SELECT next_counter('sale')`
   const numero = Number(contador!.next_counter)
 
-  const [gravada] = await tx<RegisteredSale[]>`
+  const [gravada] = await tx<Record<string, unknown>[]>`
     INSERT INTO sales ${tx({
       company_id: companyId,
       number: numero,
@@ -119,7 +148,8 @@ async function inserirVenda(
               created_at         AS "createdAt"
   `
 
-  const saleId = gravada!.id
+  const venda_gravada = vendaGravada(gravada!)
+  const saleId = venda_gravada.id
 
   if (venda.items.length > 0) {
     await tx`
@@ -185,7 +215,26 @@ async function inserirVenda(
     `
   }
 
-  return gravada!
+  return venda_gravada
+}
+
+/**
+ * Uma linha de `sales` no tipo que a porta declara.
+ *
+ * `number` tambem e `bigint` na tabela, entao tambem volta string. O numero da
+ * venda passa por tela e por conversa ao telefone; string aqui vazaria para o
+ * JSON da API como `"1"` em vez de `1`.
+ */
+function vendaGravada(linha: Record<string, unknown>): RegisteredSale {
+  return {
+    id: linha.id as string,
+    number: numero(linha.number),
+    grossAmountCents: numero(linha.grossAmountCents),
+    netAmountCents: numero(linha.netAmountCents),
+    changeCents: numero(linha.changeCents),
+    createdAt:
+      linha.createdAt instanceof Date ? linha.createdAt.toISOString() : String(linha.createdAt),
+  }
 }
 
 /**
