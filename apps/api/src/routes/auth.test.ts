@@ -9,6 +9,7 @@ import Fastify, { type FastifyInstance } from 'fastify'
 import { afterEach, describe, expect, it } from 'vitest'
 import { registerErrorHandler } from '../plugins/error-handler.js'
 import { requireContext } from '../plugins/execution-context.js'
+import { LIMITE_DE_AUTENTICACAO, registerRateLimit } from '../plugins/rate-limit.js'
 import { lerToken, registerSession } from '../plugins/session.js'
 import { registerAuthRoutes } from './auth.js'
 
@@ -22,7 +23,7 @@ import { registerAuthRoutes } from './auth.js'
 
 const CREDENCIAL = { identifier: 'marta@mercado.local', secret: 'senha-de-teste' }
 
-function buildApp() {
+async function buildApp() {
   const users = new (class {
     /* Diretorio minimo: o suficiente para login e escolha de loja. */
     usuarios = new Map([['sub-marta', { id: 'user-marta', name: 'Marta', isActive: true }]])
@@ -74,6 +75,10 @@ function buildApp() {
 
   const app = Fastify({ logger: false })
   registerErrorHandler(app)
+  /* O limitador entra AQUI tambem: `config.rateLimit` numa rota sem o plugin
+     registrado nao limita nada e nao avisa. Sem isto, a suite passaria verde
+     sobre um controle de seguranca desligado. */
+  await registerRateLimit(app)
   registerSession(app, deps.sessions)
   registerAuthRoutes(app, deps)
 
@@ -113,7 +118,7 @@ describe('leitura do cabecalho', () => {
 
 describe('entrar — RF-119', () => {
   it('devolve token, vinculos e nome', async () => {
-    const c = buildApp()
+    const c = await buildApp()
     app = c.app
 
     const r = await entrar(app)
@@ -129,7 +134,7 @@ describe('entrar — RF-119', () => {
    * de erro — e por isso responde 200 e nao 4xx.
    */
   it('com duas lojas, entra sem empresa ativa', async () => {
-    const c = buildApp()
+    const c = await buildApp()
     app = c.app
 
     const r = await entrar(app)
@@ -138,7 +143,7 @@ describe('entrar — RF-119', () => {
   })
 
   it('credencial errada responde 401', async () => {
-    const c = buildApp()
+    const c = await buildApp()
     app = c.app
 
     const r = await app.inject({
@@ -151,7 +156,7 @@ describe('entrar — RF-119', () => {
   })
 
   it('corpo invalido responde 400', async () => {
-    const c = buildApp()
+    const c = await buildApp()
     app = c.app
 
     const r = await app.inject({ method: 'POST', url: '/auth/login', payload: { identifier: '' } })
@@ -167,7 +172,7 @@ describe('entrar — RF-119', () => {
  */
 describe('sessao sem empresa nao opera', () => {
   it('rota protegida responde 401 mesmo com token valido', async () => {
-    const c = buildApp()
+    const c = await buildApp()
     app = c.app
     const token = (await entrar(app)).json().token
 
@@ -183,7 +188,7 @@ describe('sessao sem empresa nao opera', () => {
   /* Mas ela existe: `/auth/me` responde, e e como a tela sabe que precisa
      perguntar qual loja. */
   it('mas /auth/me responde, dizendo que falta escolher', async () => {
-    const c = buildApp()
+    const c = await buildApp()
     app = c.app
     const token = (await entrar(app)).json().token
 
@@ -201,7 +206,7 @@ describe('sessao sem empresa nao opera', () => {
 
 describe('escolher a loja — RF-119', () => {
   async function comLojaEscolhida(companyId = 'empresa-1') {
-    const c = buildApp()
+    const c = await buildApp()
     app = c.app
     const primeiro = (await entrar(app)).json().token
     const r = await app.inject({
@@ -241,7 +246,7 @@ describe('escolher a loja — RF-119', () => {
   })
 
   it('sem sessao responde 401', async () => {
-    const c = buildApp()
+    const c = await buildApp()
     app = c.app
 
     const r = await app.inject({
@@ -259,7 +264,7 @@ describe('token ruim nao derruba a requisicao', () => {
     ['token inventado', 'Bearer nao-e-token'],
     ['prefixo errado', 'Basic abc'],
   ])('%s: segue sem principal, e a rota protegida responde 401', async (_nome, authorization) => {
-    const c = buildApp()
+    const c = await buildApp()
     app = c.app
 
     const r = await app.inject({ method: 'GET', url: '/protegida', headers: { authorization } })
@@ -269,7 +274,7 @@ describe('token ruim nao derruba a requisicao', () => {
 
   /* Lancar no hook transformaria um token velho num 500 em rota PUBLICA. */
   it('token invalido nao impede entrar de novo', async () => {
-    const c = buildApp()
+    const c = await buildApp()
     app = c.app
 
     const r = await app.inject({
@@ -280,5 +285,53 @@ describe('token ruim nao derruba a requisicao', () => {
     })
 
     expect(r.statusCode).toBe(200)
+  })
+})
+
+/**
+ * Limite de requisicoes — RNF-026, e o alerta do CodeQL que trouxe isto.
+ *
+ * NAO e a mesma coisa que a desaceleracao de login. O `LoginThrottle` conta
+ * tentativas FALHAS (RF-120); isto conta REQUISICOES. A diferenca aparece no
+ * caso que so um dos dois pega: logins CORRETOS em rajada passam ilesos pelo
+ * throttle, porque ele so conta falha, e sao barrados aqui.
+ */
+describe('limite de requisicoes — RNF-026', () => {
+  it('barra a rajada com 429, mesmo com credencial certa', async () => {
+    const c = await buildApp()
+    app = c.app
+
+    const respostas = []
+    for (let i = 0; i < LIMITE_DE_AUTENTICACAO.max + 2; i += 1) {
+      respostas.push((await entrar(app)).statusCode)
+    }
+
+    expect(respostas.filter((s) => s === 200)).toHaveLength(LIMITE_DE_AUTENTICACAO.max)
+    expect(respostas.at(-1)).toBe(429)
+  })
+
+  /* O 429 sai pelo mesmo envelope de todo o resto: quem consome a api nao
+     deveria receber outro formato so porque bateu no limite. */
+  it('o 429 usa o envelope de erro do sistema', async () => {
+    const c = await buildApp()
+    app = c.app
+    for (let i = 0; i < LIMITE_DE_AUTENTICACAO.max; i += 1) await entrar(app)
+
+    const r = await entrar(app)
+
+    expect(r.json().error.code).toBe('RATE_LIMITED')
+    expect(r.json().error.message).toMatch(/Tente de novo em \d+ segundos/)
+  })
+
+  /* Se o plugin nao estivesse registrado, `config.rateLimit` seria ignorado em
+     silencio e o teste acima passaria por acidente. Este confere o cabecalho,
+     que so existe quando o limitador esta de fato ligado. */
+  it('o limitador esta mesmo ligado, e nao so declarado', async () => {
+    const c = await buildApp()
+    app = c.app
+
+    const r = await entrar(app)
+
+    expect(r.headers['x-ratelimit-limit']).toBe(String(LIMITE_DE_AUTENTICACAO.max))
   })
 })

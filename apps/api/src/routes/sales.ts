@@ -2,6 +2,7 @@ import { createSaleInputSchema } from '@na-regua/contracts'
 import { AppError, type RegisterSaleDeps, registerSale } from '@na-regua/core'
 import type { FastifyInstance } from 'fastify'
 import { IDEMPOTENCY_HEADER, requireContext } from '../plugins/execution-context.js'
+import { LIMITE_DE_ESCRITA } from '../plugins/rate-limit.js'
 import { validate } from '../plugins/validate.js'
 
 /**
@@ -16,7 +17,7 @@ import { validate } from '../plugins/validate.js'
  * com repositorio em memoria, sem Postgres.
  */
 export function registerSaleRoutes(app: FastifyInstance, deps: RegisterSaleDeps): void {
-  app.post('/sales', async (request, reply) => {
+  app.post('/sales', { config: { rateLimit: LIMITE_DE_ESCRITA } }, async (request, reply) => {
     /* Sem sessao valida isto lanca UNAUTHORIZED. Enquanto a NR-014 nao existe,
        toda chamada cai aqui — 401 e melhor que um contexto inventado. */
     const ctx = requireContext(request)

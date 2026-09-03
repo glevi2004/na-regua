@@ -2,6 +2,7 @@ import Fastify from 'fastify'
 import {
   assertAuthUsavelEmProducao,
   buildAuthDeps,
+  getRedis,
   buildSaleDeps,
   checkDatabase,
   checkIsolation,
@@ -11,6 +12,7 @@ import {
 } from './composition.js'
 import { registerErrorHandler } from './plugins/error-handler.js'
 import { buildLoggerOptions, generateRequestId, registerLogging } from './plugins/logging.js'
+import { registerRateLimit } from './plugins/rate-limit.js'
 import { registerSession } from './plugins/session.js'
 import { registerAuthRoutes } from './routes/auth.js'
 import { registerSaleRoutes } from './routes/sales.js'
@@ -47,15 +49,30 @@ app.get('/health', async (_request, reply) => {
 /** Liveness: o processo esta de pe? Nao toca em dependencia externa. */
 app.get('/health/live', async () => ({ status: 'ok' }))
 
-/* Sessao ANTES das rotas: e o hook que popula `request.principal`, e sem ele
-   toda rota protegida responde 401. */
-const authDeps = buildAuthDeps()
-registerSession(app, authDeps.sessions)
-registerAuthRoutes(app, authDeps)
+/**
+ * Rotas, numa funcao assincrona porque o limitador e um plugin do Fastify e
+ * plugin se registra com `await`.
+ *
+ * A ORDEM importa e nao e estetica:
+ *
+ * 1. o limitador precisa existir antes de qualquer rota que o declare
+ *    (`config.rateLimit` numa rota sem o plugin registrado nao limita nada, e
+ *    falha em silencio — que e o pior jeito de um controle de seguranca falhar);
+ * 2. a sessao e um hook `onRequest`, e popula `request.principal` para todas.
+ */
+async function registrarRotas(): Promise<void> {
+  /* `getRedis()` para o limite valer para a frota, e nao por processo — com
+     duas instancias e contador em memoria, o teto real dobra sem ninguem ver. */
+  await registerRateLimit(app, getRedis())
 
-/* Rotas de negocio. `buildSaleDeps()` abre a conexao, entao e chamada aqui e
-   nao no topo do modulo — ver o comentario em composition.ts. */
-registerSaleRoutes(app, buildSaleDeps())
+  const authDeps = buildAuthDeps()
+  registerSession(app, authDeps.sessions)
+  registerAuthRoutes(app, authDeps)
+
+  /* `buildSaleDeps()` abre a conexao, entao e chamada aqui e nao no topo do
+     modulo — ver o comentario em composition.ts. */
+  registerSaleRoutes(app, buildSaleDeps())
+}
 
 async function main(): Promise<void> {
   /*
@@ -68,6 +85,8 @@ async function main(): Promise<void> {
   /* Antes de tudo: autenticacao de desenvolvimento nao sobe em producao.
      Sincrono e sem I/O, entao vem antes ate da checagem de isolamento. */
   assertAuthUsavelEmProducao()
+
+  await registrarRotas()
 
   const isolamento = await checkIsolation()
 
