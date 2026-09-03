@@ -51,10 +51,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      57 |  155 |
-| ✅ Concluídas                 |      28 |   61 |
+| ✅ Concluídas                 |      29 |   64 |
 | 🚧 Bloqueadas por decisão     |      11 |   41 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |      17 |   51 |
+| ⬜ A fazer, pode começar hoje |      16 |   48 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -67,8 +67,8 @@ por linha, com o isolamento já materializado em `packages/db` (NR-007) e os
 cadastros, vendas e financeiro no schema (NR-008, NR-020) e os casos de uso de
 cadastro, o `registerSale` e a movimentação de estoque em `core` (NR-021,
 NR-022, NR-023), a agenda no schema (NR-035) e a trilha de auditoria
-(NR-025) e as contas a pagar com baixa e estorno (NR-028, NR-029). Dos 94 dias que
-faltam, **51 podem começar hoje**, em 17 tarefas; 43 seguem bloqueados por 11
+(NR-025) e as contas a pagar com baixa e estorno (NR-028, NR-029) e os consumidores de fila (NR-041). Dos 91 dias que faltam,
+**48 podem começar hoje**, em 16 tarefas; 43 seguem bloqueados por 11
 decisões. A próxima da fila **não é** a NR-027 — ver a nota abaixo.
 
 ---
@@ -128,7 +128,7 @@ Objetivo: emitir NFC-e e controlar contas a pagar e receber.
 | NR-028 | `core`: contas a pagar e a receber, com recorrência                    |   🔵   | `core`            |   3 | NR-020 | —                | RF-055–067             |   ✅   |
 | NR-029 | `core`: baixa, baixa parcial e estorno                                 |   🔵   | `core`            |   2 | NR-028 | —                | RF-059, RF-066, RF-067 |   ✅   |
 | NR-040 | `fiscal`: porta `InvoiceIssuer` + adapter falso                        |   🟠   | `fiscal` `core`   |   2 | NR-005 | —                | RF-045                 |   ✅   |
-| NR-041 | `worker`: consumidores de fila (emissão, mensagem, cobrança)           |   🟠   | `worker`          |   3 | NR-040 | —                | RNF-004, RF-130        |   ⬜   |
+| NR-041 | `worker`: consumidores de fila (emissão, mensagem, cobrança)           |   🟠   | `worker`          |   3 | NR-040 | —                | RNF-004, RF-130        |   ✅   |
 | NR-042 | `fiscal`: adapter real, contingência e guarda de XML                   |   🟠   | `fiscal`          |   5 | NR-040 | **DEC-004**      | RF-045–054             |   🚧   |
 | NR-043 | `payments`: porta `PaymentGateway` + adapter falso                     |   🟠   | `payments` `core` |   2 | NR-005 | —                | RF-063                 |   ✅   |
 | NR-044 | `payments`: adapter PagMaxx — Pix, link de pagamento, webhook com HMAC |   🟠   | `payments`        |   4 | NR-043 | DEC-006, DEC-015 | RF-034, RF-068         |   🚧   |
