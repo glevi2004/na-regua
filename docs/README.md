@@ -22,13 +22,13 @@ Público: todo o time, fundadores, stakeholders.
 | Doc                                                                            | Conteúdo                                                                     |
 | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
 | [`produto/visao.md`](produto/visao.md)                                         | Problema, público-alvo, proposta de valor, diferencial e métricas de sucesso |
-| [`produto/personas.md`](produto/personas.md)                                   | Lojista, funcionário, contador, cliente final e administrador da plataforma  |
-| [`produto/user-stories.md`](produto/user-stories.md)                           | 13 épicos e 64 histórias com critérios de aceite em Gherkin                  |
+| [`produto/personas.md`](produto/personas.md)                                   | Lojista (primária); staff depois; contador sem login; admin da plataforma    |
+| [`produto/user-stories.md`](produto/user-stories.md)                           | Épicos + jornadas A–J com critérios de aceite em Gherkin                     |
 | [`produto/requisitos-funcionais.md`](produto/requisitos-funcionais.md)         | Catálogo `RF-xxx` rastreável a histórias e módulos                           |
 | [`produto/requisitos-nao-funcionais.md`](produto/requisitos-nao-funcionais.md) | Catálogo `RNF-xxx` com métricas verificáveis                                 |
-| [`produto/escopo-mvp.md`](produto/escopo-mvp.md)                               | O que entra e o que **não** entra no MVP, e o roadmap depois dele            |
+| [`produto/escopo-mvp.md`](produto/escopo-mvp.md)                               | Jornadas A–J: o que entra e o que não entra                                  |
 | [`produto/glossario.md`](produto/glossario.md)                                 | Linguagem ubíqua: termo de negócio PT-BR ↔ identificador em inglês           |
-| [`produto/wireframes.md`](produto/wireframes.md)                               | Wireframes das 9 telas de módulo, derivados da apresentação comercial        |
+| [`produto/wireframes.md`](produto/wireframes.md)                               | Origem comercial — o web é a fonte de verdade de tela                        |
 
 ### 🏛 Arquitetura — _como o sistema é construído_
 

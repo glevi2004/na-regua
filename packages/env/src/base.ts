@@ -34,11 +34,9 @@ export type BaseEnv = z.infer<typeof baseEnvSchema>
  * Nome do provedor de um adapter — pagamentos, fiscal, WhatsApp, banking,
  * agente, autenticacao.
  *
- * Todas as seis decisoes de provedor (DEC-003 a DEC-008) seguem abertas —
- * ver docs/decisoes/README.md. Por isso o schema nao enumera nomes de
- * provedor: inventar um valor antes da decisao fechar seria pior que aceitar
- * qualquer string nao vazia. `fake` e o unico valor que o codigo hoje trata —
- * ambientes.md#modo-fake — e continua sendo o default local.
+ * Focus, PagMaxx e WhatsApp Cloud API ja tem ADR. Banking esta adiado
+ * (DEC-005). LLM e auth continuam abertos (DEC-007, DEC-008). `fake` permanece
+ * o default local.
  */
 export const providerSchema = z
   .string()

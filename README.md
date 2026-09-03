@@ -22,8 +22,9 @@
 | 🟡 Scaffold    | `api` (com `/health` real), `worker` (filas registradas), `web`, `mobile`                             |
 | 🔴 A fazer     | todos os demais módulos — **o banco ainda não tem schema**                                            |
 
-**51 dos 152 dias-desenvolvedor do backlog estão bloqueados por 10 decisões em
-aberto.** Decidir é hoje a atividade de maior retorno do projeto. Ver
+**24 dos 157 dias-desenvolvedor do backlog ativo estão bloqueados por 6 decisões
+em aberto** (marca, auth, LLM, memória do agente, hospedagem, cupons). Focus,
+PagMaxx e WhatsApp Cloud API já têm ADR. Ver
 [Decisões](docs/decisoes/README.md) e [Task Ledger](docs/processo/task-ledger.md).
 
 ---
@@ -32,11 +33,12 @@ aberto.** Decidir é hoje a atividade de maior retorno do projeto. Ver
 
 Duas formas de uso sobre a mesma base:
 
-- **Aplicativo** — cadastros, vendas com leitor de código de barras, financeiro,
-  relatórios, emissão de NFC-e/NFS-e e conciliação bancária via Open Finance.
-- **Assistente de IA no WhatsApp** — qualquer funcionalidade do ERP também pode
-  ser acionada por mensagem (cadastrar cliente, lançar venda, consultar contas,
-  gerar relatórios, enviar cobranças e catálogos), mantendo o contexto da conversa.
+- **Aplicativo (web e mobile)** — jornadas A–J: cadastro, estoque, vendas com
+  NFC-e e NFS-e Nacional via Focus NFe, financeiro, CRM, agenda, empresa, assinatura PagMaxx,
+  chamados e assistente. Pix, link e cartão online passam pela PagMaxx;
+  dinheiro e maquininha só são registrados.
+- **Assistente de IA no WhatsApp (Cloud API oficial)** — as mesmas operações
+  do ERP por mensagem, sobre os mesmos casos de uso.
 
 O ponto central da arquitetura: **app e WhatsApp acionam exatamente os mesmos
 casos de uso**. Não existe regra de negócio duplicada entre os dois canais.
@@ -65,18 +67,18 @@ na-regua/
 │   ├── api/          Fastify — REST, webhooks e runtime do agente
 │   ├── worker/       BullMQ — filas e jobs agendados
 │   ├── mobile/       Expo — app do lojista (leitor de código de barras)
-│   └── web/          Next.js — backoffice, catálogo público, landing
+│   └── web/          Next.js — backoffice A–J e landing
 ├── packages/
 │   ├── core/         NÚCLEO — casos de uso
 │   ├── domain/       regras puras: precificação, impostos, tarifas, comissão
 │   ├── contracts/    schemas Zod — validação HTTP, tipos e tools da IA
 │   ├── db/           schema Drizzle, migrations, políticas RLS
 │   ├── agent/        runtime do agente: tools, memória, confirmações
-│   ├── fiscal/       adapter NFC-e/NFS-e
-│   ├── whatsapp/     adapter do provedor de WhatsApp
-│   ├── banking/      adapter Open Finance
-│   ├── billing/      adapter de assinatura SaaS
-│   ├── payments/     adapter de PSP — Pix, link de pagamento
+│   ├── fiscal/       adapter Focus NFe (NFC-e e NFS-e Nacional)
+│   ├── whatsapp/     adapter WhatsApp Cloud API
+│   ├── banking/      adapter Open Finance (adiado)
+│   ├── billing/      adapter de assinatura SaaS (PagMaxx)
+│   ├── payments/     adapter PagMaxx — Pix, link, cartão online
 │   ├── money/        tipo Money — centavos, sem float
 │   └── ui/           tokens e componentes compartilhados
 ├── docs/             documentação (ver índice abaixo)
@@ -91,15 +93,15 @@ Cada módulo documenta a si mesmo no próprio README:
 | `apps/api`           | REST, webhooks, runtime do agente       | [README](apps/api/README.md)           |
 | `apps/worker`        | filas e jobs agendados                  | [README](apps/worker/README.md)        |
 | `apps/mobile`        | app do lojista                          | [README](apps/mobile/README.md)        |
-| `apps/web`           | backoffice, catálogo, landing           | [README](apps/web/README.md)           |
+| `apps/web`           | backoffice A–J e landing                | [README](apps/web/README.md)           |
 | `packages/core`      | casos de uso                            | [README](packages/core/README.md)      |
 | `packages/domain`    | regras de negócio puras                 | [README](packages/domain/README.md)    |
 | `packages/contracts` | schemas e tipos compartilhados          | [README](packages/contracts/README.md) |
 | `packages/db`        | schema, migrations, RLS                 | [README](packages/db/README.md)        |
 | `packages/agent`     | runtime do assistente                   | [README](packages/agent/README.md)     |
-| `packages/fiscal`    | adapter fiscal                          | [README](packages/fiscal/README.md)    |
-| `packages/whatsapp`  | adapter de mensageria                   | [README](packages/whatsapp/README.md)  |
-| `packages/banking`   | adapter Open Finance                    | [README](packages/banking/README.md)   |
+| `packages/fiscal`    | adapter Focus NFe                       | [README](packages/fiscal/README.md)    |
+| `packages/whatsapp`  | adapter WhatsApp Cloud API              | [README](packages/whatsapp/README.md)  |
+| `packages/banking`   | adapter Open Finance (adiado)           | [README](packages/banking/README.md)   |
 | `packages/billing`   | adapter de assinatura                   | [README](packages/billing/README.md)   |
 | `packages/payments`  | adapter de PSP (Pix, link de pagamento) | [README](packages/payments/README.md)  |
 | `packages/money`     | valores monetários                      | [README](packages/money/README.md)     |

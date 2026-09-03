@@ -16,7 +16,8 @@ export {
   phoneSchema,
   rateSchema,
   roleSchema,
+  ufSchema,
   signedMoneyCentsSchema,
   unitOfMeasureSchema,
 } from './primitives.js'
-export type { Role, UnitOfMeasure } from './primitives.js'
+export type { Role, Uf, UnitOfMeasure } from './primitives.js'

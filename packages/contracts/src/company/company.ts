@@ -1,30 +1,84 @@
 import { z } from 'zod'
 import { cnpjSchema } from '../common/document.js'
-import { emailSchema, idSchema, nameSchema, phoneSchema, roleSchema } from '../common/primitives.js'
+import {
+  emailSchema,
+  idSchema,
+  nameSchema,
+  phoneSchema,
+  rateSchema,
+  roleSchema,
+  ufSchema,
+} from '../common/primitives.js'
 
 /**
  * Empresa (o tenant) e seus usuarios — glossario `Company` e `User`.
  *
- * `.strict()` em toda entrada: chave desconhecida vira erro em vez de ser
- * descartada em silencio. E o que faz o principio 8 valer na pratica — um
- * `companyId` enfiado no corpo e recusado alto, nao ignorado.
+ * Um usuario pertence a exatamente uma empresa (`users.company_id`).
+ * `.strict()`: `companyId` no corpo e recusado (principio 8).
  */
+
+export const taxRegimeSchema = z.enum(
+  ['mei', 'simples_nacional', 'lucro_presumido', 'lucro_real'],
+  {
+    errorMap: () => ({ message: 'Regime tributario invalido.' }),
+  },
+)
+export type TaxRegime = z.infer<typeof taxRegimeSchema>
+
+export const certificateStatusSchema = z.enum(['missing', 'valid', 'expired', 'rejected'])
+export type CertificateStatus = z.infer<typeof certificateStatusSchema>
+
+export const pagmaxxOnboardingStatusSchema = z.enum([
+  'not_started',
+  'pending',
+  'approved',
+  'rejected',
+])
+export type PagmaxxOnboardingStatus = z.infer<typeof pagmaxxOnboardingStatusSchema>
+
+const cepSchema = z
+  .string()
+  .transform((v) => v.replace(/\D/g, ''))
+  .refine((d) => d.length === 8, { message: 'CEP invalido. Use 8 digitos.' })
+
+export const addressSchema = z
+  .object({
+    cep: cepSchema,
+    street: nameSchema,
+    number: z.string().trim().min(1, 'Informe o numero.').max(20),
+    complement: z.string().trim().max(80).optional(),
+    neighborhood: nameSchema,
+    city: nameSchema,
+    state: ufSchema,
+  })
+  .strict()
+
+export type Address = z.infer<typeof addressSchema>
 
 export const createCompanyInputSchema = z
   .object({
-    /** Razao social, como consta no CNPJ. */
     legalName: nameSchema,
-    /** Nome de fachada. Ausente = usa a razao social. */
     tradeName: nameSchema.optional(),
     cnpj: cnpjSchema,
     email: emailSchema,
     phone: phoneSchema,
+    stateRegistration: z.string().trim().max(20).optional(),
+    municipalRegistration: z.string().trim().max(20).optional(),
+    taxRegime: taxRegimeSchema,
+    /**
+     * Autodeclaracao. Padrao false. True nao impede o ERP; impede Focus
+     * (RF-146). Consulta CNPJ nao descobre Hibrido.
+     */
+    optedReformaHibrida: z.boolean().default(false),
+    /** Aliquota do calculo da venda. Nao vai para a Focus. */
+    taxRate: rateSchema.optional(),
+    address: addressSchema,
   })
   .strict()
 
 export type CreateCompanyInput = z.infer<typeof createCompanyInputSchema>
 
-/** Atualizacao e parcial, menos o CNPJ: trocar CNPJ e outra empresa. */
+/** CNPJ nao troca: outra empresa. CSC e A1 nao entram neste JSON. */
 export const updateCompanyInputSchema = createCompanyInputSchema
   .omit({ cnpj: true })
   .partial()
@@ -39,11 +93,39 @@ export const companyOutputSchema = z.object({
   cnpj: z.string(),
   email: z.string(),
   phone: z.string(),
+  stateRegistration: z.string().nullable(),
+  municipalRegistration: z.string().nullable(),
+  taxRegime: taxRegimeSchema,
+  optedReformaHibrida: z.boolean(),
+  taxRate: z.number().nullable(),
+  address: addressSchema,
+  cityIbgeCode: z.string().nullable(),
+  focusCompanyId: z.string().nullable(),
+  focusNfceEnabled: z.boolean(),
+  focusNfseEnabled: z.boolean(),
+  certificateStatus: certificateStatusSchema,
+  certificateExpiresAt: z.string().nullable(),
+  hasNfceCsc: z.boolean(),
+  pagmaxxOnboardingStatus: pagmaxxOnboardingStatusSchema,
   createdAt: z.string(),
 })
 
 export type CompanyOutput = z.infer<typeof companyOutputSchema>
 
+/** Signup da jornada A — ainda sem empresa. */
+export const createAccountInputSchema = z
+  .object({
+    name: nameSchema,
+    email: emailSchema,
+    phone: phoneSchema,
+    password: z.string().min(8, 'Senha deve ter pelo menos 8 caracteres.'),
+    coupon: z.string().trim().max(40).optional(),
+  })
+  .strict()
+
+export type CreateAccountInput = z.infer<typeof createAccountInputSchema>
+
+/** Staff futuro: mesmo `company_id` do owner, nunca outra empresa. */
 export const createUserInputSchema = z
   .object({
     name: nameSchema,
@@ -58,7 +140,10 @@ export const userOutputSchema = z.object({
   id: idSchema,
   name: z.string(),
   email: z.string(),
+  phone: phoneSchema.optional(),
   role: roleSchema,
+  /** Nulo entre o signup e `/app/empresa`. */
+  companyId: idSchema.nullable(),
 })
 
 export type UserOutput = z.infer<typeof userOutputSchema>

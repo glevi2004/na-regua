@@ -2,7 +2,8 @@
 
 Adapter do provedor de WhatsApp.
 
-**Estado:** 🔴 não implementado · 🚧 bloqueado por [DEC-003](../../docs/decisoes/README.md#dec-003) · `NR-045`, `NR-046`
+**Estado:** 🔴 não implementado · Cloud API oficial
+([ADR-0005](../../docs/decisoes/adr/0005-whatsapp-cloud-api.md)) · `NR-045`, `NR-046`
 
 ## Responsabilidade
 

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { addressSchema } from '../company/company.js'
 import { documentSchema } from '../common/document.js'
 import {
   emailSchema,
@@ -27,6 +28,8 @@ export const createCustomerInputSchema = z
     notes: z.string().trim().max(500, 'Observacao muito longa.').optional(),
     /** Teto do fiado. Ausente = sem fiado liberado. */
     walletLimitCents: moneyCentsSchema.optional(),
+    /** Tomador/destinatario da nota. Ausente = DPS sem tomador completo. */
+    address: addressSchema.optional(),
   })
   .strict()
 
@@ -45,6 +48,7 @@ export const customerOutputSchema = z.object({
   walletLimitCents: z.number().int(),
   /** Saldo devedor. Positivo = o cliente deve para a loja. */
   walletBalanceCents: z.number().int(),
+  address: addressSchema.nullable(),
   createdAt: z.string(),
 })
 

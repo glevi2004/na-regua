@@ -1,12 +1,10 @@
 # Personas
 
-Cinco perfis atendidos pelo sistema. Cada história em
-[`user-stories.md`](user-stories.md) declara para qual persona ela existe.
+Perfis para conversa de time. Recorte A–J: **P1 opera sozinha** no sistema;
+P2 (staff) é roadmap na mesma empresa; P3 não tem login; P4 é cliente da loja;
+P5 é a gente (chamados).
 
-Os nomes servem para conversa de time ("isso é problema da Cláudia ou do
-Roberto?"). Os perfis são hipóteses derivadas da apresentação comercial e
-precisam ser validados com entrevistas reais — ver
-[QST-006](../decisoes/README.md#qst-006).
+Hipóteses — [QST-006](../decisoes/README.md#qst-006).
 
 ---
 
@@ -28,7 +26,7 @@ tem uma funcionária. Vende também pelo WhatsApp e entrega de moto na região.
 - Registrar a venda em segundos, sem perder o cliente da frente
 - Saber quanto sobrou de verdade depois de imposto e taxa de cartão
 - Saber quem lhe deve e cobrar sem constrangimento
-- Não levar multa por não emitir nota
+- Não levar multa por não emitir nota (MEI ou Simples, sem Híbrido)
 
 **O que a faz desistir**
 
@@ -42,9 +40,11 @@ tem uma funcionária. Vende também pelo WhatsApp e entrega de moto na região.
 
 ---
 
-## P2 — Marcos, o funcionário
+## P2 — Marcos, o funcionário _(roadmap — mesma empresa)_
 
-**Papel no sistema:** `staff` — permissões restritas, definidas pela Cláudia.
+**Papel no sistema:** `staff` — **não entra no primeiro recorte**
+([ADR-0004](../decisoes/adr/0004-usuario-uma-empresa.md)). Quando entrar, é
+outro usuário com o mesmo `company_id`, nunca um segundo tenant.
 
 Vendedor, 24 anos. Trabalha no balcão, opera o app com naturalidade.
 
@@ -70,8 +70,8 @@ Vendedor, 24 anos. Trabalha no balcão, opera o app com naturalidade.
 
 ## P3 — Roberto, o contador _(persona externa)_
 
-**Papel no sistema:** `accountant` — somente leitura + exportação. **Fora do MVP**;
-no MVP a Cláudia exporta e envia manualmente.
+**Papel no sistema:** nenhum login. **Fora do recorte.** A Cláudia exporta
+(US-042, RF-087).
 
 Atende 60 pequenas empresas. Recebe informação tarde, incompleta e em formatos
 diferentes de cada cliente.
@@ -135,20 +135,20 @@ Trabalha na equipe do ZapGestor: suporte, cobrança e diagnóstico.
 Base para o modelo de autorização detalhado em
 [`seguranca.md`](../arquitetura/seguranca.md#autorização).
 
-| Capacidade                       | `owner` |     `staff`     | `accountant` | `platform_admin` |
-| -------------------------------- | :-----: | :-------------: | :----------: | :--------------: |
-| Registrar venda                  |   ✅    |       ✅        |      ❌      |        ❌        |
-| Cancelar venda emitida           |   ✅    |  ⚠️ aprovação   |      ❌      |        ❌        |
-| Ver custo e margem               |   ✅    |       ❌        |      ✅      |        ❌        |
-| Gerenciar produtos e preços      |   ✅    | ⚠️ configurável |      ❌      |        ❌        |
-| Gerenciar contas a pagar/receber |   ✅    |       ❌        |      ❌      |        ❌        |
-| Emitir nota fiscal               |   ✅    |       ✅        |      ❌      |        ❌        |
-| Conciliar banco                  |   ✅    |       ❌        |      ❌      |        ❌        |
-| Exportar dados                   |   ✅    |       ❌        |      ✅      |        ❌        |
-| Usar o assistente WhatsApp       |   ✅    | ⚠️ configurável |      ❌      |        ❌        |
-| Convidar usuários                |   ✅    |       ❌        |      ❌      |        ❌        |
-| Gerenciar assinatura             |   ✅    |       ❌        |      ❌      |        ✅        |
-| Acessar dados de outro tenant    |   ❌    |       ❌        |      ❌      |   ⚠️ auditado    |
+| Capacidade                    | `owner` | `staff` (depois) | `platform_admin` |
+| ----------------------------- | :-----: | :--------------: | :--------------: |
+| Registrar venda               |   ✅    |        ✅        |        ❌        |
+| Cancelar venda com nota       |   ✅    |   ⚠️ aprovação   |        ❌        |
+| Ver custo e margem            |   ✅    |        ❌        |        ❌        |
+| Gerenciar produtos e preços   |   ✅    | ⚠️ configurável  |        ❌        |
+| Contas a pagar/receber        |   ✅    |        ❌        |        ❌        |
+| Emitir NFC-e / NFS-e Nacional |   ✅    |        ✅        |        ❌        |
+| CRM, agenda, chamados         |   ✅    |        ❌        |        ❌        |
+| Exportar dados                |   ✅    |        ❌        |        ❌        |
+| Assistente                    |   ✅    | ⚠️ configurável  |        ❌        |
+| Convidar staff                |   ✅    |        ❌        |        ❌        |
+| Assinatura                    |   ✅    |        ❌        |        ✅        |
+| Dado de outro tenant          |   ❌    |        ❌        |   ⚠️ auditado    |
 
 ⚠️ = permitido sob condição configurável ou com registro de auditoria.
 

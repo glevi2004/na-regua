@@ -23,32 +23,27 @@ flowchart TB
 
     SYS["<b>ZapGestor</b><br/>ERP operável por app<br/>e por WhatsApp"]
 
-    SEFAZ["🏛 SEFAZ<br/><i>autorização de NFC-e/NFS-e</i>"]
-    META["💬 Provedor WhatsApp<br/><i>envio e recebimento</i>"]
-    OF["🏦 Open Finance<br/><i>extrato bancário</i>"]
-    PSP["💳 PSP / Adquirente<br/><i>tarifas e repasses</i>"]
-    LLM["🤖 Provedor de LLM<br/><i>interpretação de linguagem</i>"]
-    SAAS["💰 Cobrança SaaS<br/><i>mensalidade</i>"]
+    FOCUS["Focus NFe<br/><i>NFC-e (SEFAZ) e NFS-e Nacional</i>"]
+    META["WhatsApp Cloud API<br/><i>oficial da Meta</i>"]
+    PSP["PagMaxx<br/><i>Pix, link, cartão online, assinatura</i>"]
+    LLM["Provedor de LLM<br/><i>interpretação de linguagem</i>"]
 
-    LOJISTA -->|app e WhatsApp| SYS
-    FUNC -->|app| SYS
-    ADMIN -->|backoffice| SYS
+    LOJISTA -->|app, web e WhatsApp| SYS
+    FUNC -->|app — roadmap staff| SYS
+    ADMIN -->|backoffice / chamados| SYS
     SYS -->|cobrança, comprovante, nota| CLIENTE
 
-    SYS <-->|emite e cancela nota| SEFAZ
+    SYS <-->|empresas, emitir e cancelar NFC-e/NFS-e Nacional| FOCUS
     SYS <-->|mensagens| META
-    SYS <-->|consulta extrato| OF
-    SYS <-->|tarifas e conciliação| PSP
+    SYS <-->|vendas online e mensalidade| PSP
     SYS <-->|interpreta intenção| LLM
-    SYS <-->|assinatura| SAAS
 ```
 
-**Seis integrações externas, todas em decisão aberta** —
-[DEC-003](../decisoes/README.md#dec-003) a
-[DEC-007](../decisoes/README.md#dec-007) e
-[DEC-010](../decisoes/README.md#dec-010). É exatamente por isso que cada uma
-está atrás de um adapter: o trabalho de `core` e `domain` não espera essas
-decisões.
+**Integrações externas no recorte A–J:** Focus NFe (NFC-e e NFS-e Nacional), PagMaxx,
+WhatsApp Cloud API, LLM ([DEC-007](../decisoes/README.md#dec-007) ainda aberta).
+LLM ([DEC-007](../decisoes/README.md#dec-007) ainda aberta). Open Finance está
+[adiado](../decisoes/README.md#dec-005). Adapters isolam os provedores mesmo
+com Focus e PagMaxx já escolhidos.
 
 ## Nível 2 — Containers
 
@@ -56,7 +51,7 @@ decisões.
 flowchart TB
     subgraph clientes["Clientes"]
         MOBILE["📱 <b>apps/mobile</b><br/>Expo / React Native<br/><i>PDV, código de barras</i>"]
-        WEBAPP["🖥 <b>apps/web</b><br/>Next.js<br/><i>backoffice, catálogo, landing</i>"]
+        WEBAPP["🖥 <b>apps/web</b><br/>Next.js<br/><i>backoffice A–J, landing</i>"]
         WPP["💬 WhatsApp<br/><i>conversa do lojista</i>"]
     end
 
@@ -79,7 +74,7 @@ flowchart TB
     end
 
     subgraph externos["Provedores externos"]
-        EXT["fiscal · whatsapp · banking<br/>billing · LLM"]
+        EXT["Focus NFe · PagMaxx · WhatsApp Cloud API · LLM"]
     end
 
     MOBILE -->|HTTPS| API
@@ -105,15 +100,15 @@ flowchart TB
 
 ### Por que estes containers
 
-| Container      | Existe porque                                                                                                                    | Alternativa descartada                                                                 |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `apps/api`     | Um único ponto de entrada para app, web e webhooks, com autenticação e contexto de tenant em um lugar só                         | Um serviço por domínio — complexidade de operação que 3 devs e zero clientes não pagam |
-| `apps/worker`  | Emissão fiscal não pode bloquear a venda ([RNF-004](../produto/requisitos-nao-funcionais.md)); cobrança e lembrete são agendados | Fazer tudo síncrono na API — quebra RNF-003 e RNF-004                                  |
-| `apps/mobile`  | O PDV é no balcão, com código de barras e rede instável ([RNF-051](../produto/requisitos-nao-funcionais.md))                     | Web responsiva — não resolve leitor nativo nem operação offline                        |
-| `apps/web`     | Backoffice, relatório e conciliação são trabalho de tela grande                                                                  | Só mobile — conciliar extrato no celular é hostil                                      |
-| PostgreSQL     | Dado financeiro exige transação e integridade; RLS dá isolamento no banco ([RNF-021](../produto/requisitos-nao-funcionais.md))   | NoSQL — sem transação multi-tabela, a atomicidade de RNF-046 vira código de aplicação  |
-| Redis          | Fila para emissão, mensagens e jobs; cache de leitura quente                                                                     | Fila no próprio Postgres — viável, mas piora o pico de mensagens de RNF-018            |
-| Object storage | XML fiscal por 5 anos ([RNF-037](../produto/requisitos-nao-funcionais.md)), anexos e exportações                                 | Guardar no banco — caro e pesado para backup                                           |
+| Container      | Existe porque                                                                                                                   | Alternativa descartada                                                                 |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `apps/api`     | Um único ponto de entrada para app, web e webhooks, com autenticação e contexto de tenant em um lugar só                        | Um serviço por domínio — complexidade de operação que 3 devs e zero clientes não pagam |
+| `apps/worker`  | Emissão Focus não pode bloquear a venda ([RNF-004](../produto/requisitos-nao-funcionais.md)); cobrança e lembrete são agendados | Fazer tudo síncrono na API — quebra RNF-003 e RNF-004                                  |
+| `apps/mobile`  | O PDV é no balcão, com código de barras e rede instável ([RNF-051](../produto/requisitos-nao-funcionais.md))                    | Web responsiva — não resolve leitor nativo nem operação offline                        |
+| `apps/web`     | Backoffice, painel, financeiro, CRM, empresa — trabalho de tela grande                                                          | Só mobile — plano de contas e chamado no celular são hostis                            |
+| PostgreSQL     | Dado financeiro exige transação e integridade; RLS dá isolamento no banco ([RNF-021](../produto/requisitos-nao-funcionais.md))  | NoSQL — sem transação multi-tabela, a atomicidade de RNF-046 vira código de aplicação  |
+| Redis          | Fila para emissão, mensagens e jobs; cache de leitura quente                                                                    | Fila no próprio Postgres — viável, mas piora o pico de mensagens de RNF-018            |
+| Object storage | XML fiscal por 5 anos ([RNF-037](../produto/requisitos-nao-funcionais.md)), anexos e exportações                                | Guardar no banco — caro e pesado para backup                                           |
 
 ### O runtime do agente mora na API
 
@@ -143,7 +138,7 @@ flowchart LR
     W4 --> UC
     UC --> D["domain: calcula<br/>custo, imposto, tarifa"]
     UC --> DB[("db: venda + estoque<br/>+ recebível + auditoria<br/><i>uma transação</i>")]
-    UC --> Q["fila: emitir nota"]
+    UC --> Q["fila: NFC-e/NFS-e na Focus"]
 ```
 
 A diferença entre os canais termina em `ExecutionContext` — `channel: 'app'` ou
@@ -152,15 +147,19 @@ validações e a auditoria.
 
 ## Decisões estruturais tomadas
 
-| Decisão                | Escolha                    | Por quê                                                                                                              |
-| ---------------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Organização do código  | Monorepo                   | Contrato compartilhado entre 4 apps; mudança em `contracts` precisa ser atômica                                      |
-| Gerenciador de pacotes | pnpm + Turborepo           | Cache de tarefas e execução por pacote afetado; `node-linker=hoisted` por causa do Metro/Expo                        |
-| Linguagem              | TypeScript em todo o stack | Um tipo de venda compartilhado entre backend, app e agente                                                           |
-| Estilo de API          | REST                       | Público e superfície pequenos; GraphQL não se paga aqui                                                              |
-| ORM                    | Drizzle                    | SQL explícito e tipado, essencial para trabalhar com RLS sem surpresa                                                |
-| Isolamento             | RLS no PostgreSQL          | Isolamento que não depende de o desenvolvedor lembrar do `WHERE` — [ADR-0001](../decisoes/adr/0001-rls-por-linha.md) |
-| Validação              | Zod em `contracts`         | O mesmo schema serve a HTTP, tipos e tools do agente                                                                 |
+| Decisão                | Escolha                           | Por quê                                                                                                                                                                          |
+| ---------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Organização do código  | Monorepo                          | Contrato compartilhado entre 4 apps; mudança em `contracts` precisa ser atômica                                                                                                  |
+| Gerenciador de pacotes | pnpm + Turborepo                  | Cache de tarefas e execução por pacote afetado; `node-linker=hoisted` por causa do Metro/Expo                                                                                    |
+| Linguagem              | TypeScript em todo o stack        | Um tipo de venda compartilhado entre backend, app e agente                                                                                                                       |
+| Estilo de API          | REST                              | Público e superfície pequenos; GraphQL não se paga aqui                                                                                                                          |
+| ORM                    | Drizzle                           | SQL explícito e tipado, essencial para trabalhar com RLS sem surpresa                                                                                                            |
+| Isolamento             | RLS no PostgreSQL                 | Isolamento que não depende de o desenvolvedor lembrar do `WHERE` — [ADR-0001](../decisoes/adr/0001-rls-por-linha.md)                                                             |
+| Acesso                 | 1 usuário ↔ 1 empresa             | Staff depois, mesma loja — [ADR-0004](../decisoes/adr/0004-usuario-uma-empresa.md)                                                                                               |
+| Fiscal                 | Focus NFe, NFC-e e NFS-e Nacional | Só MEI/Simples sem Híbrido; A1 transita; não falamos com SEFAZ nem o Ambiente Nacional — [ADR-0002](../decisoes/adr/0002-focus-nfe.md), [DEC-017](../decisoes/README.md#dec-017) |
+| PSP e assinatura       | PagMaxx                           | Pix, link, cartão online; dinheiro/maquininha só registro — [ADR-0003](../decisoes/adr/0003-pagmaxx.md)                                                                          |
+| WhatsApp               | Cloud API oficial                 | Sem lib não oficial — [ADR-0005](../decisoes/adr/0005-whatsapp-cloud-api.md)                                                                                                     |
+| Validação              | Zod em `contracts`                | O mesmo schema serve a HTTP, tipos e tools do agente                                                                                                                             |
 
 ## Decisões estruturais ainda em aberto
 

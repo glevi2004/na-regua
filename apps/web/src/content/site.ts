@@ -38,7 +38,7 @@ export const nav = [
 export const highlights = [
   'Gestao completa do negocio',
   'Assistente por WhatsApp',
-  'Emissao de NFC-e e NFS-e',
+  'Emissao de NFC-e e NFS-e Nacional',
   'Contas a pagar e a receber',
   'Controle de estoque',
   'CRM e agenda integrados',
@@ -84,7 +84,7 @@ export const modules = [
     name: 'Vendas',
     tag: 'PDV e nota fiscal',
     description:
-      'Catalogo, carrinho e pagamento em Pix, cartao, dinheiro ou carteira — com NFC-e ou NFS-e emitida no fechamento.',
+      'Catalogo, carrinho e pagamento em Pix, cartao, dinheiro ou carteira — com NFC-e ou NFS-e Nacional no fechamento para MEI e Simples (DAS).',
   },
   {
     id: 'crm',
@@ -123,7 +123,7 @@ export const benefits = [
   {
     icon: 'receipt',
     title: 'A nota sai junto com a venda',
-    text: 'NFC-e e NFS-e emitidas no fechamento, com imposto e taxa de cartao ja calculados.',
+    text: 'NFC-e e NFS-e Nacional no fechamento para MEI e Simples no DAS (sem Hibrido), com imposto e taxa de cartao ja calculados.',
   },
   {
     icon: 'wallet',
@@ -160,7 +160,7 @@ export const plan = {
   note: 'Cobranca mensal, sem fidelidade. Cancele quando quiser.',
   features: [
     'Empresa, clientes, produtos e estoque',
-    'Vendas com emissao de NFC-e e NFS-e',
+    'Vendas com emissao de NFC-e e NFS-e Nacional (MEI e Simples no DAS)',
     'Financeiro: plano de contas, contas a pagar e a receber',
     'CRM em quadro Kanban e agenda integrada ao Google Agenda',
     'Assistente de IA pelo WhatsApp',
@@ -178,12 +178,12 @@ export const faq = [
   {
     question: 'Preciso de certificado digital para usar o app?',
     answer:
-      'So para emitir nota fiscal. Vendas, financeiro, estoque, clientes e o assistente funcionam sem ele. O certificado A1 e enviado na tela de Empresa e fica guardado cifrado.',
+      'So para emitir nota. Vendas, financeiro, estoque, clientes e o assistente funcionam sem ele. O A1 e enviado na tela de Empresa e vai para a Focus — nao fica no nosso banco. Emissao so para MEI e Simples no DAS (sem Hibrido).',
   },
   {
     question: 'O app emite nota fiscal?',
     answer:
-      'Sim, NFC-e para venda de produto e NFS-e para servico, emitidas no mesmo passo do fechamento da venda. O imposto e a taxa de cartao entram no calculo e o valor liquido vai para contas a receber.',
+      'Sim, NFC-e de produto e NFS-e Nacional de servico no fechamento, para MEI e Simples no DAS. Imposto e taxa de cartao entram no calculo e o valor liquido vai para contas a receber.',
   },
   {
     question: 'Posso importar meus clientes e produtos de uma planilha?',

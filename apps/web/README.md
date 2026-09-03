@@ -1,15 +1,21 @@
 # web
 
-Next.js — backoffice, catálogo público e landing.
+Next.js — backoffice das jornadas A–J e landing.
 
-**Estado:** 🟡 scaffold do Next.js · `NR-013`, `NR-072`, `NR-074`, `NR-075`, `NR-076`
+**Estado:** 🟡 scaffold do Next.js com telas de referência do recorte · `NR-013`,
+`NR-072`, `NR-074`, `NR-075`, `NR-077`, `NR-082`
+
+O menu em [`AppShell.tsx`](src/components/app/AppShell.tsx) é a fonte de verdade
+de tela: painel, vendas, clientes, produtos, financeiro (plano / a pagar / a
+receber), CRM, agenda, empresa, assistente, assinatura, suporte.
 
 ## Responsabilidade
 
-O que é melhor em tela grande: relatórios, conciliação bancária, cadastros em
-lote, gestão de assinatura. Mais o catálogo público e a landing.
+O que é melhor em tela grande: cadastros, financeiro, CRM, empresa (Focus),
+assinatura, chamados e painel. Landing do produto.
 
-**O que não faz:** regra de negócio. Fala com a API por HTTP.
+**O que não faz:** regra de negócio; catálogo público / marketplace (roadmap);
+módulo Bancos / Open Finance (adiado). Fala com a API por HTTP.
 
 ## Fronteiras
 
@@ -20,14 +26,13 @@ lote, gestão de assinatura. Mais o catálogo público e a landing.
 
 ## Superfícies
 
-| Superfície               | Público           | Autenticação |
-| ------------------------ | ----------------- | ------------ |
-| Backoffice               | lojista, contador | ✅           |
-| Catálogo público da loja | cliente final     | ❌           |
-| Landing                  | visitante         | ❌           |
+| Superfície | Público           | Autenticação |
+| ---------- | ----------------- | ------------ |
+| Backoffice | lojista (`owner`) | ✅           |
+| Landing    | visitante         | ❌           |
 
-O catálogo é público e por empresa: cuidado redobrado para não vazar dado de
-outra loja nem informação interna (custo, margem, estoque exato).
+Um usuário vê uma empresa. Sem seletor de tenant. Staff entra depois, na mesma
+empresa ([ADR-0004](../../docs/decisoes/adr/0004-usuario-uma-empresa.md)).
 
 ## Pacotes internos precisam de transpilação
 

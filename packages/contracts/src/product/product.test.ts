@@ -13,6 +13,7 @@ describe('cadastro de produto', () => {
     const r = createProductInputSchema.parse(produto)
     expect(r.stock).toBe(0)
     expect(r.minStock).toBe(0)
+    expect(r.kind).toBe('product')
   })
 
   it('normaliza o codigo de barras', () => {
@@ -39,10 +40,30 @@ describe('cadastro de produto', () => {
     [{ ...produto, taxRate: 101 }, 'aliquota acima de 100'],
     [{ ...produto, taxRate: -1 }, 'aliquota negativa'],
     [{ ...produto, barcode: '123' }, 'codigo de barras curto'],
+    [{ ...produto, ncm: '123' }, 'NCM curto'],
     [{ ...produto, stock: 1.5 }, 'estoque fracionado'],
     [{ ...produto, companyId: 'outra' }, 'companyId no corpo'],
   ])('recusa %o (%s)', (entrada, _motivo) => {
     expect(createProductInputSchema.safeParse(entrada).success).toBe(false)
+  })
+
+  it('aceita NCM e codigo nacional de servico para NFS-e Nacional', () => {
+    const r = createProductInputSchema.parse({
+      ...produto,
+      ncm: '09012100',
+      kind: 'service',
+      codigoTributacaoNacionalIss: '000301',
+      codigoNbs: '1.1501.10.00',
+    })
+    expect(r.ncm).toBe('09012100')
+    expect(r.kind).toBe('service')
+    expect(r.codigoTributacaoNacionalIss).toBe('000301')
+    expect(r.codigoNbs).toBe('1.1501.10.00')
+  })
+
+  it('normaliza NCM com pontuacao', () => {
+    const r = createProductInputSchema.parse({ ...produto, ncm: '0901.21.00' })
+    expect(r.ncm).toBe('09012100')
   })
 
   it('exige custo — sem ele nao existe margem', () => {

@@ -1,145 +1,146 @@
 # Escopo do MVP
 
-> Documento de recorte. A pergunta que ele responde é: **o que precisa existir
-> para uma lojista real operar o negócio dela inteiro no sistema?**
+> Recorte alinhado ao fluxo **A–J** e às telas de [`apps/web`](../../apps/web).
+> A pergunta é: **o lojista opera o negócio nele, sem planilha paralela?**
 
-Critério de corte do MVP: a Cláudia ([P1](personas.md#p1--cláudia-a-lojista))
-consegue, sem planilha paralela, registrar todas as vendas de um mês, emitir
-nota, saber o que tem a receber e a pagar, e cobrar quem está devendo.
+Critério de corte: a Cláudia ([P1](personas.md#p1--cláudia-a-lojista)) registra
+vendas, emite NFC-e ou NFS-e Nacional pela Focus quando for MEI/Simples sem
+Híbrido e estiver configurado, vê a receber/a pagar, cobra,
+abre chamado e fala com o assistente.
+
+Wireframes da apresentação (Bancos, seletor de empresa) **não** são fonte de
+verdade. O menu real está em
+[`AppShell.tsx`](../../apps/web/src/components/app/AppShell.tsx).
 
 ---
 
-## Módulos de negócio
+## Jornadas A–J
 
-Os nove módulos herdados da apresentação comercial, com o recorte de cada um:
+| #     | Jornada         | No primeiro recorte                                                                                                     | Fora / depois                                 |
+| ----- | --------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| **A** | Cadastro        | Pessoa no signup (nome, e-mail, telefone, senha); cupom e Pix da assinatura; empresa (CNPJ) em `/app/empresa`           | Preencher empresa no mesmo passo do signup    |
+| **B** | Estoque         | Produto plano: código, EAN, NCM, custo, venda, saldo, mínimo, movimentações                                             | Variação, kit, depósito, lote                 |
+| **C** | Vendas          | Carrinho, clientes, PagMaxx (Pix/link/cartão online), registro de dinheiro/maquininha, NFC-e e NFS-e Nacional via Focus | TEF, orçamento/delivery                       |
+| **D** | Financeiro      | Contas a pagar, a receber, plano de contas                                                                              | Bancos, Open Finance, conciliação             |
+| **E** | CRM e agenda    | Quadro (a fazer / andamento / concluído); compromissos                                                                  | Funil de marketing, agendamento pelo cliente  |
+| **F** | Dashboard       | KPIs em `/app` (faturamento, ticket, a receber, a pagar)                                                                | DRE completo como produto separado            |
+| **G** | Conta e empresa | Editar dados pessoais e da empresa; regime + declaração Híbrido; A1+CSC só se elegível                                  | Cofre nosso de certificado; multi-empresa     |
+| **H** | Assinatura      | Planos, trial, PagMaxx `/subscriptions`, estado Restrita                                                                | —                                             |
+| **I** | Suporte         | Chamados com mensagens e anexo                                                                                          | —                                             |
+| **J** | Assistente      | Mesmos casos de uso no web, app e WhatsApp Cloud API                                                                    | Lib não oficial; atendimento ao cliente final |
 
-| #   | Módulo               | Épico                                                 | No MVP                                                           | Fora do MVP                                          |
-| --- | -------------------- | ----------------------------------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------- |
-| 1   | **Empresa**          | [E1](user-stories.md#e1--onboarding--empresa)         | Cadastro, CNPJ, regime tributário, usuários e papéis             | Múltiplas filiais                                    |
-| 2   | **Clientes / CRM**   | [E2](user-stories.md#e2--clientes--crm)               | Cadastro, histórico de compras, saldo em carteira                | Segmentação, campanhas, funil                        |
-| 3   | **Produtos**         | [E3](user-stories.md#e3--produtos--estoque)           | Cadastro, código de barras, preço, custo, estoque simples        | Composição/kit, múltiplos depósitos, lote e validade |
-| 4   | **Vendas**           | [E4](user-stories.md#e4--vendas--pdv)                 | Carrinho, leitor de código de barras, pagamento misto, devolução | Orçamento, pedido, delivery, comanda                 |
-| 5   | **Contas a Pagar**   | [E6](user-stories.md#e6--contas-a-pagar)              | Lançamento, recorrência, baixa, alerta de vencimento             | Aprovação em fluxo, pagamento automatizado           |
-| 6   | **Contas a Receber** | [E7](user-stories.md#e7--contas-a-receber)            | Geração automática pela venda, parcelas, baixa, cobrança         | Régua de cobrança automática, negativação            |
-| 7   | **Bancos**           | [E8](user-stories.md#e8--bancos--conciliação)         | Conta bancária, importação de extrato, conciliação assistida     | Pagamento pelo sistema, múltiplas moedas             |
-| 8   | **Plano de Contas**  | [E9](user-stories.md#e9--plano-de-contas--relatórios) | Plano padrão, classificação de lançamento, DRE simplificado      | Plano contábil completo, centro de custo hierárquico |
-| 9   | **Agenda**           | [E10](user-stories.md#e10--agenda)                    | Compromissos, lembretes                                          | Agendamento pelo cliente final, recursos/salas       |
+Épicos antigos (E1–E13) continuam nos IDs `US-*` para rastreio. Prioridade
+**MUST** segue esta tabela, não o ranking original da apresentação.
 
-Mais os quatro módulos de plataforma, que não aparecem na apresentação
-comercial mas sem os quais nada funciona:
-
-| #   | Módulo                  | Épico                                                 | No MVP                                                                   |
-| --- | ----------------------- | ----------------------------------------------------- | ------------------------------------------------------------------------ |
-| 10  | **Emissão Fiscal**      | [E5](user-stories.md#e5--emissão-fiscal)              | NFC-e na venda, cancelamento no prazo legal, contingência, guarda de XML |
-| 11  | **Assistente WhatsApp** | [E11](user-stories.md#e11--assistente-whatsapp)       | Operação dos módulos 1–9 por mensagem, com confirmação de ação sensível  |
-| 12  | **Assinatura SaaS**     | [E12](user-stories.md#e12--assinatura--cobrança-saas) | Planos, trial, cobrança, aviso e bloqueio por inadimplência              |
-| 13  | **Plataforma**          | [E13](user-stories.md#e13--plataforma)                | Autenticação, multi-tenant, auditoria, observabilidade, exportação       |
+---
 
 ## Fluxo de venda — o caminho crítico
 
-O fluxo que define o MVP. Detalhamento técnico em
-[`fluxos.md`](../arquitetura/fluxos.md#venda-completa).
+Detalhe em [`fluxos.md`](../arquitetura/fluxos.md#venda-completa).
 
 ```
-selecionar cliente → montar carrinho (código de barras) → ajustar itens
-   → pagamento (débito · crédito · Pix · dinheiro · carteira)
-   → emissão fiscal
+selecionar cliente → montar carrinho → pagamento
+   (PagMaxx: Pix · link · cartão online  |  registro: dinheiro · maquininha)
+   → emissão NFC-e ou NFS-e Nacional na Focus (se elegível e habilitada)
 ```
 
-Ao fechar a venda o sistema calcula automaticamente, sem intervenção:
+Ao fechar a venda o sistema calcula, sem intervenção:
 
-| Cálculo                                            | Onde vive                                            |
-| -------------------------------------------------- | ---------------------------------------------------- |
-| Custo dos itens (`costAmount`)                     | [`packages/domain`](../../packages/domain/README.md) |
-| Imposto conforme o regime tributário               | [`packages/domain`](../../packages/domain/README.md) |
-| Tarifa de cartão conforme bandeira e parcelamento  | [`packages/domain`](../../packages/domain/README.md) |
-| **Valor líquido** → lançamento em contas a receber | [`packages/core`](../../packages/core/README.md)     |
+| Cálculo                                                                   | Onde                                                 |
+| ------------------------------------------------------------------------- | ---------------------------------------------------- |
+| Custo dos itens                                                           | [`packages/domain`](../../packages/domain/README.md) |
+| Imposto conforme regime (estimativa / Simples)                            | [`packages/domain`](../../packages/domain/README.md) |
+| Tarifa de cartão (tabela; PagMaxx `simulate-fee` fora do caminho crítico) | [`packages/domain`](../../packages/domain/README.md) |
+| Líquido → recebível                                                       | [`packages/core`](../../packages/core/README.md)     |
 
-É esse cálculo automático que entrega a promessa "saber o lucro real" da
-[visão](visao.md#proposta-de-valor). Sem ele, o produto é um caderno digital.
+A nota **não** fala com a SEFAZ nem com o Ambiente Nacional. A Focus autoriza ou rejeita;
+a venda já existe. NFC-e costuma voltar na hora; NFS-e Nacional fica
+`processing` até o webhook. Qual tipo emitir no passo fiscal **entra no
+recorte**; o layout da tela ainda será definido. Sem elegibilidade
+([DEC-017](../decisoes/README.md#dec-017)) a venda fecha e a nota não entra na
+fila.
 
-## Escopo do assistente no MVP
+PagMaxx só processa se o credenciamento do lojista estiver aprovado
+([ADR-0006](../decisoes/adr/0006-conta-pagmaxx-por-lojista.md)). Sem isso,
+dinheiro/maquininha ainda registram.
 
-O assistente **não** precisa cobrir 100% do ERP para o MVP ter valor. A
-prioridade é o que a lojista faz várias vezes por dia:
+---
 
-| Prioridade      | Capacidade                                                                           |
-| --------------- | ------------------------------------------------------------------------------------ |
-| **MUST**        | Consultar (vendas do dia, a receber, a pagar, estoque, saldo de cliente)             |
-| **MUST**        | Cadastrar cliente                                                                    |
-| **MUST**        | Lançar venda simples                                                                 |
-| **MUST**        | Enviar cobrança                                                                      |
-| **SHOULD**      | Lançar conta a pagar/receber                                                         |
-| **SHOULD**      | Cadastrar produto                                                                    |
-| **SHOULD**      | Gerar e enviar relatório                                                             |
-| **COULD**       | Enviar catálogo                                                                      |
-| **WON'T (MVP)** | Emitir nota fiscal por mensagem, conciliar banco por mensagem, alterar preço em lote |
+## Escopo do assistente
 
-Ações que criam ou alteram valor exigem confirmação explícita — princípio 3 da
-[visão](visao.md#princípios-de-produto).
+Prioridade no que a lojista faz várias vezes ao dia. Vale **web, app e WhatsApp**.
 
-## Fora do MVP
+| Prioridade | Capacidade                                                               |
+| ---------- | ------------------------------------------------------------------------ |
+| **MUST**   | Consultar (vendas do dia, a receber, a pagar, estoque, saldo de cliente) |
+| **MUST**   | Cadastrar cliente                                                        |
+| **MUST**   | Lançar venda simples                                                     |
+| **MUST**   | Enviar cobrança (link PagMaxx quando habilitado)                         |
+| **SHOULD** | Lançar conta a pagar/receber                                             |
+| **SHOULD** | Cadastrar produto                                                        |
+| **SHOULD** | Resumo de período                                                        |
+| **COULD**  | Enviar catálogo                                                          |
+| **WON'T**  | Emitir nota por mensagem; conciliar banco; alterar preço em lote         |
 
-Explicitamente adiado. Registrar aqui evita rediscussão a cada sprint.
+Ações com valor exigem confirmação — princípio 3 da [visão](visao.md#princípios-de-produto).
 
-| Item                                         | Por que fica fora                                                             |
-| -------------------------------------------- | ----------------------------------------------------------------------------- |
-| Marketplace de lojas                         | Depende de massa crítica de lojistas que ainda não existe                     |
-| Vitrine de especialidades                    | Idem                                                                          |
-| Espaço para propaganda                       | Modelo de receita secundário; não valida a tese                               |
-| Gamificação                                  | Retenção via valor primeiro; gamificação não salva produto sem uso            |
-| IA proativa (recomendações)                  | Precisa de histórico real para não recomendar besteira                        |
-| Parcerias por elegibilidade                  | Depende de volume e de dado consolidado                                       |
-| Atendimento ao cliente final pelo assistente | Multiplica risco de LGPD e custo de IA antes de validar o principal           |
-| Múltiplas filiais / depósitos                | Fora do público-alvo do MVP                                                   |
-| Portal do contador                           | Exportação manual resolve no MVP                                              |
-| App para o cliente final                     | Sem demanda validada                                                          |
-| Aplicativo web offline-first completo        | Offline fica restrito ao PDV mobile ([RNF-051](requisitos-nao-funcionais.md)) |
-| Integração com e-commerce / ERP terceiro     | Sem demanda validada                                                          |
-| NFS-e                                        | Público secundário; entra logo após o MVP                                     |
+---
 
-## Roadmap pós-MVP
+## Fora do recorte
 
-Ordem de intenção, não compromisso de data. Cada fase só começa quando as
-métricas da anterior sustentam.
+| Item                                          | Por que fica fora                                                   |
+| --------------------------------------------- | ------------------------------------------------------------------- |
+| Open Finance / conciliação bancária           | Fora de A–J; [DEC-005](../decisoes/README.md#dec-005) adiada        |
+| Um usuário em várias empresas                 | [ADR-0004](../decisoes/adr/0004-usuario-uma-empresa.md)             |
+| Integração direta com a SEFAZ                 | [ADR-0002](../decisoes/adr/0002-focus-nfe.md)                       |
+| Guardar A1 no nosso banco                     | A1 só transita para a Focus                                         |
+| CT-e, MDF-e, NF-e modelo 55, NFS-e municipal  | Recorte = NFC-e + NFS-e Nacional                                    |
+| Payload IBS/CBS do Simples Híbrido (2027)     | ERP ok; emissão recusada ([DEC-017](../decisoes/README.md#dec-017)) |
+| Staff no MUST                                 | Convite depois; schema já admite `role=staff`                       |
+| Portal do contador                            | Exportação manual                                                   |
+| Marketplace, vitrine, propaganda, gamificação | Apresentação comercial, sem RF                                      |
+| Atendimento ao cliente final pelo assistente  | LGPD e custo de IA                                                  |
+| Múltiplas filiais / depósitos                 | Fora do público                                                     |
+| App para o cliente final                      | Sem demanda                                                         |
+| Integração e-commerce / ERP terceiro          | Sem demanda                                                         |
+| WhatsApp não oficial                          | [ADR-0005](../decisoes/adr/0005-whatsapp-cloud-api.md)              |
 
-### Fase 2 — Consolidar o uso
+---
 
-Portal do contador · NFS-e para prestadores de serviço · Régua de cobrança
-automática · Relatórios avançados e DRE completo · Assistente com mais
-cobertura de escrita.
+## Roadmap depois deste recorte
 
-### Fase 3 — Inteligência
+Ordem de intenção, não compromisso de data.
 
-IA proativa (alerta de estoque, previsão de caixa, sugestão de preço) ·
-Recomendação de compra por histórico · Atendimento ao cliente final ·
-Gamificação de metas.
+### Em seguida
 
-### Fase 4 — Rede
+Staff na mesma empresa · OFX/conciliação · mais cobertura de escrita no
+assistente.
 
-Marketplace de lojas · Vitrine de especialidades · Espaço para propaganda ·
-Parcerias por elegibilidade (alto faturamento, CNPJ regular).
+### Depois
+
+IA proativa · atendimento ao cliente final · portal do contador · marketplace.
 
 > [!NOTE]
-> As fases 2–4 vêm da apresentação comercial e ainda não têm requisitos
-> escritos. Elas serão detalhadas quando entrarem em planejamento — não há
-> `RF-xxx` para elas hoje, e isso é intencional.
+> Fases longas da apresentação comercial ainda não têm `RF-xxx` até entrarem
+> em planejamento.
 
-## Critérios de saída do MVP
+---
 
-O MVP está pronto quando **todos** forem verdade:
+## Critérios de saída deste recorte
 
-- [ ] Uma lojista real opera um mês inteiro sem planilha paralela
-- [ ] Todos os `RF-xxx` marcados `MUST` estão implementados e testados
-- [ ] Todos os `RNF-xxx` marcados `MUST` estão medidos, não presumidos
-- [ ] NFC-e emitida com sucesso em produção, incluindo contingência
-- [ ] Assistente cobre as capacidades `MUST` desta página
-- [ ] Cobrança de assinatura funcionando ponta a ponta, incluindo bloqueio
-- [ ] Nenhum `DEC-xxx` bloqueante em aberto ([decisões](../decisoes/README.md))
-- [ ] Exportação completa de dados disponível ao lojista
+- [ ] Lojista real opera um mês sem planilha paralela
+- [ ] Jornadas A–J cobertas no web (e o que for MUST no mobile)
+- [ ] NFC-e e NFS-e Nacional autorizadas em homologação Focus, incluindo rejeição visível
+- [ ] Pix ou link PagMaxx dá baixa por webhook em homologação
+- [ ] Assistente cobre MUST acima no WhatsApp Cloud API (ou adapter falso + contrato)
+- [ ] Assinatura: trial, pagamento, estado Restrita
+- [ ] Chamado de suporte ida e volta
+- [ ] Exportação de dados disponível
+- [ ] DEC-008 e DEC-009 fechadas (auth e hospedagem)
 
 ## Documentos relacionados
 
-- [Visão do produto](visao.md) — o porquê deste recorte
-- [User Stories](user-stories.md) — o detalhamento de cada épico
-- [Task Ledger](../processo/task-ledger.md) — como isso vira trabalho de 3 devs
+- [Visão](visao.md)
+- [User Stories](user-stories.md)
+- [Task Ledger](../processo/task-ledger.md)
+- [Focus](../arquitetura/integracoes/focusnfe.md) · [PagMaxx](../arquitetura/integracoes/pagmaxx.md)

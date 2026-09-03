@@ -2,7 +2,7 @@
 
 Schemas Zod — o contrato único do sistema.
 
-**Estado:** 🟢 schemas base (Company, User, Customer, Product, Sale) · `financial`,
+**Estado:** 🟢 schemas base (Company 1:1 com usuário, User, Customer, Product, Sale) · `financial`,
 `fiscal` e `agent` ainda não · `NR-005`
 
 > ⚠️ **O pacote mais sensível do repositório.** Mudança aqui exige revisão das

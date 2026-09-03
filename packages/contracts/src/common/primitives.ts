@@ -70,8 +70,40 @@ export const unitOfMeasureSchema = z.enum(['un', 'kg', 'g', 'l', 'ml', 'm', 'cm'
 })
 export type UnitOfMeasure = z.infer<typeof unitOfMeasureSchema>
 
-/** Papel de acesso — glossario `Role`. */
-export const roleSchema = z.enum(['owner', 'staff', 'accountant', 'platform_admin'], {
+/** Unidade federativa — endereco da empresa e do cliente. */
+export const ufSchema = z.enum([
+  'AC',
+  'AL',
+  'AM',
+  'AP',
+  'BA',
+  'CE',
+  'DF',
+  'ES',
+  'GO',
+  'MA',
+  'MG',
+  'MS',
+  'MT',
+  'PA',
+  'PB',
+  'PE',
+  'PI',
+  'PR',
+  'RJ',
+  'RN',
+  'RO',
+  'RR',
+  'RS',
+  'SC',
+  'SE',
+  'SP',
+  'TO',
+])
+export type Uf = z.infer<typeof ufSchema>
+
+/** Papel de acesso — `owner`, `staff` (roadmap, mesma empresa), `platform_admin`. */
+export const roleSchema = z.enum(['owner', 'staff', 'platform_admin'], {
   errorMap: () => ({ message: 'Papel de acesso invalido.' }),
 })
 export type Role = z.infer<typeof roleSchema>

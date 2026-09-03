@@ -81,17 +81,18 @@ flowchart TB
 
 ### Adaptadores
 
-Cada um implementa uma **porta declarada por `core`** e isola um provedor
-externo ainda não escolhido.
+Cada um implementa uma **porta declarada por `core`**. Focus, PagMaxx e
+WhatsApp Cloud API já têm ADR; o adapter continua existindo para o modo `fake`
+e para troca futura. Banking está adiado. LLM segue [DEC-007](../decisoes/README.md#dec-007).
 
-| Módulo              | Porta que implementa                                | Provedor                                                                  | Decisão                                  | Trilha | Doc                                         |
-| ------------------- | --------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------- | ------ | ------------------------------------------- |
-| `packages/agent`    | Runtime do assistente: tools, memória, confirmações | LLM                                                                       | [DEC-007](../decisoes/README.md#dec-007) | 🟠 2   | [README](../../packages/agent/README.md)    |
-| `packages/fiscal`   | `InvoiceIssuer`                                     | NFC-e / NFS-e                                                             | [DEC-004](../decisoes/README.md#dec-004) | 🟠 2   | [README](../../packages/fiscal/README.md)   |
-| `packages/whatsapp` | `MessageSender`                                     | WhatsApp                                                                  | [DEC-003](../decisoes/README.md#dec-003) | 🟠 2   | [README](../../packages/whatsapp/README.md) |
-| `packages/banking`  | `BankStatementProvider`                             | Open Finance                                                              | [DEC-005](../decisoes/README.md#dec-005) | 🟠 2   | [README](../../packages/banking/README.md)  |
-| `packages/billing`  | `SubscriptionProvider`                              | Cobrança SaaS (PagMaxx `/subscriptions`)                                  | [DEC-010](../decisoes/README.md#dec-010) | 🟠 2   | [README](../../packages/billing/README.md)  |
-| `packages/payments` | `PaymentGateway`                                    | PSP — Pix, link de pagamento, estorno ([PagMaxx](integracoes/pagmaxx.md)) | [DEC-006](../decisoes/README.md#dec-006) | 🟠 2   | [README](../../packages/payments/README.md) |
+| Módulo              | Porta que implementa                                | Provedor                                             | Decisão                                                | Trilha | Doc                                         |
+| ------------------- | --------------------------------------------------- | ---------------------------------------------------- | ------------------------------------------------------ | ------ | ------------------------------------------- |
+| `packages/agent`    | Runtime do assistente: tools, memória, confirmações | LLM                                                  | [DEC-007](../decisoes/README.md#dec-007)               | 🟠 2   | [README](../../packages/agent/README.md)    |
+| `packages/fiscal`   | `InvoiceIssuer`                                     | Focus NFe (NFC-e e NFS-e Nacional; gate MEI/Simples) | [ADR-0002](../decisoes/adr/0002-focus-nfe.md)          | 🟠 2   | [README](../../packages/fiscal/README.md)   |
+| `packages/whatsapp` | `MessageSender`                                     | WhatsApp Cloud API oficial                           | [ADR-0005](../decisoes/adr/0005-whatsapp-cloud-api.md) | 🟠 2   | [README](../../packages/whatsapp/README.md) |
+| `packages/banking`  | `BankStatementProvider`                             | **Adiado** — Open Finance / OFX                      | [DEC-005](../decisoes/README.md#dec-005)               | 🟠 2   | [README](../../packages/banking/README.md)  |
+| `packages/billing`  | `SubscriptionProvider`                              | PagMaxx `/subscriptions`                             | [ADR-0003](../decisoes/adr/0003-pagmaxx.md)            | 🟠 2   | [README](../../packages/billing/README.md)  |
+| `packages/payments` | `PaymentGateway`                                    | PagMaxx — Pix, link, cartão online                   | [ADR-0003](../decisoes/adr/0003-pagmaxx.md)            | 🟠 2   | [README](../../packages/payments/README.md) |
 
 ### Interface
 

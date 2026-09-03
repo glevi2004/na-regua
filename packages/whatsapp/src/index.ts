@@ -1,6 +1,6 @@
 /**
  * Adapter do provedor de WhatsApp. Implementa a porta MessageSender.
  *
- * Provedor ainda nao escolhido (DEC-003).
+ * Provedor: WhatsApp Cloud API oficial (ADR-0005).
  */
 export const PLACEHOLDER = 'whatsapp' as const

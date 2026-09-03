@@ -7,8 +7,9 @@ import { parseEnv } from './parse.js'
  *
  * So entram aqui variaveis que o processo realmente le hoje, mais as
  * marcadas Obr. na matriz que ja tem consumidor no codigo (AUTH_PROVIDER e
- * JWT_SECRET, por DEC-008). As de PagMaxx, fiscal, WhatsApp, Open Finance e
- * agente ficam de fora ate os adapters existirem — colocar aqui uma lista de
+ * JWT_SECRET, por DEC-008). As de PagMaxx, Focus, WhatsApp e
+ * agente ficam de fora ate os adapters existirem — Open Finance nao entra
+ * neste recorte. Colocar aqui uma lista de
  * campos obrigatorios que nada consome ainda so far barrar o boot local sem
  * necessidade.
  */

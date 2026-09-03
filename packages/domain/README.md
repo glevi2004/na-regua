@@ -2,7 +2,7 @@
 
 Regras de negócio puras.
 
-**Estado:** 🟡 NR-004 implementado · 31 testes · NR-024 pendente (desconto, limite por papel, troco)
+**Estado:** 🟡 NR-004 implementado · 39 testes · NR-024 pendente (desconto, limite por papel, troco)
 
 ## Responsabilidade
 
@@ -71,8 +71,10 @@ dinheiro.**
 | `marginRate`    | `marginAmount / grossAmount * 100` (quatro casas, truncado)     |
 
 Aliquota do item: `item.taxRate` → taxa do produto em `TaxRules` → `defaultRate`
-do regime (D3). Os três regimes do glossário usam a mesma interface; não há
-lógica fiscal complexa no MVP (D4).
+do regime (D3). Os quatro valores de `TaxRegime` usam a mesma interface; não há
+lógica fiscal complexa no MVP (D4). Emissão Focus é outro predicado:
+`isEligibleForFiscalEmission` (RF-146) — só `mei` / `simples_nacional` sem
+Híbrido.
 
 Parcelas de `credit` (RF-038): `Money.allocate` (resto nas primeiras — RNF-045),
 tarifa **sobre o bruto de cada parcela** (D8), `netAmount` da parcela é o

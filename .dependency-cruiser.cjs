@@ -69,7 +69,8 @@ module.exports = {
       from: {
         orphan: true,
         // index.ts de pacote e ponto de entrada publico, nao orfao.
-        pathNot: '(\\.(d\\.ts|test\\.ts|config\\.(ts|js|mjs|cjs))|src/index\\.ts)$',
+        pathNot:
+          '(\\.(d\\.ts|test\\.ts|config\\.(ts|js|mjs|cjs))|src/index\\.ts|migrate-cli\\.ts)$',
       },
       to: {},
     },

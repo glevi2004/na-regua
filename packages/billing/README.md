@@ -2,7 +2,8 @@
 
 Adapter de assinatura SaaS — a **nossa** mensalidade.
 
-**Estado:** 🔴 não implementado · 🚧 bloqueado por [DEC-010](../../docs/decisoes/README.md#dec-010) · `NR-063`
+**Estado:** 🔴 não implementado · PagMaxx `/subscriptions`
+([ADR-0003](../../docs/decisoes/adr/0003-pagmaxx.md)) · `NR-063`
 
 ## Responsabilidade
 

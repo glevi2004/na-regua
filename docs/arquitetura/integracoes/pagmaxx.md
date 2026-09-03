@@ -1,14 +1,17 @@
 # PagMaxx — gateway de pagamento
 
-Avaliação da [documentação da API](../../assets/pagmaxx-api.md) (132 páginas,
-portal de 24/08/2026) e desenho da integração.
+Contrato do que **enviamos** e do que **gravamos**, mais a avaliação da
+[documentação da API](../../assets/pagmaxx-api.md) (132 páginas, portal de
+24/08/2026).
 
-**Veredito:** adequado para Pix, link de pagamento, cartão online e assinatura
-SaaS. **Não cobre venda presencial com cartão** — e essa é a principal via de
-venda do nosso MVP. Ver [a lacuna](#a-lacuna-não-há-api-de-venda-presencial).
+**Decidido:** PagMaxx processa Pix, link de pagamento, cartão online (vendas do
+lojista) e a assinatura SaaS. Dinheiro e maquininha, se existirem, só são
+**registrados**. Sem TEF. Ver [ADR-0003](../../decisoes/adr/0003-pagmaxx.md)
+e [ADR-0006](../../decisoes/adr/0006-conta-pagmaxx-por-lojista.md).
 
-Decisões afetadas: [DEC-006](../../decisoes/README.md#dec-006) (PSP) e
-[DEC-010](../../decisoes/README.md#dec-010) (cobrança SaaS).
+[DEC-006](../../decisoes/README.md#dec-006) e
+[DEC-010](../../decisoes/README.md#dec-010) fechadas. KYC do lojista na PagMaxx
+é esteira **separada** do A1 da Focus.
 
 ---
 
@@ -33,6 +36,65 @@ Gateway REST/JSON sobre HTTPS, prefixo `/api`, compatível com PCI-DSS.
 | Assinaturas            | `/subscriptions/*`                                       | [E12](../../produto/user-stories.md#e12--assinatura--cobrança-saas) mensalidade                                     |
 | Credenciamento         | `/customer/documents/`, `/partners/{id}/documents`       | onboarding/KYC do lojista                                                                                           |
 | Webhooks               | POST na URL cadastrada                                   | atualização de estado                                                                                               |
+
+## Contrato nosso — o que persistimos
+
+Dois adapters, um fornecedor: `packages/payments` (dinheiro do lojista) e
+`packages/billing` (nossa mensalidade).
+
+### Venda (Pix, link, cartão online)
+
+| Enviamos                                                      | Gravamos                                  |
+| ------------------------------------------------------------- | ----------------------------------------- |
+| `amount` (decimal na borda ← `Money`)                         | `payments.amount_cents`                   |
+| `external_reference` = id da venda ou do recebível            | `payments.id` / `receivables.id`          |
+| descrição, vencimento (link), dados mínimos do pagador        | —                                         |
+| `slugToken` se cartão tokenizado (PAN nunca no nosso backend) | `payment_pagmaxx.card_token_ref` opcional |
+
+| Recebemos                               | Coluna                                                      |
+| --------------------------------------- | ----------------------------------------------------------- |
+| `payment.id` / `public_id`              | `payment_pagmaxx.provider_payment_id`                       |
+| status até `authorized`                 | `payment_pagmaxx.provider_status`                           |
+| URL do Pix (QR/copia-e-cola) ou do link | `payment_pagmaxx.checkout_url`                              |
+| webhook `type` + `X-Pagmaxx-Event-Id`   | `payment_pagmaxx.provider_event_id` (único) + `settlements` |
+
+Confirmação de dinheiro: **`payment.authorized`**, nunca `payment.approved`.
+HMAC sobre o **corpo bruto**. Responder 200 e processar na fila.
+
+Meios `cash` e cartão presencial: só linha em `payments` (`method` cash/debit/credit),
+**sem** satélite PagMaxx.
+
+Pix/link/cartão online exigem credenciamento PagMaxx **aprovado**
+(`company_pagmaxx.onboarding_status`). Sem isso, a venda só aceita registro
+local (dinheiro / maquininha).
+
+### Assinatura SaaS
+
+| Enviamos                                          | Gravamos                   |
+| ------------------------------------------------- | -------------------------- |
+| plano, ciclo, `external_reference` = `company_id` | `subscriptions.company_id` |
+| meio (cartão MIT ou Pix)                          | `subscriptions.method`     |
+
+| Recebemos                                                                | Coluna                                          |
+| ------------------------------------------------------------------------ | ----------------------------------------------- |
+| `subscription` public id                                                 | `subscriptions.provider_subscription_id`        |
+| ciclo + status `scheduled \| paid \| awaiting_pix \| retrying \| failed` | `subscriptions.status` + `subscription_charges` |
+| webhook de charge                                                        | baixa / bloqueio `Restrita`                     |
+
+### Credenciamento (KYC PagMaxx)
+
+Endpoints `/customer/documents/` e status `AGUARDANDO_ENVIO` / `ENVIADO` /
+`RECUSADO`. Linha em `company_pagmaxx` **só** quando o KYC começa
+(`onboarding_status`, `account_id`, `secret_ref`). Não gravamos o arquivo
+depois do envio. Não mistura com certificado Focus.
+
+### O que não entra no schema
+
+PAN, CVV, senha da conta PagMaxx (env/secrets), payload completo variável da
+adquirente — só o recorte estável (`_pagmaxx` + ids). Decimal → `Money.parse`
+uma vez na borda.
+
+---
 
 ## O que está bom
 
@@ -299,20 +361,21 @@ Detalhadas em [`ambientes.md`](../../engenharia/ambientes.md).
 | `PAGMAXX_ACCOUNT_PASSWORD` | idem, em gerenciador de segredos         |
 | `PAGMAXX_WEBHOOK_SECRET`   | validação do HMAC                        |
 
-## Recomendação
+## Recomendação (histórica — decisão tomada)
 
-| Pergunta                               | Resposta                                                                                       |
-| -------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Adotar a PagMaxx como PSP?             | **Sim**, para Pix, link de pagamento, cartão online e estorno                                  |
-| Adotar para a mensalidade SaaS?        | **Sim** — `/subscriptions/*` cobre E12 sem outro fornecedor                                    |
-| Resolve o cartão presencial do balcão? | **Não.** Isso continua na maquininha da lojista; o sistema registra e calcula por tabela       |
-| Bloqueia algum trabalho hoje?          | Não. `PaymentGateway` e `SubscriptionProvider` podem ser escritas e testadas com adapter falso |
+A avaliação abaixo foi o insumo de [ADR-0003](../../decisoes/adr/0003-pagmaxx.md).
+Não reabrir DEC-006/010 sem ADR substituta.
 
-**Antes de fechar o contrato**, resolver
-[QST-009](../../decisoes/README.md#qst-009) (escopo da API Key),
-[QST-010](../../decisoes/README.md#qst-010) (existe API de captura presencial no
-roadmap deles?) e [DEC-015](../../decisoes/README.md#dec-015) (conta por lojista
-vs. split na conta da plataforma).
+| Pergunta                               | Resposta                                                                         |
+| -------------------------------------- | -------------------------------------------------------------------------------- |
+| Adotar a PagMaxx como PSP?             | **Sim** — Pix, link, cartão online, estorno                                      |
+| Adotar para a mensalidade SaaS?        | **Sim** — `/subscriptions/*`                                                     |
+| Resolve o cartão presencial do balcão? | **Não.** Só registra; tarifa de maquininha por tabela se o lojista informar      |
+| Bloqueia trabalho de porta/teste?      | Não. Adapter falso até homologação ([QST-012](../../decisoes/README.md#qst-012)) |
+
+Contrato comercial com a PagMaxx ainda pode pendurar [QST-009](../../decisoes/README.md#qst-009)
+(escopo da API Key) e [QST-012](../../decisoes/README.md#qst-012) (homologação).
+[DEC-015](../../decisoes/README.md#dec-015) está fechada: conta por lojista.
 
 ## Documentos relacionados
 

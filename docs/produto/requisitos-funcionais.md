@@ -1,6 +1,6 @@
 # Requisitos Funcionais
 
-131 requisitos, derivados das [User Stories](user-stories.md). Descrevem **o que
+132 requisitos, derivados das [User Stories](user-stories.md). Descrevem **o que
 o sistema faz**. Como ele se comporta (desempenho, segurança, disponibilidade)
 está em [Requisitos Não Funcionais](requisitos-nao-funcionais.md).
 
@@ -19,22 +19,24 @@ está em [Requisitos Não Funcionais](requisitos-nao-funcionais.md).
 `packages/domain` ou `packages/core` — nunca um `apps/*`. Ver
 [princípios](../arquitetura/principios.md).
 
-**Resumo:** 131 requisitos · 101 `MUST` · 25 `SHOULD` · 5 `COULD` · 0 implementados.
+**Resumo:** requisitos numerados a partir de RF-001 (IDs permanentes). Recorte
+A–J: MUST alinhado a [`escopo-mvp.md`](escopo-mvp.md). Cancelados = `❌`.
+Staff, Open Finance e cofre de A1 saíram do caminho crítico.
 
 ---
 
 ## E1 — Onboarding & Empresa
 
-| ID     | Requisito                                                                                                  | US     | Módulo dono | Pri | St  |
-| ------ | ---------------------------------------------------------------------------------------------------------- | ------ | ----------- | :-: | :-: |
-| RF-001 | Cadastrar empresa a partir do CNPJ, com preenchimento automático de razão social, nome fantasia e endereço | US-001 | `core`      |  M  | ⬜  |
-| RF-002 | Impedir cadastro de CNPJ já existente, sem revelar dados da empresa existente                              | US-001 | `core`      |  M  | ⬜  |
-| RF-003 | Registrar regime tributário da empresa e usá-lo no cálculo de imposto das vendas                           | US-002 | `domain`    |  M  | ⬜  |
-| RF-004 | Armazenar certificado digital A1 cifrado e alertar 30 dias antes do vencimento                             | US-002 | `fiscal`    |  M  | ⬜  |
-| RF-005 | Convidar usuário por e-mail ou telefone e atribuir papel (`owner`, `staff`)                                | US-003 | `core`      |  M  | ⬜  |
-| RF-006 | Revogar acesso de usuário encerrando as sessões e preservando o histórico de ações                         | US-003 | `core`      |  M  | ⬜  |
-| RF-007 | Configurar taxas da adquirente por bandeira e número de parcelas                                           | US-004 | `domain`    |  M  | ⬜  |
-| RF-008 | Configurar limite de desconto por papel e bloquear venda que o exceda                                      | US-004 | `domain`    |  M  | ⬜  |
+| ID     | Requisito                                                                                                                                                        | US     | Módulo dono | Pri | St  |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------ | ----------- | :-: | :-: |
+| RF-001 | Cadastrar empresa a partir do CNPJ, com preenchimento automático de razão social, nome fantasia e endereço                                                       | US-001 | `core`      |  M  | ⬜  |
+| RF-002 | Impedir cadastro de CNPJ já existente, sem revelar dados da empresa existente                                                                                    | US-001 | `core`      |  M  | ⬜  |
+| RF-003 | Registrar regime tributário (`mei`, `simples_nacional`, `lucro_presumido`, `lucro_real`) e usá-lo no cálculo de imposto das vendas                               | US-002 | `domain`    |  M  | ⬜  |
+| RF-004 | ~~Armazenar certificado digital A1 cifrado no nosso banco~~ — cancelado: A1 só transita para a Focus ([ADR-0002](../decisoes/adr/0002-focus-nfe.md)). Ver RF-133 | US-002 | `fiscal`    |  —  | ❌  |
+| RF-005 | Convidar usuário staff na mesma empresa (adiado — [ADR-0004](../decisoes/adr/0004-usuario-uma-empresa.md))                                                       | US-003 | `core`      |  C  | ⬜  |
+| RF-006 | Revogar acesso de staff encerrando sessões (adiado com US-003)                                                                                                   | US-003 | `core`      |  C  | ⬜  |
+| RF-007 | Configurar taxas da adquirente por bandeira e número de parcelas                                                                                                 | US-004 | `domain`    |  M  | ⬜  |
+| RF-008 | Configurar limite de desconto por papel e bloquear venda que o exceda (só faz sentido com staff)                                                                 | US-004 | `domain`    |  C  | ⬜  |
 
 ## E2 — Clientes / CRM
 
@@ -43,7 +45,7 @@ está em [Requisitos Não Funcionais](requisitos-nao-funcionais.md).
 | RF-009 | Cadastrar cliente exigindo apenas nome e telefone                                           | US-005 | `core`      |  M  | ⬜  |
 | RF-010 | Detectar cliente duplicado por telefone ou CPF e oferecer reuso do existente                | US-005 | `core`      |  M  | ⬜  |
 | RF-011 | Listar histórico de compras do cliente em ordem decrescente de data                         | US-006 | `core`      |  M  | ⬜  |
-| RF-012 | Ocultar custo e margem no histórico para o papel `staff`                                    | US-006 | `core`      |  M  | ⬜  |
+| RF-012 | Ocultar custo e margem no histórico para o papel `staff` (adiado com staff)                 | US-006 | `core`      |  C  | ⬜  |
 | RF-013 | Manter saldo em carteira (fiado) por cliente, alterado por venda `wallet` e por recebimento | US-007 | `domain`    |  M  | ⬜  |
 | RF-014 | Avisar o operador do saldo devedor do cliente ao iniciar nova venda para ele                | US-007 | `core`      |  M  | ⬜  |
 | RF-015 | Vincular número de WhatsApp ao cadastro do cliente e usá-lo como destino de mensagens       | US-008 | `core`      |  M  | ⬜  |
@@ -83,24 +85,24 @@ está em [Requisitos Não Funcionais](requisitos-nao-funcionais.md).
 | RF-039 | Distribuir resto de divisão entre parcelas de forma que a soma seja exatamente o total                     | US-019 | `money`     |  M  | ⬜  |
 | RF-040 | Calcular e exibir bruto, custo, imposto, tarifa de cartão, líquido e margem da venda                       | US-020 | `domain`    |  M  | ⬜  |
 | RF-041 | Calcular imposto conforme o regime tributário configurado para a empresa                                   | US-020 | `domain`    |  M  | ⬜  |
-| RF-042 | Ocultar custo, imposto e margem do resumo da venda para o papel `staff`                                    | US-020 | `core`      |  M  | ⬜  |
+| RF-042 | Ocultar custo, imposto e margem do resumo da venda para o papel `staff` (adiado com staff)                 | US-020 | `core`      |  C  | ⬜  |
 | RF-043 | Cancelar venda estornando estoque, contas a receber e saldo de carteira                                    | US-021 | `core`      |  M  | ⬜  |
 | RF-044 | Registrar devolução total ou parcial, estornando apenas os itens e o valor proporcional                    | US-021 | `core`      |  M  | ⬜  |
 
 ## E5 — Emissão Fiscal
 
-| ID     | Requisito                                                                                           | US     | Módulo dono | Pri | St  |
-| ------ | --------------------------------------------------------------------------------------------------- | ------ | ----------- | :-: | :-: |
-| RF-045 | Emitir NFC-e a partir de uma venda fechada e registrar a chave de acesso                            | US-022 | `fiscal`    |  M  | ⬜  |
-| RF-046 | Validar dados fiscais obrigatórios (NCM, CFOP, CST/CSOSN) antes de transmitir à SEFAZ               | US-022 | `fiscal`    |  M  | ⬜  |
-| RF-047 | Traduzir código de rejeição da SEFAZ em mensagem compreensível, preservando a venda registrada      | US-022 | `fiscal`    |  M  | ⬜  |
-| RF-048 | Enviar DANFE ou link da nota ao cliente por WhatsApp após a autorização                             | US-023 | `core`      |  M  | ⬜  |
-| RF-049 | Exibir QR Code da nota na tela para cliente sem WhatsApp cadastrado                                 | US-023 | `fiscal`    |  M  | ⬜  |
-| RF-050 | Cancelar nota fiscal na SEFAZ mediante justificativa, dentro do prazo legal                         | US-024 | `fiscal`    |  M  | ⬜  |
-| RF-051 | Bloquear cancelamento fora do prazo legal e orientar a emissão de devolução                         | US-024 | `fiscal`    |  M  | ⬜  |
-| RF-052 | Emitir em contingência quando a SEFAZ estiver indisponível, sem bloquear a venda                    | US-025 | `fiscal`    |  M  | ⬜  |
-| RF-053 | Transmitir automaticamente, em ordem, as notas em contingência quando a SEFAZ voltar                | US-025 | `fiscal`    |  M  | ⬜  |
-| RF-054 | Exibir o estado fiscal da venda de forma explícita (autorizada, contingência, rejeitada, cancelada) | US-025 | `core`      |  M  | ⬜  |
+| ID     | Requisito                                                                                                                         | US             | Módulo dono | Pri | St  |
+| ------ | --------------------------------------------------------------------------------------------------------------------------------- | -------------- | ----------- | :-: | :-: |
+| RF-045 | Emitir NFC-e a partir de uma venda fechada e registrar a chave de acesso                                                          | US-022         | `fiscal`    |  M  | ⬜  |
+| RF-046 | Validar NCM (e demais campos da NFC-e) antes de enviar à Focus; CFOP/CSOSN vêm do padrão MEI/Simples do adapter                   | US-022         | `fiscal`    |  M  | ⬜  |
+| RF-047 | Traduzir rejeição da Focus (`status_sefaz` / `mensagem_sefaz` / Ambiente Nacional) em mensagem compreensível, preservando a venda | US-022, US-073 | `fiscal`    |  M  | ⬜  |
+| RF-048 | Enviar DANFE/DANFSe ou link da nota ao cliente por WhatsApp após a autorização                                                    | US-023         | `core`      |  M  | ⬜  |
+| RF-049 | Exibir QR Code da nota na tela para cliente sem WhatsApp cadastrado (NFC-e)                                                       | US-023         | `fiscal`    |  M  | ⬜  |
+| RF-050 | Cancelar nota fiscal na Focus mediante justificativa, dentro do prazo legal                                                       | US-024         | `fiscal`    |  M  | ⬜  |
+| RF-051 | Bloquear cancelamento fora do prazo legal e orientar a emissão de devolução                                                       | US-024         | `fiscal`    |  M  | ⬜  |
+| RF-052 | Emitir NFC-e em contingência (Focus `forma_emissao=offline` ou reprocessar) sem bloquear a venda                                  | US-025         | `fiscal`    |  M  | ⬜  |
+| RF-053 | Retransmitir automaticamente, em ordem, as notas em contingência quando a Focus aceitar                                           | US-025         | `fiscal`    |  M  | ⬜  |
+| RF-054 | Exibir o estado fiscal da venda de forma explícita (autorizada, processing, contingência, rejeitada, cancelada)                   | US-025         | `core`      |  M  | ⬜  |
 
 ## E6 — Contas a Pagar
 
@@ -132,16 +134,16 @@ está em [Requisitos Não Funcionais](requisitos-nao-funcionais.md).
 
 ## E8 — Bancos & Conciliação
 
-| ID     | Requisito                                                                                        | US     | Módulo dono | Pri | St  |
-| ------ | ------------------------------------------------------------------------------------------------ | ------ | ----------- | :-: | :-: |
-| RF-073 | Cadastrar conta bancária com saldo inicial                                                       | US-035 | `core`      |  S  | ⬜  |
-| RF-074 | Conectar conta bancária via Open Finance e importar transações periodicamente                    | US-036 | `banking`   |  S  | ⬜  |
-| RF-075 | Detectar consentimento expirado, avisar o lojista e preservar conciliações anteriores            | US-036 | `banking`   |  S  | ⬜  |
-| RF-076 | Importar extrato em OFX ou CSV, informando quantas transações entraram e quantas foram ignoradas | US-037 | `banking`   |  S  | ⬜  |
-| RF-077 | Rejeitar arquivo de extrato inválido sem importação parcial                                      | US-037 | `banking`   |  S  | ⬜  |
-| RF-078 | Sugerir lançamentos compatíveis com uma transação bancária por valor e data                      | US-038 | `core`      |  S  | ⬜  |
-| RF-079 | Conciliar transação com lançamento e permitir criar o lançamento a partir da transação           | US-038 | `core`      |  S  | ⬜  |
-| RF-080 | Desfazer conciliação devolvendo transação e lançamento à fila                                    | US-038 | `core`      |  S  | ⬜  |
+| ID     | Requisito                                                                               | US     | Módulo dono | Pri | St  |
+| ------ | --------------------------------------------------------------------------------------- | ------ | ----------- | :-: | :-: |
+| RF-073 | Cadastrar conta bancária com saldo inicial — **cancelado neste recorte** (E8 / DEC-005) | US-035 | `core`      |  —  | ❌  |
+| RF-074 | Conectar conta bancária via Open Finance — **cancelado neste recorte**                  | US-036 | `banking`   |  —  | ❌  |
+| RF-075 | Detectar consentimento Open Finance expirado — **cancelado neste recorte**              | US-036 | `banking`   |  —  | ❌  |
+| RF-076 | Importar extrato OFX/CSV — **cancelado neste recorte**                                  | US-037 | `banking`   |  —  | ❌  |
+| RF-077 | Rejeitar extrato inválido — **cancelado neste recorte**                                 | US-037 | `banking`   |  —  | ❌  |
+| RF-078 | Sugerir lançamentos para conciliação — **cancelado neste recorte**                      | US-038 | `core`      |  —  | ❌  |
+| RF-079 | Conciliar transação com lançamento — **cancelado neste recorte**                        | US-038 | `core`      |  —  | ❌  |
+| RF-080 | Desfazer conciliação — **cancelado neste recorte**                                      | US-038 | `core`      |  —  | ❌  |
 
 ## E9 — Plano de Contas & Relatórios
 
@@ -160,11 +162,11 @@ está em [Requisitos Não Funcionais](requisitos-nao-funcionais.md).
 
 | ID     | Requisito                                                                                 | US     | Módulo dono | Pri | St  |
 | ------ | ----------------------------------------------------------------------------------------- | ------ | ----------- | :-: | :-: |
-| RF-089 | Criar compromisso com título, data e hora                                                 | US-043 | `core`      |  C  | ⬜  |
-| RF-090 | Vincular compromisso a um cliente e exibi-lo no cadastro dele                             | US-043 | `core`      |  C  | ⬜  |
-| RF-091 | Enviar lembrete de compromisso no tempo configurado antes do horário                      | US-044 | `core`      |  C  | ⬜  |
-| RF-092 | Cancelar lembrete de compromisso cancelado                                                | US-044 | `core`      |  C  | ⬜  |
-| RF-093 | Listar compromissos do dia em ordem de horário, com confirmação explícita de agenda livre | US-045 | `core`      |  C  | ⬜  |
+| RF-089 | Criar compromisso com título, data e hora                                                 | US-043 | `core`      |  M  | ⬜  |
+| RF-090 | Vincular compromisso a um cliente e exibi-lo no cadastro dele                             | US-043 | `core`      |  M  | ⬜  |
+| RF-091 | Enviar lembrete de compromisso no tempo configurado antes do horário                      | US-044 | `core`      |  S  | ⬜  |
+| RF-092 | Cancelar lembrete de compromisso cancelado                                                | US-044 | `core`      |  S  | ⬜  |
+| RF-093 | Listar compromissos do dia em ordem de horário, com confirmação explícita de agenda livre | US-045 | `core`      |  M  | ⬜  |
 
 ## E11 — Assistente WhatsApp
 
@@ -205,7 +207,7 @@ está em [Requisitos Não Funcionais](requisitos-nao-funcionais.md).
 
 | ID     | Requisito                                                                                                       | US     | Módulo dono | Pri | St  |
 | ------ | --------------------------------------------------------------------------------------------------------------- | ------ | ----------- | :-: | :-: |
-| RF-119 | Autenticar usuário e restringir o acesso às empresas às quais ele pertence                                      | US-059 | `core`      |  M  | ⬜  |
+| RF-119 | Autenticar usuário e restringir o acesso à **única** empresa à qual ele pertence                                | US-059 | `core`      |  M  | ⬜  |
 | RF-120 | Não revelar existência de usuário em falha de login e desacelerar tentativas repetidas                          | US-059 | `api`       |  M  | ⬜  |
 | RF-121 | Rejeitar consulta a dados de negócio sem empresa no contexto                                                    | US-060 | `db`        |  M  | ⬜  |
 | RF-122 | Impor isolamento entre empresas no banco via RLS, respondendo "não encontrado" para recurso de outra empresa    | US-060 | `db`        |  M  | ⬜  |
@@ -219,6 +221,26 @@ está em [Requisitos Não Funcionais](requisitos-nao-funcionais.md).
 | RF-130 | Reprocessar job falho com espera crescente e limite de tentativas antes de descartar                            | US-064 | `worker`    |  M  | ⬜  |
 | RF-131 | Registrar acesso administrativo a dados de tenant com justificativa                                             | US-064 | `core`      |  M  | ⬜  |
 
+## E14 — Cadastro, Focus, CRM, suporte, painel, PagMaxx na venda
+
+| ID     | Requisito                                                                                                                    | US     | Módulo dono | Pri | St  |
+| ------ | ---------------------------------------------------------------------------------------------------------------------------- | ------ | ----------- | :-: | :-: |
+| RF-132 | Criar usuário `owner` no signup com nome, e-mail, telefone e senha, antes do cadastro da empresa                             | US-065 | `core`      |  M  | ⬜  |
+| RF-133 | Encaminhar A1 (.pfx) e senha à Focus sem persistir o arquivo; gravar status e validade                                       | US-066 | `fiscal`    |  M  | ⬜  |
+| RF-134 | Enviar CSC e id_token NFC-e à Focus; expor só se está configurado                                                            | US-067 | `fiscal`    |  M  | ⬜  |
+| RF-135 | Exibir no painel faturamento do dia, ticket médio, a receber e a pagar coerentes com os módulos                              | US-068 | `core`      |  M  | ⬜  |
+| RF-136 | Manter cards de CRM em colunas `afazer`, `andamento`, `concluido`, opcionalmente ligados a cliente                           | US-069 | `core`      |  M  | ⬜  |
+| RF-137 | Persistir comentários e movimento de coluna do card de CRM                                                                   | US-069 | `core`      |  M  | ⬜  |
+| RF-138 | Abrir chamado de suporte com protocolo, categoria, mensagens e anexo                                                         | US-070 | `core`      |  M  | ⬜  |
+| RF-139 | Marcar mensagens do suporte como lidas ao abrir o chamado                                                                    | US-070 | `core`      |  M  | ⬜  |
+| RF-140 | Gerar cobrança PagMaxx (Pix, link ou cartão online) na venda quando o credenciamento estiver ok                              | US-071 | `payments`  |  M  | ⬜  |
+| RF-141 | Liquidar recebível no webhook `payment.authorized` com HMAC e id de evento únicos                                            | US-071 | `payments`  |  M  | ⬜  |
+| RF-142 | Atualizar nome, e-mail e telefone do usuário autenticado                                                                     | US-072 | `core`      |  M  | ⬜  |
+| RF-143 | Emitir NFS-e Nacional (`POST /v2/nfsen`) a partir de uma venda fechada; gravar `kind=nfse` e aguardar autorização assíncrona | US-073 | `fiscal`    |  M  | ⬜  |
+| RF-144 | Validar código de tributação nacional (e NBS quando exigido) antes de enviar NFS-e Nacional à Focus                          | US-073 | `fiscal`    |  M  | ⬜  |
+| RF-145 | Enviar `habilita_nfsen_*` à Focus; persistir `company_focus.nfse_enabled`; não ligar `habilita_nfse` municipal               | US-073 | `fiscal`    |  M  | ⬜  |
+| RF-146 | Recusar A1, CSC, `habilita_*` e a fila de nota se a empresa não for MEI/Simples sem Híbrido (`isEligibleForFiscalEmission`)  | US-074 | `fiscal`    |  M  | ⬜  |
+
 ---
 
 ## Requisitos por módulo dono
@@ -226,18 +248,19 @@ está em [Requisitos Não Funcionais](requisitos-nao-funcionais.md).
 Quem implementa o quê. Base para a divisão de trilhas em
 [`task-ledger.md`](../processo/task-ledger.md).
 
-| Módulo             | Qtd | Faixas de requisitos                                                                                                                                                    |
-| ------------------ | --: | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `packages/core`    |  72 | RF-001, 002, 005, 006, 009–012, 014–019, 022–029, 032–034, 036, 037, 042–044, 048, 054, 055, 057–062, 065–073, 078–080, 082–094, 099, 101, 119, 123, 125, 127, 128, 131 |
-| `packages/domain`  |  15 | RF-003, 007, 008, 013, 020, 021, 030, 031, 035, 038, 040, 041, 056, 063, 064                                                                                            |
-| `packages/agent`   |  13 | RF-095–098, 100, 102–109                                                                                                                                                |
-| `packages/billing` |  10 | RF-110–118, 126                                                                                                                                                         |
-| `packages/fiscal`  |   9 | RF-004, 045–047, 049–053                                                                                                                                                |
-| `packages/banking` |   4 | RF-074–077                                                                                                                                                              |
-| `packages/db`      |   4 | RF-081, 121, 122, 124                                                                                                                                                   |
-| `apps/api`         |   2 | RF-120, 129                                                                                                                                                             |
-| `packages/money`   |   1 | RF-039                                                                                                                                                                  |
-| `apps/worker`      |   1 | RF-130                                                                                                                                                                  |
+| Módulo              | Papel neste recorte                                                                 |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| `packages/core`     | Cadastros, venda, financeiro sem bancos, CRM, agenda, chamados, painel, auditoria   |
+| `packages/domain`   | Totais, imposto estimado, tarifa, parcelas, carteira, `isEligibleForFiscalEmission` |
+| `packages/agent`    | RF-095–109                                                                          |
+| `packages/billing`  | RF-110–118, 126                                                                     |
+| `packages/fiscal`   | RF-003 (uso), 045–054, 133, 134, 143–146 — **não** RF-004                           |
+| `packages/payments` | RF-140, RF-141 (e Pix/link já cobertos em RF-034, RF-068)                           |
+| `packages/banking`  | Nenhum RF ativo (074–077 ❌)                                                        |
+| `packages/db`       | RF-081, 121, 122, 124                                                               |
+| `apps/api`          | RF-120, 129                                                                         |
+| `packages/money`    | RF-039                                                                              |
+| `apps/worker`       | RF-130                                                                              |
 
 > Nenhum requisito tem `apps/mobile` ou `apps/web` como dono — **por construção**.
 > Os apps consomem casos de uso; não são donos de regra de negócio. Se um
@@ -246,17 +269,16 @@ Quem implementa o quê. Base para a divisão de trilhas em
 
 ## Requisitos bloqueados por decisão em aberto
 
-| Decisão                                                    | Requisitos bloqueados                          |
-| ---------------------------------------------------------- | ---------------------------------------------- |
-| [DEC-003](../decisoes/README.md#dec-003) provedor WhatsApp | RF-015, RF-016, RF-048, RF-068, RF-094, RF-095 |
-| [DEC-004](../decisoes/README.md#dec-004) provedor fiscal   | RF-045 a RF-054                                |
-| [DEC-005](../decisoes/README.md#dec-005) Open Finance      | RF-074 a RF-077                                |
-| [DEC-006](../decisoes/README.md#dec-006) PSP / tarifas     | RF-007, RF-038, RF-063                         |
-| [DEC-007](../decisoes/README.md#dec-007) LLM e recuperação | RF-096 a RF-109                                |
-| [DEC-008](../decisoes/README.md#dec-008) autenticação      | RF-005, RF-119, RF-120                         |
-| [DEC-010](../decisoes/README.md#dec-010) cobrança SaaS     | RF-110 a RF-118                                |
-| [DEC-011](../decisoes/README.md#dec-011) memória do agente | RF-105, RF-106                                 |
-| [DEC-012](../decisoes/README.md#dec-012) usuários e cupons | RF-114, RF-115                                 |
+| Decisão                                                    | Requisitos bloqueados  |
+| ---------------------------------------------------------- | ---------------------- |
+| [DEC-007](../decisoes/README.md#dec-007) LLM               | RF-096 a RF-109        |
+| [DEC-008](../decisoes/README.md#dec-008) autenticação      | RF-119, RF-120, RF-132 |
+| [DEC-011](../decisoes/README.md#dec-011) memória do agente | RF-105, RF-106         |
+| [DEC-012](../decisoes/README.md#dec-012) cupons            | RF-114, RF-115         |
+
+WhatsApp ([DEC-003](../decisoes/README.md#dec-003)), Focus ([DEC-004](../decisoes/README.md#dec-004))
+e PagMaxx ([DEC-006](../decisoes/README.md#dec-006), [DEC-010](../decisoes/README.md#dec-010))
+**não** bloqueiam mais o desenho das portas — só homologação/credencial.
 
 Um requisito bloqueado **pode** ter sua interface e seus testes escritos antes
 da decisão — é exatamente para isso que servem as portas dos adapters. O que não

@@ -2,7 +2,7 @@
  * Adapter de PSP — o dinheiro do LOJISTA. Implementa a porta PaymentGateway:
  * cobranca Pix, link de pagamento, estorno e tabela de tarifas.
  *
- * Candidato avaliado: PagMaxx (DEC-006).
+ * Provedor: PagMaxx (ADR-0003). Pix, link, cartao online; sem TEF.
  * Ver docs/arquitetura/integracoes/pagmaxx.md
  *
  * Atencao: a API devolve dinheiro como decimal (`129.9`) e ate como string

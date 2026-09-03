@@ -46,14 +46,14 @@ await tx.execute(sql`SELECT set_config('app.company_id', ${ctx.companyId}, true)
 
 **Consequências que valem para todo o código:**
 
-| Regra                                             | Motivo                                                                            |
-| ------------------------------------------------- | --------------------------------------------------------------------------------- |
-| Toda tabela de negócio tem `company_id NOT NULL`  | Sem ela a política não se aplica                                                  |
-| Nenhum endpoint aceita `companyId` do cliente     | [Princípio 8](principios.md#8-o-tenant-vem-do-contexto-nunca-do-cliente)          |
-| Consulta sem `app.company_id` definido **falha**  | [RF-121](../produto/requisitos-funcionais.md) — falhar é melhor que retornar tudo |
-| `FORCE ROW LEVEL SECURITY` é obrigatório          | Sem ele o dono da tabela ignora a política                                        |
-| Migrations rodam com papel separado, sem RLS      | Manutenção precisa enxergar tudo                                                  |
-| Recurso de outro tenant responde **404**, não 403 | 403 confirma que o recurso existe                                                 |
+| Regra                                             | Motivo                                                                                 |
+| ------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Toda tabela de negócio tem `company_id NOT NULL`  | Exceções: `companies.id`; `users.company_id` nulo até `/app/empresa`; inbox de webhook |
+| Nenhum endpoint aceita `companyId` do cliente     | [Princípio 8](principios.md#8-o-tenant-vem-do-contexto-nunca-do-cliente)               |
+| Consulta sem `app.company_id` definido **falha**  | [RF-121](../produto/requisitos-funcionais.md) — falhar é melhor que retornar tudo      |
+| `FORCE ROW LEVEL SECURITY` é obrigatório          | Sem ele o dono da tabela ignora a política                                             |
+| Migrations rodam com papel separado, sem RLS      | Manutenção precisa enxergar tudo                                                       |
+| Recurso de outro tenant responde **404**, não 403 | 403 confirma que o recurso existe                                                      |
 
 E um teste automatizado, rodando na CI, que tenta ler dados de outro
 `company_id` e **precisa falhar** — a verificação de
@@ -61,74 +61,220 @@ E um teste automatizado, rodando na CI, que tenta ler dados de outro
 
 ## Modelo de dados
 
-Visão lógica. Não é o schema final — o schema nasce em `packages/db`
-(`NR-007`, `NR-008`, `NR-020`).
+Visão lógica do recorte A–J. O schema em [`packages/db`](../../packages/db)
+materializa o núcleo abaixo; o restante entra quando o módulo existir.
+
+Um usuário pertence a **uma** empresa ([ADR-0004](../decisoes/adr/0004-usuario-uma-empresa.md)):
+sem `company_users`. `users.company_id` fica nulo só entre o cadastro da conta
+e `/app/empresa` (jornada A); depois é 1:1. Staff futuro = outro `users` com o
+mesmo `company_id`.
+
+O que o Postgres **neste recorte** materializa (cadastro, venda, nota):
 
 ```mermaid
 erDiagram
-    COMPANIES ||--o{ USERS : "tem"
+    COMPANIES ||--o{ USERS : "company_id"
+    COMPANIES ||--o| COMPANY_FOCUS : "se emitir"
+    COMPANIES ||--o| COMPANY_PAGMAXX : "se KYC"
     COMPANIES ||--o{ CUSTOMERS : "tem"
     COMPANIES ||--o{ PRODUCTS : "tem"
     COMPANIES ||--o{ SALES : "tem"
+    CUSTOMERS ||--o| CUSTOMER_ADDRESSES : "se tomador"
+    CUSTOMERS ||--o{ SALES : "compra em"
+    SALES ||--|{ SALE_ITEMS : "contem"
+    SALES ||--|{ PAYMENTS : "quitada por"
+    SALES ||--o| INVOICES : "espelho Focus"
+    SALES ||--o{ INVENTORY_MOVEMENTS : "movimenta"
+    PRODUCTS ||--o{ SALE_ITEMS : "vendido em"
+    PRODUCTS ||--o{ INVENTORY_MOVEMENTS : "movimentado por"
+    PAYMENTS ||--o| PAYMENT_PAGMAXX : "se online"
+```
+
+Visão lógica A–J (inclui o que ainda não nasceu no banco):
+
+```mermaid
+erDiagram
+    COMPANIES ||--o{ USERS : "company_id"
+    COMPANIES ||--o{ CUSTOMERS : "tem"
+    COMPANIES ||--o{ PRODUCTS : "tem"
+    COMPANIES ||--o{ SALES : "tem"
+    COMPANIES ||--o| SUBSCRIPTIONS : "assina"
 
     CUSTOMERS ||--o{ SALES : "compra em"
-    SALES ||--|{ SALE_ITEMS : "contém"
+    SALES ||--|{ SALE_ITEMS : "contem"
     SALES ||--|{ PAYMENTS : "quitada por"
     SALES ||--o{ RECEIVABLES : "gera"
-    SALES ||--o| INVOICES : "documentada por"
+    SALES ||--o| INVOICES : "espelho Focus"
     SALES ||--o{ INVENTORY_MOVEMENTS : "movimenta"
 
     PRODUCTS ||--o{ SALE_ITEMS : "vendido em"
     PRODUCTS ||--o{ INVENTORY_MOVEMENTS : "movimentado por"
 
-    SUPPLIERS ||--o{ PAYABLES : "cobra"
-    BANK_ACCOUNTS ||--o{ BANK_TRANSACTIONS : "extrato"
-    BANK_TRANSACTIONS ||--o| RECONCILIATIONS : "conciliada"
-    RECEIVABLES ||--o{ RECONCILIATIONS : "conciliado"
-    PAYABLES ||--o{ RECONCILIATIONS : "conciliado"
-
     LEDGER_ACCOUNTS ||--o{ RECEIVABLES : "classifica"
     LEDGER_ACCOUNTS ||--o{ PAYABLES : "classifica"
+    RECEIVABLES ||--o{ SETTLEMENTS : "baixa"
+    PAYABLES ||--o{ SETTLEMENTS : "baixa"
+
+    CUSTOMERS ||--o{ CRM_CARDS : "opcional"
+    COMPANIES ||--o{ APPOINTMENTS : "agenda"
+    COMPANIES ||--o{ SUPPORT_TICKETS : "chamados"
+    SUPPORT_TICKETS ||--|{ TICKET_MESSAGES : "contem"
 
     COMPANIES ||--o{ CONVERSATIONS : "assistente"
-    CONVERSATIONS ||--|{ MESSAGES : "contém"
-    COMPANIES ||--|| SUBSCRIPTIONS : "assina"
+    CONVERSATIONS ||--|{ MESSAGES : "contem"
+    CONVERSATIONS ||--o{ CONFIRMATIONS : "acao sensivel"
+    SUBSCRIPTIONS ||--o{ SUBSCRIPTION_CHARGES : "ciclos"
     COMPANIES ||--o{ AUDIT_LOGS : "registra"
 ```
 
 ### Agrupamento por módulo dono
 
-| Grupo            | Tabelas                                                                | Módulo dono        |
-| ---------------- | ---------------------------------------------------------------------- | ------------------ |
-| Empresa e acesso | `companies`, `users`, `company_users`, `roles`                         | `core`             |
-| Cadastros        | `customers`, `suppliers`, `products`, `product_variants`, `categories` | `core`             |
-| Estoque          | `inventory`, `inventory_movements`                                     | `core`             |
-| Vendas           | `sales`, `sale_items`, `payments`, `sale_returns`                      | `core` + `domain`  |
-| Fiscal           | `invoices`, `invoice_events`, `tax_rules`                              | `fiscal`           |
-| Financeiro       | `receivables`, `payables`, `settlements`                               | `core`             |
-| Bancos           | `bank_accounts`, `bank_transactions`, `reconciliations`                | `banking` + `core` |
-| Contábil         | `ledger_accounts`, `entries`                                           | `core`             |
-| Agenda           | `appointments`                                                         | `core`             |
-| Assistente       | `conversations`, `messages`, `tool_calls`, `confirmations`             | `agent`            |
-| Assinatura       | `subscriptions`, `plans`, `invoices_saas`, `coupons`                   | `billing`          |
-| Plataforma       | `audit_logs`, `idempotency_keys`, `attachments`, `outbox`              | `core`             |
+30 tabelas na visão lógica A–J. O Postgres **neste recorte** materializa o
+núcleo de cadastro, venda e nota (abaixo). CRM, assistente, assinatura e
+financeiro completo entram quando o módulo existir — tabela vazia não nasce
+antes.
+
+Integrações (Focus, PagMaxx) são **satélites 1:0..1**, não colunas em
+`companies` / `payments`.
+
+| Grupo                  | Tabelas                                                                                    | Módulo dono       |
+| ---------------------- | ------------------------------------------------------------------------------------------ | ----------------- |
+| Empresa e acesso       | `companies`, `users` (`company_id` no owner/staff), `company_focus`, `company_pagmaxx`     | `core` + `fiscal` |
+| Cadastros e estoque    | `customers`, `customer_addresses`, `products` (saldo na coluna), `inventory_movements`     | `core`            |
+| Venda e nota           | `sales`, `sale_items`, `payments`, `payment_pagmaxx`, `invoices` (`kind` `nfce` \| `nfse`) | `core` + `fiscal` |
+| Financeiro             | `receivables`, `payables`, `settlements`, `ledger_accounts`                                | `core`            |
+| Agenda / CRM / suporte | `appointments`, `crm_cards`, `support_tickets`, `ticket_messages`                          | `core`            |
+| Assistente             | `conversations`, `messages`, `confirmations`                                               | `agent`           |
+| Assinatura             | `subscriptions`, `subscription_charges`, `coupons`                                         | `billing`         |
+| Plataforma             | `audit_logs`, `idempotency_keys`, `attachments`, `outbox`, `webhook_events`                | `core`            |
+
+**Fundido de propósito (não criar tabela):** `categories` e `suppliers` → texto em
+`products` / `payables`; `crm_comments` → `crm_cards.comments` jsonb;
+`tool_calls` → `messages.tool_calls` jsonb; `plans` → `subscriptions.plan_code`;
+`pix_charges` / `payment_links` → `payment_pagmaxx` (e `receivables.collection_url` depois);
+custo fixo → `payables.is_template`.
+
+**Não neste recorte:** `company_users` ([ADR-0004](../decisoes/adr/0004-usuario-uma-empresa.md)),
+`product_variants`, `inventory` (cache), `sale_return_items`, `invoice_events`,
+`invoice_inutilizations`, `company_provider_accounts`, `bank_accounts`,
+`bank_transactions`, `reconciliations`, `entries`, `tax_rules`, cofre de PFX.
+
+**Não gravar:** arquivo/senha do A1; PAN; senha PagMaxx; JWT PagMaxx (Redis);
+CSC em resposta de API; `habilita_nfe`; payload municipal `/v2/nfse`.
+
+Não em `companies`: limite de desconto de staff (RF-008, depois), D+ de cartão
+(padrão 30 no `domain`), contador `next_sale_number` (`sales.number` = MAX+1 na
+TX), telefone de WhatsApp separado, endereço em jsonb, coluna derivada
+“pode emitir” (a regra vive em `domain`).
+
+### Catálogo de colunas (cadastro e fiscal)
+
+Só o que o lojista informa, o que mandamos à Focus/PagMaxx/CEP/CNPJ ou o que
+gravamos da resposta. Schema Drizzle + SQL em [`packages/db`](../../packages/db).
+Além das colunas abaixo, valem as [convenções](#convenções-de-schema)
+(`id`, `company_id` nas tabelas de negócio, `created_at` / `updated_at`).
+
+Elegibilidade de emissão **não** é coluna: `isEligibleForFiscalEmission` em
+`packages/domain` ([DEC-017](../decisoes/README.md#dec-017), RF-146). ERP
+grava a empresa mesmo inelegível — **sem** linha em `company_focus`.
+
+#### `companies`
+
+Cadastro visível e regime. Sem colunas Focus/PagMaxx.
+
+| Coluna                                                                                  | Origem                                                                       | Vai para API?                                                                          |
+| --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `legal_name`, `trade_name`, `cnpj`, `email`, `phone`                                    | lojista / CNPJ                                                               | Focus `nome`, `nome_fantasia`, `cnpj`, `email`, `telefone`                             |
+| `state_registration`, `municipal_registration`                                          | lojista (IM omitida na DPS se o município não cadastrou no emissor nacional) | Focus `inscricao_estadual`, `inscricao_municipal`                                      |
+| `street`, `street_number`, `complement`, `neighborhood`, `postal_code`, `city`, `state` | lojista / CEP                                                                | Focus endereço                                                                         |
+| `city_ibge_code`                                                                        | CEP (`GET /v2/ceps`), não digitado                                           | Focus `codigo_municipio_emissora` (NFS-e Nacional)                                     |
+| `tax_regime`                                                                            | lojista; CNPJ **sugere** `mei` vs `simples_nacional`                         | Focus `regime_tributario` **só se elegível**: `mei`→4, `simples_nacional`→1. Nunca `3` |
+| `opted_reforma_hibrida`                                                                 | autodeclaração (padrão `false`)                                              | **não** — CNPJ/Focus não devolvem Híbrido                                              |
+| `tax_rate`                                                                              | lojista (alíquota do **cálculo da venda**)                                   | **não** (Focus não recebe)                                                             |
+| `whatsapp_linked_at`                                                                    | vínculo Cloud API                                                            | **não**                                                                                |
+
+`tax_regime`: `mei` \| `simples_nacional` \| `lucro_presumido` \| `lucro_real`.
+
+`users.company_id` é nullable até `/app/empresa` (jornada A). Login por e-mail
+usa `find_login_by_email` (`SECURITY DEFINER`), não uma leitura RLS sem tenant.
+
+#### `company_focus`
+
+Linha **só** quando a empresa encaminha A1/CSC/flags (elegível). Inelegível
+não tem satélite — evita dez nulos em toda empresa.
+
+| Coluna                                         | Origem                                          |
+| ---------------------------------------------- | ----------------------------------------------- |
+| `focus_company_id`, `focus_token_secret_ref`   | resposta `POST /v2/empresas` (segredo no cofre) |
+| `nfce_enabled`, `nfse_enabled`                 | flags que enviamos se elegível                  |
+| `certificate_status`, `certificate_expires_at` | Focus / parse na borda **sem** PFX              |
+| `has_nfce_csc`                                 | CSC foi encaminhado; **não** o valor            |
+
+#### `company_pagmaxx`
+
+Linha **só** quando o lojista inicia o KYC. Sem KYC, sem satélite.
+
+| Coluna                                          | Origem  |
+| ----------------------------------------------- | ------- |
+| `onboarding_status`, `account_id`, `secret_ref` | PagMaxx |
+
+#### `products`
+
+| Coluna                                                                                                                | Uso                                |
+| --------------------------------------------------------------------------------------------------------------------- | ---------------------------------- |
+| `kind`                                                                                                                | `product` \| `service`             |
+| `description`, `barcode`, `unit_of_measure`, `sale_price_cents`, `cost_price_cents`, `stock`, `min_stock`, `tax_rate` | cadastro / cálculo                 |
+| `category`, `supplier`                                                                                                | `text`, sem tabela                 |
+| `ncm`                                                                                                                 | NFC-e; null em serviço             |
+| `codigo_tributacao_nacional_iss`, `codigo_nbs`                                                                        | NFS-e Nacional; null em mercadoria |
+
+**Não há** `item_lista_servico`, código municipal LC 116, CFOP nem CSOSN no
+produto. CFOP/CSOSN da NFC-e são padrão do adapter para MEI/Simples.
+
+#### `customers` e `customer_addresses`
+
+Documento, telefone e e-mail opcionais (balcão). Endereço **só** em
+`customer_addresses` quando tomador/destinatário precisa dele. Sem endereço,
+a DPS pode ir sem tomador completo — a Nacional admite.
+
+#### `sale_items`
+
+Snapshot `ncm` / `codigo_tributacao_nacional_iss` / `codigo_nbs` no fechamento.
+Só preenche o que o item usa (produto vs serviço).
+
+#### `payments` e `payment_pagmaxx`
+
+`payments` tem forma e valor. Pix/link/cartão online ganham linha em
+`payment_pagmaxx` (`provider_payment_id`, `checkout_url`, evento). Dinheiro e
+maquininha **não** têm satélite.
+
+#### `invoices`
+
+Espelho Focus. Linha **só** quando há emissão. `kind` só `nfce` \| `nfse`. Sem
+colunas de NF-e modelo 55. `access_key` / `series` / `qr_code` preenchidos na
+NFC-e; NFS-e usa `number` e verificação no `provider_payload`.
+
+#### `webhook_events`
+
+Inbox Focus/PagMaxx. `UNIQUE (provider, event_id)`. `company_id` preenchido
+depois de casar o evento. Sem RLS no insert — a API ainda não tem tenant.
 
 ### Estados da venda
 
 O lojista precisa ver se a nota saiu, se o Pix liquidou, se um job falhou.
 Isso **não** cabe num campo `sales.status` (`pending` / `paid` / `invoiced`):
-pagamento e NFC-e têm ciclos independentes — a venda fecha **antes** da nota
+pagamento e a nota (NFC-e ou NFS-e Nacional) têm ciclos independentes — a venda fecha **antes** da nota
 ([fluxos](fluxos.md#venda-completa)), o fiado é venda válida sem liquidação, o
 cartão presencial não passa pelo PSP.
 
 A tela da venda **compõe** os estados das tabelas ligadas:
 
-| Pergunta do lojista                         | Onde vive                                                                              | Requisito      |
-| ------------------------------------------- | -------------------------------------------------------------------------------------- | -------------- |
-| A venda existe, foi cancelada ou devolvida? | `sales` — nunca `DELETE`                                                               | RNF-040        |
-| A nota saiu?                                | `invoices` — `autorizada`, `contingencia`, `rejeitada`, `cancelada`; sem sucesso falso | RF-054, US-025 |
-| O dinheiro entrou?                          | `receivables` + `settlements` (`cash`/`pix` já liquidado; `credit`/`wallet` em aberto) | RF-063, RF-064 |
-| A integração falhou com qual resposta?      | `requestId` + corpo do provedor; job reprocessa até o limite                           | RF-129, RF-130 |
+| Pergunta do lojista                         | Onde vive                                                                                         | Requisito              |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------------- | ---------------------- |
+| A venda existe, foi cancelada ou devolvida? | `sales` — nunca `DELETE`                                                                          | RNF-040                |
+| A nota saiu?                                | `invoices` — `autorizada`, `processing` (NFS-e), `contingencia` (NFC-e), `rejeitada`, `cancelada` | RF-054, US-025, US-073 |
+| O dinheiro entrou?                          | `receivables` + `settlements` (`cash`/`pix` já liquidado; `credit`/`wallet` em aberto)            | RF-063, RF-064         |
+| A integração falhou com qual resposta?      | `requestId` + corpo do provedor; job reprocessa até o limite                                      | RF-129, RF-130         |
 
 Duas falhas distintas, dois desfechos:
 
@@ -136,28 +282,28 @@ Duas falhas distintas, dois desfechos:
    venda pela metade. Estoque, recebível e auditoria entram juntos
    ([RNF-046](../produto/requisitos-nao-funcionais.md)); o PDV mostra o erro e
    reenvia com a mesma chave de idempotência ([RNF-043](../produto/requisitos-nao-funcionais.md)).
-2. **A venda já gravou e o resto falha** (SEFAZ, webhook) — a venda permanece;
+2. **A venda já gravou e o resto falha** (Focus, webhook PagMaxx) — a venda permanece;
    o estado filho (nota, recebível, outbox) fica explícito na consulta.
 
 Quem persiste isso é `core` + `db` (NR-022, schema, RF-054), não `domain`.
 
 ## Convenções de schema
 
-| Elemento           | Convenção                                                                |
-| ------------------ | ------------------------------------------------------------------------ |
-| Tabela             | `snake_case`, plural — `sale_items`                                      |
-| Coluna             | `snake_case` — `net_amount`                                              |
-| Chave primária     | `id uuid` (UUIDv7, ordenável por tempo)                                  |
-| Chave estrangeira  | `<singular>_id` — `customer_id`                                          |
-| Tenant             | `company_id uuid NOT NULL` em **toda** tabela de negócio                 |
-| Dinheiro           | `bigint`, em **centavos** — nunca `float`, `real` ou `money`             |
-| Percentual         | `numeric(7,4)` — `0.1250` = 12,5%                                        |
-| Data/hora          | `timestamptz`, sempre UTC, sufixo `_at`                                  |
-| Data sem hora      | `date` — só vencimento e competência                                     |
-| Booleano           | `is_` / `has_` — `is_active`                                             |
-| Enum               | tabela de domínio ou `text` + `CHECK`; nunca `enum` nativo (migrar dói)  |
-| Exclusão           | `deleted_at` onde couber; **nunca** `DELETE` em venda, nota ou auditoria |
-| Auditoria de linha | `created_at`, `updated_at`, `created_by`, `updated_by`                   |
+| Elemento           | Convenção                                                                                                        |
+| ------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| Tabela             | `snake_case`, plural — `sale_items`                                                                              |
+| Coluna             | `snake_case` — `net_amount`                                                                                      |
+| Chave primária     | `id uuid` (UUIDv7, ordenável por tempo)                                                                          |
+| Chave estrangeira  | `<singular>_id` — `customer_id`                                                                                  |
+| Tenant             | `company_id uuid NOT NULL` nas tabelas de negócio (`users` nulo até a empresa; `webhook_events` depois do match) |
+| Dinheiro           | `bigint`, em **centavos** — nunca `float`, `real` ou `money`                                                     |
+| Percentual         | `numeric(7,4)` — `0.1250` = 12,5%                                                                                |
+| Data/hora          | `timestamptz`, sempre UTC, sufixo `_at`                                                                          |
+| Data sem hora      | `date` — só vencimento e competência                                                                             |
+| Booleano           | `is_` / `has_` — `is_active`                                                                                     |
+| Enum               | tabela de domínio ou `text` + `CHECK`; nunca `enum` nativo (migrar dói)                                          |
+| Exclusão           | `deleted_at` onde couber; **nunca** `DELETE` em venda, nota ou auditoria                                         |
+| Auditoria de linha | `created_at`, `updated_at`, `created_by`, `updated_by`                                                           |
 
 **Por que `bigint` em centavos:** `numeric` seria correto mas convida a
 aritmética em JavaScript com precisão perdida na borda; `bigint` em centavos
@@ -170,14 +316,14 @@ torna o erro impossível por construção e casa com o tipo
 Com RLS, **toda consulta filtra por `company_id`**. Índice que não começa por
 `company_id` quase nunca é usado.
 
-| Padrão                                                   | Exemplo                                                       |
-| -------------------------------------------------------- | ------------------------------------------------------------- |
-| Todo índice de tabela de negócio começa por `company_id` | `(company_id, created_at DESC)`                               |
-| Busca por telefone e documento                           | `(company_id, phone)`, `(company_id, document)`               |
-| Código de barras                                         | `(company_id, barcode)` — único                               |
-| Vencimento                                               | `(company_id, due_date) WHERE settled_at IS NULL` — parcial   |
-| Idempotência                                             | `(company_id, idempotency_key)` — único                       |
-| Conciliação                                              | `(company_id, external_hash)` — único, evita duplicar extrato |
+| Padrão                                                   | Exemplo                                                                    |
+| -------------------------------------------------------- | -------------------------------------------------------------------------- |
+| Todo índice de tabela de negócio começa por `company_id` | `(company_id, created_at DESC)`                                            |
+| Busca por telefone e documento                           | `(company_id, phone)`, `(company_id, document)`                            |
+| Código de barras                                         | `(company_id, barcode)` — único                                            |
+| Vencimento                                               | `(company_id, due_date) WHERE settled_at IS NULL` — parcial                |
+| Idempotência                                             | `(company_id, idempotency_key)` — único                                    |
+| Webhook (PagMaxx / Focus)                                | `UNIQUE (provider, event_id)` em `webhook_events` — sem tenant na inserção |
 
 ## Transações
 
@@ -198,9 +344,9 @@ export async function registerSale(deps, ctx, input) {
 }
 ```
 
-Efeitos externos (emitir nota, enviar mensagem) **não** entram na transação:
-vão para a fila via padrão _outbox_, gravado na mesma transação e publicado
-depois. Sem isso, um erro de rede com a SEFAZ desfaz uma venda já concluída.
+Efeitos externos (emitir nota na Focus, cobrar na PagMaxx, enviar mensagem)
+**não** entram na transação: vão para a fila via padrão _outbox_. Sem isso, um
+erro de rede com a Focus desfaz uma venda já concluída.
 
 ## Migrations
 

@@ -19,11 +19,11 @@ evento, fila e chave de tradução.
 | ------------------------- | ---------------- | ----------------------------------------------------------------------------------------- |
 | Empresa / Loja (o tenant) | `Company`        | Unidade de isolamento multi-tenant. Nunca `Store`, `Tenant` nem `Organization` no domínio |
 | Usuário                   | `User`           | Pessoa que faz login                                                                      |
-| Papel / Perfil de acesso  | `Role`           | `owner`, `staff`, `accountant`, `platform_admin`                                          |
+| Papel / Perfil de acesso  | `Role`           | `owner`, `staff` (roadmap), `platform_admin`. Sem `accountant` no produto                 |
 | Cliente                   | `Customer`       | Cliente da loja. Nunca `Client` (reservado para clientes HTTP)                            |
 | Fornecedor                | `Supplier`       |                                                                                           |
 | Produto                   | `Product`        |                                                                                           |
-| Variação (tamanho, cor)   | `ProductVariant` |                                                                                           |
+| Variação (tamanho, cor)   | `ProductVariant` | **Fora do primeiro recorte**                                                              |
 | Código de barras          | `barcode`        | EAN/GTIN                                                                                  |
 | Categoria                 | `Category`       |                                                                                           |
 | Unidade de medida         | `UnitOfMeasure`  | `un`, `kg`, `m`, `cx`                                                                     |
@@ -64,10 +64,10 @@ evento, fila e chave de tradução.
 | Vencimento             | `dueDate`         |                                          |
 | Liquidação / baixa     | `Settlement`      | Ato de marcar como pago. Verbo: `settle` |
 | Inadimplência          | `overdue`         | Estado, não entidade                     |
-| Banco / conta bancária | `BankAccount`     |                                          |
-| Transação bancária     | `BankTransaction` | Linha do extrato                         |
-| Extrato                | `BankStatement`   |                                          |
-| Conciliação bancária   | `Reconciliation`  | Verbo: `reconcile`                       |
+| Banco / conta bancária | `BankAccount`     | **Fora do recorte** (DEC-005)            |
+| Transação bancária     | `BankTransaction` | **Fora do recorte**                      |
+| Extrato                | `BankStatement`   | **Fora do recorte**                      |
+| Conciliação bancária   | `Reconciliation`  | **Fora do recorte**                      |
 | Plano de contas        | `ChartOfAccounts` |                                          |
 | Conta contábil         | `LedgerAccount`   |                                          |
 | Centro de custo        | `CostCenter`      |                                          |
@@ -76,22 +76,27 @@ evento, fila e chave de tradução.
 
 ## Fiscal
 
-| PT-BR                | Código (inglês)   | Observações                                         |
-| -------------------- | ----------------- | --------------------------------------------------- |
-| Nota fiscal          | `Invoice`         | Genérico                                            |
-| NFC-e (consumidor)   | `ConsumerInvoice` | Mantém a sigla `nfce` em campos técnicos            |
-| NFS-e (serviço)      | `ServiceInvoice`  | Sigla `nfse` em campos técnicos                     |
-| Emissão              | `issue`           | `issueInvoice()`                                    |
-| Cancelamento de nota | `cancelInvoice`   | Prazo legal distinto do cancelamento de venda       |
-| Contingência         | `contingency`     | Emissão offline quando a SEFAZ cai                  |
-| Chave de acesso      | `accessKey`       | 44 dígitos                                          |
-| DANFE                | `danfe`           | Representação impressa                              |
-| Regime tributário    | `TaxRegime`       | `simples_nacional`, `lucro_presumido`, `lucro_real` |
-| NCM                  | `ncm`             |                                                     |
-| CFOP                 | `cfop`            |                                                     |
-| CST / CSOSN          | `cst` / `csosn`   |                                                     |
-| Imposto              | `Tax`             |                                                     |
-| Alíquota             | `taxRate`         |                                                     |
+| PT-BR                             | Código (inglês)               | Observações                                                                 |
+| --------------------------------- | ----------------------------- | --------------------------------------------------------------------------- |
+| Nota fiscal                       | `Invoice`                     | Genérico                                                                    |
+| NFC-e (consumidor)                | `ConsumerInvoice`             | Mantém a sigla `nfce` em campos técnicos                                    |
+| NFS-e (serviço)                   | `ServiceInvoice`              | Sigla `nfse` em campos técnicos; emissão = NFS-e Nacional                   |
+| Emissão                           | `issue`                       | `issueInvoice()`                                                            |
+| Cancelamento de nota              | `cancelInvoice`               | Prazo legal distinto do cancelamento de venda                               |
+| Contingência                      | `contingency`                 | Emissão offline via Focus quando a autorização falha                        |
+| Chave de acesso                   | `accessKey`                   | 44 dígitos                                                                  |
+| DANFE                             | `danfe`                       | Representação impressa da NFC-e                                             |
+| DANFSe                            | `danfse`                      | Representação impressa da NFS-e                                             |
+| Regime tributário                 | `TaxRegime`                   | `mei`, `simples_nacional`, `lucro_presumido`, `lucro_real`                  |
+| Híbrido (reforma 2027)            | `optedReformaHibrida`         | Autodeclaração: IBS/CBS fora do DAS (LC 214/2025). True = ERP ok, sem Focus |
+| Elegível para emitir              | `isEligibleForFiscalEmission` | `mei` ou `simples_nacional` e não híbrido                                   |
+| NCM                               | `ncm`                         |                                                                             |
+| CFOP                              | `cfop`                        | Padrão do adapter Focus (MEI/Simples); **não** coluna de produto            |
+| CST / CSOSN                       | `cst` / `csosn`               | Idem CFOP                                                                   |
+| Imposto                           | `Tax`                         |                                                                             |
+| Alíquota                          | `taxRate`                     |                                                                             |
+| Código de tributação nacional ISS | `codigoTributacaoNacionalIss` | Payload NFS-e Nacional Focus `codigo_tributacao_nacional_iss`               |
+| NBS                               | `codigoNbs`                   | Nomenclatura Brasileira de Serviços; DPS nacional quando o município exigir |
 
 ## Assistente / IA
 
@@ -109,38 +114,40 @@ evento, fila e chave de tradução.
 
 ## Plataforma
 
-| PT-BR                      | Código (inglês)   | Observações                      |
-| -------------------------- | ----------------- | -------------------------------- |
-| Assinatura                 | `Subscription`    |                                  |
-| Plano                      | `Plan`            |                                  |
-| Mensalidade                | `subscriptionFee` |                                  |
-| Cupom                      | `Coupon`          |                                  |
-| Bloqueio por inadimplência | `suspension`      | Estado da `Subscription`         |
-| Período de teste           | `trial`           |                                  |
-| Agenda                     | `Schedule`        |                                  |
-| Compromisso                | `Appointment`     |                                  |
-| Auditoria                  | `AuditLog`        |                                  |
-| Anexo                      | `Attachment`      |                                  |
-| Webhook                    | `Webhook`         | Mantém em inglês também em PT-BR |
-| Fila                       | `Queue`           |                                  |
-| Job agendado               | `ScheduledJob`    |                                  |
+| PT-BR                      | Código (inglês)   | Observações                            |
+| -------------------------- | ----------------- | -------------------------------------- |
+| Assinatura                 | `Subscription`    |                                        |
+| Plano                      | `Plan`            |                                        |
+| Mensalidade                | `subscriptionFee` |                                        |
+| Cupom                      | `Coupon`          |                                        |
+| Bloqueio por inadimplência | `suspension`      | Estado da `Subscription`               |
+| Período de teste           | `trial`           |                                        |
+| Agenda                     | `Schedule`        |                                        |
+| Chamado de suporte         | `SupportTicket`   | Jornada I                              |
+| Card de CRM                | `CrmCard`         | Quadro a fazer / andamento / concluído |
+| Compromisso                | `Appointment`     |                                        |
+| Auditoria                  | `AuditLog`        |                                        |
+| Anexo                      | `Attachment`      |                                        |
+| Webhook                    | `Webhook`         | Mantém em inglês também em PT-BR       |
+| Fila                       | `Queue`           |                                        |
+| Job agendado               | `ScheduledJob`    |                                        |
 
 ---
 
 ## Convenções de nomenclatura
 
-| Elemento                        | Convenção                           | Exemplo                                   |
-| ------------------------------- | ----------------------------------- | ----------------------------------------- |
-| Tipo / classe / schema Zod      | `PascalCase`                        | `SaleItem`, `CreateSaleInput`             |
-| Função / variável / propriedade | `camelCase`                         | `netAmount`, `issueInvoice()`             |
-| Arquivo e pasta                 | `kebab-case`                        | `sale-item.ts`, `chart-of-accounts/`      |
-| Tabela e coluna no banco        | `snake_case`, tabela no **plural**  | `sale_items`, `net_amount`                |
-| Variável de ambiente            | `SCREAMING_SNAKE_CASE`              | `DATABASE_URL`, `WHATSAPP_API_TOKEN`      |
-| Endpoint HTTP                   | `kebab-case`, recurso no **plural** | `POST /v1/sales`, `GET /v1/bank-accounts` |
-| Fila / job                      | `kebab-case`, `<domínio>-<ação>`    | `invoice-issue`, `whatsapp-send`          |
-| Evento de domínio               | `PascalCase` no passado             | `SaleRegistered`, `InvoiceIssued`         |
-| Constante                       | `SCREAMING_SNAKE_CASE`              | `MAX_DISCOUNT_RATE`                       |
-| Booleano                        | prefixo `is` / `has` / `can`        | `isOverdue`, `hasInventory`               |
+| Elemento                        | Convenção                           | Exemplo                                              |
+| ------------------------------- | ----------------------------------- | ---------------------------------------------------- |
+| Tipo / classe / schema Zod      | `PascalCase`                        | `SaleItem`, `CreateSaleInput`                        |
+| Função / variável / propriedade | `camelCase`                         | `netAmount`, `issueInvoice()`                        |
+| Arquivo e pasta                 | `kebab-case`                        | `sale-item.ts`, `chart-of-accounts/`                 |
+| Tabela e coluna no banco        | `snake_case`, tabela no **plural**  | `sale_items`, `net_amount`                           |
+| Variável de ambiente            | `SCREAMING_SNAKE_CASE`              | `DATABASE_URL`, `WHATSAPP_API_TOKEN`                 |
+| Endpoint HTTP                   | `kebab-case`, recurso no **plural** | `POST /v1/sales` (sem `bank-accounts` neste recorte) |
+| Fila / job                      | `kebab-case`, `<domínio>-<ação>`    | `invoice-issue`, `whatsapp-send`                     |
+| Evento de domínio               | `PascalCase` no passado             | `SaleRegistered`, `InvoiceIssued`                    |
+| Constante                       | `SCREAMING_SNAKE_CASE`              | `MAX_DISCOUNT_RATE`                                  |
+| Booleano                        | prefixo `is` / `has` / `can`        | `isOverdue`, `hasInventory`                          |
 
 ## Termos proibidos no código
 

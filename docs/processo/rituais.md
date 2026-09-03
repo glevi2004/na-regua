@@ -63,7 +63,7 @@ Varredura das [decisões em aberto](../decisoes/README.md):
 - Alguma decisão foi tomada em conversa e não registrada?
 - O que está bloqueado hoje e não estava na semana passada?
 
-É o ritual mais fácil de pular e o mais caro de pular. Hoje **51 dos 152
+É o ritual mais fácil de pular e o mais caro de pular. Hoje **24 dos 157
 dias-desenvolvedor do backlog estão bloqueados por decisão**
 ([ledger](task-ledger.md#bloqueios-por-decisão)) — decidir rende mais que
 codar.

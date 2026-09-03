@@ -1,7 +1,10 @@
 # User Stories
 
-13 épicos, 64 histórias. Fonte de origem dos requisitos em
-[`requisitos-funcionais.md`](requisitos-funcionais.md).
+13 épicos originais + histórias A–J (US-065 em diante). Fonte dos requisitos em
+[`requisitos-funcionais.md`](requisitos-funcionais.md). Recorte:
+[`escopo-mvp.md`](escopo-mvp.md).
+
+**IDs nunca são apagados.** O que saiu do primeiro recorte fica `WON'T` / adiado.
 
 ## Como ler
 
@@ -26,23 +29,39 @@ Os critérios de aceite listam o caminho feliz **e** pelo menos um caminho de
 erro. Uma história sem caminho de erro não está pronta para ser pega — ver
 [Definition of Ready](../processo/rituais.md#definition-of-ready).
 
-## Índice de épicos
+## Índice por jornada A–J
 
-| Épico                                  | Tema                         | Histórias  | Prioridade dominante |
-| -------------------------------------- | ---------------------------- | ---------- | -------------------- |
-| [E1](#e1--onboarding--empresa)         | Onboarding & Empresa         | US-001–004 | MUST                 |
-| [E2](#e2--clientes--crm)               | Clientes / CRM               | US-005–008 | MUST                 |
-| [E3](#e3--produtos--estoque)           | Produtos & Estoque           | US-009–013 | MUST                 |
-| [E4](#e4--vendas--pdv)                 | Vendas & PDV                 | US-014–021 | MUST                 |
-| [E5](#e5--emissão-fiscal)              | Emissão Fiscal               | US-022–025 | MUST                 |
-| [E6](#e6--contas-a-pagar)              | Contas a Pagar               | US-026–029 | MUST                 |
-| [E7](#e7--contas-a-receber)            | Contas a Receber             | US-030–034 | MUST                 |
-| [E8](#e8--bancos--conciliação)         | Bancos & Conciliação         | US-035–038 | SHOULD               |
-| [E9](#e9--plano-de-contas--relatórios) | Plano de Contas & Relatórios | US-039–042 | SHOULD               |
-| [E10](#e10--agenda)                    | Agenda                       | US-043–045 | COULD                |
-| [E11](#e11--assistente-whatsapp)       | Assistente WhatsApp          | US-046–053 | MUST                 |
-| [E12](#e12--assinatura--cobrança-saas) | Assinatura & Cobrança SaaS   | US-054–058 | MUST                 |
-| [E13](#e13--plataforma)                | Plataforma                   | US-059–064 | MUST                 |
+| Jornada                                | Histórias                                          | Notas                                                                          |
+| -------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------ |
+| **A** Cadastro                         | US-065, US-001 (empresa depois do signup)          | Signup web: pessoa + plano; CNPJ em `/app/empresa`                             |
+| **B** Estoque                          | US-009–013                                         | Sem variação/depósito                                                          |
+| **C** Vendas + PagMaxx + clientes + NF | US-005–008, US-014–025, US-071, US-073, US-074     | NFC-e e NFS-e Nacional na Focus se elegível; Pix/link/cartão online na PagMaxx |
+| **D** Financeiro                       | US-026–034, US-039–042                             | E8 bancos = `WON'T` neste recorte                                              |
+| **E** CRM e agenda                     | US-069, US-043–045                                 | Agenda sobe de COULD para MUST                                                 |
+| **F** Dashboard                        | US-068                                             |                                                                                |
+| **G** Empresa e docs Focus             | US-066, US-067, US-002 (reescrito), US-072, US-074 | A1 transita só se elegível; CSC (NFC-e) e flags NFS-e Nacional                 |
+| **H** Assinatura                       | US-054–058                                         | PagMaxx                                                                        |
+| **I** Chamados                         | US-070                                             |                                                                                |
+| **J** Assistente                       | US-046–053                                         | Web, app e WhatsApp Cloud API                                                  |
+
+## Índice de épicos (IDs estáveis)
+
+| Épico                                  | Tema                   | Histórias                      | Neste recorte                                           |
+| -------------------------------------- | ---------------------- | ------------------------------ | ------------------------------------------------------- |
+| [E1](#e1--onboarding--empresa)         | Onboarding & Empresa   | US-001–004, US-065–067, US-072 | MUST (US-003 staff = depois)                            |
+| [E2](#e2--clientes--crm)               | Clientes               | US-005–008                     | MUST; CRM quadro = US-069                               |
+| [E3](#e3--produtos--estoque)           | Produtos & Estoque     | US-009–013                     | MUST                                                    |
+| [E4](#e4--vendas--pdv)                 | Vendas                 | US-014–021, US-071             | MUST                                                    |
+| [E5](#e5--emissão-fiscal)              | Emissão Fiscal (Focus) | US-022–025, US-073, US-074     | MUST NFC-e e NFS-e Nacional; só MEI/Simples sem Híbrido |
+| [E6](#e6--contas-a-pagar)              | Contas a Pagar         | US-026–029                     | MUST                                                    |
+| [E7](#e7--contas-a-receber)            | Contas a Receber       | US-030–034                     | MUST                                                    |
+| [E8](#e8--bancos--conciliação)         | Bancos                 | US-035–038                     | **WON'T** (DEC-005 adiada)                              |
+| [E9](#e9--plano-de-contas--relatórios) | Plano de Contas        | US-039–042                     | SHOULD → MUST plano simples / dashboard US-068          |
+| [E10](#e10--agenda)                    | Agenda                 | US-043–045                     | **MUST**                                                |
+| [E11](#e11--assistente)                | Assistente             | US-046–053                     | MUST; Cloud API                                         |
+| [E12](#e12--assinatura--cobrança-saas) | Assinatura             | US-054–058                     | MUST                                                    |
+| [E13](#e13--plataforma)                | Plataforma             | US-059–064                     | MUST; 1 empresa por usuário                             |
+| [E14](#e14--crm-suporte-e-painel)      | CRM, suporte, painel   | US-068–070                     | MUST                                                    |
 
 ---
 
@@ -55,7 +74,10 @@ erro. Uma história sem caminho de erro não está pronta para ser pega — ver
 
 **Como** lojista, **quero** cadastrar minha empresa pelo CNPJ **para** começar a
 usar o sistema sem digitar tudo à mão.
-`MUST` · P1 · `apps/web` `apps/mobile` `packages/core` `packages/db` · RF-001, RF-002
+`MUST` · P1 · `apps/web` `packages/core` `packages/db` · RF-001, RF-002
+
+> Depois do signup pessoal (US-065). Tela `/app/empresa`. Uma empresa por
+> usuário ([ADR-0004](../decisoes/adr/0004-usuario-uma-empresa.md)).
 
 - **DADO** um CNPJ válido **QUANDO** confirmo **ENTÃO** razão social, nome fantasia e endereço vêm preenchidos e eu só reviso
 - **DADO** um CNPJ inválido ou inexistente **QUANDO** confirmo **ENTÃO** vejo o erro no campo e nada é criado
@@ -64,20 +86,25 @@ usar o sistema sem digitar tudo à mão.
 
 #### US-002 — Configurar dados fiscais
 
-**Como** lojista, **quero** informar meu regime tributário e certificado digital
-**para** conseguir emitir nota fiscal.
-`MUST` · P1 · `apps/web` `packages/core` `packages/fiscal` · RF-003, RF-004
+**Como** lojista, **quero** informar meu regime tributário **para** o cálculo da
+venda e a Focus emitirem NFC-e ou NFS-e Nacional com os dados certos.
+`MUST` · P1 · `apps/web` `packages/core` `packages/fiscal` · RF-003
 
-- **DADO** que escolho o regime tributário **QUANDO** salvo **ENTÃO** o cálculo de imposto das vendas passa a usar esse regime
-- **DADO** que envio um certificado A1 com a senha correta **QUANDO** salvo **ENTÃO** o certificado é armazenado cifrado e vejo a data de validade
-- **DADO** um certificado vencido ou senha errada **QUANDO** salvo **ENTÃO** vejo o motivo exato da recusa e nada é armazenado
-- **DADO** um certificado a menos de 30 dias do vencimento **QUANDO** acesso o sistema **ENTÃO** sou avisado
+- **DADO** que escolho `mei` ou `simples_nacional` e declaro que **não** optei pelo Híbrido **QUANDO** salvo **ENTÃO** o cálculo de imposto das vendas usa a alíquota configurada e posso seguir para o A1
+- **DADO** que escolho `lucro_presumido`, `lucro_real` ou marco que optei pelo Híbrido **QUANDO** salvo **ENTÃO** a empresa grava, o ERP segue, e a emissão Focus permanece bloqueada (US-074)
+- **DADO** que ainda não enviei o A1 à Focus **QUANDO** vendo **ENTÃO** a venda fecha e a nota fica `not_configured`
+
+Certificado e CSC: US-066 e US-067. **Não** guardamos o PFX
+([ADR-0002](../decisoes/adr/0002-focus-nfe.md)).
 
 #### US-003 — Convidar funcionário
 
 **Como** lojista, **quero** convidar um funcionário e definir o que ele pode
 fazer **para** delegar o atendimento sem expor meus números.
-`MUST` · P1 · `apps/web` `packages/core` `packages/db` · RF-005, RF-006
+`WON'T` (primeiro recorte) · P1 · staff futuro na **mesma** empresa · RF-005, RF-006
+
+> Adiado: [ADR-0004](../decisoes/adr/0004-usuario-uma-empresa.md). Sem
+> many-to-many. Critérios de aceite permanecem para quando voltar.
 
 - **DADO** que convido por e-mail ou telefone **QUANDO** envio **ENTÃO** ele recebe o convite e entra com o papel `staff`
 - **DADO** um funcionário com papel `staff` **QUANDO** ele abre o app **ENTÃO** não vê custo, margem nem relatório financeiro
@@ -137,8 +164,8 @@ cadastro **para** cobrar e enviar comprovante direto da conversa.
 - **DADO** um cliente sem consentimento registrado **QUANDO** tento enviar mensagem **ENTÃO** sou informado de que preciso do aceite dele primeiro
 - **DADO** que o cliente pede para não receber mais **QUANDO** ele responde o opt-out **ENTÃO** o sistema para de enviar e registra a data
 
-> Depende de [DEC-003](../decisoes/README.md#dec-003) (provedor de WhatsApp) e
-> [DEC-008](../decisoes/README.md#dec-008) (vínculo telefone ↔ identidade).
+> WhatsApp: [ADR-0005](../decisoes/adr/0005-whatsapp-cloud-api.md). O vínculo
+> telefone ↔ identidade ainda depende de [DEC-008](../decisoes/README.md#dec-008).
 
 ---
 
@@ -266,7 +293,7 @@ saber o lucro real.
 `MUST` · P1 · `apps/mobile` `packages/domain` · RF-040, RF-041, RF-042
 
 - **DADO** uma venda fechada **QUANDO** vejo o resumo **ENTÃO** vejo bruto, custo, imposto, tarifa de cartão, líquido e margem
-- **DADO** um regime `simples_nacional` **QUANDO** a venda fecha **ENTÃO** o imposto usa a alíquota configurada
+- **DADO** um regime `simples_nacional` ou `mei` **QUANDO** a venda fecha **ENTÃO** o imposto usa a alíquota configurada
 - **DADO** um `staff` **QUANDO** fecha a venda **ENTÃO** vê o total, mas não custo, imposto nem margem
 
 #### US-021 — Cancelar ou devolver venda
@@ -276,7 +303,7 @@ erro sem apagar histórico.
 `MUST` · P1 · `apps/mobile` `packages/core` `packages/fiscal` · RF-043, RF-044
 
 - **DADO** uma venda do dia sem nota emitida **QUANDO** cancelo **ENTÃO** estoque, contas a receber e carteira voltam ao estado anterior
-- **DADO** uma venda com nota emitida dentro do prazo legal **QUANDO** cancelo **ENTÃO** a nota é cancelada na SEFAZ antes do estorno
+- **DADO** uma venda com nota emitida dentro do prazo legal **QUANDO** cancelo **ENTÃO** a nota é cancelada na Focus antes do estorno
 - **DADO** uma devolução parcial **QUANDO** confirmo os itens **ENTÃO** só esses itens voltam ao estoque e o valor proporcional é estornado
 - **DADO** qualquer cancelamento **QUANDO** confirmo **ENTÃO** fica registrado quem, quando e por quê — a venda nunca é apagada
 
@@ -284,7 +311,8 @@ erro sem apagar histórico.
 
 ## E5 — Emissão Fiscal
 
-> Depende de [DEC-004](../decisoes/README.md#dec-004) (provedor fiscal).
+> Provedor: Focus NFe ([ADR-0002](../decisoes/adr/0002-focus-nfe.md)). NFC-e e
+> NFS-e Nacional. O layout do passo fiscal no front ainda será definido.
 
 #### US-022 — Emitir NFC-e na venda
 
@@ -293,8 +321,8 @@ dia com o fisco sem passo extra.
 `MUST` · P1 P2 · `apps/api` `apps/worker` `packages/fiscal` · RF-045, RF-046, RF-047
 
 - **DADO** uma venda fechada com dados fiscais completos **QUANDO** a emissão é solicitada **ENTÃO** a nota é autorizada e vejo a chave de acesso
-- **DADO** um produto sem NCM ou CFOP **QUANDO** tento emitir **ENTÃO** sou avisado de qual produto e qual campo falta, antes de enviar à SEFAZ
-- **DADO** uma rejeição da SEFAZ **QUANDO** ela ocorre **ENTÃO** vejo o código e a descrição em linguagem clara, e a venda continua registrada
+- **DADO** um produto sem NCM **QUANDO** tento emitir NFC-e **ENTÃO** sou avisado de qual produto falta o campo, antes de enviar à Focus
+- **DADO** uma rejeição da Focus (`mensagem_sefaz`) **QUANDO** ela ocorre **ENTÃO** vejo o código e a descrição em linguagem clara, e a venda continua registrada
 - **DADO** uma emissão bem-sucedida **QUANDO** ela ocorre **ENTÃO** o XML é guardado pelo prazo legal ([RNF-037](requisitos-nao-funcionais.md))
 
 #### US-023 — Enviar a nota ao cliente
@@ -312,18 +340,43 @@ imprimir.
 corrigir dentro do prazo.
 `MUST` · P1 · `packages/fiscal` `packages/core` · RF-050, RF-051
 
-- **DADO** uma nota dentro do prazo legal **QUANDO** cancelo informando a justificativa **ENTÃO** o cancelamento é registrado na SEFAZ
+- **DADO** uma nota dentro do prazo legal **QUANDO** cancelo informando a justificativa **ENTÃO** o cancelamento é enviado à Focus e o estado da nota vira cancelado
 - **DADO** uma nota fora do prazo **QUANDO** tento cancelar **ENTÃO** sou informado do prazo e orientado a emitir devolução
 
 #### US-025 — Emitir em contingência
 
-**Como** lojista, **quero** continuar vendendo com a SEFAZ fora do ar **para**
-não parar a loja.
-`MUST` · P1 P2 · `apps/worker` `packages/fiscal` · RF-052, RF-053, RF-054
+**Como** lojista, **quero** continuar vendendo se a autorização fiscal atrasar
+**para** não parar a loja.
+`MUST` · P1 · `apps/worker` `packages/fiscal` · RF-052, RF-053, RF-054
 
-- **DADO** a SEFAZ indisponível **QUANDO** fecho a venda **ENTÃO** a nota entra em contingência e a venda é concluída normalmente
-- **DADO** notas em contingência **QUANDO** a SEFAZ volta **ENTÃO** elas são transmitidas automaticamente, em ordem
+- **DADO** a Focus/autorização indisponível **QUANDO** fecho a venda **ENTÃO** a nota entra em contingência ou `processing` e a venda é concluída
+- **DADO** notas em contingência **QUANDO** a Focus aceita reenvio **ENTÃO** elas seguem em ordem
 - **DADO** uma nota em contingência **QUANDO** consulto a venda **ENTÃO** vejo o estado explícito, não um sucesso falso
+
+#### US-073 — Emitir NFS-e Nacional na venda
+
+**Como** lojista, **quero** emitir NFS-e Nacional ao fechar uma venda de serviço
+**para** ficar em dia com o fisco sem passo extra.
+`MUST` · P1 · `apps/api` `apps/worker` `packages/fiscal` · RF-143, RF-144, RF-145
+
+- **DADO** uma venda fechada de serviço, com código de tributação nacional **QUANDO** a emissão NFS-e é solicitada **ENTÃO** a Focus aceita o envio (`POST /v2/nfsen`) e a nota fica `processing` até o Ambiente Nacional autorizar ou rejeitar
+- **DADO** item sem `codigo_tributacao_nacional_iss` **QUANDO** tento emitir **ENTÃO** sou avisado do que falta, antes de enviar à Focus, e a venda permanece
+- **DADO** autorização posterior (webhook `nfsen` ou consulta) **QUANDO** ela chega **ENTÃO** vejo número da NFS-e e posso enviar a DANFSe
+- **DADO** que o passo fiscal no app ainda muda de layout **QUANDO** emito **ENTÃO** o contrato da API (`kind=nfse`) permanece o mesmo
+
+#### US-074 — Recusar emissão se a empresa não for elegível
+
+**Como** lojista, **quero** uma mensagem clara se meu CNPJ não puder emitir nota
+neste recorte **para** não achar que a Focus falhou.
+`MUST` · P1 · `apps/web` `packages/fiscal` `packages/domain` · RF-146
+
+> Elegível: `mei` ou `simples_nacional` e `optedReformaHibrida = false`
+> ([DEC-017](../decisoes/README.md#dec-017)). Consulta CNPJ **não** descobre
+> Híbrido.
+
+- **DADO** lucro presumido, lucro real ou Simples com Híbrido declarado **QUANDO** tento enviar A1, CSC ou ligar NFC-e/NFS-e Nacional **ENTÃO** sou recusado, a empresa permanece no ERP e nada vai à Focus
+- **DADO** a mesma empresa **QUANDO** fecho uma venda pedindo nota **ENTÃO** a venda grava e a nota **não** entra em `invoice-issue`
+- **DADO** MEI ou Simples sem Híbrido **QUANDO** configuro a Focus **ENTÃO** o fluxo de US-066 / US-067 segue
 
 ---
 
@@ -423,13 +476,14 @@ constrangimento.
 
 ## E8 — Bancos & Conciliação
 
-> Depende de [DEC-005](../decisoes/README.md#dec-005) (provedor Open Finance).
+> **`WON'T` neste recorte.** [DEC-005](../decisoes/README.md#dec-005) adiada.
+> Fora das jornadas A–J e do web. Histórias mantidas para não reabrir o número.
 
 #### US-035 — Cadastrar conta bancária
 
 **Como** lojista, **quero** cadastrar minhas contas **para** separar o dinheiro
 por origem.
-`SHOULD` · P1 · `apps/web` `packages/core` · RF-073
+`WON'T` · P1 · `apps/web` `packages/core` · RF-073
 
 - **DADO** banco, agência e conta **QUANDO** salvo **ENTÃO** ela fica disponível para baixas e conciliação
 - **DADO** uma conta com saldo inicial **QUANDO** salvo **ENTÃO** o saldo é o ponto de partida do extrato interno
@@ -438,7 +492,7 @@ por origem.
 
 **Como** lojista, **quero** conectar minha conta bancária **para** o extrato
 entrar sozinho.
-`SHOULD` · P1 · `packages/banking` `apps/worker` · RF-074, RF-075
+`WON'T` · P1 · `packages/banking` `apps/worker` · RF-074, RF-075
 
 - **DADO** que autorizo o acesso no banco **QUANDO** a conexão é concluída **ENTÃO** as transações passam a ser importadas periodicamente
 - **DADO** um consentimento expirado **QUANDO** a importação falha **ENTÃO** sou avisado com o link para renovar, e a conciliação anterior é preservada
@@ -448,7 +502,7 @@ entrar sozinho.
 
 **Como** lojista, **quero** subir um OFX/CSV **para** conciliar mesmo sem Open
 Finance.
-`SHOULD` · P1 · `apps/web` `packages/banking` · RF-076, RF-077
+`WON'T` · P1 · `apps/web` `packages/banking` · RF-076, RF-077
 
 - **DADO** um arquivo OFX válido **QUANDO** importo **ENTÃO** vejo quantas transações entraram e quantas foram ignoradas por duplicidade
 - **DADO** um arquivo inválido **QUANDO** importo **ENTÃO** vejo o erro e nada é importado parcialmente
@@ -457,7 +511,7 @@ Finance.
 
 **Como** lojista, **quero** casar o extrato com meus lançamentos **para** ter
 certeza de que os números batem.
-`SHOULD` · P1 · `apps/web` `packages/core` · RF-078, RF-079, RF-080
+`WON'T` · P1 · `apps/web` `packages/core` · RF-078, RF-079, RF-080
 
 - **DADO** uma transação do extrato **QUANDO** abro a conciliação **ENTÃO** o sistema sugere lançamentos compatíveis por valor e data
 - **DADO** uma sugestão correta **QUANDO** confirmo **ENTÃO** transação e lançamento ficam conciliados e somem da fila
@@ -514,7 +568,7 @@ contador.
 
 **Como** lojista, **quero** anotar compromissos **para** não esquecer entrega e
 visita de fornecedor.
-`COULD` · P1 · `apps/mobile` `packages/core` · RF-089, RF-090
+`MUST` · P1 · `apps/web` `apps/mobile` `packages/core` · RF-089, RF-090
 
 - **DADO** título, data e hora **QUANDO** salvo **ENTÃO** o compromisso aparece na agenda
 - **DADO** um compromisso ligado a um cliente **QUANDO** abro o cliente **ENTÃO** vejo os compromissos dele
@@ -523,7 +577,7 @@ visita de fornecedor.
 
 **Como** lojista, **quero** ser lembrado antes da hora **para** não perder o
 compromisso.
-`COULD` · P1 · `apps/worker` `packages/whatsapp` · RF-091, RF-092
+`MUST` · P1 · `apps/worker` `packages/whatsapp` · RF-091, RF-092
 
 - **DADO** um compromisso com lembrete **QUANDO** falta o tempo configurado **ENTÃO** recebo a notificação
 - **DADO** um compromisso cancelado **QUANDO** o horário do lembrete chega **ENTÃO** nada é enviado
@@ -531,18 +585,19 @@ compromisso.
 #### US-045 — Ver a agenda do dia
 
 **Como** lojista, **quero** ver o dia de hoje **para** me organizar de manhã.
-`COULD` · P1 · `apps/mobile` `packages/agent` · RF-093
+`MUST` · P1 · `apps/web` `apps/mobile` `packages/agent` · RF-093
 
 - **DADO** compromissos hoje **QUANDO** abro a agenda ou pergunto ao assistente **ENTÃO** vejo a lista em ordem de horário
 - **DADO** nenhum compromisso **QUANDO** consulto **ENTÃO** recebo confirmação explícita de agenda livre
 
 ---
 
-## E11 — Assistente WhatsApp
+## E11 — Assistente
 
-> A tese central do produto. Depende de
-> [DEC-003](../decisoes/README.md#dec-003), [DEC-007](../decisoes/README.md#dec-007),
-> [DEC-008](../decisoes/README.md#dec-008) e [DEC-011](../decisoes/README.md#dec-011).
+> Web, app e WhatsApp. Cloud API oficial
+> ([ADR-0005](../decisoes/adr/0005-whatsapp-cloud-api.md)). LLM ainda
+> [DEC-007](../decisoes/README.md#dec-007); auth [DEC-008](../decisoes/README.md#dec-008);
+> memória [DEC-011](../decisoes/README.md#dec-011).
 
 #### US-046 — Vincular o número da loja
 
@@ -629,7 +684,8 @@ negócio de onde eu estiver.
 
 ## E12 — Assinatura & Cobrança SaaS
 
-> Depende de [DEC-010](../decisoes/README.md#dec-010) e [DEC-012](../decisoes/README.md#dec-012).
+> Cobrança: PagMaxx ([ADR-0003](../decisoes/adr/0003-pagmaxx.md)). Regras de
+> cupom ainda dependem de [DEC-012](../decisoes/README.md#dec-012).
 
 #### US-054 — Período de teste
 
@@ -687,10 +743,9 @@ após o prazo **para** proteger a receita sem sequestrar dados do cliente.
 dados da minha empresa.
 `MUST` · P1 P2 · `apps/api` `apps/web` `apps/mobile` · RF-119, RF-120
 
-- **DADO** credenciais válidas **QUANDO** entro **ENTÃO** acesso apenas as empresas às quais pertenço
+- **DADO** credenciais válidas **QUANDO** entro **ENTÃO** acesso a **única** empresa à qual pertenço
 - **DADO** credenciais inválidas **QUANDO** tento **ENTÃO** a mensagem não revela se o usuário existe
 - **DADO** várias tentativas falhas **QUANDO** o limite é atingido **ENTÃO** novas tentativas são desaceleradas
-- **DADO** um usuário em mais de uma empresa **QUANDO** entro **ENTÃO** escolho qual empresa operar
 
 #### US-060 — Isolamento entre empresas
 
@@ -740,6 +795,88 @@ integração falhou **para** resolver o chamado sem pedir print ao cliente.
 - **DADO** uma falha de emissão, mensagem ou cobrança **QUANDO** investigo **ENTÃO** encontro o erro pelo identificador da requisição, com a resposta do provedor
 - **DADO** um job que falhou **QUANDO** o erro é transitório **ENTÃO** ele é reprocessado com espera crescente antes de desistir
 - **DADO** que acesso dados de um tenant **QUANDO** faço isso **ENTÃO** o acesso fica registrado com justificativa
+
+---
+
+## E14 — CRM, suporte e painel
+
+#### US-065 — Cadastrar dados pessoais no signup
+
+**Como** lojista, **quero** criar minha conta com nome, e-mail, telefone e senha
+**para** entrar no sistema antes de completar a empresa.
+`MUST` · P1 · `apps/web` `packages/core` · RF-132
+
+- **DADO** dados pessoais válidos e termos aceitos **QUANDO** confirmo **ENTÃO** o usuário `owner` é criado e sigo para o pagamento da assinatura (ou trial)
+- **DADO** e-mail já cadastrado **QUANDO** confirmo **ENTÃO** vejo erro sem revelar dados de outra conta
+- **DADO** conta criada **QUANDO** ainda não há empresa **ENTÃO** sou levado a `/app/empresa` para o CNPJ
+
+#### US-066 — Enviar certificado A1 para a Focus
+
+**Como** lojista, **quero** enviar o A1 (.pfx) e a senha **para** a Focus validar
+e eu poder emitir NFC-e e NFS-e Nacional.
+`MUST` · P1 · `apps/web` `packages/fiscal` · RF-133
+
+- **DADO** arquivo e senha corretos **QUANDO** envio **ENTÃO** a Focus aceita, vejo validade e status `valid`, e o arquivo **não** fica no nosso banco
+- **DADO** senha errada, CNPJ divergente ou certificado vencido **QUANDO** envio **ENTÃO** vejo a mensagem da Focus e nada é persistido como válido
+- **DADO** empresa inelegível (US-074) **QUANDO** tento enviar o A1 **ENTÃO** sou recusado com mensagem clara e nada vai à Focus
+- **DADO** certificado a menos de 30 dias do vencimento **QUANDO** acesso a empresa **ENTÃO** sou avisado
+
+#### US-067 — Informar CSC e token NFC-e
+
+**Como** lojista, **quero** cadastrar o CSC e o id_token da NFC-e **para** a
+Focus emitir no meu CNPJ.
+`MUST` · P1 · `apps/web` `packages/fiscal` · RF-134
+
+- **DADO** CSC e token do ambiente (homologação ou produção) **QUANDO** salvo **ENTÃO** a Focus é atualizada e a tela mostra “configurado”, sem devolver o segredo
+- **DADO** CSC ausente **QUANDO** tento emitir **ENTÃO** a venda fecha e a nota fica `not_configured`
+
+#### US-068 — Ver KPIs no painel
+
+**Como** lojista, **quero** ver faturamento do dia, ticket médio, a receber e a
+pagar **para** saber o estado do negócio sem relatório longo.
+`MUST` · P1 · `apps/web` `packages/core` · RF-135
+
+- **DADO** vendas e títulos no período **QUANDO** abro `/app` **ENTÃO** vejo os totais coerentes com as telas de vendas e financeiro
+- **DADO** estoque abaixo do mínimo **QUANDO** abro o painel **ENTÃO** vejo o alerta de reposição
+
+#### US-069 — Quadro de CRM
+
+**Como** lojista, **quero** um quadro a fazer / andamento / concluído **para**
+acompanhar pendências e contatos ligados a clientes.
+`MUST` · P1 · `apps/web` `packages/core` · RF-136, RF-137
+
+- **DADO** uma pendência lançada no cliente **QUANDO** abro o CRM **ENTÃO** ela aparece na coluna “a fazer”
+- **DADO** que arrasto o card **QUANDO** solto **ENTÃO** a coluna persiste
+- **DADO** um card **QUANDO** comento **ENTÃO** o comentário fica no histórico
+
+#### US-070 — Abrir chamado de suporte
+
+**Como** lojista, **quero** abrir um chamado **para** reportar problema técnico
+sem sair do sistema.
+`MUST` · P1 · `apps/web` `packages/core` · RF-138, RF-139
+
+- **DADO** assunto, categoria e texto **QUANDO** envio **ENTÃO** recebo protocolo e o chamado fica `aberto`
+- **DADO** resposta da equipe **QUANDO** abro o chamado **ENTÃO** vejo a mensagem e o badge de não lidas zera
+- **DADO** anexo **QUANDO** envio **ENTÃO** o arquivo fica na mensagem
+
+#### US-071 — Cobrar a venda pela PagMaxx
+
+**Como** lojista, **quero** receber Pix, link ou cartão online **para** o
+dinheiro bater com a venda sem conciliação manual.
+`MUST` · P1 · `packages/payments` `packages/core` · RF-140, RF-141
+
+- **DADO** credenciamento PagMaxx aprovado **QUANDO** fecho no Pix **ENTÃO** o QR/copia-e-cola é gerado e o webhook `payment.authorized` liquida o recebível
+- **DADO** credenciamento pendente **QUANDO** escolho Pix **ENTÃO** sou informado e posso registrar dinheiro/maquininha
+- **DADO** pagamento em dinheiro **QUANDO** fecho **ENTÃO** nada chama a PagMaxx
+
+#### US-072 — Editar dados pessoais
+
+**Como** lojista, **quero** alterar nome, e-mail e telefone da minha conta
+**para** manter o cadastro certo.
+`MUST` · P1 · `apps/web` `packages/core` · RF-142
+
+- **DADO** dados válidos **QUANDO** salvo **ENTÃO** a sessão continua e o perfil reflete a mudança
+- **DADO** e-mail já usado por outro usuário **QUANDO** salvo **ENTÃO** a troca é recusada
 
 ---
 

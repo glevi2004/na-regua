@@ -181,10 +181,9 @@ export interface InvoiceIssuer {
 export function createFocusNfeIssuer(config: FocusConfig): InvoiceIssuer
 ```
 
-Isso vale ouro agora: [DEC-003](../decisoes/README.md#dec-003) a
-[DEC-006](../decisoes/README.md#dec-006) — os quatro provedores externos — ainda
-estão em aberto. **A porta pode ser escrita e testada hoje**, com um adapter
-falso, e o provedor real entra depois sem tocar em `core`.
+Isso vale agora que Focus, PagMaxx e WhatsApp Cloud API estão escolhidos:
+a **porta** continua; o adapter concreto já tem nome. `banking` está adiado
+([DEC-005](../decisoes/README.md#dec-005)). LLM permanece [DEC-007](../decisoes/README.md#dec-007).
 
 ### 4. `contracts` é o contrato único
 

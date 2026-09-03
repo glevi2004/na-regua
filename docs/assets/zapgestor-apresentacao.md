@@ -43,8 +43,8 @@ Cadastros, produtos, vendas, financeiro,
 bancos e CRM em um só lugar.
 NF
 Emissão fiscal
-NFC-e e NFS-e integradas diretamente ao 
-fluxo de vendas.
+NFC-e e NFS-e Nacional para MEI e Simples (DAS, sem Híbrido),
+integradas ao fluxo de vendas.
 IA
 IA no WhatsApp
 O usuário opera o sistema conversando, 
@@ -60,7 +60,7 @@ Duas formas de uso, um único banco de dados por trás
 App Aplicativo completo
 •  Telas de cadastro, vendas, financeiro e relatórios
 •  Leitor de código de barras no catálogo
-•  Emissão de NFC-e e NFS-e
+•  Emissão de NFC-e e NFS-e Nacional (MEI / Simples sem Híbrido)
 •  Conciliação bancária (Open Finance)
 Zap Assistente de IA no WhatsApp
 •  Cadastra clientes e produtos por mensagem

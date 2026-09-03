@@ -5,6 +5,9 @@
   "globalEnv": ["NODE_ENV"],
   "globalPassThroughEnv": [
     "DATABASE_URL",
+    "DATABASE_MIGRATION_URL",
+    "POSTGRES_USER",
+    "POSTGRES_PASSWORD",
     "REDIS_URL",
     "API_PORT",
     "LOG_LEVEL",

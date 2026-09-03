@@ -13,12 +13,26 @@ CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 -- Papel usado pelas migrations. Diferente do papel da aplicacao porque
 -- migration precisa enxergar todas as linhas, ignorando RLS
 -- (docs/arquitetura/dados.md).
+--
+-- POSTGRES_USER (naregua) e superuser do container e SEMPRE ignora RLS.
+-- A aplicacao usa naregua_app (NOSUPERUSER) para o isolamento valer.
 DO $$
 BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'naregua_migrator') THEN
-    CREATE ROLE naregua_migrator LOGIN PASSWORD 'naregua' BYPASSRLS;
+    CREATE ROLE naregua_migrator LOGIN PASSWORD 'naregua' NOSUPERUSER BYPASSRLS;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'naregua_app') THEN
+    CREATE ROLE naregua_app LOGIN PASSWORD 'naregua' NOSUPERUSER NOBYPASSRLS;
   END IF;
 END
 $$;
 
 GRANT ALL PRIVILEGES ON DATABASE naregua TO naregua_migrator;
+GRANT CONNECT ON DATABASE naregua TO naregua_app;
+GRANT USAGE, CREATE ON SCHEMA public TO naregua_migrator;
+GRANT USAGE ON SCHEMA public TO naregua_app;
+
+ALTER DEFAULT PRIVILEGES FOR ROLE naregua_migrator IN SCHEMA public
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO naregua_app;
+ALTER DEFAULT PRIVILEGES FOR ROLE naregua_migrator IN SCHEMA public
+  GRANT EXECUTE ON FUNCTIONS TO naregua_app;

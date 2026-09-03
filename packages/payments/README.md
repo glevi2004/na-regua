@@ -2,7 +2,10 @@
 
 Adapter de PSP — o dinheiro do **lojista**.
 
-**Estado:** 🔴 não implementado · 🚧 [DEC-006](../../docs/decisoes/README.md#dec-006) e [DEC-015](../../docs/decisoes/README.md#dec-015) · `NR-043`, `NR-044`
+**Estado:** 🔴 não implementado · PagMaxx escolhida
+([ADR-0003](../../docs/decisoes/adr/0003-pagmaxx.md),
+[ADR-0006](../../docs/decisoes/adr/0006-conta-pagmaxx-por-lojista.md)) ·
+`NR-043`, `NR-044`
 
 ## Responsabilidade
 
@@ -25,17 +28,13 @@ A proibição de importar `core` é verificada na CI pela regra
 `adapter-nao-importa-core`. Adapter que conhece `core` não é substituível — e
 substituibilidade é a única razão de ele existir.
 
-## Candidato: PagMaxx
-
-Avaliação completa em
+**Provedor: PagMaxx.** Avaliação e contrato em
 [`integracoes/pagmaxx.md`](../../docs/arquitetura/integracoes/pagmaxx.md).
 
 **Cobre:** Pix, link de pagamento, cartão online, tokenização, 3DS, estorno,
-simulação de taxa e webhooks bem projetados (HMAC-SHA256 sobre corpo bruto, id
-de evento para idempotência, reentrega 5×).
+webhooks.
 
-**Não cobre:** captura presencial. O cartão do balcão continua na maquininha da
-lojista; o sistema registra a venda e calcula a tarifa por tabela configurada.
+**Não cobre:** captura presencial. Dinheiro e maquininha só registram.
 
 ## Três armadilhas conhecidas
 
@@ -57,8 +56,7 @@ processe na fila `webhook-process`.
 ## Modo falso
 
 `PAYMENTS_PROVIDER=fake` responde de forma determinística, sem rede. Isso permite
-que o sistema suba local sem credencial nenhuma e que o trabalho não espere a
-decisão do fornecedor.
+que o sistema suba local sem credencial nenhuma.
 
 **O adapter falso implementa a mesma porta, inclusive os caminhos de erro.**
 Falso que só devolve sucesso esconde exatamente o que precisa ser testado.

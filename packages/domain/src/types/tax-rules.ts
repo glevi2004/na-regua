@@ -1,5 +1,5 @@
 /** Alinhado ao glossario. No MVP a aliquota e configurada, nao calculada. D4 */
-export type TaxRegime = 'simples_nacional' | 'lucro_presumido' | 'lucro_real'
+export type TaxRegime = 'mei' | 'simples_nacional' | 'lucro_presumido' | 'lucro_real'
 
 export type TaxRules = {
   readonly regime: TaxRegime

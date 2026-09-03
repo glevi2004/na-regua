@@ -15,16 +15,16 @@ Requisitos correspondentes: [RNF-020 a RNF-036](../produto/requisitos-nao-funcio
 
 O que estamos de fato protegendo, em ordem de gravidade:
 
-| #   | Ameaça                                              | Consequência                                                               | Controle principal                                                                                                   |
-| --- | --------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| T1  | Uma loja enxergar dados de outra                    | Fim do produto — quebra de confiança irrecuperável                         | RLS no banco ([RNF-021](../produto/requisitos-nao-funcionais.md))                                                    |
-| T2  | Vazamento do certificado digital A1                 | Terceiro emite nota em nome da empresa; responsabilidade fiscal e criminal | Cifragem em repouso com chave separada ([RNF-024](../produto/requisitos-nao-funcionais.md))                          |
-| T3  | Mensagem a cliente sem consentimento                | Sanção da ANPD e denúncia por spam                                         | Consentimento verificado antes de todo envio ([RNF-032](../produto/requisitos-nao-funcionais.md))                    |
-| T4  | Funcionário vendo margem e financeiro               | Conflito interno; perda de confiança do lojista                            | Autorização por papel ([RF-012](../produto/requisitos-funcionais.md), [RF-042](../produto/requisitos-funcionais.md)) |
-| T5  | Assistente executando ação de número não autorizado | Lançamento financeiro fraudulento                                          | Vínculo de número + confirmação ([RF-095](../produto/requisitos-funcionais.md))                                      |
-| T6  | Webhook forjado                                     | Estado inconsistente, cobrança falsa                                       | Verificação de assinatura ([RNF-028](../produto/requisitos-nao-funcionais.md))                                       |
-| T7  | Dado pessoal em log                                 | Violação de LGPD sem ninguém perceber                                      | Mascaramento + varredura ([RNF-034](../produto/requisitos-nao-funcionais.md))                                        |
-| T8  | Segredo em código versionado                        | Comprometimento total do ambiente                                          | Varredura bloqueante na CI ([RNF-022](../produto/requisitos-nao-funcionais.md))                                      |
+| #   | Ameaça                                              | Consequência                                       | Controle principal                                                                                                   |
+| --- | --------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| T1  | Uma loja enxergar dados de outra                    | Fim do produto — quebra de confiança irrecuperável | RLS no banco ([RNF-021](../produto/requisitos-nao-funcionais.md))                                                    |
+| T2  | Vazamento do certificado digital A1 em trânsito     | Terceiro emite nota em nome da empresa             | TLS + A1 só transita para a Focus, nunca no Postgres ([RF-133](../produto/requisitos-funcionais.md))                 |
+| T3  | Mensagem a cliente sem consentimento                | Sanção da ANPD e denúncia por spam                 | Consentimento verificado antes de todo envio ([RNF-032](../produto/requisitos-nao-funcionais.md))                    |
+| T4  | Funcionário vendo margem e financeiro               | Conflito interno; perda de confiança do lojista    | Autorização por papel ([RF-012](../produto/requisitos-funcionais.md), [RF-042](../produto/requisitos-funcionais.md)) |
+| T5  | Assistente executando ação de número não autorizado | Lançamento financeiro fraudulento                  | Vínculo de número + confirmação ([RF-095](../produto/requisitos-funcionais.md))                                      |
+| T6  | Webhook forjado                                     | Estado inconsistente, cobrança falsa               | Verificação de assinatura ([RNF-028](../produto/requisitos-nao-funcionais.md))                                       |
+| T7  | Dado pessoal em log                                 | Violação de LGPD sem ninguém perceber              | Mascaramento + varredura ([RNF-034](../produto/requisitos-nao-funcionais.md))                                        |
+| T8  | Segredo em código versionado                        | Comprometimento total do ambiente                  | Varredura bloqueante na CI ([RNF-022](../produto/requisitos-nao-funcionais.md))                                      |
 
 **T1 é a ameaça existencial.** Todas as decisões de arquitetura de dados
 ([`dados.md`](dados.md)) partem dela.
@@ -42,11 +42,11 @@ O que estamos de fato protegendo, em ordem de gravidade:
 | `platform_admin` exige segundo fator                            | [RNF-025](../produto/requisitos-nao-funcionais.md)                                      |
 | Token nunca vai em URL nem em log                               | URL vaza em histórico, referer e log de proxy                                           |
 
-### Um usuário, várias empresas
+### Um usuário, uma empresa
 
-Um contador ou um sócio pode pertencer a mais de uma empresa. O modelo é
-`users ↔ company_users ↔ companies`, e **a empresa ativa é escolhida no login**
-e vive no `ExecutionContext` — nunca é inferida do corpo da requisição
+Cada login pertence a **um** `company_id` ([ADR-0004](../decisoes/adr/0004-usuario-uma-empresa.md)).
+Não há seletor de tenant. Staff futuro é outro usuário na mesma empresa.
+`ExecutionContext.companyId` sai da sessão, nunca do corpo
 ([princípio 8](principios.md#8-o-tenant-vem-do-contexto-nunca-do-cliente)).
 
 ### Autenticação do canal WhatsApp
@@ -105,13 +105,10 @@ A matriz completa está em
 [`personas.md`](../produto/personas.md#matriz-de-permissões). Regras que se
 repetem em vários casos de uso:
 
-| Regra                                                   | Onde é imposta                                                       |
-| ------------------------------------------------------- | -------------------------------------------------------------------- |
-| `staff` não vê custo, margem, imposto                   | `core`, ao montar a resposta — não filtrado no cliente               |
-| `staff` tem limite de desconto configurável             | `domain`, no cálculo ([RF-008](../produto/requisitos-funcionais.md)) |
-| `staff` não cancela venda emitida sem aprovação         | `core`                                                               |
-| `accountant` é somente leitura e exportação             | `core`                                                               |
-| `platform_admin` não acessa dado de tenant sem registro | `core` ([RF-131](../produto/requisitos-funcionais.md))               |
+| Regra                                                        | Onde é imposta                                         |
+| ------------------------------------------------------------ | ------------------------------------------------------ |
+| `staff` não vê custo, margem, imposto (quando existir staff) | `core`                                                 |
+| `platform_admin` não acessa dado de tenant sem registro      | `core` ([RF-131](../produto/requisitos-funcionais.md)) |
 
 Recurso de outra empresa responde **404**, nunca 403 — 403 confirmaria que o
 recurso existe.
@@ -127,15 +124,15 @@ recurso existe.
 | Desenvolvedor nunca usa credencial de produção            | [RNF-070](../produto/requisitos-nao-funcionais.md)                              |
 | Vazamento suspeito → rotação imediata, sem análise prévia | Procedimento de incidente                                                       |
 
-### Certificado digital A1 — tratamento especial
+### Certificado digital A1 — transita, não mora aqui
 
-É o segredo mais perigoso do sistema (T2):
+Ameaça T2 continua: o PFX não pode vazar. Tratamento:
 
-- Cifrado em repouso, com chave **fora** do banco
-- Senha do certificado nunca em log, nem mascarada — simplesmente não é logada
-- Decifrado apenas em memória, no momento da emissão, e descartado em seguida
-- Acesso registrado em auditoria
-- Alerta 30 dias antes do vencimento ([RF-004](../produto/requisitos-funcionais.md))
+- Upload HTTPS para a nossa API, que **encaminha** à Focus e descarta o buffer
+- Senha do certificado nunca em log
+- **Não** ciframos o A1 no Postgres — a Focus guarda o certificado do emitente
+- Persistimos só `certificate_status` e `certificate_expires_at`
+- Alerta 30 dias antes do vencimento ([RF-133](../produto/requisitos-funcionais.md))
 
 ## Segurança da aplicação
 

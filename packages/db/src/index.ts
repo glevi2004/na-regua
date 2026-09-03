@@ -1,11 +1,9 @@
 /**
- * Schema Drizzle, migrations, politicas RLS e repositorios.
+ * Schema Drizzle, migrations, politicas RLS.
  *
- * O schema depende de DEC-002 (estrategia multi-tenant) e NAO deve ser
- * implementado antes dela — ver docs/arquitetura/dados.md#multi-tenant.
- *
- * Por enquanto este pacote so expoe a conexao e a verificacao de saude usadas
- * pela raiz de composicao de apps/api e apps/worker.
+ * O Postgres materializa o catalogo enxuto de docs/arquitetura/dados.md.
+ * A aplicacao conecta como naregua_app (RLS). Migrations usam
+ * DATABASE_MIGRATION_URL (BYPASSRLS).
  */
 import postgres from 'postgres'
 
@@ -51,3 +49,13 @@ export async function closeConnection(): Promise<void> {
   await client?.end({ timeout: 5 })
   client = undefined
 }
+
+export {
+  applyMigration,
+  ensureRoles,
+  getAppDatabaseUrl,
+  getBootstrapUrl,
+  resolveTestDatabaseUrl,
+} from './migrate.js'
+export * from './schema.js'
+export { withTenant } from './tenant.js'

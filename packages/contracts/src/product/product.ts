@@ -18,6 +18,21 @@ export const createProductInputSchema = z
       .max(200, 'Descricao muito longa.'),
     /** Ausente em produto sem etiqueta — granel, servico, feito na hora. */
     barcode: barcodeSchema.optional(),
+    /** NFC-e. Ausente = nao emite consumidor ate preencher. */
+    ncm: z
+      .string()
+      .trim()
+      .transform((v) => v.replace(/\D/g, ''))
+      .refine((d) => d.length === 8, { message: 'NCM invalido. Use 8 digitos.' })
+      .optional(),
+    /**
+     * NFS-e Nacional. Ausente = mercadoria, ou servico ainda sem codigo —
+     * a emissao recusa no fiscal, nao aqui.
+     */
+    codigoTributacaoNacionalIss: z.string().trim().min(1).max(20).optional(),
+    /** NBS quando o municipio/servico exigir na DPS nacional. */
+    codigoNbs: z.string().trim().min(1).max(20).optional(),
+    kind: z.enum(['product', 'service']).default('product'),
     unitOfMeasure: unitOfMeasureSchema,
     salePriceCents: moneyCentsSchema,
     /**
@@ -51,6 +66,14 @@ export const updateProductInputSchema = z
   .object({
     description: z.string().trim().min(2).max(200),
     barcode: barcodeSchema,
+    ncm: z
+      .string()
+      .trim()
+      .transform((v) => v.replace(/\D/g, ''))
+      .refine((d) => d.length === 8, { message: 'NCM invalido. Use 8 digitos.' }),
+    codigoTributacaoNacionalIss: z.string().trim().min(1).max(20),
+    codigoNbs: z.string().trim().min(1).max(20),
+    kind: z.enum(['product', 'service']),
     unitOfMeasure: unitOfMeasureSchema,
     salePriceCents: moneyCentsSchema,
     costPriceCents: moneyCentsSchema,
@@ -67,6 +90,10 @@ export const productOutputSchema = z.object({
   id: idSchema,
   description: z.string(),
   barcode: z.string().nullable(),
+  ncm: z.string().nullable(),
+  codigoTributacaoNacionalIss: z.string().nullable(),
+  codigoNbs: z.string().nullable(),
+  kind: z.enum(['product', 'service']),
   unitOfMeasure: unitOfMeasureSchema,
   salePriceCents: z.number().int(),
   costPriceCents: z.number().int(),

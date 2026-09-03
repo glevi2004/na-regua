@@ -45,6 +45,7 @@ falha por um motivo que parece outro.
 | `pgcrypto`                               | geração de UUID no banco                                                                                                             |
 | `unaccent`, `pg_trgm`                    | busca de produto e cliente por nome, sem acento e tolerante a erro de digitação ([RF-029](../docs/produto/requisitos-funcionais.md)) |
 | papel `naregua_migrator` com `BYPASSRLS` | migrations precisam enxergar todas as linhas; a aplicação não pode                                                                   |
+| papel `naregua_app` sem `BYPASSRLS`      | conexão da API/worker — RLS vale de verdade (superuser `naregua` ignora política)                                                    |
 
 Para reexecutar: `pnpm infra:reset` (apaga os dados locais).
 

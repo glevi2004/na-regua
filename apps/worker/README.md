@@ -57,10 +57,11 @@ ninguém investiga.
 
 ## Por que a emissão fiscal mora aqui
 
-A venda **fecha antes da nota**. A SEFAZ é instável e o balcão não pode parar —
-[RNF-004](../../docs/produto/requisitos-nao-funcionais.md). O caso de uso grava
-a venda e enfileira; o worker emite e atualiza o estado. Se a SEFAZ estiver
-fora, a nota entra em contingência e a venda continua válida.
+A venda **fecha antes da nota**. A autorização fiscal (Focus) é instável e o
+balcão não pode parar — [RNF-004](../../docs/produto/requisitos-nao-funcionais.md).
+O caso de uso grava a venda e enfileira; o worker chama a Focus e atualiza o
+estado. Se a Focus falhar, a nota entra em contingência/`processing` e a venda
+continua válida.
 
 ## Variáveis de ambiente
 

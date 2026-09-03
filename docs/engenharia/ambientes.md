@@ -54,13 +54,13 @@ Legenda: **Obr.** obrigatória · **Seg.** é segredo (nunca em log, nunca versi
 
 ### Dados
 
-| Variável                                        | Obr. | Seg. | local                                                 | Descrição                                     |
-| ----------------------------------------------- | :--: | :--: | ----------------------------------------------------- | --------------------------------------------- |
-| `DATABASE_URL`                                  |  ✅  |  🔒  | `postgresql://naregua:naregua@localhost:5432/naregua` | conexão da aplicação — **sujeita a RLS**      |
-| `DATABASE_MIGRATION_URL`                        |  ✅  |  🔒  | `postgresql://naregua_migrator:...`                   | papel com `BYPASSRLS`, **só** para migrations |
-| `REDIS_URL`                                     |  ✅  |  🔒  | `redis://localhost:6379`                              | filas e cache                                 |
-| `POSTGRES_USER` / `_PASSWORD` / `_DB` / `_PORT` |      |  🔒  | `naregua` / `naregua` / `naregua` / `5432`            | lidos pelo `docker-compose.yml` local         |
-| `REDIS_PORT`                                    |      |      | `6379`                                                | idem                                          |
+| Variável                                        | Obr. | Seg. | local                                                     | Descrição                                                               |
+| ----------------------------------------------- | :--: | :--: | --------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `DATABASE_URL`                                  |  ✅  |  🔒  | `postgresql://naregua_app:naregua@localhost:5432/naregua` | conexão da aplicação — **sujeita a RLS** (`naregua_app`, não superuser) |
+| `DATABASE_MIGRATION_URL`                        |  ✅  |  🔒  | `postgresql://naregua_migrator:...`                       | papel com `BYPASSRLS`, **só** para migrations                           |
+| `REDIS_URL`                                     |  ✅  |  🔒  | `redis://localhost:6379`                                  | filas e cache                                                           |
+| `POSTGRES_USER` / `_PASSWORD` / `_DB` / `_PORT` |      |  🔒  | `naregua` / `naregua` / `naregua` / `5432`                | lidos pelo `docker-compose.yml` local                                   |
+| `REDIS_PORT`                                    |      |      | `6379`                                                    | idem                                                                    |
 
 **Dois papéis de banco, de propósito:** a aplicação roda sob RLS e não pode
 enxergar dados de outra empresa nem por engano; migrations precisam enxergar
@@ -74,7 +74,7 @@ tudo. Um papel só significaria abrir mão do isolamento —
 | `AUTH_PROVIDER` |  ✅  |      | `fake`                   | `fake` \| provedor escolhido                |
 | `JWT_SECRET`    |  ✅  |  🔒  | valor de desenvolvimento | assinatura de token. **Trocar em produção** |
 
-### PSP — PagMaxx · [DEC-006](../decisoes/README.md#dec-006)
+### PSP — PagMaxx · [ADR-0003](../decisoes/adr/0003-pagmaxx.md)
 
 Detalhes em [`integracoes/pagmaxx.md`](../arquitetura/integracoes/pagmaxx.md).
 
@@ -94,35 +94,32 @@ Detalhes em [`integracoes/pagmaxx.md`](../arquitetura/integracoes/pagmaxx.md).
 > segredos com acesso mínimo, e acompanhe
 > [QST-009](../decisoes/README.md#qst-009), que pede escopo maior para a API Key.
 
-### WhatsApp — [DEC-003](../decisoes/README.md#dec-003)
+### WhatsApp — Cloud API · [ADR-0005](../decisoes/adr/0005-whatsapp-cloud-api.md)
 
 | Variável                   | Obr. | Seg. | local  | Descrição                                                                    |
 | -------------------------- | :--: | :--: | ------ | ---------------------------------------------------------------------------- |
-| `WHATSAPP_PROVIDER`        |  ✅  |      | `fake` | `fake` \| provedor escolhido                                                 |
+| `WHATSAPP_PROVIDER`        |  ✅  |      | `fake` | `fake` \| `meta` (Cloud API; BSP se encapsular a oficial)                    |
 | `WHATSAPP_API_TOKEN`       |      |  🔒  | vazio  | —                                                                            |
 | `WHATSAPP_PHONE_NUMBER_ID` |      |      | vazio  | número da plataforma                                                         |
 | `WHATSAPP_WEBHOOK_SECRET`  |      |  🔒  | vazio  | validação de assinatura ([RNF-028](../produto/requisitos-nao-funcionais.md)) |
 
-### Fiscal — [DEC-004](../decisoes/README.md#dec-004)
+### Fiscal — Focus NFe · [ADR-0002](../decisoes/adr/0002-focus-nfe.md)
 
-| Variável             | Obr. | Seg. | local         | Descrição                    |
-| -------------------- | :--: | :--: | ------------- | ---------------------------- |
-| `FISCAL_PROVIDER`    |  ✅  |      | `fake`        | `fake` \| provedor escolhido |
-| `FISCAL_API_TOKEN`   |      |  🔒  | vazio         | —                            |
-| `FISCAL_ENVIRONMENT` |      |      | `homologacao` | `homologacao` \| `producao`  |
+| Variável                  | Obr. | Seg. | local                                 | Descrição                                  |
+| ------------------------- | :--: | :--: | ------------------------------------- | ------------------------------------------ |
+| `FISCAL_PROVIDER`         |  ✅  |      | `fake`                                | `fake` \| `focusnfe`                       |
+| `FOCUSNFE_BASE_URL`       |      |      | `https://homologacao.focusnfe.com.br` | homologação ou produção                    |
+| `FOCUSNFE_PLATFORM_TOKEN` |      |  🔒  | vazio                                 | token da integração (cadastro de empresas) |
+| `FISCAL_ENVIRONMENT`      |      |      | `homologacao`                         | `homologacao` \| `producao`                |
 
-O **certificado digital A1** não é variável de ambiente: é dado por empresa,
-cifrado em repouso com chave separada do banco
-([RNF-024](../produto/requisitos-nao-funcionais.md)). É o segredo mais perigoso
-do sistema — ver [`seguranca.md`](../arquitetura/seguranca.md#certificado-digital-a1--tratamento-especial).
+O **certificado digital A1** não é variável de ambiente nem coluna de banco:
+sobe no request e segue para a Focus. Token do emitente é segredo por
+`company_id`.
 
-### Open Finance — [DEC-005](../decisoes/README.md#dec-005)
+### Open Finance — [DEC-005](../decisoes/README.md#dec-005) adiada
 
-| Variável                | Obr. | Seg. | local  | Descrição                   |
-| ----------------------- | :--: | :--: | ------ | --------------------------- |
-| `BANKING_PROVIDER`      |  ✅  |      | `fake` | `fake` \| provedor \| `ofx` |
-| `BANKING_CLIENT_ID`     |      |  🔒  | vazio  | —                           |
-| `BANKING_CLIENT_SECRET` |      |  🔒  | vazio  | —                           |
+Variáveis `BANKING_*` só quando o módulo voltar. Não exigidas para subir a API
+neste recorte.
 
 ### Agente / LLM — [DEC-007](../decisoes/README.md#dec-007)
 
@@ -161,7 +158,7 @@ Isso é decisão de arquitetura, não conveniência:
 | O sistema sobe local sem credencial nenhuma                   | ninguém precisa de conta em fornecedor para trabalhar                    |
 | Ninguém tem motivo para pôr credencial de produção na máquina | [RNF-070](../produto/requisitos-nao-funcionais.md) fica fácil de cumprir |
 | Teste de integração roda na CI sem segredo                    | pipeline mais simples e mais rápido                                      |
-| Trabalho não espera decisão de fornecedor                     | destrava as 6 decisões de provedor em aberto                             |
+| Trabalho não espera credencial de terceiro                    | o boot local não depende de Focus, PagMaxx ou Meta                       |
 
 Regra: **o adapter falso implementa a mesma porta**, inclusive os caminhos de
 erro. Falso que só devolve sucesso esconde exatamente o que precisa ser testado.

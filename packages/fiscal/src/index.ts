@@ -1,8 +1,9 @@
 /**
- * Adapter de emissao fiscal (NFC-e / NFS-e). Implementa a porta InvoiceIssuer
+ * Adapter de emissao fiscal (NFC-e). Implementa a porta InvoiceIssuer
  * declarada por core.
  *
- * Provedor ainda nao escolhido (DEC-004). A porta e os testes podem ser
- * escritos antes da decisao — e exatamente para isso que o adapter existe.
+ * Provedor: Focus NFe (ADR-0002, DEC-017). NFC-e e NFS-e Nacional.
+ * Emissao so MEI/Simples sem Hibrido. Contrato: docs/arquitetura/integracoes/focusnfe.md
+ * Contrato: docs/arquitetura/integracoes/focusnfe.md
  */
 export const PLACEHOLDER = 'fiscal' as const

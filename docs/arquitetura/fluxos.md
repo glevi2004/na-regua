@@ -22,7 +22,7 @@ sequenceDiagram
     participant DB as PostgreSQL
     participant Q as fila (Redis)
     participant W as apps/worker
-    participant FI as fiscal → SEFAZ
+    participant FI as fiscal → Focus NFe
 
     F->>M: bipa produtos, escolhe cliente e pagamento
     Note over M: carrinho é local — RNF-051<br/>rede instável não trava o balcão
@@ -50,16 +50,16 @@ sequenceDiagram
         C->>Q: enfileira invoice-issue
         C-->>A: venda registrada
         A-->>M: 201 Created
-        Note over M: RNF-003: ≤ 1,5 s<br/>sem esperar a SEFAZ — RNF-004
+        Note over M: RNF-003: ≤ 1,5 s<br/>sem esperar a Focus — RNF-004
     end
 
     Q->>W: consome invoice-issue
-    W->>FI: emite NFC-e
+        W->>FI: emite NFC-e ou NFS-e Nacional
     alt autorizada
         FI-->>W: chave de acesso + XML
         W->>DB: grava nota, XML e estado "autorizada"
         W->>Q: enfileira whatsapp-send (DANFE ao cliente)
-    else SEFAZ indisponível
+    else Focus / autorização indisponível
         W->>DB: marca "em contingência" (RF-052)
         Note over W: retransmite quando voltar — RF-053
     else rejeitada
@@ -71,8 +71,10 @@ sequenceDiagram
 
 **Três decisões visíveis aqui:**
 
-1. **A venda fecha antes da nota.** A emissão é assíncrona porque a SEFAZ é
-   instável e o balcão não pode parar por causa disso.
+1. **A venda fecha antes da nota.** A emissão é assíncrona porque a autorização
+   fiscal (Focus → SEFAZ ou Ambiente Nacional) é instável e o balcão não pode
+   parar por causa disso. NFS-e Nacional quase sempre fica `processing` até o
+   webhook.
 2. **Uma transação para tudo que muda valor.** Ou venda, estoque, recebível e
    auditoria mudam juntos, ou nada muda.
 3. **A idempotência é verificada antes de qualquer cálculo.** Rede ruim gera
@@ -80,7 +82,7 @@ sequenceDiagram
 4. **Estado visível ao lojista é composto**, não um `status` na venda. Nota,
    recebível e falha de job vivem nas tabelas deles — ver
    [`dados.md`](dados.md#estados-da-venda).
-   Falha no `registerSale` = nenhuma linha; falha na SEFAZ/Pix depois = venda
+   Falha no `registerSale` = nenhuma linha; falha na Focus/PagMaxx depois = venda
    existe com o estado filho explícito (RF-054, US-025).
 
 ## Venda pelo WhatsApp
@@ -194,43 +196,8 @@ sequenceDiagram
 
 ## Conciliação bancária
 
-Requisitos: RF-074 a RF-080.
-
-```mermaid
-sequenceDiagram
-    autonumber
-    participant W as apps/worker
-    participant BK as banking → Open Finance
-    participant C as core
-    participant DB as PostgreSQL
-    actor L as Lojista
-
-    Note over W: job periódico
-    W->>BK: busca transações desde o último marco
-    alt consentimento expirado
-        BK-->>W: erro de autorização
-        W->>C: notifica lojista com link de renovação (RF-075)
-        Note over C: conciliações anteriores são preservadas
-    else ok
-        BK-->>W: transações
-        W->>C: importBankTransactions()
-        C->>DB: grava ignorando duplicadas por hash externo
-    end
-
-    L->>C: abre a conciliação
-    C->>DB: busca lançamentos compatíveis por valor e data
-    C-->>L: sugestões ordenadas por confiança
-
-    alt sugestão correta
-        L->>C: confirma
-        C->>DB: marca transação e lançamento como conciliados
-    else sem correspondência
-        L->>C: cria lançamento a partir da transação (RF-079)
-    else conciliação errada já feita
-        L->>C: desfaz
-        C->>DB: ambos voltam à fila (RF-080)
-    end
-```
+Fora do recorte A–J. [DEC-005](../decisoes/README.md#dec-005) adiada. Não
+implementar `packages/banking` neste recorte.
 
 ## Assinatura e bloqueio por inadimplência
 
@@ -277,10 +244,10 @@ flowchart TD
     HASINV -->|não| REVERT
     HASINV -->|sim| DEADLINE{dentro do<br/>prazo legal?}
 
-    DEADLINE -->|sim| CANCELNF[cancela na SEFAZ<br/>com justificativa]
+    DEADLINE -->|sim| CANCELNF[cancela na Focus<br/>com justificativa]
     DEADLINE -->|não| REFUSE[recusa o cancelamento<br/>orienta devolução<br/>RF-051]
 
-    CANCELNF --> OK{SEFAZ aceitou?}
+    CANCELNF --> OK{Focus aceitou?}
     OK -->|não| FAIL[informa o erro<br/>nada é estornado]
     OK -->|sim| REVERT
 
@@ -293,8 +260,7 @@ flowchart TD
 ```
 
 **A ordem importa:** cancela a nota **antes** de estornar. O contrário deixaria
-o sistema estornado e a SEFAZ com nota válida — divergência fiscal que ninguém
-percebe até a fiscalização.
+o sistema estornado e a Focus/SEFAZ com nota válida.
 
 ## Onboarding até a primeira venda
 
@@ -302,25 +268,25 @@ Alvo: 15 minutos ([M3](../produto/visao.md#métricas-de-sucesso)).
 
 ```mermaid
 flowchart LR
-    A([baixa o app]) --> B[cadastro por CNPJ<br/>~2 min]
-    B --> C[regime tributário<br/>~1 min]
-    C --> D{quer emitir<br/>nota agora?}
-    D -->|não| F
-    D -->|sim| E[certificado A1<br/>~3 min]
-    E --> F[cadastra 1 produto<br/>~2 min]
-    F --> G[primeira venda<br/>~1 min]
+    A([signup pessoal + plano]) --> B[empresa CNPJ<br/>/app/empresa]
+    B --> C[regime tributário]
+    C --> D{quer emitir e e<br/>MEI ou Simples sem Hibrido?}
+    D -->|nao| F
+    D -->|sim| E[A1; CSC se NFC-e<br/>flags NFS-e Nacional]
+    E --> F[cadastra 1 produto]
+    F --> G[primeira venda]
     G --> H([valor percebido])
 
     C -.->|opcional, depois| I[vincular WhatsApp]
-    C -.->|opcional, depois| J[convidar funcionário]
-    C -.->|opcional, depois| K[conta bancária]
+    B -.->|opcional, depois| K[KYC PagMaxx<br/>Pix/link]
 
     style H fill:#14532d,color:#fff
 ```
 
-Tudo que não está no caminho principal é adiável. O certificado digital é o
-maior risco de abandono — por isso é pulável, com a emissão fiscal desativada
-até ser configurado.
+Tudo que não está no caminho principal é adiável. O certificado na Focus é
+pulável: venda e estoque funcionam; a nota fica `not_configured`. Empresa
+inelegível para emitir ([DEC-017](../decisoes/README.md#dec-017)) segue o mesmo
+caminho sem A1. Staff e Open Finance não entram neste fluxo.
 
 ## Documentos relacionados
 

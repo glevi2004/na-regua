@@ -41,26 +41,31 @@ mesma emissão fiscal.
 
 ## Público-alvo
 
-**Primário (MVP):** comércio varejista de pequeno porte no Brasil, com CNPJ,
-1 a 10 funcionários, faturamento até R$ 360 mil/ano (Simples Nacional), que já
-vende pelo WhatsApp e emite (ou deveria emitir) NFC-e.
+**Primário (primeiro recorte):** comércio varejista de pequeno porte no Brasil,
+com CNPJ **MEI** ou **Simples Nacional** (DAS, **sem** opção pelo Híbrido
+IBS/CBS da reforma de 2027), operação pelo dono (staff depois, na mesma
+empresa), que já vende pelo WhatsApp e emite (ou deveria emitir) NFC-e e, quando
+vende serviço, NFS-e Nacional.
 
-**Secundário (pós-MVP):** prestadores de serviço com NFS-e, e negócios sem CNPJ
-em fase de formalização.
+**Também no ERP, sem nota:** lucro presumido/real e Simples que optou pelo
+Híbrido — cadastro, venda e financeiro; a Focus é recusada
+([DEC-017](../decisoes/README.md#dec-017)).
 
-**Fora do alvo:** indústria, atacado com regime tributário complexo, negócios
-com múltiplas filiais e estoque distribuído. Ver
-[Escopo do MVP](escopo-mvp.md#fora-do-mvp).
+**Secundário (pós-MVP):** negócios sem CNPJ em fase de formalização.
+
+**Fora do alvo:** indústria, atacado com regime tributário complexo, emissão de
+NF-e ou NFS-e municipal, negócios com múltiplas filiais, um login para várias
+empresas. Ver [Escopo](escopo-mvp.md#fora-do-recorte).
 
 ## Proposta de valor
 
-| Para o lojista                  | O que muda                                                                   |
-| ------------------------------- | ---------------------------------------------------------------------------- |
-| Não precisa aprender um sistema | Fala com o assistente como fala com um funcionário                           |
-| Não precisa parar de vender     | Registra a venda na mesma conversa em que ela aconteceu                      |
-| Sabe o lucro real               | Custo, imposto e tarifa de cartão são calculados na venda, não no fim do mês |
-| Cobra sem constrangimento       | O sistema dispara a cobrança, com o histórico correto                        |
-| Fica em dia com o fisco         | Emissão de NFC-e/NFS-e no momento da venda                                   |
+| Para o lojista                  | O que muda                                                                                                 |
+| ------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| Não precisa aprender um sistema | Fala com o assistente como fala com um funcionário                                                         |
+| Não precisa parar de vender     | Registra a venda na mesma conversa em que ela aconteceu                                                    |
+| Sabe o lucro real               | Custo, imposto e tarifa de cartão são calculados na venda, não no fim do mês                               |
+| Cobra sem constrangimento       | O sistema dispara a cobrança, com o histórico correto                                                      |
+| Fica em dia com o fisco         | NFC-e e NFS-e Nacional via [Focus NFe](../arquitetura/integracoes/focusnfe.md), se MEI/Simples sem Híbrido |
 
 ## Diferencial
 
@@ -108,18 +113,16 @@ O que o produto conscientemente **não** se propõe a ser:
 
 - Não é uma **plataforma de atendimento** ao cliente final. O assistente atende
   o lojista, não os clientes dele (isso é roadmap, não MVP).
-- Não é um **marketplace** no MVP — está no [roadmap](escopo-mvp.md#roadmap).
+- Não é um **marketplace** neste recorte — está no [roadmap](escopo-mvp.md#roadmap-depois-deste-recorte).
 - Não é um **sistema contábil**. Gera dado fiscal correto e exportável para o
   contador; não substitui o contador.
-- Não é uma **instituição de pagamento**. O sistema gera cobrança Pix e link de
-  pagamento através de um PSP ([PagMaxx](../arquitetura/integracoes/pagmaxx.md)),
-  e registra o que passa pela maquininha da lojista — mas não custodia dinheiro
-  nem substitui a adquirente dela. O limite exato entre "gerar cobrança" e
-  "processar pagamento" tem consequência regulatória e está em
-  [DEC-015](../decisoes/README.md#dec-015).
+- Não é uma **instituição de pagamento**. Pix, link e cartão online passam pela
+  [PagMaxx](../arquitetura/integracoes/pagmaxx.md) **na conta do lojista**
+  ([ADR-0006](../decisoes/adr/0006-conta-pagmaxx-por-lojista.md)). Dinheiro e
+  maquininha só são registrados. Não custodamos o dinheiro da venda.
 
 ## Documentos relacionados
 
 - [Personas](personas.md) — quem são os usuários descritos aqui
-- [Escopo do MVP](escopo-mvp.md) — o recorte concreto desta visão
+- [Escopo (jornadas A–J)](escopo-mvp.md) — o recorte concreto desta visão
 - [User Stories](user-stories.md) — como isso vira trabalho

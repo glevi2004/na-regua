@@ -42,16 +42,55 @@ PR**, e a linha sai da tabela de abertas.
 
 ## Painel
 
-| Estado             | Qtd | Quais                                                |
-| ------------------ | --: | ---------------------------------------------------- |
-| 🔴 Aberta          |  10 | DEC-003, 004, 005, 007, 008, 009, 011, 012, 013, 015 |
-| 🟡 Em análise      |   3 | DEC-001, 006, 010                                    |
-| ⚪ Adiada          |   1 | DEC-014                                              |
-| 🟢 Decidida        |   1 | DEC-002                                              |
-| ❓ Pergunta aberta |  12 | QST-001 a QST-012                                    |
+| Estado             | Qtd | Quais                                      |
+| ------------------ | --: | ------------------------------------------ |
+| 🔴 Aberta          |   6 | DEC-007, 008, 009, 011, 012, 013           |
+| 🟡 Em análise      |   1 | DEC-001                                    |
+| ⚪ Adiada          |   2 | DEC-005, DEC-014                           |
+| 🟢 Decidida        |   8 | DEC-002, 003, 004, 006, 010, 015, 016, 017 |
+| ❓ Pergunta aberta |  12 | QST-001 a QST-012                          |
 
-**Bloqueando o MVP agora:** DEC-003, DEC-004, DEC-008, DEC-009.
-Essas quatro travam trabalho de implementação já na Sprint 1.
+**Bloqueando o MVP agora:** DEC-008, DEC-009.
+Auth e hospedagem ainda travam Sprint 1. Fiscal, WhatsApp e PagMaxx **não**
+travam mais o desenho — as ADRs 0002–0006 fecharam provedor e recorte.
+
+---
+
+## Recorte A–J (2026-09-02)
+
+Fonte de verdade das telas: [`apps/web`](../../apps/web). Espinha do produto:
+
+| Jornada | O que é                                                                              |
+| ------- | ------------------------------------------------------------------------------------ |
+| **A**   | Cadastro pessoal no signup; dados da empresa (CNPJ) em `/app/empresa`                |
+| **B**   | Estoque: produtos simples, quantidades, movimentações                                |
+| **C**   | Vendas, clientes, PagMaxx (Pix/link/cartão online), NFC-e e NFS-e Nacional via Focus |
+| **D**   | Contas a pagar, a receber, plano de contas — **sem** bancos/Open Finance             |
+| **E**   | CRM (quadro de 3 colunas) e agenda — no primeiro recorte                             |
+| **F**   | Dashboard de KPIs em `/app`                                                          |
+| **G**   | Dados pessoais e da empresa; regime + Híbrido; A1 + CSC só se elegível para a Focus  |
+| **H**   | Plano de assinatura (PagMaxx `/subscriptions`)                                       |
+| **I**   | Chamados de suporte                                                                  |
+| **J**   | Assistente no web, app e WhatsApp Cloud API oficial                                  |
+
+Decisões de recorte fechadas junto com as ADRs (não viram DEC extra):
+
+1. **Documentos G:** A1 (`.pfx`) + CSC/`id_token` NFC-e vão para a **Focus**.
+   KYC da **PagMaxx** é esteira separada, só para Pix/link/cartão online
+   ([ADR-0006](adr/0006-conta-pagmaxx-por-lojista.md)).
+2. **Nota no primeiro recorte:** **NFC-e e NFS-e Nacional** via Focus. Sem NF-e
+   modelo 55. O layout do passo fiscal no front ainda será definido
+   (`nfce | nfse | sem_nota`).
+3. **Onboarding:** como o web — pessoa, cupom, termos, Pix da assinatura; empresa
+   depois em `/app/empresa`. Emissão fiscal é pulável até o A1 ser aceito na Focus.
+4. **WhatsApp:** [ADR-0005](adr/0005-whatsapp-cloud-api.md) — Cloud API oficial.
+5. **Conta PagMaxx:** [ADR-0006](adr/0006-conta-pagmaxx-por-lojista.md).
+6. **CRM e chamados:** entram no primeiro recorte, modelo mínimo.
+7. **Bancos / Open Finance:** [DEC-005](#dec-005) adiada — fora do caminho de
+   desenvolvimento.
+8. **Elegibilidade fiscal:** ERP para qualquer regime cadastrado; emissão
+   NFC-e / NFS-e Nacional só para **MEI** ou **Simples Nacional** que **não**
+   optou pelo Híbrido IBS/CBS ([DEC-017](#dec-017)).
 
 ---
 
@@ -96,99 +135,6 @@ marca, para que a decisão não force renomear pacote nenhum.
 
 ---
 
-### DEC-003 — Provedor de WhatsApp
-
-|              |                                                                                                                                                                                 |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**   | 🔴 Aberta                                                                                                                                                                       |
-| **Dono**     | Trilha 2 — Plataforma & Integrações                                                                                                                                             |
-| **Prazo**    | **Sprint 2**                                                                                                                                                                    |
-| **Bloqueia** | `packages/whatsapp` · [RF-015](../produto/requisitos-funcionais.md), RF-016, RF-048, RF-068, RF-094, RF-095 · todo o [E11](../produto/user-stories.md#e11--assistente-whatsapp) |
-
-**Opções:** Meta Cloud API direto · BSP (Twilio, Z-API, 360dialog, Gupshup) ·
-biblioteca não oficial.
-
-**Critérios de decisão:** custo por conversa (entra em
-[RNF-072](../produto/requisitos-nao-funcionais.md)) · janela de 24h e template de
-mensagem · confiabilidade do webhook · **risco de banimento** — biblioteca não
-oficial derruba o produto inteiro sem aviso e sem recurso.
-
-**Recomendação preliminar.** Descartar solução não oficial: o produto todo
-depende deste canal. Entre Meta direto e BSP, é troca de custo por velocidade —
-BSP entrega mais rápido, Meta sai mais barato em escala. A porta
-`MessageSender` deve ser escrita antes da decisão.
-
----
-
-### DEC-004 — Provedor de emissão fiscal
-
-|              |                                                                                                                                  |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**   | 🔴 Aberta                                                                                                                        |
-| **Dono**     | Trilha 2 — Plataforma & Integrações                                                                                              |
-| **Prazo**    | **Sprint 2**                                                                                                                     |
-| **Bloqueia** | `packages/fiscal` · [RF-045 a RF-054](../produto/requisitos-funcionais.md) · [E5](../produto/user-stories.md#e5--emissão-fiscal) |
-
-**Opções:** provedor de API fiscal (Focus NFe, NFe.io, PlugNotas, eNotas, Tecnospeed)
-· integração direta com a SEFAZ.
-
-**Critérios:** cobertura de NFC-e **e** NFS-e (NFS-e é municipal — a cobertura
-varia por cidade) · contingência ([RF-052](../produto/requisitos-funcionais.md))
-· guarda de XML por 5 anos ([RNF-037](../produto/requisitos-nao-funcionais.md))
-· gestão do certificado A1 · qualidade das mensagens de rejeição
-([RF-047](../produto/requisitos-funcionais.md)) · custo por nota.
-
-**Recomendação.** Integração direta com a SEFAZ está fora de cogitação para um
-time de 3 pessoas: é um projeto inteiro por si só. Escolher provedor, priorizando
-NFC-e (MVP) e cobertura de NFS-e nas cidades-alvo.
-
----
-
-### DEC-005 — Provedor de Open Finance
-
-|              |                                                                                                 |
-| ------------ | ----------------------------------------------------------------------------------------------- |
-| **Status**   | 🔴 Aberta                                                                                       |
-| **Dono**     | Trilha 2 — Plataforma & Integrações                                                             |
-| **Prazo**    | Sprint 4 — só bloqueia [E8](../produto/user-stories.md#e8--bancos--conciliação), que é `SHOULD` |
-| **Bloqueia** | `packages/banking` · [RF-074 a RF-077](../produto/requisitos-funcionais.md)                     |
-
-**Opções:** agregador (Pluggy, Belvo, Klavi) · integração direta · **apenas
-importação de OFX/CSV no MVP**.
-
-**Recomendação.** Começar por OFX/CSV
-([RF-076](../produto/requisitos-funcionais.md)), que já entrega conciliação e não
-depende de fornecedor nem de certificação. Open Finance entra depois, atrás da
-mesma porta `BankStatementProvider`.
-
----
-
-### DEC-006 — PSP / adquirente
-
-|              |                                                                                     |
-| ------------ | ----------------------------------------------------------------------------------- |
-| **Status**   | 🟡 Em análise — candidato avaliado                                                  |
-| **Dono**     | Produto + Trilha 2                                                                  |
-| **Prazo**    | Sprint 2                                                                            |
-| **Bloqueia** | `packages/payments` · [RF-007](../produto/requisitos-funcionais.md), RF-038, RF-063 |
-
-**Candidato: PagMaxx.** Avaliação completa em
-[`integracoes/pagmaxx.md`](../arquitetura/integracoes/pagmaxx.md).
-
-**Resumo.** Cobre Pix, link de pagamento, cartão online, tokenização, 3DS,
-estorno, simulação de taxa e assinaturas, com webhooks bem projetados
-(HMAC-SHA256 sobre corpo bruto, id de evento para idempotência, reentrega 5×).
-
-**A ressalva que importa:** **não há API de captura presencial.** O cartão do
-balcão continua na maquininha da lojista; o sistema registra a venda e calcula a
-tarifa por tabela configurada. Isso não invalida a escolha — encaixa bem na
-metade conversacional do produto — mas precisa estar claro antes de assinar.
-
-**Pendências antes de fechar:** [QST-009](#qst-009), [QST-010](#qst-010),
-[QST-012](#qst-012) e [DEC-015](#dec-015).
-
----
-
 ### DEC-007 — Modelo de LLM e mecanismo de recuperação de informação
 
 |              |                                                                                                                                |
@@ -217,30 +163,32 @@ e é o que sustenta [RF-101](../produto/requisitos-funcionais.md).
 Busca semântica pode ser útil depois, para documentação e ajuda — não para dado
 financeiro.
 
+O assistente existe no **web, app e WhatsApp** (jornada J). O runtime continua
+em `packages/agent` dentro da API.
+
 ---
 
 ### DEC-008 — Autenticação e vínculo do número de WhatsApp
 
-|              |                                                                                                                                               |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**   | 🔴 Aberta                                                                                                                                     |
-| **Dono**     | Trilha 2 + Trilha 1                                                                                                                           |
-| **Prazo**    | **Sprint 1**                                                                                                                                  |
-| **Bloqueia** | [RF-005](../produto/requisitos-funcionais.md), RF-119, RF-120 · api, web, mobile · [E11](../produto/user-stories.md#e11--assistente-whatsapp) |
+|              |                                                                                                                              |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| **Status**   | 🔴 Aberta — **recorte 2026-09-02:** membership 1:1 saiu desta DEC ([ADR-0004](adr/0004-usuario-uma-empresa.md))              |
+| **Dono**     | Trilha 2 + Trilha 1                                                                                                          |
+| **Prazo**    | **Sprint 1**                                                                                                                 |
+| **Bloqueia** | [RF-119](../produto/requisitos-funcionais.md), RF-120 · api, web, mobile · [E11](../produto/user-stories.md#e11--assistente) |
 
-**Duas perguntas juntas, porque a segunda depende da primeira:**
+**Ainda em aberto (só isto):**
 
-1. **Autenticação:** solução própria vs. gerenciada (Auth0, Clerk, Supabase Auth,
-   Better Auth). Critérios: custo por usuário ativo, suporte a um usuário em
-   várias empresas, segundo fator para `platform_admin`
+1. **Provedor de autenticação:** solução própria vs. gerenciada (Auth0, Clerk,
+   Supabase Auth, Better Auth). Critérios: custo por usuário ativo, segundo
+   fator para `platform_admin`
    ([RNF-025](../produto/requisitos-nao-funcionais.md)), e não amarrar o vendor
-   ao modelo de dados.
+   ao modelo de dados. **Não** precisa suportar um usuário em várias empresas.
 
-2. **Vínculo telefone ↔ identidade:** herdada da apresentação. Hoje o desenho
-   trata o número vinculado como credencial
-   ([`seguranca.md`](../arquitetura/seguranca.md#autenticação-do-canal-whatsapp)),
-   o que herda a fragilidade do SIM swap. Contrapesos atuais: confirmação
-   explícita de toda ação com valor e trilha de auditoria.
+2. **Vínculo telefone ↔ identidade:** o número vinculado é a credencial do
+   canal WhatsApp
+   ([`seguranca.md`](../arquitetura/seguranca.md#autenticação-do-canal-whatsapp)).
+   Contrapesos: confirmação explícita de ação com valor e trilha de auditoria.
 
 **A decidir explicitamente:** o vínculo por número é suficiente, ou uma ação
 acima de certo valor exige confirmação por um segundo canal?
@@ -271,40 +219,6 @@ na fatura.
 
 ---
 
-### DEC-010 — Cobrança de mensalidade, inadimplência e bloqueio
-
-|              |                                                                                                                                                |
-| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**   | 🟡 Em análise — candidato avaliado                                                                                                             |
-| **Dono**     | Produto                                                                                                                                        |
-| **Prazo**    | Sprint 3                                                                                                                                       |
-| **Bloqueia** | `packages/billing` · [RF-110 a RF-118](../produto/requisitos-funcionais.md) · [E12](../produto/user-stories.md#e12--assinatura--cobrança-saas) |
-
-**Contexto.** Herdada da apresentação: como cobrar, como avisar da inadimplência,
-qual a regra de bloqueio.
-
-**Provedor.** `/subscriptions/*` da
-[PagMaxx](../arquitetura/integracoes/pagmaxx.md) cobre recorrência em cartão e
-Pix, com ciclos numerados, `external_reference` próprio e histórico de cobranças
-— suficiente para E12 sem um segundo fornecedor.
-
-**Ainda em aberto (produto, não técnico):**
-
-| Ponto      | Pergunta                                                                   |
-| ---------- | -------------------------------------------------------------------------- |
-| Preço      | Quanto custa a mensalidade e quantos planos existem? → [QST-002](#qst-002) |
-| Trial      | Quantos dias e com quais limites?                                          |
-| Tolerância | Quantos dias entre o vencimento e a restrição?                             |
-| Restrição  | Confirmado que restringe **escrita** mantendo leitura e exportação?        |
-
-**Recomendação.** Manter o estado `Restrita` como desenhado em
-[`fluxos.md`](../arquitetura/fluxos.md#assinatura-e-bloqueio-por-inadimplência):
-bloquear escrita, **nunca** leitura nem exportação. Sequestrar dado para forçar
-pagamento contradiz o princípio 5 da [visão](../produto/visao.md#princípios-de-produto)
-e transforma inadimplente em detrator.
-
----
-
 ### DEC-011 — Memória e contexto da conversa
 
 |              |                                                                                                                                    |
@@ -329,7 +243,7 @@ dado de lojista é outra, e exige base legal e consentimento próprios
 
 ---
 
-### DEC-012 — Criação de usuário e cupons
+### DEC-012 — Cupons (autocadastro já existe no web)
 
 |              |                                                                                                                    |
 | ------------ | ------------------------------------------------------------------------------------------------------------------ |
@@ -338,9 +252,28 @@ dado de lojista é outra, e exige base legal e consentimento próprios
 | **Prazo**    | Sprint 3                                                                                                           |
 | **Bloqueia** | [RF-114](../produto/requisitos-funcionais.md), RF-115 · [US-056](../produto/user-stories.md#us-056--aplicar-cupom) |
 
-Herdada da apresentação. **Decidir:** há autocadastro ou só por convite? Existe
-indicação entre lojistas? Cupom é desconto percentual, valor fixo ou período
-grátis? Cumulativo? Quem emite?
+O web já tem autocadastro e campo de cupom no signup. **Ainda decidir:** cupom
+é desconto percentual, valor fixo ou período grátis? Cumulativo? Quem emite?
+Indicação entre lojistas?
+
+Convite de funcionário **não** está nesta DEC — é [ADR-0004](adr/0004-usuario-uma-empresa.md)
+(staff depois, mesma empresa).
+
+---
+
+### <a id="dec-005"></a>DEC-005 — Provedor de Open Finance
+
+|              |                                                                                     |
+| ------------ | ----------------------------------------------------------------------------------- |
+| **Status**   | ⚪ Adiada — fora do recorte A–J. Revisar depois do MVP operacional                  |
+| **Dono**     | Trilha 2 — Plataforma & Integrações                                                 |
+| **Prazo**    | Sem data no primeiro recorte                                                        |
+| **Bloqueia** | Nada no caminho crítico. `packages/banking` e NR-047/048/076 saem da Sprint 5 ativa |
+
+**Motivo.** Jornada D é contas a pagar/receber e plano de contas. Conciliação
+e Open Finance não estão no web nem no fluxo A–J.
+
+Quando voltar: começar por OFX/CSV atrás da porta `BankStatementProvider`.
 
 ---
 
@@ -377,53 +310,25 @@ Pré-MVP usa **tag única `v0.x.y`** no monorepo. Quando os deploys de `api`,
 
 ---
 
-### DEC-015 — Modelo de conta no PSP: uma por lojista vs. split na conta da plataforma
-
-|              |                                                                                                                                             |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**   | 🔴 Aberta                                                                                                                                   |
-| **Dono**     | Produto + jurídico                                                                                                                          |
-| **Prazo**    | Antes de fechar contrato com o PSP                                                                                                          |
-| **Bloqueia** | `packages/payments` · onboarding ([E1](../produto/user-stories.md#e1--onboarding--empresa)) · [M3](../produto/visao.md#métricas-de-sucesso) |
-
-**Contexto.** Descoberto na avaliação da
-[PagMaxx](../arquitetura/integracoes/pagmaxx.md#5-uma-conta-pagmaxx-por-lojista--atrito-de-onboarding):
-_"cada estabelecimento opera com suas próprias credenciais"_, com credenciamento
-por envio de documentos e aprovação humana.
-
-| Opção                            | Prós                                                                      | Contras                                                                                              |
-| -------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **Conta por lojista**            | Dinheiro vai direto ao lojista; responsabilidade regulatória fica com ele | KYC com aprovação humana no onboarding — atrito contra [M3](../produto/visao.md#métricas-de-sucesso) |
-| **Split na conta da plataforma** | Onboarding quase instantâneo                                              | O dinheiro passa por nós — muda a natureza regulatória do negócio e exige análise jurídica           |
-
-**Recomendação.** Conta por lojista, com o credenciamento **fora do caminho
-crítico** do onboarding: a lojista vende, registra e emite nota desde o primeiro
-minuto; Pix e link de pagamento ficam pendentes até a aprovação. Preserva M3 sem
-assumir risco regulatório de instituição de pagamento.
-
-Exige validação jurídica junto com [QST-004](#qst-004).
-
----
-
 ## Perguntas em aberto
 
 Resolvem-se com informação, não com escolha. Uma pergunta respondida vira
 atualização de documento — e às vezes abre uma `DEC`.
 
-| ID                              | Pergunta                                                                                                                  | Para quem            | Por que importa                                                                                                                                                    | Prazo             |
-| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| <a id="qst-001"></a>**QST-001** | Quantos lojistas se espera nos primeiros 12 meses?                                                                        | Produto              | Dimensiona [RNF-016/017](../produto/requisitos-nao-funcionais.md) e o custo de [DEC-009](#dec-009)                                                                 | Sprint 1          |
-| <a id="qst-002"></a>**QST-002** | Qual o preço da mensalidade e quantos planos?                                                                             | Produto              | [RNF-072](../produto/requisitos-nao-funcionais.md) e [RNF-074](../produto/requisitos-nao-funcionais.md) são percentuais dela — sem o valor, não há como verificar  | Sprint 1          |
-| <a id="qst-003"></a>**QST-003** | Existe lojista-piloto comprometido em usar o MVP?                                                                         | Produto              | Sem piloto não há como validar o [critério de saída do MVP](../produto/escopo-mvp.md#critérios-de-saída-do-mvp)                                                    | Sprint 1          |
-| <a id="qst-004"></a>**QST-004** | Quem é controlador e quem é operador de dados na LGPD?                                                                    | Jurídico             | Define quem responde por vazamento e o que vai no contrato — ver [`seguranca.md`](../arquitetura/seguranca.md#lgpd)                                                | Sprint 2          |
-| <a id="qst-005"></a>**QST-005** | Qual contador valida o formato de exportação?                                                                             | Produto              | [RF-087](../produto/requisitos-funcionais.md) sem validação real vira retrabalho                                                                                   | Sprint 4          |
-| <a id="qst-006"></a>**QST-006** | As [personas](../produto/personas.md) foram validadas com lojistas reais?                                                 | Produto              | Hoje são inferência a partir da apresentação comercial                                                                                                             | Sprint 2          |
-| <a id="qst-007"></a>**QST-007** | As metas [M1–M7](../produto/visao.md#métricas-de-sucesso) são realistas?                                                  | Produto              | São hipóteses; meta errada leva a decisão errada                                                                                                                   | Sprint 2          |
-| <a id="qst-008"></a>**QST-008** | Os alvos numéricos dos [RNFs](../produto/requisitos-nao-funcionais.md) batem com o aparelho e a internet do público-alvo? | Produto + Trilha 3   | Calibrados por estimativa, não por medição                                                                                                                         | Sprint 3          |
-| <a id="qst-009"></a>**QST-009** | A PagMaxx pode estender o escopo da API Key para Pix, links e assinaturas?                                                | PagMaxx              | Hoje essas rotas exigem guardar **e-mail e senha** da conta — ver [a ressalva](../arquitetura/integracoes/pagmaxx.md#3-autenticação-server-to-server-é-incompleta) | Antes do contrato |
-| <a id="qst-010"></a>**QST-010** | A PagMaxx tem ou terá API de captura presencial (maquininha, TEF, tap-on-phone)?                                          | PagMaxx              | Mudaria completamente o desenho do PDV — ver [a lacuna](../arquitetura/integracoes/pagmaxx.md#a-lacuna-não-há-api-de-venda-presencial)                             | Antes do contrato |
-| <a id="qst-011"></a>**QST-011** | ProComércio é a marca guarda-chuva e este ERP é uma das soluções dela, ou é o nome do próprio ERP?                        | Produto / fundadores | Resolve [DEC-001](#dec-001) e define qual das 5 paletas derivadas o produto usa                                                                                    | Sprint 1          |
-| <a id="qst-012"></a>**QST-012** | Já existe conta PagMaxx ativa e acesso ao ambiente de homologação?                                                        | Produto              | Sem homologação não há como testar `packages/payments`                                                                                                             | Sprint 2          |
+| ID                              | Pergunta                                                                                                                  | Para quem            | Por que importa                                                                                                                                                    | Prazo                       |
+| ------------------------------- | ------------------------------------------------------------------------------------------------------------------------- | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------- |
+| <a id="qst-001"></a>**QST-001** | Quantos lojistas se espera nos primeiros 12 meses?                                                                        | Produto              | Dimensiona [RNF-016/017](../produto/requisitos-nao-funcionais.md) e o custo de [DEC-009](#dec-009)                                                                 | Sprint 1                    |
+| <a id="qst-002"></a>**QST-002** | Qual o preço da mensalidade e quantos planos?                                                                             | Produto              | [RNF-072](../produto/requisitos-nao-funcionais.md) e [RNF-074](../produto/requisitos-nao-funcionais.md) são percentuais dela — sem o valor, não há como verificar  | Sprint 1                    |
+| <a id="qst-003"></a>**QST-003** | Existe lojista-piloto comprometido em usar o MVP?                                                                         | Produto              | Sem piloto não há como validar o [critério de saída do MVP](../produto/escopo-mvp.md#critérios-de-saída-do-mvp)                                                    | Sprint 1                    |
+| <a id="qst-004"></a>**QST-004** | Quem é controlador e quem é operador de dados na LGPD?                                                                    | Jurídico             | Define quem responde por vazamento e o que vai no contrato — ver [`seguranca.md`](../arquitetura/seguranca.md#lgpd)                                                | Sprint 2                    |
+| <a id="qst-005"></a>**QST-005** | Qual contador valida o formato de exportação?                                                                             | Produto              | [RF-087](../produto/requisitos-funcionais.md) sem validação real vira retrabalho                                                                                   | Sprint 4                    |
+| <a id="qst-006"></a>**QST-006** | As [personas](../produto/personas.md) foram validadas com lojistas reais?                                                 | Produto              | Hoje são inferência a partir da apresentação comercial                                                                                                             | Sprint 2                    |
+| <a id="qst-007"></a>**QST-007** | As metas [M1–M7](../produto/visao.md#métricas-de-sucesso) são realistas?                                                  | Produto              | São hipóteses; meta errada leva a decisão errada                                                                                                                   | Sprint 2                    |
+| <a id="qst-008"></a>**QST-008** | Os alvos numéricos dos [RNFs](../produto/requisitos-nao-funcionais.md) batem com o aparelho e a internet do público-alvo? | Produto + Trilha 3   | Calibrados por estimativa, não por medição                                                                                                                         | Sprint 3                    |
+| <a id="qst-009"></a>**QST-009** | A PagMaxx pode estender o escopo da API Key para Pix, links e assinaturas?                                                | PagMaxx              | Hoje essas rotas exigem guardar **e-mail e senha** da conta — ver [a ressalva](../arquitetura/integracoes/pagmaxx.md#3-autenticação-server-to-server-é-incompleta) | Antes do contrato           |
+| <a id="qst-010"></a>**QST-010** | A PagMaxx tem ou terá API de captura presencial (maquininha, TEF, tap-on-phone)?                                          | PagMaxx              | Não muda a escolha atual (só registro) — informativo                                                                                                               | Quando houver roadmap deles |
+| <a id="qst-011"></a>**QST-011** | ProComércio é a marca guarda-chuva e este ERP é uma das soluções dela, ou é o nome do próprio ERP?                        | Produto / fundadores | Resolve [DEC-001](#dec-001) e define qual das 5 paletas derivadas o produto usa                                                                                    | Sprint 1                    |
+| <a id="qst-012"></a>**QST-012** | Já existe conta PagMaxx ativa e acesso ao ambiente de homologação?                                                        | Produto              | Sem homologação não há como testar `packages/payments`                                                                                                             | Sprint 2                    |
 
 ---
 
@@ -432,9 +337,14 @@ atualização de documento — e às vezes abre uma `DEC`.
 Fechadas viram ADR em [`adr/`](adr/). A âncora `DEC-xxx` permanece para os
 links que já apontam para cá.
 
-| ADR                                   | Decisão                                   | Data       |
-| ------------------------------------- | ----------------------------------------- | ---------- |
-| [ADR-0001](adr/0001-rls-por-linha.md) | Isolamento multi-tenant por RLS por linha | 2026-09-01 |
+| ADR                                               | Decisão                                               | Data       |
+| ------------------------------------------------- | ----------------------------------------------------- | ---------- |
+| [ADR-0001](adr/0001-rls-por-linha.md)             | Isolamento multi-tenant por RLS por linha             | 2026-09-01 |
+| [ADR-0002](adr/0002-focus-nfe.md)                 | Emissão fiscal via Focus NFe (NFC-e e NFS-e Nacional) | 2026-09-02 |
+| [ADR-0003](adr/0003-pagmaxx.md)                   | PagMaxx nas vendas online e na assinatura SaaS        | 2026-09-02 |
+| [ADR-0004](adr/0004-usuario-uma-empresa.md)       | Um usuário, uma empresa                               | 2026-09-02 |
+| [ADR-0005](adr/0005-whatsapp-cloud-api.md)        | WhatsApp Cloud API oficial                            | 2026-09-02 |
+| [ADR-0006](adr/0006-conta-pagmaxx-por-lojista.md) | Conta PagMaxx por lojista                             | 2026-09-02 |
 
 ### <a id="dec-002"></a>DEC-002 — Estratégia multi-tenant
 
@@ -445,10 +355,86 @@ links que já apontam para cá.
 | **Data**    | 2026-09-01                                            |
 
 Consequências no código: [`dados.md`](../arquitetura/dados.md#multi-tenant).
-Materialização em `packages/db` (`NR-007`).
+Materialização em `packages/db` (`NR-007`). Isolamento **entre lojas**; não
+implica um usuário em várias empresas ([ADR-0004](adr/0004-usuario-uma-empresa.md)).
+
+### <a id="dec-003"></a>DEC-003 — Provedor de WhatsApp
+
+|             |                                                                     |
+| ----------- | ------------------------------------------------------------------- |
+| **Status**  | 🟢 Decidida — [ADR-0005](adr/0005-whatsapp-cloud-api.md)            |
+| **Escolha** | WhatsApp Cloud API oficial da Meta (BSP só se encapsular a oficial) |
+| **Data**    | 2026-09-02                                                          |
+
+Biblioteca não oficial descartada.
+
+### <a id="dec-004"></a>DEC-004 — Provedor de emissão fiscal
+
+|             |                                                                                       |
+| ----------- | ------------------------------------------------------------------------------------- |
+| **Status**  | 🟢 Decidida — [ADR-0002](adr/0002-focus-nfe.md)                                       |
+| **Escolha** | Focus NFe; NFC-e e NFS-e Nacional; A1 só transita; emissão só MEI/Simples sem Híbrido |
+| **Data**    | 2026-09-02                                                                            |
+
+Não há integração direta com a SEFAZ. Contrato:
+[`integracoes/focusnfe.md`](../arquitetura/integracoes/focusnfe.md).
+Quem pode emitir: [DEC-017](#dec-017).
+
+### <a id="dec-006"></a>DEC-006 — PSP / adquirente
+
+|             |                                               |
+| ----------- | --------------------------------------------- |
+| **Status**  | 🟢 Decidida — [ADR-0003](adr/0003-pagmaxx.md) |
+| **Escolha** | PagMaxx para Pix, link e cartão online        |
+| **Data**    | 2026-09-02                                    |
+
+Dinheiro e maquininha: só registro. Sem TEF no recorte.
+
+### <a id="dec-010"></a>DEC-010 — Cobrança de mensalidade (provedor)
+
+|             |                                               |
+| ----------- | --------------------------------------------- |
+| **Status**  | 🟢 Decidida — [ADR-0003](adr/0003-pagmaxx.md) |
+| **Escolha** | PagMaxx `/subscriptions/*`                    |
+| **Data**    | 2026-09-02                                    |
+
+Ainda produto (não bloqueia adapter): preço e trial → [QST-002](#qst-002).
+Estado `Restrita`: bloquear escrita, nunca leitura nem exportação
+([`fluxos.md`](../arquitetura/fluxos.md#assinatura-e-bloqueio-por-inadimplência)).
+
+### <a id="dec-015"></a>DEC-015 — Modelo de conta no PSP
+
+|             |                                                                 |
+| ----------- | --------------------------------------------------------------- |
+| **Status**  | 🟢 Decidida — [ADR-0006](adr/0006-conta-pagmaxx-por-lojista.md) |
+| **Escolha** | Uma conta PagMaxx por lojista; KYC fora do caminho crítico      |
+| **Data**    | 2026-09-02                                                      |
+
+### <a id="dec-016"></a>DEC-016 — Relação usuário–empresa
+
+|             |                                                           |
+| ----------- | --------------------------------------------------------- |
+| **Status**  | 🟢 Decidida — [ADR-0004](adr/0004-usuario-uma-empresa.md) |
+| **Escolha** | `users.company_id` 1:1; staff futuro na mesma empresa     |
+| **Data**    | 2026-09-02                                                |
+
+### <a id="dec-017"></a>DEC-017 — Elegibilidade para emitir nota
+
+|             |                                                                                                             |
+| ----------- | ----------------------------------------------------------------------------------------------------------- |
+| **Status**  | 🟢 Decidida — recorte em [ADR-0002](adr/0002-focus-nfe.md)                                                  |
+| **Escolha** | ERP liberado; NFC-e e NFS-e Nacional só MEI ou Simples **sem** Híbrido IBS/CBS (LC 214/2025, vigência 2027) |
+| **Data**    | 2026-09-02                                                                                                  |
+
+Autodeclaração em `/app/empresa` (`tax_regime` + `opted_reforma_hibrida`).
+Consulta CNPJ sugere MEI vs Simples; **não** descobre Híbrido. Inelegível
+grava a empresa, vende e usa financeiro; A1, CSC, flags Focus e a fila
+`invoice-issue` são recusados ([RF-146](../produto/requisitos-funcionais.md)).
+Predicado: `isEligibleForFiscalEmission` em `packages/domain`.
 
 ## Documentos relacionados
 
 - [ADRs](adr/) — decisões fechadas, com o contexto da época
 - [Task Ledger](../processo/task-ledger.md) — o que cada decisão bloqueia
 - [Princípios](../arquitetura/principios.md) — o que **não** é negociável
+- [Escopo A–J](../produto/escopo-mvp.md) — recorte de produto

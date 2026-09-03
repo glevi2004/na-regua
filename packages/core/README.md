@@ -11,8 +11,9 @@ Toda operação de negócio ponta a ponta: `registerSale`, `settleReceivable`,
 `issueInvoice`, `registerCustomer`. Com transação, autorização e auditoria.
 
 **Também declara as portas dos adapters** — as interfaces que `fiscal`,
-`whatsapp`, `banking`, `billing` e `payments` implementam. A seta aponta para
-dentro: quem define o contrato é o núcleo, não o fornecedor.
+`whatsapp`, `billing` e `payments` implementam. A porta de `banking` existe
+para o recorte futuro (Open Finance adiado). A seta aponta para dentro: quem
+define o contrato é o núcleo, não o fornecedor.
 
 **O que não faz:** cálculo (é `domain`), SQL (é `db`), HTTP (é `api`),
 interpretação de linguagem (é `agent`).
@@ -77,7 +78,8 @@ src/
 │   ├── bank-statement-provider.ts
 │   └── subscription-provider.ts
 ├── company/  customer/  product/  inventory/
-├── sale/  financial/  banking/  accounting/
+├── sale/  financial/  accounting/  crm/  support/
+│   (banking/ adiado — DEC-005)
 └── audit/
 ```
 

@@ -2,7 +2,8 @@
 
 Adapter de extrato bancário — Open Finance e importação de arquivo.
 
-**Estado:** 🔴 não implementado · 🚧 Open Finance bloqueado por [DEC-005](../../docs/decisoes/README.md#dec-005) · `NR-047`, `NR-048`
+**Estado:** 🔴 não implementado · **fora do recorte A–J**
+([DEC-005](../../docs/decisoes/README.md#dec-005) adiada) · NR-047/048 no backlog
 
 ## Responsabilidade
 

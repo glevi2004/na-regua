@@ -65,19 +65,19 @@ Se você não consegue escrever como medir, o requisito ainda não está pronto.
 
 ## 4. Segurança
 
-| ID      | Requisito                                                                                     | Como medir                                                           | Pri |
-| ------- | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | :-: |
-| RNF-020 | Todo tráfego externo em TLS 1.2+; nenhuma porta de banco ou Redis exposta à internet          | Varredura de portas + verificação de configuração                    |  M  |
-| RNF-021 | Isolamento entre empresas imposto no banco por RLS, não apenas na aplicação                   | Teste automatizado que tenta ler dados de outro `company_id` e falha |  M  |
-| RNF-022 | Nenhum segredo em código, log ou variável versionada; todos em gerenciador de segredos        | Varredura de segredos na CI, bloqueante                              |  M  |
-| RNF-023 | Senhas com hash forte e específico para senhas (Argon2id ou bcrypt), nunca reversível         | Revisão de código                                                    |  M  |
-| RNF-024 | Certificado digital A1 armazenado cifrado em repouso, com chave separada do banco             | Revisão de arquitetura                                               |  M  |
-| RNF-025 | Autenticação de administrador da plataforma exige segundo fator                               | Verificação de configuração                                          |  M  |
-| RNF-026 | Limite de requisições por usuário e por IP em rotas de autenticação e de escrita              | Teste de carga; verificação de resposta 429                          |  M  |
-| RNF-027 | Toda entrada validada por schema antes de chegar à lógica de negócio                          | Revisão de código; nenhuma rota sem schema Zod                       |  M  |
-| RNF-028 | Webhooks de terceiros verificam assinatura e rejeitam requisição não autenticada              | Teste de integração com assinatura inválida                          |  M  |
-| RNF-029 | Dependências verificadas contra vulnerabilidades conhecidas a cada PR                         | Job de auditoria na CI, bloqueante para severidade alta              |  M  |
-| RNF-030 | Acesso administrativo a dados de tenant é registrado com justificativa e revisado mensalmente | Auditoria do log de acesso                                           |  S  |
+| ID      | Requisito                                                                                                              | Como medir                                                           | Pri |
+| ------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | :-: |
+| RNF-020 | Todo tráfego externo em TLS 1.2+; nenhuma porta de banco ou Redis exposta à internet                                   | Varredura de portas + verificação de configuração                    |  M  |
+| RNF-021 | Isolamento entre empresas imposto no banco por RLS, não apenas na aplicação                                            | Teste automatizado que tenta ler dados de outro `company_id` e falha |  M  |
+| RNF-022 | Nenhum segredo em código, log ou variável versionada; todos em gerenciador de segredos                                 | Varredura de segredos na CI, bloqueante                              |  M  |
+| RNF-023 | Senhas com hash forte e específico para senhas (Argon2id ou bcrypt), nunca reversível                                  | Revisão de código                                                    |  M  |
+| RNF-024 | ~~A1 cifrado no nosso banco~~ — cancelado: A1 só transita para a Focus ([ADR-0002](../decisoes/adr/0002-focus-nfe.md)) | —                                                                    |  —  | ❌  |
+| RNF-025 | Autenticação de administrador da plataforma exige segundo fator                                                        | Verificação de configuração                                          |  M  |
+| RNF-026 | Limite de requisições por usuário e por IP em rotas de autenticação e de escrita                                       | Teste de carga; verificação de resposta 429                          |  M  |
+| RNF-027 | Toda entrada validada por schema antes de chegar à lógica de negócio                                                   | Revisão de código; nenhuma rota sem schema Zod                       |  M  |
+| RNF-028 | Webhooks de terceiros verificam assinatura e rejeitam requisição não autenticada                                       | Teste de integração com assinatura inválida                          |  M  |
+| RNF-029 | Dependências verificadas contra vulnerabilidades conhecidas a cada PR                                                  | Job de auditoria na CI, bloqueante para severidade alta              |  M  |
+| RNF-030 | Acesso administrativo a dados de tenant é registrado com justificativa e revisado mensalmente                          | Auditoria do log de acesso                                           |  S  |
 
 ## 5. Privacidade e LGPD
 
@@ -92,14 +92,14 @@ Se você não consegue escrever como medir, o requisito ainda não está pronto.
 
 ## 6. Fiscal e legal
 
-| ID      | Requisito                                                                               | Como medir                                         | Pri |
-| ------- | --------------------------------------------------------------------------------------- | -------------------------------------------------- | :-: |
-| RNF-037 | XML das notas emitidas guardado por no mínimo 5 anos, íntegro e recuperável             | Teste de recuperação de XML antigo                 |  M  |
-| RNF-038 | Emissão em contingência disponível sempre que a SEFAZ estiver indisponível              | Teste com SEFAZ simulada fora do ar                |  M  |
-| RNF-039 | Numeração de notas é sequencial, sem lacuna e sem repetição, mesmo com concorrência     | Teste de concorrência; verificação de sequência    |  M  |
-| RNF-040 | Venda registrada nunca é apagada; correção sempre por cancelamento ou devolução         | Ausência de `DELETE` em vendas; teste automatizado |  M  |
-| RNF-041 | Cálculo de imposto é auditável: entrada, regra aplicada e resultado ficam registrados   | Registro do cálculo por venda                      |  M  |
-| RNF-042 | Alteração de regra fiscal é versionada; venda antiga é recalculada com a regra da época | Teste com vigência de regra                        |  S  |
+| ID      | Requisito                                                                                 | Como medir                                         | Pri |
+| ------- | ----------------------------------------------------------------------------------------- | -------------------------------------------------- | :-: |
+| RNF-037 | XML das notas emitidas guardado por no mínimo 5 anos, íntegro e recuperável               | Teste de recuperação de XML antigo                 |  M  |
+| RNF-038 | Contingência quando a Focus/autorização fiscal estiver indisponível, sem bloquear a venda | Teste com adapter Focus em falha                   |  M  |
+| RNF-039 | Numeração de notas é sequencial, sem lacuna e sem repetição, mesmo com concorrência       | Teste de concorrência; verificação de sequência    |  M  |
+| RNF-040 | Venda registrada nunca é apagada; correção sempre por cancelamento ou devolução           | Ausência de `DELETE` em vendas; teste automatizado |  M  |
+| RNF-041 | Cálculo de imposto é auditável: entrada, regra aplicada e resultado ficam registrados     | Registro do cálculo por venda                      |  M  |
+| RNF-042 | Alteração de regra fiscal é versionada; venda antiga é recalculada com a regra da época   | Teste com vigência de regra                        |  S  |
 
 ## 7. Integridade financeira e de dados
 
