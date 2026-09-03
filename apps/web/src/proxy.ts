@@ -12,8 +12,14 @@ import { SESSION_COOKIE } from '@/lib/session'
  * pessoa sem sessao caia numa tela do painel, mas NAO e autorizacao: cada
  * rota de API precisa validar a sessao por conta propria no servidor.
  *
- * QUANDO O BACKEND EXISTIR: trocar a presenca do cookie pela validacao real
- * do token (assinatura e expiracao).
+ * O cookie e `httpOnly` (NR-013): so o servidor o escreve e o le. Aqui ainda
+ * se confere apenas a PRESENCA, e continua sendo otimista de proposito —
+ * validar assinatura e expiracao no proxy significaria falar com a api a cada
+ * navegacao, inclusive nas que nem chegam a buscar dado.
+ *
+ * Quem valida de verdade e a api, em toda chamada. E quando ela recusa o token,
+ * o Route Handler `/api/session` apaga o cookie — sem isso a pessoa ficaria
+ * presa: o proxy veria o cookie e deixaria passar, e cada tela receberia 401.
  */
 export function proxy(request: NextRequest) {
   const temSessao = Boolean(request.cookies.get(SESSION_COOKIE)?.value)

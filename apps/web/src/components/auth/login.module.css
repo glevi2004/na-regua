@@ -52,3 +52,50 @@
   font-family: ui-monospace, 'SFMono-Regular', Menlo, monospace;
   font-size: 12.5px;
 }
+
+/* Escolha de loja — US-059. Aparece so para quem tem acesso a mais de uma. */
+.lojas {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.loja {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border: 1px solid var(--nr-border, #d8dee9);
+  border-radius: 0.625rem;
+  background: var(--nr-surface, #fff);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  transition:
+    border-color 120ms ease,
+    background-color 120ms ease;
+}
+
+.loja:hover:not(:disabled),
+.loja:focus-visible {
+  border-color: var(--nr-accent, #2f6fed);
+  background: var(--nr-surface-hover, #f6f8fc);
+}
+
+.loja:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+.lojaNome {
+  font-weight: 600;
+}
+
+.lojaPapel {
+  font-size: 0.8125rem;
+  color: var(--nr-text-muted, #5b6478);
+}
