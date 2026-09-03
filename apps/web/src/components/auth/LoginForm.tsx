@@ -3,12 +3,19 @@
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, type FormEvent } from 'react'
-import { signIn } from '@/lib/auth-api'
-import { startSession } from '@/lib/session'
-import { saveSubscriptionStatus } from '@/lib/subscription-store'
+import type { SessionUser } from '@/lib/session'
+import { entrar, escolherEmpresa } from '@/lib/session-client'
 import { validateCredential, validateLoginPassword, type FieldError } from '@/lib/validation'
 import { Alert, FormFooter, FormHeader, PasswordField, SubmitButton, TextField } from './Fields'
 import loginStyles from './login.module.css'
+
+/** O papel na tela e em portugues, nao o valor do contrato. */
+const PAPEL: Record<string, string> = {
+  owner: 'Dono',
+  staff: 'Funcionario',
+  accountant: 'Contador',
+  platform_admin: 'Administrador',
+}
 
 export default function LoginForm() {
   const router = useRouter()
@@ -21,6 +28,15 @@ export default function LoginForm() {
   const [formError, setFormError] = useState<string | null>(null)
 
   const [loading, setLoading] = useState(false)
+
+  /**
+   * Quem opera mais de uma loja entra e DEPOIS escolhe — US-059.
+   *
+   * Enquanto isto tem valor, o formulario da lugar a lista de lojas. Nao e um
+   * passo a mais para todo mundo: com uma loja so, o codigo escolhe sozinho e
+   * a pessoa nem ve esta tela.
+   */
+  const [escolhendo, setEscolhendo] = useState<SessionUser | null>(null)
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
@@ -35,34 +51,103 @@ export default function LoginForm() {
     setFormError(null)
     setLoading(true)
 
-    /* 1) Autentica. SUBSTITUIR POR: POST /auth/login */
-    const result = await signIn(credential, password)
+    const r = await entrar(credential, password)
 
-    if (!result.ok) {
-      setFormError(result.error)
+    if (!r.ok) {
+      /* A api ja manda a mensagem em PT-BR e ela e a MESMA para usuario
+         inexistente e senha errada — RF-120 pede nao revelar se a conta
+         existe. Reescrever aqui desfaria isso. */
+      setFormError(r.message)
       setLoading(false)
       return
     }
 
-    /* 2) O status da assinatura vem junto do login. Se o backend expuser
-       em endpoint separado, chamar GET /billing/subscription aqui.
-       O acesso NAO e bloqueado quando ha pendencia — o painel apenas
-       entra em modo restrito. */
-    saveSubscriptionStatus(result.subscription.status)
+    await concluir(r.sessao)
+  }
 
-    /* 3) Abre a sessao. O cookie e o que o proxy.ts enxerga para liberar
-       /app/*; sem ele a navegacao volta para ca. */
-    startSession({
-      nome: result.user.nome,
-      email: result.user.email,
-      empresa: result.user.empresa,
-    })
+  /**
+   * Com uma loja, entra direto. Com varias, pergunta.
+   *
+   * A escolha vale a pena automatizar no caso de uma so porque e o caso da
+   * maioria — e uma tela de escolha com um unico item e uma tela que so existe
+   * para ser fechada.
+   */
+  async function concluir(sessao: SessionUser) {
+    if (sessao.activeCompanyId !== null) return irParaOPainel()
 
+    if (sessao.memberships.length === 1) {
+      const r = await escolherEmpresa(sessao.memberships[0]!.companyId)
+      if (!r.ok) {
+        setFormError(r.message)
+        setLoading(false)
+        return
+      }
+      return irParaOPainel()
+    }
+
+    if (sessao.memberships.length === 0) {
+      /* Conta sem vinculo nenhum: entrar levaria a um painel vazio e sem
+         explicacao. Melhor dizer o que aconteceu. */
+      setFormError(`Sua conta ainda nao esta ligada a nenhuma loja. Fale com quem administra.`)
+      setLoading(false)
+      return
+    }
+
+    setEscolhendo(sessao)
+    setLoading(false)
+  }
+
+  async function selecionar(companyId: string) {
+    setFormError(null)
+    setLoading(true)
+
+    const r = await escolherEmpresa(companyId)
+    if (!r.ok) {
+      setFormError(r.message)
+      setLoading(false)
+      return
+    }
+    irParaOPainel()
+  }
+
+  function irParaOPainel() {
     /* Se o proxy guardou um destino (?proximo=), devolve a pessoa para la.
        Lido de window e nao de useSearchParams para nao exigir Suspense
        numa pagina estatica. */
     const proximo = new URLSearchParams(window.location.search).get('proximo')
     router.push(proximo && proximo.startsWith('/app') ? proximo : '/app')
+  }
+
+  /* Escolha de loja — US-059. Substitui o formulario em vez de aparecer abaixo
+     dele: a senha ja foi aceita, e deixar os campos na tela convida a pessoa a
+     digitar de novo. */
+  if (escolhendo !== null) {
+    return (
+      <>
+        <FormHeader
+          title="Qual loja?"
+          subtitle={`Ola, ${escolhendo.userName}. Voce tem acesso a mais de uma.`}
+        />
+
+        {formError ? <Alert tone="error">{formError}</Alert> : null}
+
+        <ul className={loginStyles.lojas}>
+          {escolhendo.memberships.map((v) => (
+            <li key={v.companyId}>
+              <button
+                type="button"
+                className={loginStyles.loja}
+                onClick={() => void selecionar(v.companyId)}
+                disabled={loading}
+              >
+                <span className={loginStyles.lojaNome}>{v.companyName}</span>
+                <span className={loginStyles.lojaPapel}>{PAPEL[v.role] ?? v.role}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </>
+    )
   }
 
   return (

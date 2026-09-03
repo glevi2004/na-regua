@@ -6,7 +6,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState, type ComponentType, type ReactNode } from 'react'
 import { BRAND } from '@/content/site'
 import { MODULOS_BLOQUEADOS } from '@/lib/access'
-import { endSession } from '@/lib/session'
+import { sair as encerrarSessao } from '@/lib/session-client'
 import { listarChamados, totalNaoLidas } from '@/lib/suporte-api'
 import PaymentOverdueBanner from '../billing/PaymentOverdueBanner'
 import PaymentRequiredModal from '../billing/PaymentRequiredModal'
@@ -124,7 +124,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
     )
 
   function sair() {
-    endSession()
+    /* Nao espera a resposta: sair sempre "da certo" para quem clicou, e travar
+       o botao numa rede ruim faria a pessoa clicar de novo achando que falhou.
+       O cookie e httpOnly, entao quem o apaga e o servidor. */
+    void encerrarSessao()
     router.push('/login')
   }
 

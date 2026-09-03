@@ -4,7 +4,6 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useCallback, useState, type FormEvent } from 'react'
 import { createAccount, createPixCharge, fetchPixChargeStatus } from '@/lib/auth-api'
-import { startSession } from '@/lib/session'
 import { saveSubscriptionStatus } from '@/lib/subscription-store'
 import {
   maskPhone,
@@ -126,7 +125,11 @@ export default function SignupFlow() {
     saveSubscriptionStatus('active')
 
     /* Abre a sessao para o proxy liberar /app/*. */
-    startSession({ nome, email, empresa: 'Minha empresa' })
+    /* A criacao de conta ainda e simulada (POST /auth/signup nao existe — nao
+       ha tarefa no ledger para ela). Antes isto abria uma sessao FALSA, com um
+       cookie que o proxy aceitava: quem criava conta entrava no painel sem
+       nunca ter passado pela api. Agora manda para o login, que e verdade —
+       a conta so existe quando o cadastro existir. */
 
     router.push('/app')
   }, [router, nome, email])
