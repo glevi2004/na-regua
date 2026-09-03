@@ -8,12 +8,21 @@
  * Se um import de `db` ou de adapter aparecer fora daqui, a verificacao de
  * fronteiras na CI barra o PR — e com razao.
  */
-import { createDefaultSaleSettings, type RegisterSaleDeps } from '@na-regua/core'
+import {
+  type AuthDeps,
+  createDefaultSaleSettings,
+  FakeIdentityProvider,
+  InMemoryAuditTrail,
+  InMemoryLoginThrottle,
+  InMemorySessionIssuer,
+  type RegisterSaleDeps,
+} from '@na-regua/core'
 import {
   assertRlsEnforced,
   checkConnection,
   closeConnection,
   createSaleUnitOfWork,
+  createUserDirectory,
   getClient,
   type DatabaseHealth,
 } from '@na-regua/db'
@@ -124,5 +133,55 @@ export function buildSaleDeps(): RegisterSaleDeps {
   return {
     unitOfWork: createSaleUnitOfWork(getClient(env.DATABASE_URL)),
     settings: createDefaultSaleSettings(),
+  }
+}
+
+/**
+ * Dependencias de sessao — NR-014, ADR-0002.
+ *
+ * O provedor de identidade, o emissor de sessao e a desaceleracao sao HOJE as
+ * implementacoes de desenvolvimento. As tres vivem em memoria e por instancia:
+ * reiniciar o processo derruba todas as sessoes, e duas instancias nao
+ * compartilham nem sessao nem contador de tentativa.
+ *
+ * Por isso `assertAuthUsavelEmProducao` existe. A escolha entre provedor
+ * gerenciado (opcao C) e biblioteca auto-hospedada (opcao D) espera a DEC-009,
+ * e a ADR-0002 registra que essa espera nao bloqueia codigo: as duas satisfazem
+ * a mesma porta, e trocar e trocar esta funcao.
+ */
+export function buildAuthDeps(): AuthDeps {
+  return {
+    provider: new FakeIdentityProvider(),
+    users: createUserDirectory(getClient(env.DATABASE_URL)),
+    sessions: new InMemorySessionIssuer(),
+    throttle: new InMemoryLoginThrottle(),
+    /*
+     * A trilha do login ainda nao persiste: `packages/db` nao expoe repositorio
+     * de auditoria. Registrar em memoria e melhor que nao registrar — o caso de
+     * uso continua exercitando o caminho, e o dia em que o repositorio existir
+     * so muda esta linha. Mas nao e trilha de verdade, e por isso entra na
+     * mesma guarda de producao.
+     */
+    audit: new InMemoryAuditTrail(),
+  }
+}
+
+/**
+ * Recusa subir em producao com a autenticacao de desenvolvimento.
+ *
+ * Mesmo mecanismo do `checkIsolation`: ambiente mal configurado tem de derrubar
+ * o processo, nao aceitar login em silencio. `AUTH_PROVIDER=fake` aceita
+ * qualquer credencial — subir assim seria publicar um sistema sem porta.
+ *
+ * A verificacao olha o provedor, mas o que ela protege sao as tres coisas: o
+ * emissor de sessao e a desaceleracao tambem sao de memoria, e sobem juntos.
+ */
+export function assertAuthUsavelEmProducao(): void {
+  if (env.NODE_ENV === 'production' && env.AUTH_PROVIDER === 'fake') {
+    throw new Error(
+      'AUTH_PROVIDER=fake aceita qualquer credencial e nao pode rodar em producao. ' +
+        'A sessao e a desaceleracao tambem sao de memoria (ADR-0002). ' +
+        'Defina um provedor real antes de subir.',
+    )
   }
 }

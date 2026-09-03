@@ -1,5 +1,7 @@
 import Fastify from 'fastify'
 import {
+  assertAuthUsavelEmProducao,
+  buildAuthDeps,
   buildSaleDeps,
   checkDatabase,
   checkIsolation,
@@ -9,6 +11,8 @@ import {
 } from './composition.js'
 import { registerErrorHandler } from './plugins/error-handler.js'
 import { buildLoggerOptions, generateRequestId, registerLogging } from './plugins/logging.js'
+import { registerSession } from './plugins/session.js'
+import { registerAuthRoutes } from './routes/auth.js'
 import { registerSaleRoutes } from './routes/sales.js'
 
 // RNF-058: log estruturado (JSON) com requestId, companyId e userId.
@@ -43,6 +47,12 @@ app.get('/health', async (_request, reply) => {
 /** Liveness: o processo esta de pe? Nao toca em dependencia externa. */
 app.get('/health/live', async () => ({ status: 'ok' }))
 
+/* Sessao ANTES das rotas: e o hook que popula `request.principal`, e sem ele
+   toda rota protegida responde 401. */
+const authDeps = buildAuthDeps()
+registerSession(app, authDeps.sessions)
+registerAuthRoutes(app, authDeps)
+
 /* Rotas de negocio. `buildSaleDeps()` abre a conexao, entao e chamada aqui e
    nao no topo do modulo — ver o comentario em composition.ts. */
 registerSaleRoutes(app, buildSaleDeps())
@@ -55,6 +65,10 @@ async function main(): Promise<void> {
    * consulta devolver as linhas de todas as lojas, sem erro nenhum. Aconteceu
    * num ambiente real e so a CI notou. Subir assim e pior que nao subir.
    */
+  /* Antes de tudo: autenticacao de desenvolvimento nao sobe em producao.
+     Sincrono e sem I/O, entao vem antes ate da checagem de isolamento. */
+  assertAuthUsavelEmProducao()
+
   const isolamento = await checkIsolation()
 
   if (isolamento.status === 'bypassed') {

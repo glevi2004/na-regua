@@ -99,3 +99,60 @@ describe('checkIsolation', () => {
     expect((await checkIsolation()).status).not.toBe('bypassed')
   })
 })
+
+/**
+ * A guarda que impede subir em producao com a autenticacao de desenvolvimento
+ * — ADR-0002.
+ *
+ * Vale um teste pelo mesmo motivo de `checkIsolation`: e facil de inverter, e a
+ * consequencia e assimetrica. Deixar passar publica um sistema em que
+ * `AUTH_PROVIDER=fake` aceita qualquer credencial. Barrar de menos so causa
+ * indisponibilidade em ambiente mal configurado, que e o que se quer.
+ */
+describe('assertAuthUsavelEmProducao — ADR-0002', () => {
+  async function comAmbiente(over: Record<string, string>) {
+    vi.resetModules()
+    for (const [chave, valor] of Object.entries({ ...AMBIENTE, ...over })) {
+      vi.stubEnv(chave, valor)
+    }
+    return import('./composition.js')
+  }
+
+  it('recusa producao com o provedor falso', async () => {
+    const { assertAuthUsavelEmProducao } = await comAmbiente({
+      NODE_ENV: 'production',
+      AUTH_PROVIDER: 'fake',
+    })
+
+    expect(() => assertAuthUsavelEmProducao()).toThrow(/nao pode rodar em producao/)
+  })
+
+  /* A mensagem precisa dizer O QUE fazer, senao quem for acordado as 3h so
+     sabe que algo esta errado. */
+  it('a recusa diz o que configurar', async () => {
+    const { assertAuthUsavelEmProducao } = await comAmbiente({
+      NODE_ENV: 'production',
+      AUTH_PROVIDER: 'fake',
+    })
+
+    expect(() => assertAuthUsavelEmProducao()).toThrow(/Defina um provedor real/)
+  })
+
+  it('aceita producao com provedor de verdade', async () => {
+    const { assertAuthUsavelEmProducao } = await comAmbiente({
+      NODE_ENV: 'production',
+      AUTH_PROVIDER: 'better-auth',
+    })
+
+    expect(() => assertAuthUsavelEmProducao()).not.toThrow()
+  })
+
+  /* Desenvolvimento e teste continuam com o falso — e o modo previsto pela
+     ADR-0002 enquanto a DEC-009 nao escolhe entre provedor gerenciado e
+     biblioteca auto-hospedada. */
+  it.each(['development', 'test'])('aceita %s com o provedor falso', async (NODE_ENV) => {
+    const { assertAuthUsavelEmProducao } = await comAmbiente({ NODE_ENV, AUTH_PROVIDER: 'fake' })
+
+    expect(() => assertAuthUsavelEmProducao()).not.toThrow()
+  })
+})
