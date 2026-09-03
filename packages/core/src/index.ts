@@ -122,6 +122,16 @@ export {
 } from './registration/register-product.js'
 export type { RegisterProductDeps } from './registration/register-product.js'
 
+/* --- Importacao de extrato — NR-047 --- */
+export { importStatement } from './banking/import-statement.js'
+export type { ImportStatementDeps } from './banking/import-statement.js'
+export type {
+  BankTransactionWriter,
+  NewBankTransaction,
+  StatementFile,
+  StatementParser,
+} from './ports/statement-import.js'
+
 /* --- Autenticacao — NR-014 --- */
 export { inviteUser } from './auth/invite-user.js'
 export { DURACAO_DA_SESSAO_HORAS, login, selectCompany } from './auth/login.js'

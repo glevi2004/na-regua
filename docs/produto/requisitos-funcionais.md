@@ -137,8 +137,8 @@ está em [Requisitos Não Funcionais](requisitos-nao-funcionais.md).
 | RF-073 | Cadastrar conta bancária com saldo inicial                                                       | US-035 | `core`      |  S  | ⬜  |
 | RF-074 | Conectar conta bancária via Open Finance e importar transações periodicamente                    | US-036 | `banking`   |  S  | ⬜  |
 | RF-075 | Detectar consentimento expirado, avisar o lojista e preservar conciliações anteriores            | US-036 | `banking`   |  S  | ⬜  |
-| RF-076 | Importar extrato em OFX ou CSV, informando quantas transações entraram e quantas foram ignoradas | US-037 | `banking`   |  S  | ⬜  |
-| RF-077 | Rejeitar arquivo de extrato inválido sem importação parcial                                      | US-037 | `banking`   |  S  | ⬜  |
+| RF-076 | Importar extrato em OFX ou CSV, informando quantas transações entraram e quantas foram ignoradas | US-037 | `banking`   |  S  | ✅  |
+| RF-077 | Rejeitar arquivo de extrato inválido sem importação parcial                                      | US-037 | `banking`   |  S  | ✅  |
 | RF-078 | Sugerir lançamentos compatíveis com uma transação bancária por valor e data                      | US-038 | `core`      |  S  | ✅  |
 | RF-079 | Conciliar transação com lançamento e permitir criar o lançamento a partir da transação           | US-038 | `core`      |  S  | ✅  |
 | RF-080 | Desfazer conciliação devolvendo transação e lançamento à fila                                    | US-038 | `core`      |  S  | ✅  |
@@ -250,7 +250,7 @@ Quem implementa o quê. Base para a divisão de trilhas em
 | ---------------------------------------------------------- | ---------------------------------------------- |
 | [DEC-003](../decisoes/README.md#dec-003) provedor WhatsApp | RF-015, RF-016, RF-048, RF-068, RF-094, RF-095 |
 | [DEC-004](../decisoes/README.md#dec-004) provedor fiscal   | RF-045 a RF-054                                |
-| [DEC-005](../decisoes/README.md#dec-005) Open Finance      | RF-074 a RF-077                                |
+| [DEC-005](../decisoes/README.md#dec-005) Open Finance      | RF-074, RF-075                                 |
 | [DEC-006](../decisoes/README.md#dec-006) PSP / tarifas     | RF-007, RF-038, RF-063                         |
 | [DEC-007](../decisoes/README.md#dec-007) LLM e recuperação | RF-096 a RF-109                                |
 | [DEC-008](../decisoes/README.md#dec-008) autenticação      | RF-005, RF-119, RF-120                         |

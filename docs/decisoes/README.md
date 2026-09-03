@@ -151,12 +151,12 @@ NFC-e (MVP) e cobertura de NFS-e nas cidades-alvo.
 
 ### DEC-005 — Provedor de Open Finance
 
-|              |                                                                                                 |
-| ------------ | ----------------------------------------------------------------------------------------------- |
-| **Status**   | 🔴 Aberta                                                                                       |
-| **Dono**     | Trilha 2 — Plataforma & Integrações                                                             |
-| **Prazo**    | Sprint 4 — só bloqueia [E8](../produto/user-stories.md#e8--bancos--conciliação), que é `SHOULD` |
-| **Bloqueia** | `packages/banking` · [RF-074 a RF-077](../produto/requisitos-funcionais.md)                     |
+|              |                                                                                                                                                                         |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Status**   | 🔴 Aberta                                                                                                                                                               |
+| **Dono**     | Trilha 2 — Plataforma & Integrações                                                                                                                                     |
+| **Prazo**    | Sprint 4 — só bloqueia [E8](../produto/user-stories.md#e8--bancos--conciliação), que é `SHOULD`                                                                         |
+| **Bloqueia** | `packages/banking` · [RF-074, RF-075](../produto/requisitos-funcionais.md) — a importação por arquivo (RF-076, RF-077) **não** depende desta decisão e já está entregue |
 
 **Opções:** agregador (Pluggy, Belvo, Klavi) · integração direta · **apenas
 importação de OFX/CSV no MVP**.
