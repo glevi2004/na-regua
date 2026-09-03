@@ -79,6 +79,16 @@ export type {
   PayableTransaction,
   PayableUnitOfWork,
 } from './ports/payable-repository.js'
+export { reverseSettlement } from './settlements/reverse-settlement.js'
+export { settlePayable, settleReceivable } from './settlements/settle.js'
+export type { SettleDeps } from './settlements/settle.js'
+export { mexeNoSaldoDoCliente } from './settlements/customer-balance.js'
+export type {
+  NewSettlement,
+  SettlementTransaction,
+  SettlementUnitOfWork,
+  TituloSnapshot,
+} from './ports/settlement-writers.js'
 export { registerSale } from './sales/register-sale.js'
 export type { RegisterSaleDeps, RegisterSaleResult, StockWarning } from './sales/register-sale.js'
 
