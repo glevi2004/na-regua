@@ -1,0 +1,117 @@
+import { z } from 'zod'
+import { dateTimeSchema, idSchema, nameSchema, roleSchema } from '../common/primitives.js'
+
+/** Autenticacao, sessao e convite — RF-005, RF-119, RF-120. */
+
+/**
+ * A credencial, sem saber de que tipo ela e.
+ *
+ * `identifier` + `secret` cobre senha (e-mail + senha) e codigo por mensagem
+ * (telefone + codigo) com a mesma forma. A alternativa era uma uniao
+ * discriminada por tipo de credencial, e ela vazaria para o contrato uma
+ * escolha que a [ADR-0002](../../../docs/decisoes/adr/0002-autenticacao-identidade-propria.md)
+ * deliberadamente deixou para tras da porta: quem prova a identidade nao muda
+ * a forma do pedido de login.
+ *
+ * Sem `.trim()` no segredo: espaco no comeco ou no fim pode ser parte da senha,
+ * e aparar silenciosamente faria uma senha valida ser recusada sem explicacao.
+ */
+export const credentialSchema = z
+  .object({
+    identifier: z
+      .string()
+      .trim()
+      .min(1, 'Informe seu e-mail ou telefone.')
+      .max(180, 'Identificador muito longo.'),
+    secret: z.string().min(1, 'Informe sua senha.').max(200, 'Senha muito longa.'),
+  })
+  .strict()
+
+export type Credential = z.infer<typeof credentialSchema>
+
+export const loginInputSchema = credentialSchema
+
+export type LoginInput = z.infer<typeof loginInputSchema>
+
+/** Uma loja a que a pessoa tem acesso, com o papel que ela tem la. */
+export const membershipOutputSchema = z.object({
+  companyId: idSchema,
+  companyName: z.string(),
+  role: roleSchema,
+})
+
+export type MembershipOutput = z.infer<typeof membershipOutputSchema>
+
+/**
+ * A sessao emitida por nos — nunca um token de terceiro repassado.
+ *
+ * `activeCompanyId` nulo e estado legitimo e nao erro: quem tem acesso a mais
+ * de uma loja entra e **depois** escolhe (US-059). Enquanto for nulo, rota de
+ * negocio nenhuma funciona — nao existe operacao sem empresa.
+ */
+export const sessionOutputSchema = z.object({
+  token: z.string(),
+  expiresAt: dateTimeSchema,
+  userId: idSchema,
+  userName: z.string(),
+  memberships: z.array(membershipOutputSchema),
+  activeCompanyId: idSchema.nullable(),
+})
+
+export type SessionOutput = z.infer<typeof sessionOutputSchema>
+
+export const selectCompanyInputSchema = z.object({ companyId: idSchema }).strict()
+
+export type SelectCompanyInput = z.infer<typeof selectCompanyInputSchema>
+
+/**
+ * Papel que se pode conceder a alguem — RF-005.
+ *
+ * `platform_admin` fica de fora: ele nao e operador de loja, e conceder por
+ * esta rota deixaria um lojista criar acesso de plataforma. Quem rege esse
+ * papel e a RF-131, que e outra regra.
+ */
+export const grantableRoleSchema = z.enum(['owner', 'staff', 'accountant'], {
+  errorMap: () => ({ message: 'Papel invalido. Use owner, staff ou accountant.' }),
+})
+
+export type GrantableRole = z.infer<typeof grantableRoleSchema>
+
+/**
+ * Convite por e-mail **ou** telefone — RF-005.
+ *
+ * Os dois opcionais com pelo menos um obrigatorio, e nao um campo `contato`
+ * unico: e-mail e telefone tem validacao e normalizacao diferentes, e um campo
+ * que aceita os dois precisaria adivinhar qual e para validar — adivinhacao que
+ * erra em telefone com formato de e-mail truncado.
+ */
+export const inviteUserInputSchema = z
+  .object({
+    name: nameSchema,
+    email: z.string().trim().toLowerCase().email('E-mail invalido. Confira o endereco.').optional(),
+    phone: z
+      .string()
+      .transform((v) => v.replace(/\D/g, ''))
+      .refine((d) => d.length === 10 || d.length === 11, {
+        message: 'Telefone invalido. Use DDD e numero.',
+      })
+      .optional(),
+    role: grantableRoleSchema,
+  })
+  .strict()
+  .refine((v) => v.email !== undefined || v.phone !== undefined, {
+    message: 'Informe e-mail ou telefone para enviar o convite.',
+    path: ['email'],
+  })
+
+export type InviteUserInput = z.infer<typeof inviteUserInputSchema>
+
+export const invitedUserOutputSchema = z.object({
+  userId: idSchema,
+  companyId: idSchema,
+  role: roleSchema,
+  /** Falso quando a pessoa ja existia e so ganhou acesso a esta loja. */
+  created: z.boolean(),
+})
+
+export type InvitedUserOutput = z.infer<typeof invitedUserOutputSchema>
