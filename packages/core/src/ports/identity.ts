@@ -72,15 +72,29 @@ export type UserDirectory = {
 
   findMembership(companyId: CompanyId, userId: UserId): Promise<MembershipOutput | undefined>
 
-  insertUser(usuario: {
+  /**
+   * Cria a pessoa E o acesso, juntos.
+   *
+   * Uma operacao e nao duas, porque nao existe estado intermediario valido.
+   * Usuario gravado sem vinculo nao consegue entrar — login com zero vinculos
+   * responde falha (RF-120) — e ainda ocupa o e-mail no indice unico, o que
+   * faz a segunda tentativa de convite responder "esta pessoa ja existe". O
+   * convite passaria a ser impossivel, e a saida seria mexer no banco a mao.
+   *
+   * Nasce sem `auth_subject`: quem prova a identidade e o provedor, e ele so
+   * conhece a pessoa no primeiro login, que e quando `attachSubject` roda.
+   */
+  createUserWithAccess(convite: {
+    readonly companyId: CompanyId
     readonly name: string
     readonly email: string | null
     readonly phone: string | null
-    readonly subject: string | null
+    readonly role: Role
     readonly createdAt: Date
   }): Promise<LocalUser>
 
-  insertMembership(vinculo: {
+  /** Da acesso a esta loja a quem ja existe. Uma escrita, atomica por si. */
+  grantAccess(vinculo: {
     readonly companyId: CompanyId
     readonly userId: UserId
     readonly role: Role

@@ -55,7 +55,7 @@ export async function inviteUser(
       throw AppError.conflict('Esta pessoa ja tem acesso a esta loja.')
     }
 
-    await deps.users.insertMembership({
+    await deps.users.grantAccess({
       companyId: ctx.companyId,
       userId: existente.id,
       role: input.role,
@@ -68,22 +68,20 @@ export async function inviteUser(
   }
 
   /*
+   * Pessoa e acesso numa operacao so — ver `createUserWithAccess`. Usuario
+   * gravado sem vinculo nao entra e ainda ocupa o e-mail no indice unico, o
+   * que tornaria o convite impossivel de repetir.
+   *
    * Nasce sem `subject`: quem prova a identidade e o provedor, e ele so
    * conhece a pessoa quando ela entra pela primeira vez. O `login` amarra o
    * `subject` nesse momento, por e-mail ou telefone — e e por isso que o
    * convite exige um dos dois.
    */
-  const criado = await deps.users.insertUser({
+  const criado = await deps.users.createUserWithAccess({
+    companyId: ctx.companyId,
     name: input.name,
     email: input.email ?? null,
     phone: input.phone ?? null,
-    subject: null,
-    createdAt: ctx.now,
-  })
-
-  await deps.users.insertMembership({
-    companyId: ctx.companyId,
-    userId: criado.id,
     role: input.role,
     createdAt: ctx.now,
   })

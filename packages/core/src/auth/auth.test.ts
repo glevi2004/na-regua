@@ -497,6 +497,24 @@ describe('convidar usuario — RF-005', () => {
     expect(JSON.stringify(entrada!.after)).not.toContain('novo@x.com')
   })
 
+  /*
+   * Defeito encontrado ao implementar o repositorio: a porta tinha
+   * `insertUser` e `insertMembership` separados. Usuario gravado sem vinculo
+   * nao entra — login com zero vinculos responde falha — e ainda ocupa o
+   * e-mail no indice unico, o que faz a segunda tentativa de convite responder
+   * "esta pessoa ja existe". O convite viraria impossivel pela tela.
+   */
+  it('nao deixa pessoa sem acesso quando o vinculo falha', async () => {
+    const { deps, users, ctx } = comOwner()
+    const antes = users.quantosUsuarios()
+    users.falharAoDarAcesso = true
+
+    await pegaErro(() => inviteUser(deps, ctx, convite))
+
+    expect(users.quantosUsuarios()).toBe(antes)
+    expect(await users.findByEmail('novo@x.com')).toBeUndefined()
+  })
+
   it('staff nao convida — operar a loja nao e decidir quem entra nela', async () => {
     const { deps, ctx } = comOwner()
 

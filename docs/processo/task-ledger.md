@@ -50,11 +50,11 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
-| Total                         |      58 |  157 |
+| Total                         |      58 |  158 |
 | ✅ Concluídas                 |      32 |   73 |
 | 🚧 Bloqueadas por decisão     |       9 |   35 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |      16 |   47 |
+| ⬜ A fazer, pode começar hoje |      16 |   48 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -85,20 +85,20 @@ decisões. A próxima da fila **não é** a NR-027 — ver a nota abaixo.
 
 Objetivo: as três trilhas conseguem trabalhar em paralelo sem esperar uma à outra.
 
-| ID     | Tarefa                                                                          | Trilha | Módulo       | Est | Dep    | Bloq                | US/RF                   | Status |
-| ------ | ------------------------------------------------------------------------------- | :----: | ------------ | --: | ------ | ------------------- | ----------------------- | :----: |
-| NR-004 | `domain`: cálculo de venda — custo, imposto, tarifa de cartão, parcelas         |   🔵   | `domain`     |   3 | NR-003 | —                   | RF-040, RF-041, RF-038  |   ✅   |
-| NR-005 | `contracts`: schemas base (Company, Customer, Product, Sale)                    |   🔵   | `contracts`  |   2 | NR-003 | —                   | RNF-027                 |   ✅   |
-| NR-006 | Configuração tipada: validar variáveis de ambiente na inicialização             |   🟠   | `repo`       |   1 | NR-001 | —                   | —                       |   ✅   |
-| NR-007 | `db`: estratégia multi-tenant, RLS e teste de isolamento                        |   🔵   | `db`         |   3 | NR-005 | —                   | RF-121, RF-122, RNF-021 |   ✅   |
-| NR-008 | `db`: schema de cadastros (companies, users, customers, products)               |   🔵   | `db`         |   2 | NR-007 | —                   | RF-001, RF-009, RF-017  |   ✅   |
-| NR-009 | `api`: base — contexto de execução, erro padronizado, validação por `contracts` |   🟠   | `api`        |   2 | NR-005 | —                   | RNF-027, RNF-054        |   ✅   |
-| NR-010 | Qualidade: lint com type-checking e piso de cobertura na CI                     |   🟠   | `repo`       |   1 | NR-001 | —                   | RNF-068                 |   ✅   |
-| NR-011 | `ui`: tokens de design (cor, tipografia, espaçamento)                           |   🟢   | `ui`         |   2 | —      | **DEC-001**/QST-011 | RNF-055                 |   ✅   |
-| NR-012 | `mobile`: shell de navegação e sessão                                           |   🟢   | `mobile`     |   3 | NR-011 | DEC-008             | US-059                  |   ✅   |
-| NR-013 | `web`: shell de layout e sessão                                                 |   🟢   | `web`        |   2 | NR-011 | —                   | US-059                  |   ⬜   |
-| NR-014 | Autenticação: login, papéis, usuário em várias empresas                         |   🟠   | `api` `core` |   4 | NR-009 | —                   | RF-119, RF-120, RF-005  |   ⬜   |
-| NR-015 | `infra`: definir hospedagem e preencher os workflows de deploy                  |   🟠   | `infra`      |   3 | —      | **DEC-009**         | RNF-064, RNF-013        |   🚧   |
+| ID     | Tarefa                                                                          | Trilha | Módulo            | Est | Dep    | Bloq                | US/RF                   | Status |
+| ------ | ------------------------------------------------------------------------------- | :----: | ----------------- | --: | ------ | ------------------- | ----------------------- | :----: |
+| NR-004 | `domain`: cálculo de venda — custo, imposto, tarifa de cartão, parcelas         |   🔵   | `domain`          |   3 | NR-003 | —                   | RF-040, RF-041, RF-038  |   ✅   |
+| NR-005 | `contracts`: schemas base (Company, Customer, Product, Sale)                    |   🔵   | `contracts`       |   2 | NR-003 | —                   | RNF-027                 |   ✅   |
+| NR-006 | Configuração tipada: validar variáveis de ambiente na inicialização             |   🟠   | `repo`            |   1 | NR-001 | —                   | —                       |   ✅   |
+| NR-007 | `db`: estratégia multi-tenant, RLS e teste de isolamento                        |   🔵   | `db`              |   3 | NR-005 | —                   | RF-121, RF-122, RNF-021 |   ✅   |
+| NR-008 | `db`: schema de cadastros (companies, users, customers, products)               |   🔵   | `db`              |   2 | NR-007 | —                   | RF-001, RF-009, RF-017  |   ✅   |
+| NR-009 | `api`: base — contexto de execução, erro padronizado, validação por `contracts` |   🟠   | `api`             |   2 | NR-005 | —                   | RNF-027, RNF-054        |   ✅   |
+| NR-010 | Qualidade: lint com type-checking e piso de cobertura na CI                     |   🟠   | `repo`            |   1 | NR-001 | —                   | RNF-068                 |   ✅   |
+| NR-011 | `ui`: tokens de design (cor, tipografia, espaçamento)                           |   🟢   | `ui`              |   2 | —      | **DEC-001**/QST-011 | RNF-055                 |   ✅   |
+| NR-012 | `mobile`: shell de navegação e sessão                                           |   🟢   | `mobile`          |   3 | NR-011 | DEC-008             | US-059                  |   ✅   |
+| NR-013 | `web`: shell de layout e sessão                                                 |   🟢   | `web`             |   2 | NR-011 | —                   | US-059                  |   ⬜   |
+| NR-014 | Autenticação: login, papéis, usuário em várias empresas                         |   🟠   | `api` `core` `db` |   5 | NR-009 | —                   | RF-119, RF-120, RF-005  |   ⬜   |
+| NR-015 | `infra`: definir hospedagem e preencher os workflows de deploy                  |   🟠   | `infra`           |   3 | —      | **DEC-009**         | RNF-064, RNF-013        |   🚧   |
 
 ## Sprint 2 — Cadastros e venda
 
@@ -279,7 +279,7 @@ passou a ser retrabalho: trocar os tokens quando a marca fechar.
 | Trilha                          | Tarefas | Dias | Observação                                       |
 | ------------------------------- | ------: | ---: | ------------------------------------------------ |
 | 🔵 1 — Núcleo & Dados           |      19 |   47 | é o gargalo; a fila dela segue em NR-023         |
-| 🟠 2 — Plataforma & Integrações |      25 |   68 | a mais carregada e a mais bloqueada (9 decisões) |
+| 🟠 2 — Plataforma & Integrações |      25 |   69 | a mais carregada e a mais bloqueada (9 decisões) |
 | 🟢 3 — Clientes                 |      13 |   38 | depende de schema, mas já não está bloqueada     |
 | Compartilhada                   |       1 |    4 | documentação (NR-002)                            |
 
