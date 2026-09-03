@@ -27,8 +27,14 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Vulnerabilidades conhecidas
-        # RNF-029: bloqueante em severidade alta
-        run: pnpm audit --audit-level high
+        # RNF-029: bloqueante em severidade alta.
+        #
+        # Via script, e nao `pnpm audit --audit-level high` direto, porque o
+        # pnpm sai com codigo 1 tanto quando ACHA vulnerabilidade quanto quando
+        # nao consegue falar com o registry. As duas terminam em vermelho — nao
+        # verificar nao e verificar e estar limpo — mas o motivo precisa
+        # aparecer na primeira linha do log. Ver scripts/audit.mjs.
+        run: node scripts/audit.mjs
 
   revisao-de-dependencia:
     name: Revisao de dependencia
