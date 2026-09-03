@@ -347,9 +347,6 @@ importers:
       '@na-regua/contracts':
         specifier: workspace:*
         version: link:../contracts
-      '@na-regua/db':
-        specifier: workspace:*
-        version: link:../db
       '@na-regua/domain':
         specifier: workspace:*
         version: link:../domain
@@ -369,6 +366,9 @@ importers:
       '@na-regua/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@na-regua/core':
+        specifier: workspace:*
+        version: link:../core
       '@na-regua/env':
         specifier: workspace:*
         version: link:../env

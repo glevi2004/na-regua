@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@na-regua/contracts": "workspace:*",
+    "@na-regua/core": "workspace:*",
     "@na-regua/env": "workspace:*",
     "@na-regua/money": "workspace:*",
     "postgres": "^3.4.5"

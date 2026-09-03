@@ -50,8 +50,8 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
-| Total                         |      57 |  155 |
-| ✅ Concluídas                 |      30 |   68 |
+| Total                         |      58 |  157 |
+| ✅ Concluídas                 |      31 |   70 |
 | 🚧 Bloqueadas por decisão     |      11 |   41 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
 | ⬜ A fazer, pode começar hoje |      15 |   44 |
@@ -163,15 +163,16 @@ Objetivo: operar o ERP por mensagem e cobrar a mensalidade.
 
 ## Backlog
 
-| ID     | Tarefa                                               | Trilha | Módulo   | Est | Dep    | Bloq | US/RF          | Status |
-| ------ | ---------------------------------------------------- | :----: | -------- | --: | ------ | ---- | -------------- | :----: |
-| NR-016 | `CHANGELOG` gerado dos commits + processo de release |   🟠   | `repo`   |   1 | —      | —    | —              |   ✅   |
-| NR-034 | `core`: agenda e lembretes                           |   🔵   | `core`   |   2 | —      | —    | RF-089–093     |   ✅   |
-| NR-035 | `db`: schema de agenda (`appointments`)              |   🔵   | `db`     |   1 | NR-008 | —    | RF-089, RF-090 |   ✅   |
-| NR-036 | `api`: rotas de agenda                               |   🟠   | `api`    |   1 | NR-035 | —    | RF-089–093     |   ⬜   |
-| NR-049 | E2E do caminho crítico (3 fluxos)                    |   🟠   | `repo`   |   3 | NR-071 | —    | RNF-068        |   ⬜   |
-| NR-078 | `mobile`: agenda                                     |   🟢   | `mobile` |   2 | NR-036 | —    | US-043–045     |   ⬜   |
-| NR-079 | `web`: conteúdo real da landing                      |   🟢   | `web`    |   1 | —      | —    | —              |   ✅   |
+| ID     | Tarefa                                               | Trilha | Módulo   | Est | Dep    | Bloq | US/RF           | Status |
+| ------ | ---------------------------------------------------- | :----: | -------- | --: | ------ | ---- | --------------- | :----: |
+| NR-016 | `CHANGELOG` gerado dos commits + processo de release |   🟠   | `repo`   |   1 | —      | —    | —               |   ✅   |
+| NR-034 | `core`: agenda e lembretes                           |   🔵   | `core`   |   2 | —      | —    | RF-089–093      |   ✅   |
+| NR-035 | `db`: schema de agenda (`appointments`)              |   🔵   | `db`     |   1 | NR-008 | —    | RF-089, RF-090  |   ✅   |
+| NR-036 | `api`: rotas de agenda                               |   🟠   | `api`    |   1 | NR-035 | —    | RF-089–093      |   ⬜   |
+| NR-037 | `db`: repositórios da venda e trilha de estoque      |   🔵   | `db`     |   2 | NR-020 | —    | RF-024, RNF-046 |   ✅   |
+| NR-049 | E2E do caminho crítico (3 fluxos)                    |   🟠   | `repo`   |   3 | NR-071 | —    | RNF-068         |   ⬜   |
+| NR-078 | `mobile`: agenda                                     |   🟢   | `mobile` |   2 | NR-036 | —    | US-043–045      |   ⬜   |
+| NR-079 | `web`: conteúdo real da landing                      |   🟢   | `web`    |   1 | —      | —    | —               |   ✅   |
 
 ---
 
@@ -270,12 +271,12 @@ passou a ser retrabalho: trocar os tokens quando a marca fechar.
 
 | Trilha                          | Tarefas | Dias | Observação                                       |
 | ------------------------------- | ------: | ---: | ------------------------------------------------ |
-| 🔵 1 — Núcleo & Dados           |      18 |   45 | é o gargalo; a fila dela segue em NR-023         |
+| 🔵 1 — Núcleo & Dados           |      19 |   47 | é o gargalo; a fila dela segue em NR-023         |
 | 🟠 2 — Plataforma & Integrações |      25 |   68 | a mais carregada e a mais bloqueada (9 decisões) |
 | 🟢 3 — Clientes                 |      13 |   38 | depende de schema, mas já não está bloqueada     |
 | Compartilhada                   |       1 |    4 | documentação (NR-002)                            |
 
-Somando: **155 dias-desenvolvedor** em 57 tarefas. Com 3 pessoas, isso é cerca
+Somando: **157 dias-desenvolvedor** em 58 tarefas. Com 3 pessoas, isso é cerca
 de 10 semanas de trabalho — desde que nada fique bloqueado, o que não é o caso
 hoje.
 

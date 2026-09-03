@@ -20,6 +20,9 @@ export type { DatabaseHealth } from './connection.js'
 export { lerMigrations, migrate } from './migrate.js'
 export type { Migration, MigrationResult } from './migrate.js'
 
+/* --- Repositorios: implementam as portas declaradas por core --- */
+export { createSaleUnitOfWork } from './sale-unit-of-work.js'
+
 /* --- Guarda: a conexao da aplicacao pode ignorar RLS? --- */
 export { assertRlsEnforced, checkRlsEnforcement } from './rls-guard.js'
 export type { RlsStatus } from './rls-guard.js'
