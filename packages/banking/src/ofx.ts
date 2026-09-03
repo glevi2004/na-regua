@@ -132,6 +132,60 @@ function dataDoLancamento(bruto: string): string | undefined {
   return `${ano}-${mes}-${dia}`
 }
 
+const ABRE = '<STMTTRN>'
+const FECHA = '</STMTTRN>'
+
+/**
+ * Acha os blocos de transacao em tempo LINEAR.
+ *
+ * ## Por que nao e uma expressao regular
+ *
+ * A primeira versao usava `matchAll(/<STMTTRN>([\s\S]*?)<\/STMTTRN>/gi)`, e o
+ * CodeQL a reprovou com razao: `js/polynomial-redos`, severidade alta.
+ *
+ * O corpo preguicoso com fechamento obrigatorio faz o motor, para CADA
+ * `<STMTTRN>` que abre, varrer o resto do arquivo procurando `</STMTTRN>`. Num
+ * arquivo com muitas aberturas e nenhum fechamento — `<STMTTRN>a` repetido — o
+ * custo e O(n²): dez megabytes viram horas de CPU num nucleo, e o processo para
+ * de responder. Nao e ataque exotico: basta um arquivo truncado grande, e a
+ * importacao aceita arquivo de quem esta autenticado.
+ *
+ * `indexOf` a partir de uma posicao que so avanca visita cada caractere uma
+ * vez. E tambem le melhor que a expressao.
+ *
+ * ## A copia para busca preserva o tamanho
+ *
+ * A busca precisa ignorar caixa, e `toUpperCase()` na string inteira NAO
+ * serve: ele muda o comprimento em alguns caracteres — `ß` vira `SS` — e um
+ * unico deles desalinharia todos os indices dali para frente, cortando os
+ * blocos no lugar errado, em silencio. Extrato em latin1 com `ß` e improvavel,
+ * mas o erro seria invisivel.
+ *
+ * `replace(/[a-z]/g, ...)` troca caractere por caractere dentro do ASCII, que
+ * e onde os nomes de tag vivem, e o comprimento fica identico.
+ */
+function blocosDeTransacao(conteudo: string): { corpo: string; inicio: number }[] {
+  const paraBusca = conteudo.replace(/[a-z]/g, (c) => c.toUpperCase())
+  const blocos: { corpo: string; inicio: number }[] = []
+
+  let de = 0
+  for (;;) {
+    const abre = paraBusca.indexOf(ABRE, de)
+    if (abre < 0) break
+
+    const inicioDoCorpo = abre + ABRE.length
+    const fecha = paraBusca.indexOf(FECHA, inicioDoCorpo)
+    /* Sem fechamento daqui para frente: o resto do arquivo esta truncado, e
+       nao ha mais bloco completo para achar. */
+    if (fecha < 0) break
+
+    blocos.push({ corpo: conteudo.slice(inicioDoCorpo, fecha), inicio: abre })
+    de = fecha + FECHA.length
+  }
+
+  return blocos
+}
+
 export function lerOfx(conteudo: string): StatementParseResult {
   if (!pareceOfx(conteudo)) {
     return {
@@ -142,7 +196,7 @@ export function lerOfx(conteudo: string): StatementParseResult {
     }
   }
 
-  const blocos = [...conteudo.matchAll(/<STMTTRN>([\s\S]*?)<\/STMTTRN>/gi)]
+  const blocos = blocosDeTransacao(conteudo)
 
   if (blocos.length === 0) {
     /*
@@ -171,8 +225,7 @@ export function lerOfx(conteudo: string): StatementParseResult {
   const transacoes: ParsedBankTransaction[] = []
 
   for (const [indice, bloco] of blocos.entries()) {
-    const conteudoDoBloco = bloco[1]!
-    const lida = lerTransacao(conteudoDoBloco)
+    const lida = lerTransacao(bloco.corpo)
 
     if (lida === undefined) {
       /*
@@ -190,7 +243,7 @@ export function lerOfx(conteudo: string): StatementParseResult {
         message:
           `A transacao ${indice + 1} do arquivo esta incompleta ou com valor invalido. ` +
           'Nada foi importado. Baixe o extrato de novo no banco.',
-        line: linhaDoBloco(conteudo, bloco[0]!),
+        line: linhaEm(conteudo, bloco.inicio),
       }
     }
 
@@ -264,9 +317,18 @@ function contaDoArquivo(conteudo: string): string | null {
   return banco === undefined ? conta : `${banco}/${conta}`
 }
 
-/** Numero da linha onde o bloco comeca, base 1 — e o que o editor mostra. */
-function linhaDoBloco(conteudo: string, bloco: string): number {
-  const posicao = conteudo.indexOf(bloco)
-  if (posicao < 0) return 1
-  return conteudo.slice(0, posicao).split('\n').length
+/**
+ * Numero da linha de um deslocamento, base 1 — e o que o editor mostra.
+ *
+ * Recebe a POSICAO e nao o texto do bloco. A versao anterior procurava o bloco
+ * com `indexOf` para descobrir onde ele estava, o que era uma varredura extra
+ * do arquivo e, pior, achava a PRIMEIRA ocorrencia: dois blocos identicos no
+ * mesmo extrato apontariam os dois para a linha do primeiro.
+ */
+function linhaEm(conteudo: string, posicao: number): number {
+  let linha = 1
+  for (let i = 0; i < posicao; i += 1) {
+    if (conteudo[i] === '\n') linha += 1
+  }
+  return linha
 }

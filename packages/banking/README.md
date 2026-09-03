@@ -74,15 +74,16 @@ Corrigida.
 
 ### O que a realidade dos bancos impõe
 
-| Decisão                                | Por quê                                                                                                                                                      |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Leitura de OFX por expressão regular   | OFX 1.x **não é XML**: é SGML com fechamento de tag opcional. Um parser de XML recusa a maioria dos extratos reais como mal formados                         |
-| A direção vem do **sinal do `TRNAMT`** | `TRNTYPE` varia demais entre bancos — alguns mandam `OTHER` para tudo. O sinal é o que todos preenchem certo, porque o saldo do próprio extrato depende dele |
-| `DTPOSTED` truncado em 8 caracteres    | Converter para instante e formatar no fuso mudaria o dia. Data de lançamento é **dia**, e conciliação compara dias                                           |
-| Codificação detectada, não assumida    | Extrato antigo vem em latin1; CSV do Excel vem em UTF-8 com BOM. Errar não falha — devolve acento trocado, e esse texto vai para a tela                      |
-| Formato detectado pelo **conteúdo**    | Extrato chega como `extrato.txt`, `Extrato(1).ofx`, `download.csv` com OFX dentro. A extensão é o que menos se pode confiar                                  |
-| PDF tem recusa própria                 | É o erro mais comum de verdade: o banco oferece PDF primeiro. Sem esse caso, o lojista recebe "não reconhecemos as colunas", que não diz o que fazer         |
-| CSV sintetiza `externalId`             | CSV de extrato quase nunca traz identificador, e importar duas vezes é a forma normal de conferir se funcionou. Ver abaixo                                   |
+| Decisão                                 | Por quê                                                                                                                                                      |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Leitura de OFX por busca de tag         | OFX 1.x **não é XML**: é SGML com fechamento de tag opcional. Um parser de XML recusa a maioria dos extratos reais como mal formados                         |
+| Blocos achados com `indexOf`, não regex | `matchAll` com corpo preguiçoso e fechamento obrigatório é O(n²) em arquivo truncado — CodeQL `js/polynomial-redos`. Ver abaixo                              |
+| A direção vem do **sinal do `TRNAMT`**  | `TRNTYPE` varia demais entre bancos — alguns mandam `OTHER` para tudo. O sinal é o que todos preenchem certo, porque o saldo do próprio extrato depende dele |
+| `DTPOSTED` truncado em 8 caracteres     | Converter para instante e formatar no fuso mudaria o dia. Data de lançamento é **dia**, e conciliação compara dias                                           |
+| Codificação detectada, não assumida     | Extrato antigo vem em latin1; CSV do Excel vem em UTF-8 com BOM. Errar não falha — devolve acento trocado, e esse texto vai para a tela                      |
+| Formato detectado pelo **conteúdo**     | Extrato chega como `extrato.txt`, `Extrato(1).ofx`, `download.csv` com OFX dentro. A extensão é o que menos se pode confiar                                  |
+| PDF tem recusa própria                  | É o erro mais comum de verdade: o banco oferece PDF primeiro. Sem esse caso, o lojista recebe "não reconhecemos as colunas", que não diz o que fazer         |
+| CSV sintetiza `externalId`              | CSV de extrato quase nunca traz identificador, e importar duas vezes é a forma normal de conferir se funcionou. Ver abaixo                                   |
 
 ### O id sintetizado do CSV
 
@@ -113,3 +114,27 @@ procuraria no banco a transação que falta, e ela estaria lá.
 valor, e recusar por causa dela obrigaria a editar o arquivo à mão — e ninguém
 edita, desiste da conciliação. Linha sem valor passa batido; linha com valor
 ilegível recusa.
+
+### Por que a busca de bloco não é uma expressão regular
+
+A primeira versão usava `matchAll(/<STMTTRN>([\s\S]*?)<\/STMTTRN>/gi)`. O
+CodeQL reprovou o PR: `js/polynomial-redos`, severidade alta — e com razão.
+
+Corpo preguiçoso com fechamento obrigatório faz o motor, para **cada**
+`<STMTTRN>` que abre, varrer o resto do arquivo procurando `</STMTTRN>`. Num
+arquivo com muitas aberturas e nenhum fechamento o custo é O(n²): dez megabytes
+viram horas de CPU num núcleo, e o processo para de responder.
+
+Não é ataque exótico. Um download interrompido produz exatamente essa forma, e
+a importação aceita arquivo de qualquer usuário autenticado.
+
+`indexOf` a partir de uma posição que só avança visita cada caractere uma vez.
+Há teste de regressão com 40 mil aberturas sem fechamento — instantâneo agora,
+minutos antes.
+
+**Detalhe que o `indexOf` exige:** a busca ignora caixa, e `toUpperCase()` na
+string inteira **não serve** — ele muda o comprimento em alguns caracteres
+(`ß` vira `SS`), e um único deles desalinharia todos os índices dali para
+frente, cortando os blocos no lugar errado, em silêncio.
+`replace(/[a-z]/g, ...)` troca caractere por caractere dentro do ASCII, que é
+onde os nomes de tag vivem, e preserva o comprimento.

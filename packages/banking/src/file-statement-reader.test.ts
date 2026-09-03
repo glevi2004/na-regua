@@ -446,3 +446,64 @@ describe('formato detectado pelo conteudo, nunca pela extensao', () => {
     expect(lerArquivo(arquivo('só um texto qualquer', 'nota.txt')).outcome).toBe('rejected')
   })
 })
+
+describe('nao trava com arquivo hostil — js/polynomial-redos', () => {
+  /*
+   * A primeira versao achava os blocos com
+   * `matchAll(/<STMTTRN>([\s\S]*?)<\/STMTTRN>/gi)`. Corpo preguicoso com
+   * fechamento obrigatorio faz o motor, para CADA abertura, varrer o resto do
+   * arquivo procurando o fechamento — O(n²).
+   *
+   * O CodeQL reprovou o PR por isso (severidade alta), e estava certo: o
+   * arquivo abaixo, com 40 mil aberturas e nenhum fechamento, levava minutos
+   * na versao antiga. Nao e ataque exotico — um download truncado grande
+   * produz exatamente esta forma, e a importacao aceita arquivo de quem esta
+   * autenticado.
+   *
+   * O limite de tempo e generoso de proposito: o que se afirma aqui e a
+   * ORDEM de grandeza, nao o desempenho. Linear termina em milissegundos;
+   * quadratico nao termina.
+   */
+  it('recusa em tempo linear um OFX com muitas aberturas e nenhum fechamento', () => {
+    const hostil = `OFXHEADER:100\n<OFX>${'<STMTTRN>a'.repeat(40_000)}`
+
+    const comecou = performance.now()
+    const r = lerArquivo(arquivo(hostil))
+    const levou = performance.now() - comecou
+
+    expect(r).toMatchObject({ code: 'ESTRUTURA_INVALIDA' })
+    expect(levou).toBeLessThan(2_000)
+  })
+
+  /* O mesmo pela outra ponta: aberturas e fechamentos alternados de verdade. */
+  it('le em tempo linear um OFX com muitos blocos completos', () => {
+    const bloco = '<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20260910<TRNAMT>-1.00<FITID>x<MEMO>m</STMTTRN>'
+    const grande = `OFXHEADER:100\n<OFX><BANKTRANLIST>${bloco.repeat(5_000)}</BANKTRANLIST></OFX>`
+
+    const comecou = performance.now()
+    const r = lerArquivo(arquivo(grande))
+    const levou = performance.now() - comecou
+
+    if (r.outcome !== 'parsed') throw new Error('esperava parsed')
+    expect(r.transactions).toHaveLength(5_000)
+    expect(levou).toBeLessThan(2_000)
+  })
+
+  /*
+   * Dois blocos com o MESMO texto: a versao anterior descobria a linha com
+   * `conteudo.indexOf(bloco)`, que acha a primeira ocorrencia — os dois
+   * apontariam para a linha do primeiro, e a recusa mandaria o lojista olhar
+   * a linha errada.
+   */
+  it('aponta a linha do bloco certo quando dois sao identicos', () => {
+    const ruim = '<STMTTRN><TRNTYPE>DEBIT<DTPOSTED>20260910<TRNAMT>-1.00</STMTTRN>'
+    const bom = '<STMTTRN><DTPOSTED>20260910<TRNAMT>-1.00<FITID>ok<MEMO>m</STMTTRN>'
+    const conteudo = `OFXHEADER:100\n<OFX><BANKTRANLIST>\n${bom}\n${ruim}\n${ruim}\n</BANKTRANLIST></OFX>`
+
+    const r = lerArquivo(arquivo(conteudo))
+    if (r.outcome !== 'rejected') throw new Error('esperava rejected')
+
+    /* O primeiro ruim esta na quarta linha: cabecalho, <OFX>, bom, ruim. */
+    expect(r.line).toBe(4)
+  })
+})
