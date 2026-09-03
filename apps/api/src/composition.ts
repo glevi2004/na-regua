@@ -8,10 +8,12 @@
  * Se um import de `db` ou de adapter aparecer fora daqui, a verificacao de
  * fronteiras na CI barra o PR — e com razao.
  */
+import { createDefaultSaleSettings, type RegisterSaleDeps } from '@na-regua/core'
 import {
   assertRlsEnforced,
   checkConnection,
   closeConnection,
+  createSaleUnitOfWork,
   getClient,
   type DatabaseHealth,
 } from '@na-regua/db'
@@ -104,4 +106,23 @@ export async function checkIsolation(): Promise<IsolationCheck> {
 export async function shutdown(): Promise<void> {
   await Promise.allSettled([closeConnection(), redis?.quit()])
   redis = undefined
+}
+
+/**
+ * Dependencias do fechamento de venda — NR-027.
+ *
+ * `unitOfWork` e de `db` e abre a transacao com o tenant definido; `settings`
+ * ainda e o padrao de `core`, porque aliquota, tabela de tarifas e teto de
+ * desconto **nao tem tabela** (ver `CompanySettingsRepository`). Quando
+ * tiverem, so esta funcao muda.
+ *
+ * Funcao e nao constante: `getClient()` abre conexao, e abrir conexao no topo
+ * do modulo faria importar a composicao — inclusive num teste — conectar no
+ * banco.
+ */
+export function buildSaleDeps(): RegisterSaleDeps {
+  return {
+    unitOfWork: createSaleUnitOfWork(getClient(env.DATABASE_URL)),
+    settings: createDefaultSaleSettings(),
+  }
 }
