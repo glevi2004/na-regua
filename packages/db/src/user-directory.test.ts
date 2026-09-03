@@ -198,6 +198,40 @@ describe.skipIf(!DATABASE_URL)('diretorio de usuarios — NR-014', () => {
       expect(criado.id).toMatch(/^[0-9a-f-]{36}$/)
     })
 
+    /*
+     * A regra que faltava em todo lugar. Pessoa sem NENHUM contato e uma linha
+     * em `users` que ninguem consegue reivindicar: o primeiro login amarra a
+     * identidade do provedor por e-mail ou por telefone, e sem os dois o
+     * convidado nunca entra — e a linha ocupa o lugar dele para sempre.
+     */
+    it('recusa pessoa sem e-mail e sem telefone', async () => {
+      await expect(
+        diretorio().createUserWithAccess({
+          companyId: empresaA,
+          name: 'Sem Contato',
+          email: null,
+          phone: null,
+          role: 'staff',
+          createdAt: new Date(),
+        }),
+      ).rejects.toThrow(/users_tem_contato/)
+    })
+
+    /* O schema exigia e-mail e o contrato permitia so telefone: a validacao
+       passava, a tela prometia, e o erro aparecia no INSERT. A CI mostrou. */
+    it('aceita pessoa so com telefone — RF-005', async () => {
+      const criado = await diretorio().createUserWithAccess({
+        companyId: empresaA,
+        name: 'So Telefone',
+        email: null,
+        phone: `4197${String(Date.now()).slice(-7)}`,
+        role: 'staff',
+        createdAt: new Date(),
+      })
+
+      expect(await diretorio().findById(criado.id)).toMatchObject({ id: criado.id })
+    })
+
     it('recusa dois usuarios no mesmo telefone', async () => {
       const telefone = `4198${String(Date.now()).slice(-7)}`
       await diretorio().createUserWithAccess({

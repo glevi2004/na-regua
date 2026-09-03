@@ -34,6 +34,35 @@ COMMENT ON COLUMN users.auth_subject IS
 -- todo convidado nasce sem `auth_subject` e ganha o dele no primeiro login.
 CREATE UNIQUE INDEX users_auth_subject_unico ON users (auth_subject);
 
+-- ---------------------------------------------------------------------------
+-- E-mail deixa de ser obrigatorio, e contato passa a ser
+-- ---------------------------------------------------------------------------
+--
+-- A RF-005 e explicita: convidar por e-mail OU telefone. O schema da 0002
+-- exigia e-mail, entao convite so por telefone era impossivel — e o contrato
+-- em `contracts` permitia. Contrato mais permissivo que o schema significa que
+-- a validacao passa, a tela promete, e o erro aparece no INSERT com a mensagem
+-- do Postgres. Foi assim que apareceu, num teste da CI:
+--
+--   null value in column "email" of relation "users" violates not-null constraint
+--
+-- O CHECK e a regra que realmente importa, e ela nao existia em lugar nenhum:
+-- pessoa sem NENHUM contato e uma linha em `users` que ninguem consegue
+-- reivindicar. O primeiro login amarra a identidade do provedor por e-mail ou
+-- por telefone (`auth_user_by_email`, `auth_user_by_phone`); sem os dois, o
+-- convidado nunca entra e a linha fica ocupando o lugar dele para sempre.
+--
+-- `users_email_unico` e sobre `lower(email)` e nao muda: indice unico do
+-- Postgres aceita nulo repetido, que e o que se quer aqui.
+
+ALTER TABLE users ALTER COLUMN email DROP NOT NULL;
+
+ALTER TABLE users ADD CONSTRAINT users_tem_contato
+  CHECK (email IS NOT NULL OR phone IS NOT NULL);
+
+COMMENT ON CONSTRAINT users_tem_contato ON users IS
+  'E-mail ou telefone, pelo menos um: sem contato ninguem reivindica a conta (RF-005).';
+
 -- Telefone tambem precisa ser unico, e a falta disso era um bug esperando
 -- acontecer: login por telefone com dois usuarios no mesmo numero nao tem
 -- resposta certa, e a funcao abaixo devolveria um dos dois por sorte da ordem
