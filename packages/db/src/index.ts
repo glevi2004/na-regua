@@ -23,6 +23,10 @@ export type { Migration, MigrationResult } from './migrate.js'
 /* --- Repositorios: implementam as portas declaradas por core --- */
 export { createSaleUnitOfWork } from './sale-unit-of-work.js'
 
+/* Diretorio de usuarios — NR-014. Le por fora da RLS, pelas funcoes auth_* da
+   migration 0009; ver user-directory.ts sobre por que isso e necessario. */
+export { createUserDirectory } from './user-directory.js'
+
 /* --- Guarda: a conexao da aplicacao pode ignorar RLS? --- */
 export { assertRlsEnforced, checkRlsEnforcement } from './rls-guard.js'
 export type { RlsStatus } from './rls-guard.js'
