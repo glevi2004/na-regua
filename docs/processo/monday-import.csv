@@ -11,8 +11,8 @@ NR-006 — Configuração tipada: validar variáveis de ambiente na inicializaç
 NR-010 — Qualidade: lint com type-checking e piso de cobertura na CI,Sprint 1 — Núcleo mínimo,Trilha 2 — Plataforma & Integracoes,Done,Medium,1,Sprint 1,NR-001,,repo,RNF-068,docs/processo/task-ledger.md
 "NR-011 — ui: tokens de design (cor, tipografia, espaçamento)",Sprint 1 — Núcleo mínimo,Trilha 3 — Clientes,Done,High,2,Sprint 1,,DEC-001/QST-011,ui,RNF-055,docs/processo/task-ledger.md
 NR-012 — mobile: shell de navegação e sessão,Sprint 1 — Núcleo mínimo,Trilha 3 — Clientes,Done,High,3,Sprint 1,NR-011,DEC-008,mobile,US-059,docs/processo/task-ledger.md
-NR-013 — web: shell de layout e sessão,Sprint 1 — Núcleo mínimo,Trilha 3 — Clientes,Blocked,High,2,Sprint 1,NR-011,DEC-008,web,US-059,docs/processo/task-ledger.md
-"NR-014 — Autenticação: login, papéis, usuário em várias empresas",Sprint 1 — Núcleo mínimo,Trilha 2 — Plataforma & Integracoes,Blocked,High,4,Sprint 1,NR-009,DEC-008,api core,"RF-119, RF-120, RF-005",docs/processo/task-ledger.md
+NR-013 — web: shell de layout e sessão,Sprint 1 — Núcleo mínimo,Trilha 3 — Clientes,Not started,Medium,2,Sprint 1,NR-011,,web,US-059,docs/processo/task-ledger.md
+"NR-014 — Autenticação: login, papéis, usuário em várias empresas",Sprint 1 — Núcleo mínimo,Trilha 2 — Plataforma & Integracoes,Not started,Medium,4,Sprint 1,NR-009,,api core,"RF-119, RF-120, RF-005",docs/processo/task-ledger.md
 NR-015 — infra: definir hospedagem e preencher os workflows de deploy,Sprint 1 — Núcleo mínimo,Trilha 2 — Plataforma & Integracoes,Blocked,High,3,Sprint 1,,DEC-009,infra,"RNF-064, RNF-013",docs/processo/task-ledger.md
 NR-020 — db: schema de vendas e financeiro,Sprint 2 — Cadastros e venda,Trilha 1 — Nucleo & Dados,Done,Medium,3,Sprint 2,NR-008,,db,"RF-027–044, RF-063",docs/processo/task-ledger.md
 "NR-021 — core: casos de uso de cadastro (empresa, cliente, produto)",Sprint 2 — Cadastros e venda,Trilha 1 — Nucleo & Dados,Done,Medium,3,Sprint 2,NR-008,,core,RF-001–019,docs/processo/task-ledger.md

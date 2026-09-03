@@ -26,7 +26,7 @@ export type {
 } from './ports/chart-of-accounts.js'
 export type { AppErrorCode, FieldIssue } from './app-error.js'
 
-export { assertCanWrite } from './authorization.js'
+export { assertCanWrite, assertSegundoCanal } from './authorization.js'
 
 export type { Channel, CompanyId, ExecutionContext, UseCase, UserId } from './context.js'
 
@@ -121,6 +121,20 @@ export {
   registerProduct,
 } from './registration/register-product.js'
 export type { RegisterProductDeps } from './registration/register-product.js'
+
+/* --- Autenticacao — NR-014 --- */
+export { inviteUser } from './auth/invite-user.js'
+export { DURACAO_DA_SESSAO_HORAS, login, selectCompany } from './auth/login.js'
+export type { AuthDeps, LoginMeta } from './auth/login.js'
+export type {
+  IdentityProvider,
+  LocalUser,
+  LoginThrottle,
+  SessionClaims,
+  SessionIssuer,
+  UserDirectory,
+  VerifiedIdentity,
+} from './ports/identity.js'
 
 /* --- Conciliacao bancaria — NR-033 --- */
 export {

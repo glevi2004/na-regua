@@ -68,6 +68,17 @@ export class AppError extends Error {
   static validation(message: string, fields: readonly FieldIssue[] = []): AppError {
     return new AppError('VALIDATION_FAILED', message, fields)
   }
+
+  /**
+   * Tentativas demais — RF-120, RNF-026.
+   *
+   * A mensagem diz QUANTO esperar, e nao so que houve excesso: sem o tempo, a
+   * unica estrategia de quem esta do outro lado e tentar de novo, o que
+   * realimenta o bloqueio.
+   */
+  static rateLimited(message: string): AppError {
+    return new AppError('RATE_LIMITED', message)
+  }
 }
 
 /** Estreita `unknown` de um `catch` sem recorrer a `instanceof` em cascata. */
