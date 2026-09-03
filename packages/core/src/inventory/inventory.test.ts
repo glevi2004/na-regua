@@ -4,6 +4,7 @@ import type { ExecutionContext } from '../context.js'
 import type { InventoryProductSnapshot } from '../ports/inventory-writers.js'
 import { adjustStock } from './adjust-stock.js'
 import { checkStock, estaAbaixoDoMinimo } from './check-stock.js'
+import { InMemoryAuditTrail } from '../audit/fakes.js'
 import { InMemoryInventory } from './fakes.js'
 
 const AGORA = new Date('2026-09-02T12:00:00.000Z')
@@ -43,6 +44,11 @@ function estoqueCom(...produtos: InventoryProductSnapshot[]) {
   const inv = new InMemoryInventory()
   for (const p of produtos) inv.adicionarProduto('empresa-1', p)
   return inv
+}
+
+/** A trilha e obrigatoria — RF-123. Quem quer inspecionar passa a sua. */
+function deps(inv: InMemoryInventory, audit: InMemoryAuditTrail = new InMemoryAuditTrail()) {
+  return { uow: inv, audit }
 }
 
 // ---------------------------------------------------------------------------
@@ -146,7 +152,7 @@ describe('ajustar estoque — RF-023', () => {
   it('o saldo passa a ser o contado', async () => {
     const inv = estoqueCom(ARROZ)
 
-    await adjustStock({ uow: inv }, contexto(), {
+    await adjustStock(deps(inv), contexto(), {
       productId: 'prod-arroz',
       countedQuantity: 18,
       reason: 'Contagem de inventario',
@@ -158,7 +164,7 @@ describe('ajustar estoque — RF-023', () => {
   it('grava o movimento com autoria, motivo e data', async () => {
     const inv = estoqueCom(ARROZ)
 
-    const mov = await adjustStock({ uow: inv }, contexto({ userId: 'joana' }), {
+    const mov = await adjustStock(deps(inv), contexto({ userId: 'joana' }), {
       productId: 'prod-arroz',
       countedQuantity: 18,
       reason: 'Quebra de duas unidades',
@@ -173,7 +179,7 @@ describe('ajustar estoque — RF-023', () => {
   it('a diferenca e assinada: contar menos da delta negativo', async () => {
     const inv = estoqueCom(ARROZ)
 
-    const mov = await adjustStock({ uow: inv }, contexto(), {
+    const mov = await adjustStock(deps(inv), contexto(), {
       productId: 'prod-arroz',
       countedQuantity: 18,
       reason: 'Quebra',
@@ -186,7 +192,7 @@ describe('ajustar estoque — RF-023', () => {
   it('contar mais da delta positivo — sobra tambem e divergencia', async () => {
     const inv = estoqueCom(ARROZ)
 
-    const mov = await adjustStock({ uow: inv }, contexto(), {
+    const mov = await adjustStock(deps(inv), contexto(), {
       productId: 'prod-arroz',
       countedQuantity: 25,
       reason: 'Entrada nao lancada',
@@ -198,7 +204,7 @@ describe('ajustar estoque — RF-023', () => {
   it('ajuste nao nasce de venda, entao saleId fica nulo', async () => {
     const inv = estoqueCom(ARROZ)
 
-    const mov = await adjustStock({ uow: inv }, contexto(), {
+    const mov = await adjustStock(deps(inv), contexto(), {
       productId: 'prod-arroz',
       countedQuantity: 18,
       reason: 'Contagem',
@@ -210,7 +216,7 @@ describe('ajustar estoque — RF-023', () => {
   it('deixa exatamente um movimento na trilha', async () => {
     const inv = estoqueCom(ARROZ)
 
-    await adjustStock({ uow: inv }, contexto(), {
+    await adjustStock(deps(inv), contexto(), {
       productId: 'prod-arroz',
       countedQuantity: 18,
       reason: 'Contagem',
@@ -225,7 +231,7 @@ describe('ajustar estoque — RF-023', () => {
     const inv = estoqueCom(GRANEL)
 
     try {
-      await adjustStock({ uow: inv }, contexto(), {
+      await adjustStock(deps(inv), contexto(), {
         productId: 'prod-granel',
         countedQuantity: 10,
         reason: 'Tentando controlar',
@@ -240,7 +246,7 @@ describe('ajustar estoque — RF-023', () => {
     const inv = estoqueCom(ARROZ)
 
     try {
-      await adjustStock({ uow: inv }, contexto(), {
+      await adjustStock(deps(inv), contexto(), {
         productId: 'prod-arroz',
         countedQuantity: 20,
         reason: 'Conferencia',
@@ -254,7 +260,7 @@ describe('ajustar estoque — RF-023', () => {
   it('conferencia que bate nao suja a trilha', async () => {
     const inv = estoqueCom(ARROZ)
 
-    await adjustStock({ uow: inv }, contexto(), {
+    await adjustStock(deps(inv), contexto(), {
       productId: 'prod-arroz',
       countedQuantity: 20,
       reason: 'Conferencia',
@@ -267,7 +273,7 @@ describe('ajustar estoque — RF-023', () => {
     const inv = estoqueCom(ARROZ)
 
     try {
-      await adjustStock({ uow: inv }, contexto({ companyId: 'empresa-2' }), {
+      await adjustStock(deps(inv), contexto({ companyId: 'empresa-2' }), {
         productId: 'prod-arroz',
         countedQuantity: 18,
         reason: 'Contagem',
@@ -287,7 +293,7 @@ describe('autorizacao por papel', () => {
   it.each(['owner', 'staff'] as const)('%s ajusta', async (role) => {
     const inv = estoqueCom(ARROZ)
 
-    const mov = await adjustStock({ uow: inv }, contexto({ role }), {
+    const mov = await adjustStock(deps(inv), contexto({ role }), {
       productId: 'prod-arroz',
       countedQuantity: 18,
       reason: 'Contagem',
@@ -300,7 +306,7 @@ describe('autorizacao por papel', () => {
     const inv = estoqueCom(ARROZ)
 
     try {
-      await adjustStock({ uow: inv }, contexto({ role: 'accountant' }), {
+      await adjustStock(deps(inv), contexto({ role: 'accountant' }), {
         productId: 'prod-arroz',
         countedQuantity: 18,
         reason: 'Contagem',
@@ -314,7 +320,7 @@ describe('autorizacao por papel', () => {
   it('accountant nao mexe no saldo nem por engano', async () => {
     const inv = estoqueCom(ARROZ)
 
-    await adjustStock({ uow: inv }, contexto({ role: 'accountant' }), {
+    await adjustStock(deps(inv), contexto({ role: 'accountant' }), {
       productId: 'prod-arroz',
       countedQuantity: 18,
       reason: 'Contagem',
@@ -329,13 +335,80 @@ describe('autorizacao por papel', () => {
  * ou nao entram — e o falso faz rollback de verdade para que este teste meça
  * atomicidade, e nao a boa vontade dele.
  */
+describe('trilha de auditoria — RF-123', () => {
+  it('o ajuste deixa autor, canal, data e antes/depois na trilha', async () => {
+    const inv = estoqueCom(ARROZ)
+    const audit = new InMemoryAuditTrail()
+
+    await adjustStock(deps(inv, audit), contexto({ userId: 'joana' }), {
+      productId: 'prod-arroz',
+      countedQuantity: 18,
+      reason: 'Quebra',
+    })
+
+    const [entrada] = audit.daEmpresa('empresa-1')
+    expect(entrada?.actorId).toBe('joana')
+    expect(entrada?.channel).toBe('app')
+    expect(entrada?.occurredAt).toBe(AGORA.toISOString())
+    expect(entrada?.before).toEqual({ stockQuantity: 20 })
+    expect(entrada?.after).toEqual({ stockQuantity: 18 })
+  })
+
+  /* O mesmo caso de uso pelos dois canais deixa a mesma trilha, com o canal
+     distinguindo — e a promessa de que app e WhatsApp fazem a mesma coisa. */
+  it('o mesmo ajuste pelo WhatsApp registra o canal, e nada mais muda', async () => {
+    const inv = estoqueCom(ARROZ)
+    const audit = new InMemoryAuditTrail()
+
+    await adjustStock(deps(inv, audit), contexto({ channel: 'whatsapp' }), {
+      productId: 'prod-arroz',
+      countedQuantity: 18,
+      reason: 'Quebra',
+    })
+
+    expect(audit.daEmpresa('empresa-1')[0]?.channel).toBe('whatsapp')
+  })
+
+  it('recusa nao deixa trilha — nao houve alteracao para registrar', async () => {
+    const inv = estoqueCom(GRANEL)
+    const audit = new InMemoryAuditTrail()
+
+    await adjustStock(deps(inv, audit), contexto(), {
+      productId: 'prod-granel',
+      countedQuantity: 10,
+      reason: 'Tentando controlar',
+    }).catch(() => undefined)
+
+    expect(audit.total).toBe(0)
+  })
+
+  /* Saldo mudado sem trilha e a trilha mentindo: as duas coisas entram juntas
+     ou nao entram. */
+  it('trilha indisponivel desfaz a mudanca de saldo', async () => {
+    const inv = estoqueCom(ARROZ)
+    const audit = new InMemoryAuditTrail()
+    audit.falharAoGravar = true
+
+    await expect(
+      adjustStock(deps(inv, audit), contexto(), {
+        productId: 'prod-arroz',
+        countedQuantity: 18,
+        reason: 'Quebra',
+      }),
+    ).rejects.toThrow()
+
+    expect(inv.saldoDe('prod-arroz')).toBe(20)
+    expect(inv.movimentos).toEqual([])
+  })
+})
+
 describe('atomicidade', () => {
   it('falha ao gravar o movimento desfaz a mudanca de saldo', async () => {
     const inv = estoqueCom(ARROZ)
     inv.falharAoGravarMovimento = true
 
     await expect(
-      adjustStock({ uow: inv }, contexto(), {
+      adjustStock(deps(inv), contexto(), {
         productId: 'prod-arroz',
         countedQuantity: 18,
         reason: 'Contagem',

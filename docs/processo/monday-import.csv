@@ -19,7 +19,7 @@ NR-020 — db: schema de vendas e financeiro,Sprint 2 — Cadastros e venda,Tril
 "NR-022 — core: registerSale — transação única com estoque, recebível e auditoria",Sprint 2 — Cadastros e venda,Trilha 1 — Nucleo & Dados,Done,Medium,4,Sprint 2,"NR-020, NR-004",,core,"RF-034–039, RNF-046",docs/processo/task-ledger.md
 NR-023 — core: movimentação de estoque e ajuste com autoria,Sprint 2 — Cadastros e venda,Trilha 1 — Nucleo & Dados,Done,Medium,2,Sprint 2,NR-021,,core,RF-022–024,docs/processo/task-ledger.md
 "NR-024 — domain: desconto, limite por papel, troco",Sprint 2 — Cadastros e venda,Trilha 1 — Nucleo & Dados,Done,Medium,2,Sprint 2,NR-004,,domain,"RF-030, RF-031, RF-035",docs/processo/task-ledger.md
-NR-025 — core: trilha de auditoria somente-inserção,Sprint 2 — Cadastros e venda,Trilha 1 — Nucleo & Dados,Not started,Medium,2,Sprint 2,NR-020,,core,"RF-123, RF-124",docs/processo/task-ledger.md
+NR-025 — core: trilha de auditoria somente-inserção,Sprint 2 — Cadastros e venda,Trilha 1 — Nucleo & Dados,Done,Medium,2,Sprint 2,NR-020,,core,"RF-123, RF-124",docs/processo/task-ledger.md
 NR-026 — api: rotas de cadastro,Sprint 2 — Cadastros e venda,Trilha 2 — Plataforma & Integracoes,Not started,Medium,2,Sprint 2,"NR-021, NR-009",,api,RF-001–019,docs/processo/task-ledger.md
 NR-027 — api: rota de venda com chave de idempotência,Sprint 2 — Cadastros e venda,Trilha 2 — Plataforma & Integracoes,Not started,Medium,2,Sprint 2,NR-022,,api,"RF-036, RNF-043",docs/processo/task-ledger.md
 "NR-030 — api: observabilidade — requestId, log estruturado, rastreamento",Sprint 2 — Cadastros e venda,Trilha 2 — Plataforma & Integracoes,Done,Medium,2,Sprint 2,NR-009,,api worker,"RNF-058, RNF-059",docs/processo/task-ledger.md

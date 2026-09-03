@@ -2,10 +2,20 @@ import type { AdjustStockInput, InventoryMovementOutput } from '@na-regua/contra
 import { AppError } from '../app-error.js'
 import { assertCanWrite } from '../authorization.js'
 import type { ExecutionContext } from '../context.js'
+import type { AuditTrail } from '../ports/audit-trail.js'
 import type { InventoryUnitOfWork } from '../ports/inventory-writers.js'
 
 export type AdjustStockDeps = {
   readonly uow: InventoryUnitOfWork
+  /**
+   * Obrigatoria, e nao opcional — RF-123.
+   *
+   * Ajuste de inventario e o caso que US-061 descreve palavra por palavra:
+   * "saber quem fez o que para resolver divergencia com meu funcionario". Uma
+   * dependencia opcional aqui seria a trilha que some justamente quando quem
+   * montou o grafo esqueceu dela.
+   */
+  readonly audit: AuditTrail
 }
 
 /**
@@ -61,6 +71,20 @@ export async function adjustStock(
     }
 
     await tx.setStock(input.productId, input.countedQuantity)
+
+    /* Dentro da transacao: saldo mudado sem trilha e a trilha mentindo. Se a
+       gravacao falhar, o rollback leva o saldo junto. */
+    await deps.audit.record({
+      companyId: ctx.companyId,
+      entity: 'Product',
+      entityId: input.productId,
+      action: 'updated',
+      actorId: ctx.userId,
+      channel: ctx.channel,
+      occurredAt: ctx.now,
+      before: { stockQuantity: produto.stockQuantity },
+      after: { stockQuantity: input.countedQuantity },
+    })
 
     return tx.insertMovement({
       companyId: ctx.companyId,

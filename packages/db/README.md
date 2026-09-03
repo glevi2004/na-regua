@@ -186,6 +186,7 @@ chamada veja uma exceção consciente e não um esquecimento.
 | `sale_returns`      | `company_id`          | `0003_vendas_e_financeiro` |
 | `sale_return_items` | `company_id`          | `0003_vendas_e_financeiro` |
 | `appointments`      | `company_id`          | `0006_agenda`              |
+| `audit_log`         | `company_id` (sem FK) | `0007_auditoria`           |
 
 Dois casos fogem do `company_id`, e os dois de propósito:
 
