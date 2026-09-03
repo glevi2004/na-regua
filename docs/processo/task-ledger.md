@@ -51,10 +51,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      58 |  158 |
-| ✅ Concluídas                 |      35 |   81 |
+| ✅ Concluídas                 |      36 |   86 |
 | 🚧 Bloqueadas por decisão     |       9 |   35 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |      13 |   40 |
+| ⬜ A fazer, pode começar hoje |      12 |   35 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -67,9 +67,8 @@ por linha, com o isolamento já materializado em `packages/db` (NR-007) e os
 cadastros, vendas e financeiro no schema (NR-008, NR-020) e os casos de uso de
 cadastro, o `registerSale` e a movimentação de estoque em `core` (NR-021,
 NR-022, NR-023), a agenda no schema (NR-035) e a trilha de auditoria
-(NR-025) e as contas a pagar com baixa e estorno (NR-028, NR-029) os consumidores de fila (NR-041) e o plano de contas com DRE (NR-032). Dos 85
-dias que faltam, **40 podem começar hoje**, em 13 tarefas; 43 seguem bloqueados
-por 11 decisões. A NR-027 saiu: a rota de venda agora e real — ver a nota abaixo.
+(NR-025) e as contas a pagar com baixa e estorno (NR-028, NR-029) os consumidores de fila (NR-041) e o plano de contas com DRE (NR-032). Dos 80
+dias que faltam, **35 podem começar hoje**, em 12 tarefas; A NR-027 saiu: a rota de venda agora e real — ver a nota abaixo.
 
 ---
 
@@ -97,7 +96,7 @@ Objetivo: as três trilhas conseguem trabalhar em paralelo sem esperar uma à ou
 | NR-011 | `ui`: tokens de design (cor, tipografia, espaçamento)                           |   🟢   | `ui`              |   2 | —      | **DEC-001**/QST-011 | RNF-055                 |   ✅   |
 | NR-012 | `mobile`: shell de navegação e sessão                                           |   🟢   | `mobile`          |   3 | NR-011 | DEC-008             | US-059                  |   ✅   |
 | NR-013 | `web`: shell de layout e sessão                                                 |   🟢   | `web`             |   2 | NR-011 | —                   | US-059                  |   ⬜   |
-| NR-014 | Autenticação: login, papéis, usuário em várias empresas                         |   🟠   | `api` `core` `db` |   5 | NR-009 | —                   | RF-119, RF-120, RF-005  |   ⬜   |
+| NR-014 | Autenticação: login, papéis, usuário em várias empresas                         |   🟠   | `api` `core` `db` |   5 | NR-009 | —                   | RF-119, RF-120, RF-005  |   ✅   |
 | NR-015 | `infra`: definir hospedagem e preencher os workflows de deploy                  |   🟠   | `infra`           |   3 | —      | **DEC-009**         | RNF-064, RNF-013        |   🚧   |
 
 ## Sprint 2 — Cadastros e venda

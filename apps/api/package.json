@@ -14,6 +14,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
+    "@fastify/rate-limit": "^11.2.0",
     "@na-regua/contracts": "workspace:*",
     "@na-regua/core": "workspace:*",
     "@na-regua/db": "workspace:*",

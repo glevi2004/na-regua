@@ -154,6 +154,17 @@ export type {
 /* --- Autenticacao — NR-014 --- */
 export { inviteUser } from './auth/invite-user.js'
 export { DURACAO_DA_SESSAO_HORAS, login, selectCompany } from './auth/login.js'
+/*
+ * Implementacoes de desenvolvimento, exportadas como os adapters falsos de
+ * fiscal, whatsapp e payments — a ADR-0002 preve AUTH_PROVIDER=fake para
+ * desenvolvimento e teste, e producao recusa subir com ele.
+ *
+ * As tres sao por instancia e nao sobrevivem a reinicio. Isso NAO e detalhe de
+ * teste: e o motivo de a guarda de producao existir.
+ */
+export { FakeIdentityProvider, InMemoryLoginThrottle, InMemorySessionIssuer } from './auth/fakes.js'
+/* Idem: a trilha so persiste quando `db` expuser repositorio de auditoria. */
+export { InMemoryAuditTrail } from './audit/fakes.js'
 export type { AuthDeps, LoginMeta } from './auth/login.js'
 export type {
   IdentityProvider,
