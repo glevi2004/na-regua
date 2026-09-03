@@ -122,6 +122,23 @@ export {
 } from './registration/register-product.js'
 export type { RegisterProductDeps } from './registration/register-product.js'
 
+/* --- Conciliacao bancaria — NR-033 --- */
+export {
+  createEntryFromTransaction,
+  reconcile,
+  undoReconciliation,
+} from './reconciliation/reconcile.js'
+export { JANELA_DE_DIAS, suggestMatches } from './reconciliation/suggest-matches.js'
+export type { ReconciliationDeps, SugestaoDeConciliacao } from './reconciliation/suggest-matches.js'
+export type {
+  BankTransactionSnapshot,
+  LancamentoConciliavel,
+  NovoLancamentoDeTransacao,
+  ReconciliationQueries,
+  ReconciliationTransaction,
+  ReconciliationUnitOfWork,
+} from './ports/reconciliation-repository.js'
+
 /* --- Agenda — NR-034 --- */
 export { cancelAppointment } from './schedule/cancel-appointment.js'
 export type { CancelAppointmentDeps } from './schedule/cancel-appointment.js'

@@ -139,9 +139,9 @@ está em [Requisitos Não Funcionais](requisitos-nao-funcionais.md).
 | RF-075 | Detectar consentimento expirado, avisar o lojista e preservar conciliações anteriores            | US-036 | `banking`   |  S  | ⬜  |
 | RF-076 | Importar extrato em OFX ou CSV, informando quantas transações entraram e quantas foram ignoradas | US-037 | `banking`   |  S  | ⬜  |
 | RF-077 | Rejeitar arquivo de extrato inválido sem importação parcial                                      | US-037 | `banking`   |  S  | ⬜  |
-| RF-078 | Sugerir lançamentos compatíveis com uma transação bancária por valor e data                      | US-038 | `core`      |  S  | ⬜  |
-| RF-079 | Conciliar transação com lançamento e permitir criar o lançamento a partir da transação           | US-038 | `core`      |  S  | ⬜  |
-| RF-080 | Desfazer conciliação devolvendo transação e lançamento à fila                                    | US-038 | `core`      |  S  | ⬜  |
+| RF-078 | Sugerir lançamentos compatíveis com uma transação bancária por valor e data                      | US-038 | `core`      |  S  | ✅  |
+| RF-079 | Conciliar transação com lançamento e permitir criar o lançamento a partir da transação           | US-038 | `core`      |  S  | ✅  |
+| RF-080 | Desfazer conciliação devolvendo transação e lançamento à fila                                    | US-038 | `core`      |  S  | ✅  |
 
 ## E9 — Plano de Contas & Relatórios
 
