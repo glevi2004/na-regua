@@ -15,6 +15,9 @@ export type DomainErrorCode =
   | 'DISCOUNT_EXCEEDS_TOTAL'
   | 'DISCOUNT_ABOVE_ROLE_LIMIT'
   | 'INVALID_CHANGE'
+  /* NR-028 — vencimento e recorrencia */
+  | 'INVALID_DATE'
+  | 'INVALID_RECURRENCE'
 
 export class DomainError extends Error {
   readonly code: DomainErrorCode
