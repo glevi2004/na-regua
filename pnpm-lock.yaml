@@ -246,9 +246,15 @@ importers:
       '@na-regua/env':
         specifier: workspace:*
         version: link:../../packages/env
+      '@na-regua/fiscal':
+        specifier: workspace:*
+        version: link:../../packages/fiscal
       '@na-regua/money':
         specifier: workspace:*
         version: link:../../packages/money
+      '@na-regua/whatsapp':
+        specifier: workspace:*
+        version: link:../../packages/whatsapp
       bullmq:
         specifier: ^6.3.2
         version: 6.3.2(ioredis@6.0.0)

@@ -1,8 +1,11 @@
 import { loadWorkerEnv } from '@na-regua/env'
 import { Queue, Worker } from 'bullmq'
 import { Redis } from 'ioredis'
+import { montarDeps } from './composition.js'
+import { consumidorDe, filasSemConsumidor } from './consumers/index.js'
 import { log, safeUrl } from './logging.js'
 import { DEFAULT_JOB_OPTIONS, QUEUES, type QueueName } from './queues.js'
+import { ehPermanente, nivelDaFalha } from './retry.js'
 
 /**
  * Validado no topo do processo, antes de qualquer conexao — NR-006. Antes
@@ -17,18 +20,37 @@ const workers: Worker[] = []
 
 for (const name of Object.values(QUEUES)) {
   queues.set(name, new Queue(name, { connection, defaultJobOptions: DEFAULT_JOB_OPTIONS }))
+}
 
+/* Depois de as filas existirem: o enfileirador da varredura precisa delas. */
+const deps = montarDeps(queues)
+
+for (const name of Object.values(QUEUES)) {
   const worker = new Worker(
     name,
     async (job) => {
-      // Consumidores reais entram com os casos de uso de core.
-      // Ver docs/processo/task-ledger.md (NR-041 em diante).
-      log('info', 'job recebido (sem consumidor implementado)', {
+      const consumir = consumidorDe(name)
+
+      if (consumir === undefined) {
+        /* Fila sem consumidor registrado. Dizer isso e diferente de fingir que
+           processou — ver o comentario em consumers/index.ts. */
+        log('warn', 'job recebido em fila sem consumidor', { queue: name, jobId: job.id })
+        return { outcome: 'sem-consumidor' }
+      }
+
+      const r = await consumir(deps, job.data)
+
+      /* O desfecho vai para o log SEMPRE, inclusive quando e 'rejected': job
+         concluido sem dizer o que aconteceu faz uma nota autorizada e uma
+         recusada desaparecerem no mesmo silencio. */
+      log('info', 'job concluido', {
         queue: name,
         jobId: job.id,
         attempt: job.attemptsMade + 1,
+        ...r,
       })
-      return { skipped: true }
+
+      return r
     },
     { connection, concurrency: 5 },
   )
@@ -39,11 +61,18 @@ for (const name of Object.values(QUEUES)) {
    * `attemptsMade` distingue uma falha que se repete de falhas diferentes.
    */
   worker.on('failed', (job, erro) => {
-    log('error', 'job falhou', {
+    const tentativa = (job?.attemptsMade ?? 0) + 1
+    const info = { tentativa, maxTentativas: DEFAULT_JOB_OPTIONS.attempts }
+    const permanente = ehPermanente(erro)
+
+    log(nivelDaFalha(info, erro), permanente ? 'job descartado sem retentar' : 'job falhou', {
       queue: name,
       jobId: job?.id,
-      attempt: (job?.attemptsMade ?? 0) + 1,
+      attempt: tentativa,
       maxAttempts: DEFAULT_JOB_OPTIONS.attempts,
+      /* O descarte precisa ser encontravel no log agregado — RNF-062. */
+      descartado: permanente || tentativa >= DEFAULT_JOB_OPTIONS.attempts,
+      permanente,
       /* Mensagem, nunca a stack: log agregado nao ganha nada com ela. */
       error: erro.message,
     })
@@ -56,7 +85,12 @@ for (const name of Object.values(QUEUES)) {
 connection.on('ready', () => log('info', 'conectado ao Redis', { redis: safeUrl(env.REDIS_URL) }))
 connection.on('error', (erro: Error) => log('error', 'falha no Redis', { error: erro.message }))
 
-log('info', 'worker iniciado', { queues: Object.values(QUEUES) })
+log('info', 'worker iniciado', {
+  queues: Object.values(QUEUES),
+  /* Explicito na subida: fila sem consumidor e coisa que se descobre agora ou
+     no dia em que alguem pergunta por que nada aconteceu. */
+  semConsumidor: filasSemConsumidor(),
+})
 
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.on(signal, () => {
