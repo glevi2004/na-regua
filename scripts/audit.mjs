@@ -5,18 +5,26 @@
  * Existe para separar duas coisas que o `pnpm audit` confunde: ele sai com
  * codigo 1 tanto quando ACHA vulnerabilidade quanto quando NAO CONSEGUE
  * consultar o registry. As duas exigem reacoes opostas — uma pede corrigir um
- * pacote, a outra pede tentar de novo — e o log so revela qual foi para quem
- * baixar o arquivo inteiro.
+ * pacote, a outra pede esperar — e o log so revela qual foi para quem baixar o
+ * arquivo inteiro.
  *
- * O custo dessa confusao nao e teorico. Na primeira vez que o registry deu
- * timeout, o PR ficou vermelho com "Auditoria de dependencias: Failing after
- * 4m" e a leitura natural foi "meu PR introduziu vulnerabilidade". Repetido
- * algumas vezes, o desfecho previsivel e alguem trocar o passo por
- * `pnpm audit || true` — e ai a vulnerabilidade de verdade passa em silencio,
- * que e exatamente o que a RNF-029 existe para impedir.
+ * O custo dessa confusao nao e teorico. No PR #74 o passo ficou vermelho com
+ * "Auditoria de dependencias: Failing after 4m" e a leitura natural foi "meu PR
+ * introduziu vulnerabilidade". Repetido algumas vezes, o desfecho previsivel e
+ * alguem trocar o passo por `pnpm audit || true` — e ai a vulnerabilidade de
+ * verdade passa em silencio, que e exatamente o que a RNF-029 impede.
  *
- * Aqui os dois casos terminam em vermelho, porque "nao consegui verificar" nao
- * e "verifiquei e esta limpo" — mas com mensagens que nao se parecem.
+ * Os dois casos continuam terminando em vermelho, porque "nao consegui
+ * verificar" nao e "verifiquei e esta limpo". O que muda e a mensagem.
+ *
+ * **NAO ha laco de repeticao aqui, e a ausencia foi aprendida.** A primeira
+ * versao tentava tres vezes com espera crescente. O `pnpm audit` ja retenta
+ * tres vezes por dentro (10s, 60s), entao o laco externo virou nove idas a
+ * rede: o job levou 10min40 e o `timeout-minutes: 10` o matou. Passo CANCELADO
+ * e pior que vermelho — nao diz se achou vulnerabilidade, se nao rodou, ou se
+ * alguem apertou o botao.
+ *
+ * O que este arquivo agrega e a LEITURA do desfecho, nao mais tentativas.
  */
 import { spawnSync } from 'node:child_process'
 import { basename } from 'node:path'
@@ -25,8 +33,14 @@ import { fileURLToPath } from 'node:url'
 /** Severidades que barram o PR — RNF-029. */
 const BLOQUEIAM = ['high', 'critical']
 
-const TENTATIVAS = 3
-const ESPERA_MS = [0, 15_000, 45_000]
+/**
+ * Teto da execucao, folgado abaixo do `timeout-minutes: 10` do job.
+ *
+ * O pnpm ja tem o proprio backoff e leva ~4min ate desistir. Este teto e para o
+ * caso em que ele NAO desiste: melhor um vermelho que explica do que um
+ * cancelamento que nao explica nada.
+ */
+const TETO_MS = 6 * 60 * 1000
 
 function rodarAudit() {
   /*
@@ -36,8 +50,7 @@ function rodarAudit() {
   const r = spawnSync('pnpm', ['audit', '--json'], {
     encoding: 'utf8',
     shell: true,
-    /* Sem timeout proprio: o pnpm ja tem o dele, e um timeout menor aqui
-       cortaria a tentativa que ia dar certo. */
+    timeout: TETO_MS,
   })
 
   return { saida: r.stdout ?? '', erro: r.stderr ?? '', status: r.status }
@@ -76,74 +89,57 @@ export function listarBloqueantes(relatorio) {
     .map((a) => `  ${a.severity.padEnd(8)} ${a.module_name} — ${a.title}\n    ${a.url ?? ''}`)
 }
 
-const espera = (ms) => new Promise((r) => setTimeout(r, ms))
-
 /**
- * `executar` e `dormir` sao parametros para o caminho de falha ser
- * verificavel sem esperar o backoff de verdade — sem isso, conferir a mensagem
- * de "nao rodou" custaria oito minutos e ninguem confere.
+ * `executar` e parametro para os tres desfechos serem verificaveis sem
+ * depender do registry — sem isso, conferir a mensagem de "nao rodou" exigiria
+ * uma indisponibilidade de verdade, e ninguem conferiria.
  */
-export async function main(executar = rodarAudit, dormir = espera) {
-  let ultimoErro = ''
+export function main(executar = rodarAudit) {
+  const { saida, erro, status } = executar()
+  const relatorio = lerRelatorio(saida)
 
-  for (let tentativa = 1; tentativa <= TENTATIVAS; tentativa += 1) {
-    if (ESPERA_MS[tentativa - 1] > 0) {
-      console.log(
-        `Registry nao respondeu. Tentativa ${tentativa} em ${ESPERA_MS[tentativa - 1] / 1000}s...`,
-      )
-      await dormir(ESPERA_MS[tentativa - 1])
-    }
+  if (relatorio === undefined) {
+    /*
+     * Vermelho de proposito: "nao consegui verificar" nao e "verifiquei e esta
+     * limpo", e deixar passar transformaria indisponibilidade do registry em
+     * porta de entrada. Mas a mensagem diz o que aconteceu, para ninguem
+     * procurar vulnerabilidade que nao existe.
+     */
+    const ultimo = (erro || saida || `codigo de saida ${status}`)
+      .trim()
+      .split('\n')
+      .slice(-5)
+      .join('\n')
 
-    const { saida, erro, status } = executar()
-    const relatorio = lerRelatorio(saida)
-
-    if (relatorio === undefined) {
-      /* Sem relatorio: nao rodou. Guarda e tenta de novo. */
-      ultimoErro = (erro || saida || `codigo de saida ${status}`)
-        .trim()
-        .split('\n')
-        .slice(-5)
-        .join('\n')
-      continue
-    }
-
-    const bloqueantes = contarBloqueantes(relatorio)
-
-    if (bloqueantes === 0) {
-      const v = relatorio.metadata.vulnerabilities
-      console.log(
-        `Auditoria OK — nenhuma vulnerabilidade alta ou critica. ` +
-          `(moderada: ${v.moderate ?? 0}, baixa: ${v.low ?? 0})`,
-      )
-      process.exit(0)
-    }
-
-    console.error(`\n::error::${bloqueantes} vulnerabilidade(s) de severidade alta ou critica.\n`)
-    for (const linha of listarBloqueantes(relatorio)) console.error(linha)
-    console.error(
-      '\nRNF-029: severidade alta bloqueia. Suba a dependencia, ou registre a excecao\n' +
-        'com prazo em docs/decisoes/ se nao houver versao corrigida.',
-    )
-    process.exit(1)
+    console.error('\n::error::A auditoria NAO RODOU — o registry nao respondeu.\n')
+    console.error('Isto NAO e uma vulnerabilidade no seu PR: nenhum pacote foi reprovado.')
+    console.error('Nada foi verificado, e por isso o passo termina em vermelho.\n')
+    console.error('O que fazer: confira https://status.npmjs.org e re-rode o job.')
+    console.error('Se o endpoint /-/npm/v1/security/advisories/bulk estiver fora,')
+    console.error('re-rodar nao adianta — o jeito e esperar.\n')
+    console.error('Ultima resposta do pnpm:')
+    console.error(ultimo)
+    return 1
   }
 
-  /*
-   * Esgotou as tentativas sem relatorio nenhum.
-   *
-   * Termina em vermelho de proposito: "nao consegui verificar" nao e
-   * "verifiquei e esta limpo", e deixar passar transformaria uma
-   * indisponibilidade do registry numa porta de entrada. Mas a mensagem diz o
-   * que aconteceu, para ninguem procurar vulnerabilidade que nao existe.
-   */
+  const bloqueantes = contarBloqueantes(relatorio)
+
+  if (bloqueantes === 0) {
+    const v = relatorio.metadata.vulnerabilities
+    console.log(
+      `Auditoria OK — nenhuma vulnerabilidade alta ou critica. ` +
+        `(moderada: ${v.moderate ?? 0}, baixa: ${v.low ?? 0})`,
+    )
+    return 0
+  }
+
+  console.error(`\n::error::${bloqueantes} vulnerabilidade(s) de severidade alta ou critica.\n`)
+  for (const linha of listarBloqueantes(relatorio)) console.error(linha)
   console.error(
-    `\n::error::A auditoria NAO RODOU — o registry nao respondeu em ${TENTATIVAS} tentativas.\n`,
+    '\nRNF-029: severidade alta bloqueia. Suba a dependencia, ou registre a excecao\n' +
+      'com prazo em docs/decisoes/ se nao houver versao corrigida.',
   )
-  console.error('Isto NAO e uma vulnerabilidade no seu PR: nenhum pacote foi reprovado.')
-  console.error('Nada foi verificado, e por isso o passo termina em vermelho.\n')
-  console.error('O que fazer: re-rode este job. Se persistir, veja https://status.npmjs.org.\n')
-  console.error('Ultima resposta do pnpm:')
-  console.error(ultimoErro)
-  process.exit(1)
+  return 1
 }
 
 /* So executa quando chamado direto. Importar o arquivo — para conferir as
@@ -152,5 +148,5 @@ if (
   process.argv[1] !== undefined &&
   basename(process.argv[1]) === basename(fileURLToPath(import.meta.url))
 ) {
-  await main()
+  process.exit(main())
 }
