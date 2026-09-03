@@ -16,7 +16,6 @@
   },
   "dependencies": {
     "@na-regua/contracts": "workspace:*",
-    "@na-regua/db": "workspace:*",
     "@na-regua/domain": "workspace:*",
     "@na-regua/money": "workspace:*"
   },

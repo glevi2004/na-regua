@@ -67,6 +67,7 @@ export type {
   SaleProductSnapshot,
   SaleSettings,
   SaleTransaction,
+  StockMovementOrigin,
   UnitOfWork,
 } from './ports/sale-writers.js'
 export type { MessageSender } from './ports/message-sender.js'
