@@ -126,6 +126,33 @@ export default function EtapaCatalogo({
    * ---------------------------------------------------------------- */
 
   /**
+   * Escapa texto para entrar em HTML.
+   *
+   * O orcamento e montado com `document.write` numa janela aberta por
+   * `window.open('')`, e essa janela HERDA A ORIGEM do aplicativo. Descricao de
+   * produto e nome de cliente vem do banco, digitados pelo lojista: um produto
+   * chamado `<img src=x onerror=...>` executaria script com acesso a sessao de
+   * quem esta usando o sistema.
+   *
+   * A CI encontrou isto — CodeQL `js/xss-through-dom`, severidade alta.
+   *
+   * Nao e um problema de dado "malicioso" apenas: descricao com `<` ou `&` no
+   * nome — "Cabo HDMI 2m <novo>", "Pilha AA & AAA" — ja saia com a tabela
+   * quebrada, e ninguem tinha notado porque o orcamento sai em janela separada.
+   *
+   * A troca de ordem importa: `&` primeiro, senao as entidades geradas pelas
+   * outras substituicoes seriam escapadas de novo e apareceriam como `&amp;lt;`.
+   */
+  function escaparHtml(texto: string): string {
+    return texto
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#39;')
+  }
+
+  /**
    * Gera o orcamento usando a impressao do navegador (imprimir para PDF).
    *
    * Sem dependencia nova e funciona hoje. Para envio por WhatsApp o PDF
@@ -142,7 +169,8 @@ export default function EtapaCatalogo({
     const linhas = itens
       .map(
         (i) =>
-          `<tr><td>${i.descricao}</td><td style="text-align:center">${i.quantidade}</td>` +
+          `<tr><td>${escaparHtml(i.descricao)}</td>` +
+          `<td style="text-align:center">${i.quantidade}</td>` +
           `<td style="text-align:right">${formatMoney(i.precoUnitario)}</td>` +
           `<td style="text-align:right">${formatMoney(subtotalItem(i))}</td></tr>`,
       )
@@ -159,7 +187,7 @@ export default function EtapaCatalogo({
         `td{border-bottom:1px solid #e6e8ef;padding:8px 6px}` +
         `tfoot td{border:none;padding-top:10px;font-weight:600}` +
         `</style></head><body>` +
-        `<h1>Orcamento</h1><p>${clienteNome} · ${new Date().toLocaleDateString('pt-BR')}</p>` +
+        `<h1>Orcamento</h1><p>${escaparHtml(clienteNome)} · ${new Date().toLocaleDateString('pt-BR')}</p>` +
         `<table><thead><tr><th>Produto</th><th style="text-align:center">Qtd</th>` +
         `<th style="text-align:right">Unitario</th><th style="text-align:right">Subtotal</th></tr></thead>` +
         `<tbody>${linhas}</tbody><tfoot>` +
