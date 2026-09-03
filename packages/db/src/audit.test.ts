@@ -59,8 +59,8 @@ describe.skipIf(!DATABASE_URL)('trilha de auditoria — NR-025', () => {
           ${over.actorId ?? randomUUID()},
           ${over.channel ?? 'app'},
           ${'2026-09-02T12:00:00Z'},
-          ${JSON.stringify({ stockQuantity: 20 })},
-          ${JSON.stringify({ stockQuantity: 18 })}
+          ${sql.json({ stockQuantity: 20 })},
+          ${sql.json({ stockQuantity: 18 })}
         )
         RETURNING id
       `,
@@ -146,7 +146,7 @@ describe.skipIf(!DATABASE_URL)('trilha de auditoria — NR-025', () => {
             INSERT INTO audit_log
               (company_id, entity, entity_id, action, actor_id, channel, occurred_at, before)
             VALUES (${empresaA}, ${'Product'}, ${randomUUID()}, ${'created'}, ${randomUUID()},
-                    ${'app'}, ${'2026-09-02T12:00:00Z'}, ${JSON.stringify({ a: 1 })})
+                    ${'app'}, ${'2026-09-02T12:00:00Z'}, ${sql.json({ a: 1 })})
           `,
         ),
       ).rejects.toThrow()
