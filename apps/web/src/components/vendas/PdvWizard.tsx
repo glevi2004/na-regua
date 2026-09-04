@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
 import {
   criarVenda,
   totalCarrinho,
@@ -52,6 +52,21 @@ export default function PdvWizard() {
   const [desconto, setDesconto] = useState<Desconto | null>(null)
   const [pagamentos, setPagamentos] = useState<Pagamento[]>([])
 
+  /*
+   * A chave de idempotencia do fechamento — RNF-043.
+   *
+   * Num `ref` e nao em estado: ela nao pinta nada na tela, e mudar estado aqui
+   * so causaria um render a mais. O que importa e a VIDA dela — nasce na
+   * primeira tentativa de fechar e sobrevive a todas as seguintes, ate a venda
+   * entrar ou o carrinho ser esvaziado.
+   *
+   * E o coracao da protecao: o PDV de balcao tem internet ruim, o operador
+   * clica de novo, e sem a chave reaproveitada o reenvio vira uma SEGUNDA
+   * venda, com segundo estoque baixado e segundo recebivel. Gerar a chave
+   * dentro da funcao de envio seria o mesmo que nao ter chave.
+   */
+  const chaveDeFechamento = useRef<string | null>(null)
+
   const [vendaId, setVendaId] = useState<string | null>(null)
   const [vendaNumero, setVendaNumero] = useState<string | null>(null)
   const [fechando, setFechando] = useState(false)
@@ -63,20 +78,35 @@ export default function PdvWizard() {
   const fecharVenda = useCallback(async () => {
     setFechando(true)
 
-    /* SUBSTITUIR POR: POST /vendas — o servidor recalcula preco, imposto
-       e taxa; o total do front e so referencia. */
-    const r = await criarVenda({
-      clienteId: cliente?.id ?? null,
-      clienteNome: cliente?.nome ?? 'Venda sem cliente',
-      itens,
-      desconto,
-      pagamentos,
-    })
+    /* `??=`: so gera na primeira vez. Uma retentativa reusa a mesma. */
+    chaveDeFechamento.current ??= crypto.randomUUID()
+
+    /* O servidor recalcula preco, imposto e taxa — o total daqui e so
+       referencia para o operador conferir na tela. */
+    const r = await criarVenda(
+      {
+        clienteId: cliente?.id ?? null,
+        clienteNome: cliente?.nome ?? 'Venda sem cliente',
+        itens,
+        desconto,
+        pagamentos,
+      },
+      chaveDeFechamento.current,
+    )
     setFechando(false)
 
     if (!r.ok) {
+      /* A chave FICA: o erro pode ter sido a resposta se perdendo depois de a
+         venda entrar, e uma chave nova na proxima tentativa criaria a segunda. */
       setToast({ msg: r.error, tone: 'error' })
       return
+    }
+
+    if (r.avisosDeEstoque.length > 0) {
+      /* RF-028: vender sem saldo nao e recusado, mas o operador precisa saber. */
+      setToast({ msg: r.avisosDeEstoque.join(' '), tone: 'error' })
+    } else if (r.reenvio) {
+      setToast({ msg: `Esta venda ja tinha sido fechada (nº ${r.numero}).`, tone: 'success' })
     }
 
     setVendaId(r.id)
@@ -85,6 +115,9 @@ export default function PdvWizard() {
   }, [cliente, itens, desconto, pagamentos])
 
   function cancelarVenda() {
+    /* Carrinho novo, chave nova: a proxima venda nao pode ser confundida com
+       esta pelo servidor. */
+    chaveDeFechamento.current = null
     setItens([])
     setDesconto(null)
     setPagamentos([])

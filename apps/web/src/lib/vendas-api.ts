@@ -25,9 +25,8 @@
  * inventario que ninguem consegue explicar depois.
  */
 
-import { produtos } from './mock-data'
 import type { PixCharge, PixChargeStatus } from './auth-api'
-import type { FormaPagamento, Produto } from './types'
+import type { FormaPagamento } from './types'
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
@@ -79,7 +78,14 @@ export function totalCarrinho(itens: ItemCarrinho[], desconto: Desconto | null):
   return sub - valorDesconto(sub, desconto)
 }
 
-export function paraItemCarrinho(produto: Produto): ItemCarrinho {
+export function paraItemCarrinho(produto: {
+  id: string
+  codigo: string
+  descricao: string
+  precoVenda: number
+  precoCusto: number
+  estoque: number
+}): ItemCarrinho {
   return {
     produtoId: produto.id,
     codigo: produto.codigo,
@@ -91,14 +97,50 @@ export function paraItemCarrinho(produto: Produto): ItemCarrinho {
   }
 }
 
-/** Busca produto pelo EAN lido na camera. */
-export function produtoPorEan(ean: string): Produto | null {
-  const limpo = ean.replace(/\D/g, '')
-  return (
-    produtos.find((p) => p.ean === limpo) ??
-    produtos.find((p) => p.codigo.toUpperCase() === ean.trim().toUpperCase()) ??
-    null
-  )
+/**
+ * Busca pelo EAN lido na camera — RF-018, agora contra a api.
+ *
+ * `null` significa "a loja nao tem esse cadastro", e nao "erro": o balcao
+ * distingue os dois, porque o primeiro tem conserto imediato (cadastrar) e o
+ * segundo nao.
+ */
+export async function buscarPorEan(ean: string): Promise<ProdutoDoCatalogo | null> {
+  const limpo = ean.replace(/D/g, '')
+  if (limpo === '') return null
+
+  let resposta: Response
+  try {
+    resposta = await fetch(`/api/produtos?ean=${encodeURIComponent(limpo)}`, {
+      headers: { 'content-type': 'application/json' },
+      credentials: 'same-origin',
+    })
+  } catch {
+    return null
+  }
+
+  if (!resposta.ok) return null
+
+  const p = (await resposta.json().catch(() => null)) as {
+    id: string
+    description: string
+    barcode: string | null
+    internalCode: string
+    salePriceCents: number
+    costPriceCents: number
+    stock: number
+  } | null
+
+  if (p === null) return null
+
+  return {
+    id: p.id,
+    codigo: p.internalCode,
+    descricao: p.description,
+    ean: p.barcode,
+    precoVenda: p.salePriceCents / 100,
+    precoCusto: p.costPriceCents / 100,
+    estoque: p.stock,
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -186,18 +228,114 @@ export type DadosVenda = {
   pagamentos: Pagamento[]
 }
 
-/** SUBSTITUIR POR: POST /vendas */
+/**
+ * A forma de pagamento da tela para a do contrato.
+ *
+ * Traducao explicita, e nao um `as`: os dois vocabularios sao independentes —
+ * a tela fala portugues com o lojista e a api fala o dominio. Um `as` calaria
+ * o compilador no dia em que um dos lados ganhasse uma forma nova, e a venda
+ * chegaria com um metodo que a api recusa.
+ */
+const METODO: Record<FormaPagamento, 'cash' | 'pix' | 'debit' | 'credit' | 'wallet'> = {
+  dinheiro: 'cash',
+  pix: 'pix',
+  debito: 'debit',
+  credito: 'credit',
+  carteira: 'wallet',
+}
+
+/** Reais para centavos. Arredondar aqui evita 1990.0000000000002 no corpo. */
+const emCentavos = (reais: number): number => Math.round(reais * 100)
+
+export type ResultadoDaVenda =
+  | {
+      ok: true
+      id: string
+      numero: string
+      /**
+       * A venda ja existia e foi reconhecida pela chave — RNF-043.
+       *
+       * A tela precisa saber: "venda registrada" depois de um reenvio faria o
+       * operador achar que fechou duas.
+       */
+      reenvio: boolean
+      /** Item vendido sem saldo — AVISO, nao erro (RF-028). */
+      avisosDeEstoque: string[]
+    }
+  | { ok: false; error: string }
+
+/**
+ * Fecha a venda contra a api — RF-024 a RF-030.
+ *
+ * A `chaveDeIdempotencia` vem de fora de proposito (RNF-043): quem a gera e a
+ * tela, UMA vez, quando o operador manda fechar. Gerada aqui dentro, cada
+ * retentativa teria chave nova e a protecao viraria enfeite — o PDV com
+ * internet ruim reenvia, e cada reenvio criaria uma venda, um estoque baixado e
+ * um recebivel a mais.
+ *
+ * O total do front nao vai no corpo: quem calcula imposto, tarifa e liquido e o
+ * servidor (RF-040, RF-036). Mandar o total daqui criaria dois lugares para a
+ * mesma conta, e eles divergiriam na primeira mudanca de aliquota.
+ */
 export async function criarVenda(
   dados: DadosVenda,
-): Promise<{ ok: true; id: string; numero: string } | { ok: false; error: string }> {
-  await delay(900)
-
+  chaveDeIdempotencia: string,
+): Promise<ResultadoDaVenda> {
   if (dados.itens.length === 0) {
     return { ok: false, error: 'O carrinho esta vazio.' }
   }
 
-  const numero = String(1843 + Math.floor(Math.random() * 50))
-  return { ok: true, id: `ven-${Date.now()}`, numero }
+  const subtotal = subtotalCarrinho(dados.itens)
+
+  const corpo = {
+    ...(dados.clienteId === null ? {} : { customerId: dados.clienteId }),
+    items: dados.itens.map((i) => ({
+      productId: i.produtoId,
+      quantity: i.quantidade,
+      unitPriceCents: emCentavos(i.precoUnitario),
+    })),
+    payments: dados.pagamentos.map((pg) => ({
+      method: METODO[pg.forma],
+      amountCents: emCentavos(pg.valor),
+    })),
+    /* O desconto vai em CENTAVOS mesmo quando a tela o pediu em percentual: a
+       api guarda o valor concedido, nao a regra que o produziu. */
+    ...(dados.desconto === null
+      ? {}
+      : { discountCents: emCentavos(valorDesconto(subtotal, dados.desconto)) }),
+  }
+
+  let resposta: Response
+  try {
+    resposta = await fetch('/api/vendas', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', 'idempotency-key': chaveDeIdempotencia },
+      credentials: 'same-origin',
+      body: JSON.stringify(corpo),
+    })
+  } catch {
+    return { ok: false, error: 'Sem conexao. A venda nao foi fechada — tente de novo.' }
+  }
+
+  const json = (await resposta.json().catch(() => ({}))) as {
+    sale?: { id: string; number: number }
+    stockWarnings?: string[]
+    replayed?: boolean
+    error?: { message?: string }
+  }
+
+  if (!resposta.ok || json.sale === undefined) {
+    return { ok: false, error: json.error?.message ?? 'Nao foi possivel fechar a venda.' }
+  }
+
+  return {
+    ok: true,
+    id: json.sale.id,
+    numero: String(json.sale.number),
+    /* 200 e reenvio, 201 e venda nova — a api distingue os dois de proposito. */
+    reenvio: resposta.status === 200 || json.replayed === true,
+    avisosDeEstoque: json.stockWarnings ?? [],
+  }
 }
 
 /* -------------------------------------------------------------------------- */
@@ -392,4 +530,78 @@ export async function estornarVenda(
 
   const itensDevolvidos = venda.itens.reduce((acc, i) => acc + i.quantidade, 0)
   return { ok: true, itensDevolvidos }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Catalogo do balcao — RF-019                                                */
+/* -------------------------------------------------------------------------- */
+
+export type ProdutoDoCatalogo = {
+  id: string
+  codigo: string
+  descricao: string
+  ean: string | null
+  precoVenda: number
+  precoCusto: number
+  estoque: number
+}
+
+/**
+ * Busca no SERVIDOR, e nao filtro sobre uma lista carregada.
+ *
+ * O catalogo de uma mercearia tem milhares de itens; traze-lo inteiro para
+ * filtrar no navegador custa a primeira abertura da tela e piora com o
+ * crescimento da loja — exatamente ao contrario do que deveria.
+ *
+ * Termo vazio devolve o comeco do catalogo, que e o estado em que o PDV abre.
+ * Lista vazia e resposta legitima aqui: "nenhum produto com esse nome".
+ */
+export async function carregarCatalogo(
+  termo: string,
+): Promise<{ ok: true; produtos: ProdutoDoCatalogo[] } | { ok: false; error: string }> {
+  const busca = termo.trim()
+
+  let resposta: Response
+  try {
+    resposta = await fetch(
+      busca === '' ? '/api/produtos' : `/api/produtos?q=${encodeURIComponent(busca)}`,
+      {
+        headers: { 'content-type': 'application/json' },
+        credentials: 'same-origin',
+      },
+    )
+  } catch {
+    return { ok: false, error: 'Sem conexao. Verifique sua internet.' }
+  }
+
+  const json = (await resposta.json().catch(() => ({}))) as {
+    products?: {
+      id: string
+      description: string
+      barcode: string | null
+      internalCode: string
+      salePriceCents: number
+      costPriceCents: number
+      stock: number
+    }[]
+    error?: { message?: string }
+  }
+
+  if (!resposta.ok || json.products === undefined) {
+    return { ok: false, error: json.error?.message ?? 'Nao foi possivel carregar o catalogo.' }
+  }
+
+  return {
+    ok: true,
+    /* Centavos para reais na borda: a tela de venda inteira trabalha em reais. */
+    produtos: json.products.map((p) => ({
+      id: p.id,
+      codigo: p.internalCode,
+      descricao: p.description,
+      ean: p.barcode,
+      precoVenda: p.salePriceCents / 100,
+      precoCusto: p.costPriceCents / 100,
+      estoque: p.stock,
+    })),
+  }
 }

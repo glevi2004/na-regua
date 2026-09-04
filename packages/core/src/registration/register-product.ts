@@ -86,3 +86,34 @@ export async function findProductByBarcode(
 ): Promise<ProductOutput | undefined> {
   return deps.products.findByBarcode(ctx.companyId, barcode)
 }
+
+/**
+ * O catalogo do balcao — RF-019.
+ *
+ * Leitura: nao passa por `assertCanWrite`. Quem vende precisa ver o que ha para
+ * vender, e `accountant` consulta preco como qualquer um.
+ *
+ * O teto vive AQUI e nao na rota: ele e decisao de produto ("a tela mostra uma
+ * lista, nao um banco"), e na rota cada cliente novo — mobile, assistente —
+ * escolheria o seu. Quem pede pode reduzir; aumentar, nao.
+ */
+export const TETO_DO_CATALOGO = 50
+
+export type SearchProductsDeps = { readonly products: ProductRepository }
+
+export async function searchProducts(
+  deps: SearchProductsDeps,
+  ctx: ExecutionContext,
+  input: { readonly termo?: string; readonly limite?: number },
+): Promise<readonly ProductOutput[]> {
+  const limite = Math.min(input.limite ?? TETO_DO_CATALOGO, TETO_DO_CATALOGO)
+
+  return deps.products.search(ctx.companyId, {
+    /* Termo vazio e "me mostre o catalogo", nao "nao ache nada" — e o estado
+       em que a tela do PDV abre. */
+    ...(input.termo === undefined || input.termo.trim() === ''
+      ? {}
+      : { termo: input.termo.trim() }),
+    limite: Math.max(1, limite),
+  })
+}

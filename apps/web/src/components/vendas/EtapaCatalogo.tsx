@@ -1,9 +1,11 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
+  carregarCatalogo,
+  type ProdutoDoCatalogo,
   paraItemCarrinho,
-  produtoPorEan,
+  buscarPorEan,
   subtotalCarrinho,
   subtotalItem,
   totalCarrinho,
@@ -11,8 +13,6 @@ import {
   type Desconto,
   type ItemCarrinho,
 } from '@/lib/vendas-api'
-import { produtos } from '@/lib/mock-data'
-import { nivelEstoque } from '@/lib/produtos-api'
 import { formatMoney } from '@/lib/format'
 import { Badge, Card, EmptyState } from '@/components/ui/UI'
 import { Button } from '@/components/ui/Button'
@@ -48,27 +48,55 @@ export default function EtapaCatalogo({
   onCancelar: () => void
 }) {
   const [busca, setBusca] = useState('')
-  const [categoria, setCategoria] = useState('')
   const [lendoCodigo, setLendoCodigo] = useState(false)
   const [carrinhoAberto, setCarrinhoAberto] = useState(false)
   const [dandoDesconto, setDandoDesconto] = useState(false)
   const [cancelando, setCancelando] = useState(false)
   const [toast, setToast] = useState<{ msg: string; tone: 'success' | 'error' } | null>(null)
 
-  const categorias = useMemo(() => [...new Set(produtos.map((p) => p.categoria))].sort(), [])
+  /*
+   * O catalogo vem do SERVIDOR (RF-019), e nao de uma lista carregada inteira.
+   *
+   * Carregar tudo para filtrar aqui custa a primeira abertura da tela e piora
+   * conforme a loja cresce — o contrario do que deveria. Uma mercearia tem
+   * milhares de itens.
+   *
+   * Some com ele o filtro por CATEGORIA: a api guarda `categoryId` e nao ha
+   * cadastro de categoria com nome, entao o seletor so poderia mostrar uuid.
+   * Filtro que o lojista nao consegue ler e pior que filtro nenhum — ele volta
+   * quando as categorias existirem de verdade.
+   */
+  const [catalogo, setCatalogo] = useState<ProdutoDoCatalogo[]>([])
+  const [carregandoCatalogo, setCarregandoCatalogo] = useState(true)
+  const [erroCatalogo, setErroCatalogo] = useState<string | null>(null)
 
-  const catalogo = useMemo(() => {
-    const termo = busca.trim().toLowerCase()
-    return produtos.filter((p) => {
-      if (categoria && p.categoria !== categoria) return false
-      if (!termo) return true
-      return (
-        p.descricao.toLowerCase().includes(termo) ||
-        p.codigo.toLowerCase().includes(termo) ||
-        p.ean.includes(termo.replace(/\D/g, ''))
-      )
-    })
-  }, [busca, categoria])
+  const buscarCatalogo = useCallback(async (termo: string) => {
+    const r = await carregarCatalogo(termo)
+    setCarregandoCatalogo(false)
+
+    if (!r.ok) {
+      setErroCatalogo(r.error)
+      return
+    }
+
+    setErroCatalogo(null)
+    setCatalogo(r.produtos)
+  }, [])
+
+  useEffect(() => {
+    /*
+     * Espera antes de perguntar: sem isto cada tecla vira um pedido, e o balcao
+     * digita rapido. 300ms e curto o bastante para nao parecer travado e longo
+     * o bastante para "cafe" ser uma consulta, e nao quatro.
+     */
+    const timer = setTimeout(() => {
+      void (async () => {
+        await buscarCatalogo(busca)
+      })()
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [busca, buscarCatalogo])
 
   const subtotal = subtotalCarrinho(itens)
   const abatimento = valorDesconto(subtotal, desconto)
@@ -80,7 +108,7 @@ export default function EtapaCatalogo({
    * ---------------------------------------------------------------- */
 
   function adicionar(produtoId: string) {
-    const produto = produtos.find((p) => p.id === produtoId)
+    const produto = catalogo.find((p) => p.id === produtoId)
     if (!produto) return
 
     const existente = itens.find((i) => i.produtoId === produtoId)
@@ -111,13 +139,27 @@ export default function EtapaCatalogo({
     onItens(itens.map((i) => (i.produtoId === produtoId ? { ...i, quantidade } : i)))
   }
 
-  function lerCodigo(codigo: string) {
-    const produto = produtoPorEan(codigo)
-    if (!produto) {
+  async function lerCodigo(codigo: string) {
+    const produto = await buscarPorEan(codigo)
+    if (produto === null) {
       setToast({ msg: `Codigo ${codigo} nao esta no catalogo.`, tone: 'error' })
       return
     }
-    adicionar(produto.id)
+
+    /*
+     * Entra no carrinho direto, sem depender de o produto estar na lista
+     * visivel: o leitor acha um item que a busca atual nao mostra, e obrigar o
+     * operador a limpar o filtro antes de bipar seria o oposto do que o leitor
+     * existe para fazer.
+     */
+    const existente = itens.find((i) => i.produtoId === produto.id)
+    onItens(
+      existente
+        ? itens.map((i) =>
+            i.produtoId === produto.id ? { ...i, quantidade: i.quantidade + 1 } : i,
+          )
+        : [...itens, paraItemCarrinho(produto)],
+    )
     setToast({ msg: `${produto.descricao} adicionado.`, tone: 'success' })
   }
 
@@ -229,37 +271,41 @@ export default function EtapaCatalogo({
             </Button>
           </div>
 
-          <div className={styles.categorias} role="group" aria-label="Categorias">
-            <button
-              type="button"
-              className={`${styles.categoria} ${categoria === '' ? styles.categoriaAtiva : ''}`}
-              onClick={() => setCategoria('')}
-              aria-pressed={categoria === ''}
-            >
-              Todas
-            </button>
-            {categorias.map((c) => (
-              <button
-                key={c}
-                type="button"
-                className={`${styles.categoria} ${categoria === c ? styles.categoriaAtiva : ''}`}
-                onClick={() => setCategoria(c)}
-                aria-pressed={categoria === c}
-              >
-                {c}
-              </button>
-            ))}
-          </div>
-
-          {catalogo.length === 0 ? (
+          {carregandoCatalogo ? (
+            <EmptyState title="Carregando o catalogo" description="Buscando os produtos." />
+          ) : erroCatalogo !== null ? (
+            <EmptyState
+              title="Nao deu para carregar o catalogo"
+              description={erroCatalogo}
+              action={
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setCarregandoCatalogo(true)
+                    setErroCatalogo(null)
+                    void buscarCatalogo(busca)
+                  }}
+                >
+                  Tentar de novo
+                </Button>
+              }
+            />
+          ) : catalogo.length === 0 ? (
             <EmptyState
               title="Nenhum produto encontrado"
-              description="Tente outro termo ou categoria."
+              description={
+                busca.trim() === ''
+                  ? 'Cadastre produtos para vender pelo balcao.'
+                  : 'Tente outro termo, ou leia o codigo de barras.'
+              }
             />
           ) : (
             <ul className={styles.catalogo}>
               {catalogo.map((p) => {
-                const nivel = nivelEstoque(p)
+                /* O catalogo da api nao traz `estoqueMinimo`; sem ele o nivel
+                   e so "tem ou nao tem". Mostrar um alerta de minimo inventado
+                   seria pior que nao mostrar. */
+                const nivel = p.estoque <= 0 ? 'zerado' : 'ok'
                 const noCarrinho = itens.find((i) => i.produtoId === p.id)
 
                 return (
@@ -280,10 +326,8 @@ export default function EtapaCatalogo({
 
                       <span className={styles.produtoNumeros}>
                         <strong>{formatMoney(p.precoVenda)}</strong>
-                        {nivel === 'esgotado' ? (
+                        {nivel === 'zerado' ? (
                           <Badge tone="danger">Sem estoque</Badge>
-                        ) : nivel === 'baixo' ? (
-                          <Badge tone="warning">{p.estoque} un</Badge>
                         ) : (
                           <span className={styles.produtoEstoque}>{p.estoque} un</span>
                         )}

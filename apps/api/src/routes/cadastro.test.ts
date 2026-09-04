@@ -6,7 +6,7 @@ import type {
   NewProduct,
   ProductRepository,
 } from '@na-regua/core'
-import { InMemoryChartOfAccounts } from '@na-regua/core'
+import { InMemoryChartOfAccounts, TETO_DO_CATALOGO } from '@na-regua/core'
 import Fastify, { type FastifyInstance } from 'fastify'
 import { afterEach, describe, expect, it } from 'vitest'
 import { registerErrorHandler } from '../plugins/error-handler.js'
@@ -74,6 +74,18 @@ function cadastroEmMemoria() {
   }
 
   const products: ProductRepository = {
+    /* O catalogo do balcao (RF-019). Imita o LIMITE e a ORDEM do repositorio de
+       verdade: um falso que devolvesse tudo em qualquer ordem deixaria passar
+       um SQL sem `LIMIT` nem `ORDER BY`. */
+    search: async (companyId, criterio) => {
+      const termo = criterio.termo?.toLowerCase() ?? ''
+      return produtos
+        .filter((p) => p.companyId === companyId)
+        .filter((p) => termo === '' || p.description.toLowerCase().includes(termo))
+        .sort((a, b) => a.description.localeCompare(b.description))
+        .slice(0, criterio.limite)
+    },
+
     create: async (p: NewProduct) => {
       seq += 1
       const pr = {
@@ -368,5 +380,89 @@ describe('localizar por codigo de barras — RF-018', () => {
       (await app.inject({ method: 'GET', url: '/produtos/codigo-de-barras/0000000000000' }))
         .statusCode,
     ).toBe(404)
+  })
+})
+
+describe('catalogo do balcao — RF-019', () => {
+  const CAFE = {
+    description: 'Cafe torrado 500g',
+    unitOfMeasure: 'un' as const,
+    salePriceCents: 1990,
+    costPriceCents: 1200,
+  }
+  const ACUCAR = {
+    description: 'Acucar refinado 1kg',
+    unitOfMeasure: 'un' as const,
+    salePriceCents: 599,
+    costPriceCents: 400,
+  }
+
+  async function comCatalogo() {
+    const c = await buildApp()
+    app = c.app
+    await app.inject({ method: 'POST', url: '/produtos', payload: CAFE })
+    await app.inject({ method: 'POST', url: '/produtos', payload: ACUCAR })
+    return c
+  }
+
+  it('sem termo, devolve o catalogo — e o estado em que o PDV abre', async () => {
+    await comCatalogo()
+
+    const r = await app.inject({ method: 'GET', url: '/produtos' })
+
+    expect(r.statusCode).toBe(200)
+    expect(r.json().products).toHaveLength(2)
+  })
+
+  it('ordena por descricao, para a lista nao dancar entre buscas iguais', async () => {
+    await comCatalogo()
+
+    const r = await app.inject({ method: 'GET', url: '/produtos' })
+
+    expect(r.json().products.map((p: { description: string }) => p.description)).toEqual([
+      'Acucar refinado 1kg',
+      'Cafe torrado 500g',
+    ])
+  })
+
+  it('filtra pelo termo, sem depender da caixa', async () => {
+    await comCatalogo()
+
+    const r = await app.inject({ method: 'GET', url: '/produtos?q=CAFE' })
+
+    expect(r.json().products).toHaveLength(1)
+    expect(r.json().products[0].description).toBe('Cafe torrado 500g')
+  })
+
+  it('nada encontrado e lista VAZIA, e nao 404', async () => {
+    await comCatalogo()
+
+    const r = await app.inject({ method: 'GET', url: '/produtos?q=bicicleta' })
+
+    /*
+     * Aqui e busca sobre colecao: "nenhum produto com esse nome" e uma
+     * resposta. O 404 fica para o codigo de barras, onde nao achar significa
+     * "existe no mundo e falta cadastrar" — e o balcao age diferente nos dois.
+     */
+    expect(r.statusCode).toBe(200)
+    expect(r.json().products).toEqual([])
+  })
+
+  it('nao passa do teto, mesmo se pedirem mais', async () => {
+    const c = await comCatalogo()
+    app = c.app
+
+    const r = await app.inject({ method: 'GET', url: `/produtos?limite=${TETO_DO_CATALOGO + 500}` })
+
+    /* O teto e decisao de produto e mora em `core`: na rota, cada cliente novo
+       — mobile, assistente — escolheria o seu. Quem pede pode reduzir. */
+    expect(r.json().products.length).toBeLessThanOrEqual(TETO_DO_CATALOGO)
+  })
+
+  it('sem sessao, 401', async () => {
+    const c = await buildApp(null)
+    app = c.app
+
+    expect((await app.inject({ method: 'GET', url: '/produtos' })).statusCode).toBe(401)
   })
 })

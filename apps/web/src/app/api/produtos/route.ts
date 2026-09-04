@@ -42,19 +42,40 @@ export async function POST(request: Request) {
 }
 
 /**
- * Localizar pelo codigo de barras lido — RF-018.
+ * Duas perguntas diferentes, e a resposta vazia significa coisas opostas.
  *
- * `?ean=` aqui, embora a api use `/produtos/codigo-de-barras/:codigo`: para o
- * navegador isto e uma consulta da tela de cadastro, e o handler traduz. Manter
- * o caminho da api aqui acoplaria a rota do Next ao formato da api sem ganho.
+ * - `?ean=` — localizar pelo codigo lido (RF-018). Nao achou e **404**: o
+ *   codigo existe no mundo e nao no cadastro da loja, e o balcao precisa saber
+ *   que ha cadastro a fazer.
+ * - `?q=` ou nada — o catalogo do balcao (RF-019). Nao achou e **lista
+ *   vazia**: e busca sobre colecao, e "nenhum produto com esse nome" e uma
+ *   resposta.
+ *
+ * A api ja separa as duas em caminhos distintos; aqui elas convivem porque para
+ * o navegador as duas sao "consultar produto", e o handler traduz.
  */
 export async function GET(request: Request) {
   const token = await comToken()
   if (token === undefined) return semSessao()
 
-  const ean = new URL(request.url).searchParams.get('ean')
+  const params = new URL(request.url).searchParams
+  const ean = params.get('ean')
 
-  if (ean === null || ean.trim() === '') {
+  /* Sem `ean`: e o catalogo, e nao um pedido malformado. */
+  if (ean === null) {
+    const q = params.get('q')
+    const r = await chamarApi(q === null ? '/produtos' : `/produtos?q=${encodeURIComponent(q)}`, {
+      token,
+    })
+
+    return r.ok
+      ? NextResponse.json(r.dados)
+      : NextResponse.json(r.corpo ?? { error: { code: r.code, message: r.message } }, {
+          status: r.status,
+        })
+  }
+
+  if (ean.trim() === '') {
     return NextResponse.json(
       { error: { code: 'VALIDATION_FAILED', message: 'Informe o codigo de barras.' } },
       { status: 400 },
