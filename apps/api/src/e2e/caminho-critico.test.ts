@@ -1,0 +1,514 @@
+import { randomUUID } from 'node:crypto'
+import {
+  cnpjSchema,
+  createCompanyInputSchema,
+  createProductInputSchema,
+  createSaleInputSchema,
+} from '@na-regua/contracts'
+import { PLANO_DE_CONTAS_PADRAO } from '@na-regua/core'
+import { getClient, migrate, withTenant } from '@na-regua/db'
+import Fastify, { type FastifyInstance } from 'fastify'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
+import { registerErrorHandler } from '../plugins/error-handler.js'
+import type { AuthenticatedPrincipal } from '../plugins/execution-context.js'
+import { registerRateLimit } from '../plugins/rate-limit.js'
+import { registerCadastroRoutes } from '../routes/cadastro.js'
+import { registerSaleRoutes } from '../routes/sales.js'
+
+/**
+ * O caminho critico, ponta a ponta — NR-049.
+ *
+ * ## Por que pela API e nao pelo navegador
+ *
+ * `docs/engenharia/testes.md` descreve tres fluxos E2E "no navegador". Hoje
+ * nenhum deles atravessa o navegador de ponta a ponta, e o motivo nao e o
+ * teste:
+ *
+ * - o web NAO tem rota de BFF para `/empresas` nem para `/sales`, entao o
+ *   onboarding e a venda nao existem pela tela;
+ * - o fluxo 3 (cobranca no WhatsApp -> link de pagamento -> baixa por webhook)
+ *   nao tem NENHUMA rota na api.
+ *
+ * Um Playwright contra as telas de hoje exercitaria mock. Suite verde que prova
+ * nada e pior que suite nenhuma, porque cria confianca sem lastro — e o proprio
+ * documento diz que "tres testes E2E confiaveis valem mais que trinta que
+ * falham aleatoriamente".
+ *
+ * Entao este teste sobe a api DE VERDADE — rotas reais, composicao real,
+ * repositorios reais, Postgres real — e atravessa HTTP -> rota -> `core` ->
+ * `db`. E a camada onde os defeitos desta base tem aparecido: dependencia nao
+ * declarada, fiacao errada na composicao, SQL que nunca rodou.
+ *
+ * ## O que ele NAO cobre, e por que
+ *
+ * A sessao. Nao existe rota de login (so `/auth/me`), entao nao ha como obter
+ * um token por HTTP. A identidade e injetada, e o que se prova daqui para baixo
+ * e o resto do caminho. Quando a NR-014 fechar, o `onRequest` de teste sai e o
+ * fluxo comeca no login.
+ */
+
+const DATABASE_URL = process.env.DATABASE_URL
+const MIGRATION_URL = process.env.DATABASE_MIGRATION_URL ?? DATABASE_URL
+
+/**
+ * `composition.js` entra por import DINAMICO, dentro do `beforeAll`.
+ *
+ * Ele valida o ambiente no topo do modulo (NR-006) e LANCA se faltar variavel.
+ * Importado estaticamente, o arquivo nem chega a ser coletado numa maquina sem
+ * `.env` completo — e derruba a suite inteira de `apps/api`, inclusive os
+ * testes de rota que nao precisam de banco nenhum. O `skipIf` protege o que
+ * roda, nao o que o modulo faz ao ser carregado.
+ */
+type Composicao = typeof import('../composition.js')
+
+const EAN = `789${Date.now()}`.slice(0, 13)
+
+/*
+ * CNPJ com digito verificador de verdade, e unico por execucao.
+ *
+ * Os testes de `db` inserem direto na tabela e por isso se contentam com
+ * catorze digitos quaisquer. Este entra pelo CONTRATO, e `cnpjSchema` confere
+ * os dois digitos finais — numero aleatorio volta 400, e como o cadastro da
+ * empresa e o primeiro degrau, TODO o resto do fluxo cai atras dele. Foi o que
+ * aconteceu na segunda rodada da CI.
+ *
+ * A base sai do relogio para nao esbarrar em "CNPJ ja cadastrado" numa
+ * reexecucao contra o mesmo banco, e o resultado continua reconhecivelmente
+ * falso, como manda docs/engenharia/testes.md.
+ */
+const CNPJ = (() => {
+  const digito = (nums: number[], pesos: number[]): number => {
+    const resto = nums.reduce((acc, n, i) => acc + n * pesos[i]!, 0) % 11
+    return resto < 2 ? 0 : 11 - resto
+  }
+
+  const base = String(Date.now()).slice(-12).split('').map(Number)
+  const d1 = digito(base, [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2])
+  const d2 = digito([...base, d1], [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2])
+
+  return `${base.join('')}${d1}${d2}`
+})()
+
+/*
+ * Os corpos enviados, num lugar so — e conferidos contra os contratos por um
+ * teste que roda SEM banco (ver o fim do arquivo).
+ *
+ * Nasceram inline e me custaram duas rodadas de CI: `stockQuantity` em vez de
+ * `stock`, e CNPJ sem digito verificador. Os dois sao 400, e como o fluxo e
+ * encadeado, um 400 no primeiro degrau reprova os oito casos seguintes com
+ * mensagens que nao apontam para a causa.
+ */
+const EMPRESA = {
+  legalName: 'Mercearia do Caminho Critico LTDA',
+  cnpj: CNPJ,
+  email: `contato@${CNPJ}.local`,
+  phone: '41999990000',
+}
+
+const PRODUTO = {
+  description: 'Cafe torrado 500g',
+  unitOfMeasure: 'un' as const,
+  salePriceCents: 1990,
+  costPriceCents: 1200,
+  barcode: EAN,
+  stock: 10,
+}
+
+const vendaDinheiro = (productId: string) => ({
+  items: [{ productId, quantity: 1, unitPriceCents: 1990 }],
+  payments: [{ method: 'cash' as const, amountCents: 1990 }],
+})
+
+/*
+ * TRES parcelas, e nao duas.
+ *
+ * A tabela de tarifas padrao tem linha para 1x (3%) e para 3x (6%), e nada
+ * para 2x. Com duas, a tarifa dependeria de como a busca resolve o vao — e a
+ * assercao "o liquido vem abaixo do bruto" passaria ou falharia por um detalhe
+ * que este teste nao quer medir. Tres casa exatamente com a tabela.
+ */
+const vendaCredito = (productId: string) => ({
+  items: [{ productId, quantity: 2, unitPriceCents: 1990 }],
+  payments: [{ method: 'credit' as const, amountCents: 3980, installments: 3 }],
+})
+
+const vendaPix = (productId: string) => ({
+  items: [{ productId, quantity: 1, unitPriceCents: 1990 }],
+  payments: [{ method: 'pix' as const, amountCents: 1990 }],
+})
+
+describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
+  let app: FastifyInstance
+  let usuario: string
+
+  /*
+   * O MESMO cliente que a api usa, e nao uma conexao propria.
+   *
+   * `postgres` nem e dependencia declarada de `apps/api` — abrir uma conexao
+   * paralela aqui pediria uma. E ler pelo caminho da aplicacao, sujeito a RLS
+   * como ela, e mais honesto: uma assercao que so passa por fora da politica
+   * nao prova nada sobre o que o lojista veria.
+   */
+  let composicao: Composicao
+
+  const sql = () => getClient(DATABASE_URL!)
+
+  /*
+   * Toda consulta deste arquivo filtra por `company_id` NA MAO.
+   *
+   * O `withTenant` define o tenant, mas quem o faz valer e a RLS — e a conexao
+   * daqui e a da propria api, dona do banco no runner. Superusuario ignora a
+   * politica, entao apoiar-se nela aqui e apoiar-se em nada: a assercao de
+   * numeracao voltou [1, 1, 2, 2] justamente por isso, enxergando as vendas da
+   * execucao anterior alem das suas.
+   *
+   * Filtro explicito acerta com politica e sem ela. E o codigo de PRODUCAO
+   * continua sem filtro de proposito (ADR-0001) — la o papel e comum, e o
+   * `checkIsolation` da subida recusa abrir a porta se nao for.
+   */
+
+  /**
+   * Mutavel de proposito: no onboarding ainda nao existe empresa, e a partir
+   * dele toda chamada corre sob a que acabou de nascer. E o que torna o teste
+   * um FLUXO em vez de chamadas soltas com dados montados a mao.
+   */
+  let principal: AuthenticatedPrincipal
+
+  beforeAll(async () => {
+    /*
+     * O job Verificar da CI fornece DATABASE_URL, DATABASE_MIGRATION_URL e
+     * REDIS_URL, e mais nada. `loadApiEnv` exige tambem API_URL e JWT_SECRET,
+     * e lanca sem eles — foi assim que este arquivo reprovou na primeira
+     * rodada.
+     *
+     * Preenchidos aqui, e nao no workflow: sao exigencia do VALIDADOR, nao
+     * deste teste. O E2E nao emite nem verifica token (nao ha rota de login),
+     * entao um segredo de mentira e honesto — e por o segredo de verdade no
+     * workflow seria pedir uma variavel de CI para um caminho que ninguem
+     * exercita. O `??` deixa o ambiente real vencer, se algum dia houver um.
+     */
+    vi.stubEnv('API_URL', process.env.API_URL ?? 'http://localhost:3333')
+    vi.stubEnv('JWT_SECRET', process.env.JWT_SECRET ?? 'segredo-que-o-e2e-nao-usa')
+
+    composicao = await import('../composition.js')
+
+    await migrate(MIGRATION_URL!)
+
+    usuario = randomUUID()
+    const placeholder = randomUUID()
+
+    /* O usuario existe antes da empresa porque `created_by` referencia
+       `users`. Gravado dentro de um tenant, como todo acesso desta base. */
+    await withTenant(
+      sql(),
+      placeholder,
+      (tx) => tx`
+        INSERT INTO users (id, name, email)
+        VALUES (${usuario}, 'Operadora', ${`e2e-${usuario}@local`})
+      `,
+    )
+
+    principal = { companyId: placeholder, userId: usuario, role: 'owner' }
+
+    app = Fastify({ logger: false })
+    registerErrorHandler(app)
+    await registerRateLimit(app)
+
+    /* A unica coisa falsa deste teste. Ver o cabecalho sobre a NR-014. */
+    app.addHook('onRequest', async (request) => {
+      request.principal = principal
+    })
+
+    /* Os MESMOS construtores que o `index.ts` usa. E o que faz este teste pegar
+       fiacao errada na composicao — o defeito que os testes de rota, com
+       dependencia falsa, nao conseguem ver. */
+    registerCadastroRoutes(app, composicao.buildCadastroDeps())
+    registerSaleRoutes(app, composicao.buildSaleDeps())
+
+    await app.ready()
+  }, 90_000)
+
+  afterAll(async () => {
+    await app?.close()
+
+    /*
+     * Guarda para o caso de o `beforeAll` ter falhado.
+     *
+     * Sem ela, a limpeza estoura em `principal.companyId` indefinido e o
+     * relatorio mostra ESSE erro no lugar do que realmente quebrou — foi o que
+     * aconteceu aqui: a causa era variavel de ambiente faltando, e a CI acusou
+     * "Cannot read properties of undefined".
+     */
+    if (composicao === undefined || principal === undefined) {
+      vi.unstubAllEnvs()
+      return
+    }
+
+    /*
+     * Sem limpeza, e a razao e do SCHEMA e nao do teste.
+     *
+     * `inventory_movements` recusa DELETE por gatilho — "corrija com um
+     * movimento novo, nao alterando o antigo" (RF-124). Como `products` e
+     * referenciada por ela, e `companies` por tudo, a limpeza para no primeiro
+     * degrau e nao ha ordem que a salve. Livro-razao que so cresce e assim de
+     * proposito.
+     *
+     * O custo e uma empresa a mais por execucao no banco de desenvolvimento. O
+     * CNPJ sai do relogio, entao nada colide; na CI o banco morre com o job.
+     */
+
+    /* Fecha o cliente compartilhado: e o mesmo que a api usa, e deixa-lo aberto
+       segura o processo do vitest. */
+    await composicao.shutdown()
+    vi.unstubAllEnvs()
+  })
+
+  /*
+   * Um `it` por etapa, na ordem, e nao um teste gigante.
+   *
+   * O fluxo tem estado — a empresa nasce no primeiro e e usada nos seguintes —
+   * entao a ordem E o contrato aqui, ao contrario dos testes de unidade. A
+   * vantagem sobre um `it` unico e o diagnostico: quando quebra, o nome do caso
+   * ja diz em que degrau do caminho critico o sistema parou.
+   */
+
+  let produtoId: string
+  let vendaNumero: number
+
+  describe('fluxo 1 — onboarding ate a primeira venda', () => {
+    it('cadastra a empresa e ela ja nasce com plano de contas', async () => {
+      const r = await app.inject({
+        method: 'POST',
+        url: '/empresas',
+        payload: EMPRESA,
+      })
+
+      expect(r.statusCode).toBe(201)
+
+      /* Daqui para a frente, tudo corre sob a empresa que acabou de nascer. */
+      principal = { ...principal, companyId: r.json().id }
+
+      /* RF-081: o plano padrao e semeado no onboarding. Sem isto o lojista abre
+         a tela de classificacao vazia e a resposta pratica dele e nao
+         classificar nada — o que reduz o DRE a uma linha so. */
+      const contas = await withTenant(
+        sql(),
+        principal.companyId,
+        (tx) => tx<{ total: string }[]>`
+          SELECT count(*) AS total FROM accounts WHERE company_id = ${principal.companyId}
+        `,
+      )
+
+      /* Exato, e nao "maior que zero": o plano tem tamanho conhecido, e um
+         numero qualquer passaria mesmo se a consulta enxergasse outras lojas —
+         que foi o defeito que este arquivo teve. */
+      expect(Number(contas[0]!.total)).toBe(PLANO_DE_CONTAS_PADRAO.length)
+    })
+
+    it('cadastra o produto que sera vendido', async () => {
+      const r = await app.inject({
+        method: 'POST',
+        url: '/produtos',
+        payload: PRODUTO,
+      })
+
+      expect(r.statusCode).toBe(201)
+      produtoId = r.json().id
+    })
+
+    it('registra a primeira venda', async () => {
+      const r = await app.inject({
+        method: 'POST',
+        url: '/sales',
+        headers: { 'idempotency-key': randomUUID() },
+        payload: vendaDinheiro(produtoId),
+      })
+
+      expect(r.statusCode).toBe(201)
+
+      /* Atribuido ANTES das assercoes: uma assercao que falha aqui deixaria
+         `vendaNumero` indefinido e o teste de numeracao reprovaria com
+         "undefined", escondendo qual foi o erro de verdade. */
+      vendaNumero = Number(r.json().sale.number)
+
+      /*
+       * O BRUTO e o que foi cobrado; o LIQUIDO ja vem depois do imposto
+       * (RF-040). Eu esperava 1990 nos dois e a CI devolveu 1871 — a diferenca
+       * e o tributo que `domain` calcula na venda, e confundir os dois e
+       * exatamente o engano que separar os dois campos existe para evitar.
+       */
+      expect(r.json().sale.grossAmountCents).toBe(1990)
+      expect(r.json().sale.netAmountCents).toBeLessThan(1990)
+    })
+  })
+
+  describe('fluxo 2 — leitura do codigo de barras ate o recebivel', () => {
+    it('acha o produto pelo codigo lido no balcao', async () => {
+      const r = await app.inject({ method: 'GET', url: `/produtos/codigo-de-barras/${EAN}` })
+
+      expect(r.statusCode).toBe(200)
+      expect(r.json().id).toBe(produtoId)
+    })
+
+    it('codigo que nao existe volta 404, e nao lista vazia', async () => {
+      const r = await app.inject({ method: 'GET', url: '/produtos/codigo-de-barras/0000000000000' })
+
+      /* O balcao precisa distinguir "cadastro a fazer" de "cadastro feito e
+         zerado". Lista vazia confundiria os dois. */
+      expect(r.statusCode).toBe(404)
+    })
+
+    it('venda no credito parcelado gera os recebiveis', async () => {
+      const r = await app.inject({
+        method: 'POST',
+        url: '/sales',
+        headers: { 'idempotency-key': randomUUID() },
+        payload: vendaCredito(produtoId),
+      })
+
+      expect(r.statusCode).toBe(201)
+
+      const linhas = await withTenant(
+        sql(),
+        principal.companyId,
+        (tx) => tx<{ amount_cents: string; net_amount_cents: string }[]>`
+          SELECT amount_cents, net_amount_cents FROM receivables
+          WHERE company_id = ${principal.companyId} AND sale_id = ${r.json().sale.id}
+          ORDER BY due_date
+        `,
+      )
+
+      const bruto = linhas.reduce((acc, l) => acc + Number(l.amount_cents), 0)
+      const liquido = linhas.reduce((acc, l) => acc + Number(l.net_amount_cents), 0)
+
+      /*
+       * Tres parcelas, tres recebiveis, e o bruto fecha com a venda — o resto
+       * da divisao nao pode evaporar (`allocate`, RF-038).
+       *
+       * O liquido vem MENOR: a diferenca e a tarifa da adquirente, que o
+       * sistema ja calculou na venda (RF-036). E por isso que a conciliacao
+       * compara o extrato com o liquido e nao com o bruto — sem esta linha,
+       * nenhuma venda no cartao conciliaria.
+       */
+      expect(linhas).toHaveLength(3)
+      expect(bruto).toBe(3980)
+      expect(liquido).toBeLessThan(bruto)
+    })
+
+    it('a venda numerou em sequencia, sem repetir', async () => {
+      const linhas = await withTenant(
+        sql(),
+        principal.companyId,
+        (tx) => tx<{ number: string }[]>`
+          SELECT number FROM sales WHERE company_id = ${principal.companyId} ORDER BY number
+        `,
+      )
+
+      /* `Number`: a coluna e bigint e o postgres.js devolve STRING para nao
+         perder precisao — a comparacao crua daria ['1','2'] contra [1, 2]. */
+      expect(linhas.map((l) => Number(l.number))).toEqual([vendaNumero, vendaNumero + 1])
+    })
+  })
+
+  describe('o reenvio do PDV com internet ruim — RNF-043', () => {
+    it('a mesma chave devolve a MESMA venda, com 200 em vez de 201', async () => {
+      const chave = randomUUID()
+      const corpo = vendaPix(produtoId)
+
+      const primeira = await app.inject({
+        method: 'POST',
+        url: '/sales',
+        headers: { 'idempotency-key': chave },
+        payload: corpo,
+      })
+      const segunda = await app.inject({
+        method: 'POST',
+        url: '/sales',
+        headers: { 'idempotency-key': chave },
+        payload: corpo,
+      })
+
+      /*
+       * O caso que a RNF-043 existe para evitar: sem a chave reaproveitada, o
+       * reenvio vira uma SEGUNDA venda, com segundo estoque baixado e segundo
+       * recebivel. O 200 e o que diz a quem integra "isto ja existia" — 201
+       * sempre faria um integrador contar duas onde houve uma.
+       */
+      expect(primeira.statusCode).toBe(201)
+      expect(segunda.statusCode).toBe(200)
+      expect(segunda.json().replayed).toBe(true)
+      expect(segunda.json().sale.id).toBe(primeira.json().sale.id)
+    })
+
+    it('sem o cabecalho, a venda e recusada em vez de arriscada', async () => {
+      const r = await app.inject({
+        method: 'POST',
+        url: '/sales',
+        payload: vendaDinheiro(produtoId),
+      })
+
+      /* 400 e nao 422: quem chamou corrige sozinho reenviando com o cabecalho. */
+      expect(r.statusCode).toBe(400)
+    })
+  })
+
+  /*
+   * NAO ha teste de isolamento aqui, e a ausencia e deliberada.
+   *
+   * A primeira versao trocava o `companyId` do principal e esperava 404. Veio
+   * 200 na CI, e o culpado nao era vazamento: este E2E usa a conexao da propria
+   * api, que no runner e DONA do banco. Superusuario ignora RLS, entao a
+   * consulta enxergava tudo — e `findByBarcode` nem filtra por `company_id`,
+   * confia na politica (ADR-0001).
+   *
+   * Os testes de `packages/db` provam o isolamento porque criam um papel COMUM
+   * de proposito (`conectarComoAplicacao`). Repetir a assercao daqui, com esta
+   * conexao, seria um teste que passa ou falha por um motivo que nao e o que
+   * ele diz medir — e em producao quem garante o papel certo e o
+   * `checkIsolation` da subida, que recusa abrir a porta se o papel escapar.
+   */
+})
+
+/**
+ * Os corpos batem com os contratos — e este roda SEM banco.
+ *
+ * O E2E de cima e pulado em toda maquina sem Postgres, entao um payload errado
+ * so aparecia na CI. E aparecia mal: o fluxo e encadeado, e um 400 no primeiro
+ * degrau reprova os oito casos seguintes com mensagens que apontam para os
+ * sintomas, nunca para a causa. Foram duas rodadas assim — `stockQuantity` no
+ * lugar de `stock`, e CNPJ sem digito verificador.
+ *
+ * Aqui a forma e conferida contra o MESMO schema que a rota usa, no `pnpm test`
+ * de qualquer um. Nao substitui o E2E: nao prova que a venda acontece, prova
+ * que o pedido chega valido — que e a metade que estava custando caro.
+ */
+describe('os corpos que o E2E envia — sem banco', () => {
+  const UUID = '3d1f0c4e-6a2b-4c8d-9e1f-0a2b3c4d5e6f'
+
+  const casos = [
+    ['empresa', createCompanyInputSchema, EMPRESA],
+    ['produto', createProductInputSchema, PRODUTO],
+    ['venda em dinheiro', createSaleInputSchema, vendaDinheiro(UUID)],
+    ['venda no credito', createSaleInputSchema, vendaCredito(UUID)],
+    ['venda no pix', createSaleInputSchema, vendaPix(UUID)],
+  ] as const
+
+  for (const [nome, schema, corpo] of casos) {
+    it(`${nome} passa no schema da rota`, () => {
+      const r = schema.safeParse(corpo)
+
+      /* A mensagem do erro entra na assercao de proposito: `expected false to
+         be true` nao diz qual campo esta errado, e era exatamente essa a
+         dificuldade de ler a falha na CI. */
+      expect(
+        r.success ? [] : r.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`),
+      ).toEqual([])
+    })
+  }
+
+  it('o CNPJ gerado tem digito verificador valido', () => {
+    /* O gerador e codigo meu, e codigo meu erra. Se ele quebrar, o E2E volta a
+       reprovar no primeiro degrau — e agora a causa aparece aqui. */
+    expect(cnpjSchema.safeParse(CNPJ).success).toBe(true)
+  })
+})
