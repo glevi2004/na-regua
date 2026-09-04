@@ -25,9 +25,18 @@ module.exports = {
       comment:
         'Somente a raiz de composicao (composition.ts) pode importar @na-regua/db. ' +
         'Se um handler consulta o banco direto, a regra migra para a rota e o ' +
-        'canal WhatsApp deixa de aplica-la.',
+        'canal WhatsApp deixa de aplica-la. ' +
+        'A segunda excecao e a pasta do E2E (apps/api/src/e2e), e ela nao afrouxa ' +
+        'a primeira: o que a regra protege e o caminho de PRODUCAO, e teste que le ' +
+        'o banco nao faz canal nenhum pular regra. O E2E precisa dos dois lados por ' +
+        'definicao — entra por HTTP e confere o que ficou gravado. Estreita de ' +
+        'proposito: e a pasta, e nao "todo arquivo .test.ts", senao qualquer teste ' +
+        'de rota poderia consultar o banco e a fronteira viraria sugestao.',
       severity: 'error',
-      from: { path: '^apps/(api|worker)/src', pathNot: 'composition\\.ts$' },
+      from: {
+        path: '^apps/(api|worker)/src',
+        pathNot: '(composition\\.ts$|^apps/api/src/e2e/)',
+      },
       to: { path: '^packages/db' },
     },
     {

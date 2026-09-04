@@ -164,6 +164,29 @@ justificar contra esse custo. Três testes E2E confiáveis valem mais que trinta
 que falham aleatoriamente — porque suíte que falha à toa deixa de ser lida, e
 aí não serve para nada.
 
+### Onde eles rodam hoje — NR-049
+
+**Pela API, não pelo navegador**, em `apps/api/src/e2e/`: HTTP → rota → `core`
+→ `db` → Postgres, com a composição real. Não é a forma final; é a forma que
+prova alguma coisa hoje.
+
+O navegador ainda não alcança nenhum dos três fluxos, e o que falta não é
+teste:
+
+| Fluxo                                        | O que impede                                    |
+| -------------------------------------------- | ----------------------------------------------- |
+| 1 — Onboarding → primeira venda              | o web não tem BFF para `/empresas` nem `/sales` |
+| 2 — Código de barras → pagamento → recebível | idem                                            |
+| 3 — WhatsApp → link de pagamento → webhook   | **nenhuma rota existe** na api                  |
+
+Playwright contra as telas de hoje exercitaria mock. Suíte verde que prova nada
+é pior que suíte nenhuma: cria confiança sem lastro, e é justamente o que esta
+seção diz para evitar. Quando as rotas de BFF existirem, os fluxos 1 e 2 sobem
+para o navegador e este arquivo muda junto.
+
+O E2E de hoje também **não cobre a sessão**: não há rota de login (só
+`/auth/me`), então a identidade é injetada e o que se prova é daí para baixo.
+
 ## O que não testar
 
 | Não teste                            | Por quê                                |
