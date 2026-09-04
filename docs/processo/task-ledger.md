@@ -51,12 +51,12 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      58 |  158 |
-| ✅ Concluídas                 |      45 |  111 |
+| ✅ Concluídas                 |      46 |  114 |
 | 🚧 Bloqueadas por decisão     |       9 |   35 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |       3 |   10 |
+| ⬜ A fazer, pode começar hoje |       2 |    7 |
 
-> **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
+> **Números conferidos contra a `main` em 2026-09-04**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
 > exceção — foi mesclado antes de a convenção de rodapé existir (PR #15).
 > As somas saem das linhas deste arquivo e fecham com o
@@ -157,7 +157,7 @@ Objetivo: operar o ERP por mensagem e cobrar a mensalidade.
 | NR-033 | `core`: conciliação com sugestão por valor e data              |   🔵   | `core`         |   3 | NR-032 | —           | RF-078–080     |   ✅   |
 | NR-047 | `banking`: importação de OFX/CSV                               |   🟠   | `banking`      |   3 | NR-033 | —           | RF-076, RF-077 |   ✅   |
 | NR-048 | `banking`: Open Finance                                        |   🟠   | `banking`      |   4 | NR-047 | **DEC-005** | RF-074, RF-075 |   🚧   |
-| NR-076 | `web`: conciliação bancária                                    |   🟢   | `web`          |   3 | NR-033 | —           | US-038         |   ⬜   |
+| NR-076 | `web`: conciliação bancária                                    |   🟢   | `web`          |   3 | NR-033 | —           | US-038         |   ✅   |
 | NR-077 | Relatórios: DRE, ranking e faturamento, no app e no assistente |   🟢   | `web` `mobile` |   4 | NR-032 | —           | US-041, US-053 |   ⬜   |
 
 ## Backlog

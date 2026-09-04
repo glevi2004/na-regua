@@ -4,6 +4,7 @@ import { InMemoryAuditTrail } from '../audit/fakes.js'
 import type { ExecutionContext } from '../context.js'
 import { InMemoryReconciliation } from './fakes.js'
 import { createEntryFromTransaction, reconcile, undoReconciliation } from './reconcile.js'
+import { listBankTransactions } from './list-transactions.js'
 import { JANELA_DE_DIAS, suggestMatches } from './suggest-matches.js'
 
 const AGORA = new Date('2026-09-15T12:00:00.000Z')
@@ -734,3 +735,152 @@ function somaDias(data: string, dias: number): string {
   const [a, m, d] = data.split('-').map(Number)
   return new Date(Date.UTC(a!, m! - 1, d!) + dias * 86_400_000).toISOString().slice(0, 10)
 }
+
+describe('a fila de conciliacao — NR-076', () => {
+  it('lista o que falta conferir, da mais antiga para a mais nova', async () => {
+    const { deps, repo } = cenario()
+
+    repo.adicionarTransacao(EMPRESA, {
+      direction: 'debit',
+      amountCents: 3_000,
+      postedOn: '2026-09-10',
+    })
+    repo.adicionarTransacao(EMPRESA, {
+      direction: 'debit',
+      amountCents: 1_000,
+      postedOn: '2026-09-02',
+    })
+
+    const r = await listBankTransactions(deps.queries, contexto(), { scope: 'pending' })
+
+    /* A ordem e o contrato: transacao antiga sem conferir e a que ja passou do
+       mes que o contador fechou. */
+    expect(r.transactions.map((t) => t.postedOn)).toEqual(['2026-09-02', '2026-09-10'])
+    expect(r.pendingCount).toBe(2)
+  })
+
+  it('tira da fila o que ja foi conciliado', async () => {
+    const { deps, repo } = cenario()
+
+    const transacao = repo.adicionarTransacao(EMPRESA, {
+      direction: 'debit',
+      amountCents: 5_000,
+      postedOn: '2026-09-10',
+    })
+    const conta = repo.adicionarLancamento(EMPRESA, {
+      entryKind: 'payable',
+      counterparty: 'Enel',
+      amountCents: 5_000,
+      dueDate: '2026-09-10',
+    })
+
+    await reconcile(deps, contexto(), {
+      transactionId: transacao.id,
+      entryKind: 'payable',
+      entryId: conta.id,
+    })
+
+    const fila = await listBankTransactions(deps.queries, contexto(), { scope: 'pending' })
+    expect(fila.transactions).toEqual([])
+    expect(fila.pendingCount).toBe(0)
+  })
+
+  it('no recorte das conciliadas, diz COM O QUE cada uma casou', async () => {
+    const { deps, repo } = cenario()
+
+    const transacao = repo.adicionarTransacao(EMPRESA, {
+      direction: 'debit',
+      amountCents: 5_000,
+      postedOn: '2026-09-10',
+    })
+    const conta = repo.adicionarLancamento(EMPRESA, {
+      entryKind: 'payable',
+      counterparty: 'Enel',
+      description: 'Energia de agosto',
+      amountCents: 5_000,
+      dueDate: '2026-09-10',
+    })
+
+    await reconcile(deps, contexto(), {
+      transactionId: transacao.id,
+      entryKind: 'payable',
+      entryId: conta.id,
+    })
+
+    const r = await listBankTransactions(deps.queries, contexto(), { scope: 'reconciled' })
+
+    /* Sem isto o desfazer seria um salto no escuro: "desfazer R$ 50,00" nao
+       diz se e essa mesmo (RF-080). */
+    expect(r.transactions[0]?.reconciledWith).toEqual({
+      kind: 'payable',
+      id: conta.id,
+      counterparty: 'Enel',
+      description: 'Energia de agosto',
+      dueDate: '2026-09-10',
+    })
+  })
+
+  it('conta as pendentes mesmo quando quem pergunta olha as conciliadas', async () => {
+    const { deps, repo } = cenario()
+
+    const transacao = repo.adicionarTransacao(EMPRESA, {
+      direction: 'debit',
+      amountCents: 5_000,
+      postedOn: '2026-09-10',
+    })
+    const conta = repo.adicionarLancamento(EMPRESA, {
+      entryKind: 'payable',
+      counterparty: 'Enel',
+      amountCents: 5_000,
+      dueDate: '2026-09-10',
+    })
+    repo.adicionarTransacao(EMPRESA, {
+      direction: 'debit',
+      amountCents: 900,
+      postedOn: '2026-09-11',
+    })
+
+    await reconcile(deps, contexto(), {
+      transactionId: transacao.id,
+      entryKind: 'payable',
+      entryId: conta.id,
+    })
+
+    const r = await listBankTransactions(deps.queries, contexto(), { scope: 'reconciled' })
+
+    /* A aba "conciliadas" cheia daria a impressao de que acabou. O numero e o
+       que traz de volta para o trabalho. */
+    expect(r.transactions).toHaveLength(1)
+    expect(r.pendingCount).toBe(1)
+  })
+
+  it('nao mostra a fila de outra empresa', async () => {
+    const { deps, repo } = cenario()
+
+    repo.adicionarTransacao('empresa-2', {
+      direction: 'debit',
+      amountCents: 4_000,
+      postedOn: '2026-09-09',
+    })
+
+    const r = await listBankTransactions(deps.queries, contexto(), { scope: 'pending' })
+
+    expect(r.transactions).toEqual([])
+  })
+
+  it('deixa o contador ler — conciliar de olho e metade do trabalho dele', async () => {
+    const { deps, repo } = cenario()
+
+    repo.adicionarTransacao(EMPRESA, {
+      direction: 'credit',
+      amountCents: 7_000,
+      postedOn: '2026-09-08',
+    })
+
+    const r = await listBankTransactions(deps.queries, contexto({ role: 'accountant' }), {
+      scope: 'pending',
+    })
+
+    expect(r.transactions).toHaveLength(1)
+  })
+})

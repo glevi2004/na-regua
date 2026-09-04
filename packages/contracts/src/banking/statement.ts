@@ -108,3 +108,31 @@ export const importStatementResultSchema = z.object({
 export type ImportStatementResult = z.infer<typeof importStatementResultSchema>
 
 export type { BankTransactionDirection }
+
+/**
+ * O extrato chegando pela api — NR-076.
+ *
+ * Base64, e nao o texto do arquivo. OFX de banco brasileiro costuma vir em
+ * latin-1: transportar como string obrigaria alguem a escolher uma decodificacao
+ * antes do parser, e "Manutencao" viraria "Manuten��o" sem erro nenhum — o
+ * arquivo importaria, com o nome do fornecedor corrompido. Base64 preserva os
+ * bytes e deixa a decisao com `decodificar`, que e de quem ela e.
+ *
+ * Sem multipart pelo mesmo motivo de nao haver upload em nenhuma outra rota: um
+ * extrato mensal tem dezenas de KB, e a dependencia a mais nao se paga.
+ */
+export const importStatementInputSchema = z
+  .object({
+    filename: z.string().trim().min(1, 'Informe o nome do arquivo.').max(255),
+    contentBase64: z
+      .string()
+      .min(1, 'Arquivo vazio.')
+      /* Base64 invalido nao lanca no `Buffer.from`: ele descarta o que nao
+         reconhece e devolve bytes truncados. Sem esta checagem, um envio
+         corrompido viraria "arquivo em formato desconhecido" e mandaria o
+         lojista procurar problema no extrato. */
+      .regex(/^[A-Za-z0-9+/]+={0,2}$/, 'Conteudo do arquivo corrompido no envio.'),
+  })
+  .strict()
+
+export type ImportStatementInput = z.infer<typeof importStatementInputSchema>
