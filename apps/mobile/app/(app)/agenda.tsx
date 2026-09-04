@@ -1,100 +1,187 @@
-import { useMemo, useState } from 'react'
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'
+import { useRouter } from 'expo-router'
+import { useCallback, useEffect, useState } from 'react'
+import {
+  ActivityIndicator,
+  Alert,
+  Pressable,
+  RefreshControl,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Cabecalho from '@/components/Cabecalho'
-import { compromissos } from '@/lib/mock-data'
-import { formatDate } from '@/lib/format'
-import type { Compromisso } from '@/lib/types'
+import Botao from '@/components/ui/Botao'
 import { Etiqueta, Vazio } from '@/components/ui/Cartao'
+import {
+  agendaDoDia,
+  cancelarCompromisso,
+  type CompromissoDaApi,
+  hojeLocal,
+  horaLocal,
+} from '@/lib/agenda-api'
+import { formatDate } from '@/lib/format'
 import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
 
-/** Data de referencia do app (mesma dos mocks). */
-const HOJE = '2026-08-24'
-
-const ROTULO_TIPO: Record<Compromisso['tipo'], string> = {
-  cobranca: 'Cobranca',
-  entrega: 'Entrega',
-  reuniao: 'Reuniao',
-  pagamento: 'Pagamento',
-}
-
 /**
- * Agenda do dia.
+ * Agenda do dia — NR-078, US-045.
  *
- * Versao enxuta: no celular o que importa e "o que tenho para hoje e
- * amanha". Calendario mensal e criacao de compromisso ficam no web.
+ * Versao enxuta: no celular o que importa e "o que tenho para hoje e amanha".
+ * Calendario mensal fica no web.
+ *
+ * ## O que mudou ao ligar na api
+ *
+ * A tela de demonstracao tinha um marcador de **concluido**, com um toque para
+ * riscar o item. Esse conceito NAO existe no servidor: `appointments.status` e
+ * `scheduled` ou `cancelled`, e so.
+ *
+ * Trocar "feito" por "cancelado" seria inverter o significado — um e sucesso, o
+ * outro e "nao vai acontecer". Entao o marcador saiu, e o que ficou e cancelar,
+ * que e o que a api sabe fazer. Marcar como concluido, se o produto quiser,
+ * pede coluna nova e uma decisao de time.
  */
 export default function Agenda() {
-  const [concluidos, setConcluidos] = useState<Set<string>>(
-    () => new Set(compromissos.filter((c) => c.concluido).map((c) => c.id)),
-  )
+  const router = useRouter()
+  const [hoje, setHoje] = useState<CompromissoDaApi[]>([])
+  const [amanha, setAmanha] = useState<CompromissoDaApi[]>([])
+  /** Veio do servidor, e nao deduzido de lista vazia — US-045. */
+  const [diaLivre, setDiaLivre] = useState(false)
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState<string | null>(null)
 
-  const { hoje, proximos } = useMemo(() => {
-    const ordenados = [...compromissos].sort((a, b) =>
-      (a.data + a.hora).localeCompare(b.data + b.hora),
-    )
-    return {
-      hoje: ordenados.filter((c) => c.data === HOJE),
-      proximos: ordenados.filter((c) => c.data > HOJE),
+  const carregar = useCallback(async () => {
+    setErro(null)
+
+    const dias = proximosDois()
+    const [a, b] = await Promise.all([agendaDoDia(dias.hoje), agendaDoDia(dias.amanha)])
+
+    /*
+     * Um erro em qualquer um dos dois vira erro da tela. Mostrar metade da
+     * agenda sem dizer que a outra metade falhou e pior que nao mostrar nada:
+     * o lojista se organiza a partir do que ve.
+     */
+    if (!a.ok) {
+      setErro(a.erro)
+      setCarregando(false)
+      return
     }
+    if (!b.ok) {
+      setErro(b.erro)
+      setCarregando(false)
+      return
+    }
+
+    setHoje([...a.dados.compromissos])
+    setAmanha([...b.dados.compromissos])
+    setDiaLivre(a.dados.livre)
+    setCarregando(false)
   }, [])
 
-  function alternar(id: string) {
-    setConcluidos((atual) => {
-      const novo = new Set(atual)
-      if (novo.has(id)) {
-        novo.delete(id)
-      } else {
-        novo.add(id)
-      }
-      /* SUBSTITUIR POR: PATCH /agenda/eventos/:id { concluido } */
-      return novo
-    })
+  useEffect(() => {
+    void carregar()
+  }, [carregar])
+
+  function cancelar(c: CompromissoDaApi) {
+    Alert.alert(
+      'Cancelar compromisso',
+      `${c.title}\n\nEle sai da agenda, mas continua no historico.`,
+      [
+        { text: 'Voltar', style: 'cancel' },
+        {
+          text: 'Cancelar',
+          style: 'destructive',
+          onPress: () => {
+            void (async () => {
+              const r = await cancelarCompromisso(c.id)
+              if (!r.ok) {
+                Alert.alert('Nao deu para cancelar', r.erro)
+                return
+              }
+              /* Recarrega em vez de tirar da lista na mao: o servidor e a
+                 fonte da verdade, e entre a leitura e agora outra pessoa pode
+                 ter mexido na agenda. */
+              await carregar()
+            })()
+          },
+        },
+      ],
+    )
   }
 
-  const pendentesHoje = hoje.filter((c) => !concluidos.has(c.id)).length
+  const subtitulo = carregando
+    ? 'Carregando...'
+    : erro !== null
+      ? 'Nao foi possivel carregar'
+      : hoje.length === 0
+        ? 'Nada marcado para hoje'
+        : `${hoje.length} hoje`
 
   return (
     <SafeAreaView style={estilos.tela} edges={['top']}>
       <Cabecalho
         titulo="Agenda"
-        subtitulo={
-          pendentesHoje === 0 ? 'Nada pendente para hoje' : `${pendentesHoje} pendente(s) hoje`
-        }
+        subtitulo={subtitulo}
+        acao={<Botao onPress={() => router.push({ pathname: '/compromisso-novo' })}>Marcar</Botao>}
       />
 
-      <ScrollView contentContainerStyle={estilos.conteudo}>
-        <Secao titulo="Hoje">
-          {hoje.length === 0 ? (
-            <Vazio titulo="Dia livre" descricao="Nada marcado para hoje." />
-          ) : (
-            hoje.map((c) => (
-              <LinhaCompromisso
-                key={c.id}
-                item={c}
-                concluido={concluidos.has(c.id)}
-                onAlternar={() => alternar(c.id)}
-              />
-            ))
-          )}
-        </Secao>
+      <ScrollView
+        contentContainerStyle={estilos.conteudo}
+        refreshControl={
+          <RefreshControl refreshing={carregando} onRefresh={() => void carregar()} />
+        }
+      >
+        {carregando && hoje.length === 0 ? (
+          <ActivityIndicator color={cores.acento} style={estilos.espera} />
+        ) : erro !== null ? (
+          <Vazio titulo="Nao deu para carregar" descricao={erro} />
+        ) : (
+          <>
+            <Secao titulo="Hoje">
+              {hoje.length === 0 ? (
+                /* "Agenda livre" dito com todas as letras — US-045 pede
+                   confirmacao explicita, e nao uma lista vazia que tambem
+                   apareceria se a consulta tivesse falhado. */
+                <Vazio
+                  titulo={diaLivre ? 'Dia livre' : 'Nada marcado'}
+                  descricao="Nenhum compromisso para hoje."
+                />
+              ) : (
+                hoje.map((c) => (
+                  <LinhaCompromisso key={c.id} item={c} onCancelar={() => cancelar(c)} />
+                ))
+              )}
+            </Secao>
 
-        {proximos.length > 0 ? (
-          <Secao titulo="Proximos dias">
-            {proximos.map((c) => (
-              <LinhaCompromisso
-                key={c.id}
-                item={c}
-                concluido={concluidos.has(c.id)}
-                onAlternar={() => alternar(c.id)}
-                mostrarData
-              />
-            ))}
-          </Secao>
-        ) : null}
+            {amanha.length > 0 ? (
+              <Secao titulo="Amanha">
+                {amanha.map((c) => (
+                  <LinhaCompromisso
+                    key={c.id}
+                    item={c}
+                    mostrarData
+                    onCancelar={() => cancelar(c)}
+                  />
+                ))}
+              </Secao>
+            ) : null}
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   )
+}
+
+/**
+ * Hoje e amanha, no fuso do APARELHO.
+ *
+ * Somar 24h a `Date.now()` erraria no dia da virada do horario de verao, onde o
+ * dia tem 23 ou 25 horas. Somar 1 ao dia do calendario e deixar o `Date`
+ * normalizar acerta sempre.
+ */
+function proximosDois(agora = new Date()): { hoje: string; amanha: string } {
+  const d = new Date(agora.getFullYear(), agora.getMonth(), agora.getDate() + 1)
+  return { hoje: hojeLocal(agora), amanha: hojeLocal(d) }
 }
 
 function Secao({ titulo, children }: { titulo: string; children: React.ReactNode }) {
@@ -108,45 +195,32 @@ function Secao({ titulo, children }: { titulo: string; children: React.ReactNode
 
 function LinhaCompromisso({
   item,
-  concluido,
-  onAlternar,
   mostrarData = false,
+  onCancelar,
 }: {
-  item: Compromisso
-  concluido: boolean
-  onAlternar: () => void
+  item: CompromissoDaApi
   mostrarData?: boolean
+  onCancelar: () => void
 }) {
   return (
     <Pressable
-      onPress={onAlternar}
+      onLongPress={onCancelar}
       style={estilos.compromisso}
-      accessibilityRole="checkbox"
-      accessibilityState={{ checked: concluido }}
-      accessibilityLabel={item.titulo}
+      accessibilityRole="button"
+      accessibilityLabel={item.title}
+      accessibilityHint="Toque e segure para cancelar"
     >
-      {/* Marcar como feito com um toque: no balcao ninguem abre detalhe. */}
-      <View style={[estilos.marcador, concluido && estilos.marcadorFeito]}>
-        {concluido ? <Text style={estilos.marcadorCheck}>✓</Text> : null}
-      </View>
-
       <View style={estilos.compromissoInfo}>
-        <Text
-          style={[estilos.compromissoTitulo, concluido && estilos.textoFeito]}
-          numberOfLines={2}
-        >
-          {item.titulo}
+        <Text style={estilos.compromissoTitulo} numberOfLines={2}>
+          {item.title}
         </Text>
         <Text style={estilos.compromissoApoio}>
-          {mostrarData ? `${formatDate(item.data)} · ` : ''}
-          {item.hora}
-          {item.clienteNome ? ` · ${item.clienteNome}` : ''}
+          {mostrarData ? `${formatDate(item.startsAt.slice(0, 10))} · ` : ''}
+          {horaLocal(item.startsAt)}
         </Text>
       </View>
 
-      <Etiqueta tom={item.tipo === 'cobranca' ? 'atencao' : 'neutro'}>
-        {ROTULO_TIPO[item.tipo]}
-      </Etiqueta>
+      {item.reminderMinutesBefore !== null ? <Etiqueta tom="neutro">lembrete</Etiqueta> : null}
     </Pressable>
   )
 }
@@ -154,11 +228,9 @@ function LinhaCompromisso({
 const estilos = StyleSheet.create({
   tela: { flex: 1, backgroundColor: cores.fundo },
 
-  cabecalho: { paddingHorizontal: espaco.lg, paddingTop: espaco.md, gap: 2 },
-  titulo: { fontSize: fonte.display, fontWeight: peso.pesado, color: cores.texto },
-  subtitulo: { fontSize: fonte.pequeno, color: cores.textoFraco },
-
   conteudo: { padding: espaco.lg, gap: espaco.xl },
+  espera: { marginTop: espaco.xl },
+
   secao: { gap: espaco.md },
   secaoTitulo: {
     fontSize: fonte.micro,
@@ -173,37 +245,11 @@ const estilos = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: espaco.md,
-    padding: espaco.lg,
-    borderWidth: 1,
-    borderColor: cores.borda,
+    padding: espaco.md,
     borderRadius: raio.md,
     backgroundColor: cores.superficie,
   },
-  marcador: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
-    borderWidth: 2,
-    borderColor: cores.borda,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  marcadorFeito: { backgroundColor: cores.acento, borderColor: cores.acento },
-  marcadorCheck: {
-    fontSize: fonte.pequeno,
-    fontWeight: peso.pesado,
-    color: cores.textoSobreAcento,
-  },
-
   compromissoInfo: { flex: 1, gap: 2 },
-  compromissoTitulo: {
-    fontSize: fonte.corpo,
-    fontWeight: peso.forte,
-    color: cores.texto,
-  },
-  textoFeito: {
-    textDecorationLine: 'line-through',
-    color: cores.textoFraco,
-  },
+  compromissoTitulo: { fontSize: fonte.pequeno, fontWeight: peso.forte, color: cores.texto },
   compromissoApoio: { fontSize: fonte.micro, color: cores.textoFraco },
 })
