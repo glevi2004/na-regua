@@ -150,12 +150,48 @@ export type DadosProduto = {
   imagem: string | null
 }
 
-/** SUBSTITUIR POR: POST /produtos ou PUT /produtos/:id */
+/**
+ * Cadastra o produto — RF-017, RF-019.
+ *
+ * **Fornecedor, categoria e imagem nao sao enviados**, pela mesma razao do
+ * endereco do cliente: o contrato e `.strict()` e nao tem esses campos.
+ * `categoria` existe como `categoryId` na api, mas a tela guarda o NOME e nao
+ * o id, e inventar a correspondencia aqui seria adivinhar. Registrado no PR.
+ */
 export async function salvarProduto(
   dados: DadosProduto,
 ): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
-  await delay(900)
-  return { ok: true, id: dados.id ?? `prod-${Date.now()}` }
+  let resposta: Response
+  try {
+    resposta = await fetch('/api/produtos', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        description: dados.descricao,
+        ...(dados.ean ? { barcode: dados.ean } : {}),
+        unitOfMeasure: 'un',
+        /* A tela trabalha em reais; o contrato exige centavos inteiros
+           (RNF-044). A conversao acontece AQUI, na borda, e nao no meio. */
+        salePriceCents: Math.round(dados.precoVenda * 100),
+        costPriceCents: Math.round(dados.precoCusto * 100),
+        minStock: Math.round(dados.estoqueMinimo),
+      }),
+    })
+  } catch {
+    return { ok: false, error: 'Sem conexao. Verifique sua internet.' }
+  }
+
+  const corpo = (await resposta.json().catch(() => ({}))) as {
+    id?: string
+    error?: { message?: string }
+  }
+
+  if (!resposta.ok) {
+    return { ok: false, error: corpo.error?.message ?? 'Nao foi possivel salvar. Tente de novo.' }
+  }
+
+  return { ok: true, id: corpo.id! }
 }
 
 /** SUBSTITUIR POR: POST /produtos/importar */

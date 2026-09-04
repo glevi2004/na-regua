@@ -31,7 +31,21 @@ type EnvelopeDeErro = {
 
 export type Resposta<T> =
   | { readonly ok: true; readonly dados: T }
-  | { readonly ok: false; readonly status: number; readonly code: string; readonly message: string }
+  | {
+      readonly ok: false
+      readonly status: number
+      readonly code: string
+      readonly message: string
+      /**
+       * O corpo bruto do erro.
+       *
+       * Existe porque nem tudo que vem num 4xx e detalhe do erro. O 409 de
+       * cliente duplicado traz `candidates` FORA do envelope — sao a
+       * informacao que permite decidir, e sem isto eles se perderiam aqui, a
+       * um passo da tela que precisa mostra-los.
+       */
+      readonly corpo: unknown
+    }
 
 /**
  * A mensagem quando a api nao responde.
@@ -59,7 +73,7 @@ export async function chamarApi<T>(
       cache: 'no-store',
     })
   } catch {
-    return { ok: false, status: 503, code: 'UNAVAILABLE', message: INDISPONIVEL }
+    return { ok: false, status: 503, code: 'UNAVAILABLE', message: INDISPONIVEL, corpo: null }
   }
 
   if (resposta.ok) {
@@ -78,9 +92,16 @@ export async function chamarApi<T>(
       status: resposta.status,
       code: envelope.error?.code ?? 'UNKNOWN',
       message: envelope.error?.message ?? INDISPONIVEL,
+      corpo: envelope,
     }
   } catch {
     /* Resposta sem corpo JSON — 502 de um proxy, por exemplo. */
-    return { ok: false, status: resposta.status, code: 'UNKNOWN', message: INDISPONIVEL }
+    return {
+      ok: false,
+      status: resposta.status,
+      code: 'UNKNOWN',
+      message: INDISPONIVEL,
+      corpo: null,
+    }
   }
 }

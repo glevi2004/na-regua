@@ -76,12 +76,74 @@ export type DadosCliente = {
   uf: string
 }
 
-/** SUBSTITUIR POR: POST /clientes (novo) ou PUT /clientes/:id (edicao) */
-export async function salvarCliente(
-  dados: DadosCliente,
-): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
-  await delay(900)
-  return { ok: true, id: dados.id ?? `cli-${Date.now()}` }
+/** Cliente parecido, quando a api encontra telefone ou documento repetido. */
+export type CandidatoCliente = {
+  id: string
+  name: string
+  phone: string | null
+  document: string | null
+}
+
+export type ResultadoSalvarCliente =
+  | { ok: true; id: string }
+  | { ok: false; error: string }
+  /**
+   * Duplicado NAO e erro — RF-010.
+   *
+   * A api devolve os candidatos em vez de recusar, porque a decisao de reusar o
+   * existente e de quem esta no balcao, com o cliente na frente. Um terceiro
+   * desfecho no tipo obriga a tela a tratar isso, em vez de mostrar "erro ao
+   * salvar" para uma situacao que nao e erro.
+   */
+  | { ok: false; duplicados: CandidatoCliente[] }
+
+/**
+ * Cadastra o cliente — RF-009, RF-010.
+ *
+ * **O endereco NAO e enviado, e isso e uma lacuna conhecida.** O formulario
+ * coleta CEP, logradouro, numero, bairro, cidade e UF; a api nao tem onde
+ * guardar — nao existe tabela de endereco de cliente no schema. Mandar os
+ * campos faria o `.strict()` do contrato recusar a requisicao inteira, entao
+ * eles ficam de fora e o resto e salvo.
+ *
+ * Registrado no PR da NR-072: a tabela existe na proposta do PR #24, que nao
+ * foi mesclada. Enquanto nao houver, o endereco digitado se perde ao salvar.
+ */
+export async function salvarCliente(dados: DadosCliente): Promise<ResultadoSalvarCliente> {
+  const permitirDuplicado = dados.id === undefined ? '' : '?duplicado=permitir'
+
+  let resposta: Response
+  try {
+    resposta = await fetch(`/api/clientes${permitirDuplicado}`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        name: dados.nome,
+        ...(dados.documento ? { document: dados.documento } : {}),
+        ...(dados.celular ? { phone: `${dados.ddd}${dados.celular}`.replace(/D/g, '') } : {}),
+        ...(dados.email ? { email: dados.email } : {}),
+      }),
+    })
+  } catch {
+    return { ok: false, error: 'Sem conexao. Verifique sua internet.' }
+  }
+
+  const corpo = (await resposta.json().catch(() => ({}))) as {
+    id?: string
+    candidates?: CandidatoCliente[]
+    error?: { message?: string }
+  }
+
+  if (resposta.status === 409 && corpo.candidates !== undefined) {
+    return { ok: false, duplicados: corpo.candidates }
+  }
+
+  if (!resposta.ok) {
+    return { ok: false, error: corpo.error?.message ?? 'Nao foi possivel salvar. Tente de novo.' }
+  }
+
+  return { ok: true, id: corpo.id! }
 }
 
 /* -------------------------------------------------------------------------- */
