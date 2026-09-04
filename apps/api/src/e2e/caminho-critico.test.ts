@@ -1,4 +1,10 @@
 import { randomUUID } from 'node:crypto'
+import {
+  cnpjSchema,
+  createCompanyInputSchema,
+  createProductInputSchema,
+  createSaleInputSchema,
+} from '@na-regua/contracts'
 import { getClient, migrate, withTenant } from '@na-regua/db'
 import Fastify, { type FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
@@ -54,6 +60,82 @@ const MIGRATION_URL = process.env.DATABASE_MIGRATION_URL ?? DATABASE_URL
  */
 type Composicao = typeof import('../composition.js')
 
+const EAN = `789${Date.now()}`.slice(0, 13)
+
+/*
+ * CNPJ com digito verificador de verdade, e unico por execucao.
+ *
+ * Os testes de `db` inserem direto na tabela e por isso se contentam com
+ * catorze digitos quaisquer. Este entra pelo CONTRATO, e `cnpjSchema` confere
+ * os dois digitos finais — numero aleatorio volta 400, e como o cadastro da
+ * empresa e o primeiro degrau, TODO o resto do fluxo cai atras dele. Foi o que
+ * aconteceu na segunda rodada da CI.
+ *
+ * A base sai do relogio para nao esbarrar em "CNPJ ja cadastrado" numa
+ * reexecucao contra o mesmo banco, e o resultado continua reconhecivelmente
+ * falso, como manda docs/engenharia/testes.md.
+ */
+const CNPJ = (() => {
+  const digito = (nums: number[], pesos: number[]): number => {
+    const resto = nums.reduce((acc, n, i) => acc + n * pesos[i]!, 0) % 11
+    return resto < 2 ? 0 : 11 - resto
+  }
+
+  const base = String(Date.now()).slice(-12).split('').map(Number)
+  const d1 = digito(base, [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2])
+  const d2 = digito([...base, d1], [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2])
+
+  return `${base.join('')}${d1}${d2}`
+})()
+
+/*
+ * Os corpos enviados, num lugar so — e conferidos contra os contratos por um
+ * teste que roda SEM banco (ver o fim do arquivo).
+ *
+ * Nasceram inline e me custaram duas rodadas de CI: `stockQuantity` em vez de
+ * `stock`, e CNPJ sem digito verificador. Os dois sao 400, e como o fluxo e
+ * encadeado, um 400 no primeiro degrau reprova os oito casos seguintes com
+ * mensagens que nao apontam para a causa.
+ */
+const EMPRESA = {
+  legalName: 'Mercearia do Caminho Critico LTDA',
+  cnpj: CNPJ,
+  email: `contato@${CNPJ}.local`,
+  phone: '41999990000',
+}
+
+const PRODUTO = {
+  description: 'Cafe torrado 500g',
+  unitOfMeasure: 'un' as const,
+  salePriceCents: 1990,
+  costPriceCents: 1200,
+  barcode: EAN,
+  stock: 10,
+}
+
+const vendaDinheiro = (productId: string) => ({
+  items: [{ productId, quantity: 1, unitPriceCents: 1990 }],
+  payments: [{ method: 'cash' as const, amountCents: 1990 }],
+})
+
+/*
+ * TRES parcelas, e nao duas.
+ *
+ * A tabela de tarifas padrao tem linha para 1x (3%) e para 3x (6%), e nada
+ * para 2x. Com duas, a tarifa dependeria de como a busca resolve o vao — e a
+ * assercao "o liquido vem abaixo do bruto" passaria ou falharia por um detalhe
+ * que este teste nao quer medir. Tres casa exatamente com a tabela.
+ */
+const vendaCredito = (productId: string) => ({
+  items: [{ productId, quantity: 2, unitPriceCents: 1990 }],
+  payments: [{ method: 'credit' as const, amountCents: 3980, installments: 3 }],
+})
+
+const vendaPix = (productId: string) => ({
+  items: [{ productId, quantity: 1, unitPriceCents: 1990 }],
+  payments: [{ method: 'pix' as const, amountCents: 1990 }],
+})
+
 describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
   let app: FastifyInstance
   let usuario: string
@@ -76,9 +158,6 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
    * um FLUXO em vez de chamadas soltas com dados montados a mao.
    */
   let principal: AuthenticatedPrincipal
-
-  const EAN = `789${Date.now()}`.slice(0, 13)
-  const CNPJ = `5${Date.now()}`.slice(0, 14)
 
   beforeAll(async () => {
     /*
@@ -188,12 +267,7 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
       const r = await app.inject({
         method: 'POST',
         url: '/empresas',
-        payload: {
-          legalName: 'Mercearia do Caminho Critico LTDA',
-          cnpj: CNPJ,
-          email: `contato@${CNPJ}.local`,
-          phone: '41999990000',
-        },
+        payload: EMPRESA,
       })
 
       expect(r.statusCode).toBe(201)
@@ -216,14 +290,7 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
       const r = await app.inject({
         method: 'POST',
         url: '/produtos',
-        payload: {
-          description: 'Cafe torrado 500g',
-          unitOfMeasure: 'un',
-          salePriceCents: 1990,
-          costPriceCents: 1200,
-          barcode: EAN,
-          stock: 10,
-        },
+        payload: PRODUTO,
       })
 
       expect(r.statusCode).toBe(201)
@@ -235,10 +302,7 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
         method: 'POST',
         url: '/sales',
         headers: { 'idempotency-key': randomUUID() },
-        payload: {
-          items: [{ productId: produtoId, quantity: 1, unitPriceCents: 1990 }],
-          payments: [{ method: 'cash', amountCents: 1990 }],
-        },
+        payload: vendaDinheiro(produtoId),
       })
 
       expect(r.statusCode).toBe(201)
@@ -268,10 +332,7 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
         method: 'POST',
         url: '/sales',
         headers: { 'idempotency-key': randomUUID() },
-        payload: {
-          items: [{ productId: produtoId, quantity: 2, unitPriceCents: 1990 }],
-          payments: [{ method: 'credit', amountCents: 3980, installments: 2 }],
-        },
+        payload: vendaCredito(produtoId),
       })
 
       expect(r.statusCode).toBe(201)
@@ -279,19 +340,28 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
       const linhas = await withTenant(
         sql(),
         principal.companyId,
-        (tx) => tx<{ id: string; net_amount_cents: string }[]>`
-          SELECT id, net_amount_cents FROM receivables
+        (tx) => tx<{ amount_cents: string; net_amount_cents: string }[]>`
+          SELECT amount_cents, net_amount_cents FROM receivables
           WHERE sale_id = ${r.json().sale.id}
           ORDER BY due_date
         `,
       )
 
-      /* Duas parcelas, dois recebiveis. E o liquido de cada um vem MENOR que a
-         metade do bruto: a diferenca e a tarifa da adquirente, que o sistema ja
-         calculou na venda (RF-036) — e e por isso que a conciliacao compara o
-         extrato com o liquido, e nao com o bruto. */
-      expect(linhas).toHaveLength(2)
-      for (const l of linhas) expect(Number(l.net_amount_cents)).toBeLessThan(1990)
+      const bruto = linhas.reduce((acc, l) => acc + Number(l.amount_cents), 0)
+      const liquido = linhas.reduce((acc, l) => acc + Number(l.net_amount_cents), 0)
+
+      /*
+       * Tres parcelas, tres recebiveis, e o bruto fecha com a venda — o resto
+       * da divisao nao pode evaporar (`allocate`, RF-038).
+       *
+       * O liquido vem MENOR: a diferenca e a tarifa da adquirente, que o
+       * sistema ja calculou na venda (RF-036). E por isso que a conciliacao
+       * compara o extrato com o liquido e nao com o bruto — sem esta linha,
+       * nenhuma venda no cartao conciliaria.
+       */
+      expect(linhas).toHaveLength(3)
+      expect(bruto).toBe(3980)
+      expect(liquido).toBeLessThan(bruto)
     })
 
     it('a venda numerou em sequencia, sem repetir', async () => {
@@ -308,10 +378,7 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
   describe('o reenvio do PDV com internet ruim — RNF-043', () => {
     it('a mesma chave devolve a MESMA venda, com 200 em vez de 201', async () => {
       const chave = randomUUID()
-      const corpo = {
-        items: [{ productId: produtoId, quantity: 1, unitPriceCents: 1990 }],
-        payments: [{ method: 'pix' as const, amountCents: 1990 }],
-      }
+      const corpo = vendaPix(produtoId)
 
       const primeira = await app.inject({
         method: 'POST',
@@ -342,10 +409,7 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
       const r = await app.inject({
         method: 'POST',
         url: '/sales',
-        payload: {
-          items: [{ productId: produtoId, quantity: 1, unitPriceCents: 1990 }],
-          payments: [{ method: 'cash', amountCents: 1990 }],
-        },
+        payload: vendaDinheiro(produtoId),
       })
 
       /* 400 e nao 422: quem chamou corrige sozinho reenviando com o cabecalho. */
@@ -377,5 +441,49 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
        */
       expect(r.statusCode).toBe(404)
     })
+  })
+})
+
+/**
+ * Os corpos batem com os contratos — e este roda SEM banco.
+ *
+ * O E2E de cima e pulado em toda maquina sem Postgres, entao um payload errado
+ * so aparecia na CI. E aparecia mal: o fluxo e encadeado, e um 400 no primeiro
+ * degrau reprova os oito casos seguintes com mensagens que apontam para os
+ * sintomas, nunca para a causa. Foram duas rodadas assim — `stockQuantity` no
+ * lugar de `stock`, e CNPJ sem digito verificador.
+ *
+ * Aqui a forma e conferida contra o MESMO schema que a rota usa, no `pnpm test`
+ * de qualquer um. Nao substitui o E2E: nao prova que a venda acontece, prova
+ * que o pedido chega valido — que e a metade que estava custando caro.
+ */
+describe('os corpos que o E2E envia — sem banco', () => {
+  const UUID = '3d1f0c4e-6a2b-4c8d-9e1f-0a2b3c4d5e6f'
+
+  const casos = [
+    ['empresa', createCompanyInputSchema, EMPRESA],
+    ['produto', createProductInputSchema, PRODUTO],
+    ['venda em dinheiro', createSaleInputSchema, vendaDinheiro(UUID)],
+    ['venda no credito', createSaleInputSchema, vendaCredito(UUID)],
+    ['venda no pix', createSaleInputSchema, vendaPix(UUID)],
+  ] as const
+
+  for (const [nome, schema, corpo] of casos) {
+    it(`${nome} passa no schema da rota`, () => {
+      const r = schema.safeParse(corpo)
+
+      /* A mensagem do erro entra na assercao de proposito: `expected false to
+         be true` nao diz qual campo esta errado, e era exatamente essa a
+         dificuldade de ler a falha na CI. */
+      expect(
+        r.success ? [] : r.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`),
+      ).toEqual([])
+    })
+  }
+
+  it('o CNPJ gerado tem digito verificador valido', () => {
+    /* O gerador e codigo meu, e codigo meu erra. Se ele quebrar, o E2E volta a
+       reprovar no primeiro degrau — e agora a causa aparece aqui. */
+    expect(cnpjSchema.safeParse(CNPJ).success).toBe(true)
   })
 })
