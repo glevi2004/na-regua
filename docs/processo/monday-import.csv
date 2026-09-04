@@ -52,7 +52,7 @@ NR-076 — web: conciliação bancária,Sprint 5 — Bancos e relatórios,Trilha
 NR-016 — CHANGELOG gerado dos commits + processo de release,Backlog,Trilha 2 — Plataforma & Integracoes,Done,Low,1,Backlog,,,repo,—,docs/processo/task-ledger.md
 NR-034 — core: agenda e lembretes,Backlog,Trilha 1 — Nucleo & Dados,Done,Low,2,Backlog,,,core,RF-089–093,docs/processo/task-ledger.md
 NR-035 — db: schema de agenda (appointments),Backlog,Trilha 1 — Nucleo & Dados,Done,Low,1,Backlog,NR-008,,db,"RF-089, RF-090",docs/processo/task-ledger.md
-NR-036 — api: rotas de agenda,Backlog,Trilha 2 — Plataforma & Integracoes,Not started,Low,1,Backlog,NR-035,,api,RF-089–093,docs/processo/task-ledger.md
+NR-036 — api: rotas de agenda,Backlog,Trilha 2 — Plataforma & Integracoes,Done,Low,1,Backlog,NR-035,,api,RF-089–093,docs/processo/task-ledger.md
 NR-037 — db: repositórios da venda e trilha de estoque,Backlog,Trilha 1 — Nucleo & Dados,Done,Low,2,Backlog,NR-020,,db,"RF-024, RNF-046",docs/processo/task-ledger.md
 NR-049 — E2E do caminho crítico (3 fluxos),Backlog,Trilha 2 — Plataforma & Integracoes,Not started,Low,3,Backlog,NR-071,,repo,RNF-068,docs/processo/task-ledger.md
 NR-078 — mobile: agenda,Backlog,Trilha 3 — Clientes,Not started,Low,2,Backlog,NR-036,,mobile,US-043–045,docs/processo/task-ledger.md

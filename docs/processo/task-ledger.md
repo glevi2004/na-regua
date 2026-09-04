@@ -51,10 +51,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      58 |  158 |
-| ✅ Concluídas                 |      37 |   88 |
+| ✅ Concluídas                 |      38 |   89 |
 | 🚧 Bloqueadas por decisão     |       9 |   35 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |      11 |   33 |
+| ⬜ A fazer, pode começar hoje |      10 |   32 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -167,7 +167,7 @@ Objetivo: operar o ERP por mensagem e cobrar a mensalidade.
 | NR-016 | `CHANGELOG` gerado dos commits + processo de release |   🟠   | `repo`   |   1 | —      | —    | —               |   ✅   |
 | NR-034 | `core`: agenda e lembretes                           |   🔵   | `core`   |   2 | —      | —    | RF-089–093      |   ✅   |
 | NR-035 | `db`: schema de agenda (`appointments`)              |   🔵   | `db`     |   1 | NR-008 | —    | RF-089, RF-090  |   ✅   |
-| NR-036 | `api`: rotas de agenda                               |   🟠   | `api`    |   1 | NR-035 | —    | RF-089–093      |   ⬜   |
+| NR-036 | `api`: rotas de agenda                               |   🟠   | `api`    |   1 | NR-035 | —    | RF-089–093      |   ✅   |
 | NR-037 | `db`: repositórios da venda e trilha de estoque      |   🔵   | `db`     |   2 | NR-020 | —    | RF-024, RNF-046 |   ✅   |
 | NR-049 | E2E do caminho crítico (3 fluxos)                    |   🟠   | `repo`   |   3 | NR-071 | —    | RNF-068         |   ⬜   |
 | NR-078 | `mobile`: agenda                                     |   🟢   | `mobile` |   2 | NR-036 | —    | US-043–045      |   ⬜   |
