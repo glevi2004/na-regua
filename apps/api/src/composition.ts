@@ -17,10 +17,13 @@ import {
   InMemorySessionIssuer,
   type RegisterSaleDeps,
 } from '@na-regua/core'
+import type { AgendaDeps } from './routes/agenda.js'
+import { createReminderScheduler } from './reminder-scheduler.js'
 import {
   assertRlsEnforced,
   checkConnection,
   closeConnection,
+  createAppointmentRepository,
   createCompanyRepository,
   createCustomerRepository,
   createProductRepository,
@@ -203,5 +206,25 @@ export function buildCadastroDeps(): CadastroDeps {
     companies: createCompanyRepository(sql),
     customers: createCustomerRepository(sql),
     products: createProductRepository(sql),
+  }
+}
+
+/**
+ * Dependencias da agenda — NR-036.
+ *
+ * O repositorio e real (Postgres, com o tenant definido pela transacao) e o
+ * agendador de lembrete e uma fila BullMQ com atraso.
+ *
+ * **O lembrete e agendado, mas ainda nao e ENTREGUE.** Nenhum consumidor le a
+ * fila `appointment-remind` — o registro de consumidores do worker (NR-041)
+ * cobre emissao, mensagem e cobranca, e nao esta. Entao o job fica la, pronto
+ * na hora certa, esperando quem o processe. Isso esta dito no PR: agendar sem
+ * consumir e melhor que nao agendar (o dado existe quando o consumidor chegar),
+ * mas nao e RF-091 fechada.
+ */
+export function buildAgendaDeps(): AgendaDeps {
+  return {
+    appointments: createAppointmentRepository(getClient(env.DATABASE_URL)),
+    reminders: createReminderScheduler(getRedis()),
   }
 }

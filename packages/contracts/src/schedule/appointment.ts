@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { dateTimeSchema, idSchema } from '../common/primitives.js'
+import { dateSchema, dateTimeSchema, idSchema } from '../common/primitives.js'
 
 /** Compromisso da agenda — glossario `Appointment`. RF-089 a RF-093. */
 
@@ -41,8 +41,14 @@ export type CancelAppointmentInput = z.infer<typeof cancelAppointmentInputSchema
 /** Compromissos de um dia, em ordem de horario — RF-093. */
 export const listDayAppointmentsInputSchema = z
   .object({
-    /** Dia no fuso de exibicao da empresa, nao em UTC. */
-    day: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Dia invalido. Use o formato AAAA-MM-DD.'),
+    /**
+     * Dia no fuso de exibicao da empresa, nao em UTC.
+     *
+     * `dateSchema` e nao um regex proprio: a copia que existia aqui aceitava
+     * `2026-13-40`, e a consulta respondia agenda vazia em vez de recusar.
+     * Duas validacoes da mesma coisa divergem — foi o que aconteceu.
+     */
+    day: dateSchema,
   })
   .strict()
 

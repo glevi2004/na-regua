@@ -1,6 +1,7 @@
 import Fastify from 'fastify'
 import {
   assertAuthUsavelEmProducao,
+  buildAgendaDeps,
   buildAuthDeps,
   buildCadastroDeps,
   getRedis,
@@ -15,6 +16,7 @@ import { registerErrorHandler } from './plugins/error-handler.js'
 import { buildLoggerOptions, generateRequestId, registerLogging } from './plugins/logging.js'
 import { registerRateLimit } from './plugins/rate-limit.js'
 import { registerSession } from './plugins/session.js'
+import { registerAgendaRoutes } from './routes/agenda.js'
 import { registerAuthRoutes } from './routes/auth.js'
 import { registerCadastroRoutes } from './routes/cadastro.js'
 import { registerSaleRoutes } from './routes/sales.js'
@@ -74,6 +76,7 @@ async function registrarRotas(): Promise<void> {
   /* `buildSaleDeps()` abre a conexao, entao e chamada aqui e nao no topo do
      modulo — ver o comentario em composition.ts. */
   registerSaleRoutes(app, buildSaleDeps())
+  registerAgendaRoutes(app, buildAgendaDeps())
   registerCadastroRoutes(app, buildCadastroDeps())
 }
 

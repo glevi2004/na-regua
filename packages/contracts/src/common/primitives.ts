@@ -87,10 +87,36 @@ export const rateSchema = z
   .min(0, 'Aliquota nao pode ser negativa.')
   .max(100, 'Aliquota nao pode passar de 100%.')
 
-/** Data em ISO 8601, so a parte de data. */
+const diasNoMes = (ano: number, mes: number): number => {
+  if (mes === 2) {
+    const bissexto = (ano % 4 === 0 && ano % 100 !== 0) || ano % 400 === 0
+    return bissexto ? 29 : 28
+  }
+  return [4, 6, 9, 11].includes(mes) ? 30 : 31
+}
+
+/**
+ * Data de calendario em ISO, so a parte de data.
+ *
+ * **O formato nao basta**, e um teste custou a descoberta: `2026-13-40` casa com
+ * a expressao regular e nao existe. `new Date` sobre ela devolve `Invalid Date`,
+ * e QUALQUER comparacao com `Invalid Date` e falsa — entao a agenda do dia
+ * respondia 200 com lista vazia para uma data inexistente. Resposta errada com
+ * cara de resposta certa, que e a pior forma de errar.
+ *
+ * A checagem de calendario vale para todo mundo que usa este schema: vencimento
+ * de conta a pagar, data de lancamento no extrato, periodo do DRE.
+ */
 export const dateSchema = z
   .string()
   .regex(/^\d{4}-\d{2}-\d{2}$/, 'Data invalida. Use o formato AAAA-MM-DD.')
+  .refine(
+    (d) => {
+      const [ano, mes, dia] = d.split('-').map(Number) as [number, number, number]
+      return mes >= 1 && mes <= 12 && dia >= 1 && dia <= diasNoMes(ano, mes)
+    },
+    { message: 'Data invalida. Esse dia nao existe no calendario.' },
+  )
 
 /**
  * Instante em ISO 8601 com fuso, sempre UTC no armazenamento.
