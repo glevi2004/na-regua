@@ -14,8 +14,9 @@
  * alguem trocar o passo por `pnpm audit || true` — e ai a vulnerabilidade de
  * verdade passa em silencio, que e exatamente o que a RNF-029 impede.
  *
- * Os dois casos continuam terminando em vermelho, porque "nao consegui
- * verificar" nao e "verifiquei e esta limpo". O que muda e a mensagem.
+ * O ACHADO reprova. O "nao consegui verificar" avisa e deixa passar, porque
+ * outros dois controles do repo cobrem essa lacuna e continuam bloqueando — o
+ * porque completo esta no ramo que trata o caso, mais abaixo.
  *
  * **NAO ha laco de repeticao aqui, e a ausencia foi aprendida.** A primeira
  * versao tentava tres vezes com espera crescente. O `pnpm audit` ja retenta
@@ -100,10 +101,27 @@ export function main(executar = rodarAudit) {
 
   if (relatorio === undefined) {
     /*
-     * Vermelho de proposito: "nao consegui verificar" nao e "verifiquei e esta
-     * limpo", e deixar passar transformaria indisponibilidade do registry em
-     * porta de entrada. Mas a mensagem diz o que aconteceu, para ninguem
-     * procurar vulnerabilidade que nao existe.
+     * AVISO, e nao erro — e esta decisao inverteu a que estava escrita aqui.
+     *
+     * A versao anterior reprovava, com o argumento de que "nao consegui
+     * verificar" nao e "verifiquei e esta limpo". O argumento continua certo
+     * isolado. O que faltava era perguntar se algum OUTRO controle cobre a
+     * lacuna enquanto o registry esta fora. Cobre, e sao dois:
+     *
+     * - `dependency-review-action` (`fail-on-severity: high`) confere as
+     *   dependencias NOVAS e ALTERADAS deste PR. Usa a base de avisos do
+     *   GitHub, nao o npm — por isso segue verde durante a queda, e segue
+     *   BLOQUEANDO.
+     * - Os alertas do Dependabot vigiam as dependencias EXISTENTES, no repo
+     *   inteiro e continuamente. E exatamente o que esta auditoria faria, e
+     *   nao depende do endpoint que caiu.
+     *
+     * Sem essa sobreposicao, reprovar seria o certo. Com ela, reprovar barra
+     * todo merge do repo por indisponibilidade de terceiro sem fechar buraco
+     * nenhum — e o desfecho previsivel e alguem trocar o passo por
+     * `pnpm audit || true`, que ai sim esconderia achado de verdade.
+     *
+     * O ACHADO continua reprovando. So o "nao rodou" avisa.
      */
     const ultimo = (erro || saida || `codigo de saida ${status}`)
       .trim()
@@ -111,15 +129,21 @@ export function main(executar = rodarAudit) {
       .slice(-5)
       .join('\n')
 
-    console.error('\n::error::A auditoria NAO RODOU — o registry nao respondeu.\n')
-    console.error('Isto NAO e uma vulnerabilidade no seu PR: nenhum pacote foi reprovado.')
-    console.error('Nada foi verificado, e por isso o passo termina em vermelho.\n')
-    console.error('O que fazer: confira https://status.npmjs.org e re-rode o job.')
-    console.error('Se o endpoint /-/npm/v1/security/advisories/bulk estiver fora,')
-    console.error('re-rodar nao adianta — o jeito e esperar.\n')
-    console.error('Ultima resposta do pnpm:')
-    console.error(ultimo)
-    return 1
+    console.log('::warning::A auditoria NAO RODOU — o registry npm nao respondeu.')
+    console.log('')
+    console.log('Isto NAO e uma vulnerabilidade: nenhum pacote foi reprovado, e nada')
+    console.log('foi verificado por AQUI. O passo passa porque outros dois controles')
+    console.log('cobrem a lacuna e continuam bloqueando:')
+    console.log('')
+    console.log('  - Revisao de dependencia: as dependencias novas e alteradas deste PR')
+    console.log('  - Alertas do Dependabot: as dependencias existentes, no repo inteiro')
+    console.log('')
+    console.log('Se isto persistir por dias, confira https://status.npmjs.org — e vale')
+    console.log('rodar `pnpm audit` na maquina de alguem antes de uma entrega grande.')
+    console.log('')
+    console.log('Ultima resposta do pnpm:')
+    console.log(ultimo)
+    return 0
   }
 
   const bloqueantes = contarBloqueantes(relatorio)
