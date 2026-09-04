@@ -35,12 +35,12 @@ erro. Uma história sem caminho de erro não está pronta para ser pega — ver
 | -------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------ |
 | **A** Cadastro                         | US-065, US-001 (empresa depois do signup)          | Signup web: pessoa + plano; CNPJ em `/app/empresa`                             |
 | **B** Estoque                          | US-009–013                                         | Sem variação/depósito                                                          |
-| **C** Vendas + PagMaxx + clientes + NF | US-005–008, US-014–025, US-071, US-073, US-074     | NFC-e e NFS-e Nacional na Focus se elegível; Pix/link/cartão online na PagMaxx |
+| **C** Vendas + Asaas + clientes + NF   | US-005–008, US-014–025, US-071, US-073, US-074     | NFC-e e NFS-e Nacional na Focus se elegível; Pix/boleto/link/cartão online no Asaas |
 | **D** Financeiro                       | US-026–034, US-039–042                             | E8 bancos = `WON'T` neste recorte                                              |
 | **E** CRM e agenda                     | US-069, US-043–045                                 | Agenda sobe de COULD para MUST                                                 |
 | **F** Dashboard                        | US-068                                             |                                                                                |
 | **G** Empresa e docs Focus             | US-066, US-067, US-002 (reescrito), US-072, US-074 | A1 transita só se elegível; CSC (NFC-e) e flags NFS-e Nacional                 |
-| **H** Assinatura                       | US-054–058                                         | PagMaxx                                                                        |
+| **H** Assinatura                       | US-054–058                                         | Asaas (conta-pai)                                                                  |
 | **I** Chamados                         | US-070                                             |                                                                                |
 | **J** Assistente                       | US-046–053                                         | Web, app e WhatsApp Cloud API                                                  |
 
@@ -684,7 +684,7 @@ negócio de onde eu estiver.
 
 ## E12 — Assinatura & Cobrança SaaS
 
-> Cobrança: PagMaxx ([ADR-0003](../decisoes/adr/0003-pagmaxx.md)). Regras de
+> Cobrança: Asaas ([ADR-0007](../decisoes/adr/0007-asaas.md)). Regras de
 > cupom ainda dependem de [DEC-012](../decisoes/README.md#dec-012).
 
 #### US-054 — Período de teste
@@ -859,15 +859,16 @@ sem sair do sistema.
 - **DADO** resposta da equipe **QUANDO** abro o chamado **ENTÃO** vejo a mensagem e o badge de não lidas zera
 - **DADO** anexo **QUANDO** envio **ENTÃO** o arquivo fica na mensagem
 
-#### US-071 — Cobrar a venda pela PagMaxx
+#### US-071 — Cobrar a venda pelo Asaas
 
-**Como** lojista, **quero** receber Pix, link ou cartão online **para** o
+**Como** lojista, **quero** receber Pix, boleto, link ou cartão online **para** o
 dinheiro bater com a venda sem conciliação manual.
 `MUST` · P1 · `packages/payments` `packages/core` · RF-140, RF-141
 
-- **DADO** credenciamento PagMaxx aprovado **QUANDO** fecho no Pix **ENTÃO** o QR/copia-e-cola é gerado e o webhook `payment.authorized` liquida o recebível
+- **DADO** subconta Asaas aprovada **QUANDO** fecho no Pix **ENTÃO** o QR/copia-e-cola é gerado e o webhook `PAYMENT_RECEIVED` liquida o recebível
+- **DADO** subconta aprovada **QUANDO** fecho no boleto **ENTÃO** a linha digitável e o PDF são gerados e o webhook `PAYMENT_CONFIRMED` liquida o recebível
 - **DADO** credenciamento pendente **QUANDO** escolho Pix **ENTÃO** sou informado e posso registrar dinheiro/maquininha
-- **DADO** pagamento em dinheiro **QUANDO** fecho **ENTÃO** nada chama a PagMaxx
+- **DADO** pagamento em dinheiro **QUANDO** fecho **ENTÃO** nada chama o Asaas
 
 #### US-072 — Editar dados pessoais
 

@@ -75,11 +75,12 @@ O que o Postgres **neste recorte** materializa (cadastro, venda, nota):
 erDiagram
     COMPANIES ||--o{ USERS : "company_id"
     COMPANIES ||--o| COMPANY_FOCUS : "se emitir"
-    COMPANIES ||--o| COMPANY_PAGMAXX : "se KYC"
+    COMPANIES ||--o| COMPANY_ASAAS : "se KYC"
     COMPANIES ||--o{ CUSTOMERS : "tem"
     COMPANIES ||--o{ PRODUCTS : "tem"
     COMPANIES ||--o{ SALES : "tem"
     CUSTOMERS ||--o| CUSTOMER_ADDRESSES : "se tomador"
+    CUSTOMERS ||--o| CUSTOMER_ASAAS : "se cobrado"
     CUSTOMERS ||--o{ SALES : "compra em"
     SALES ||--|{ SALE_ITEMS : "contem"
     SALES ||--|{ PAYMENTS : "quitada por"
@@ -87,7 +88,7 @@ erDiagram
     SALES ||--o{ INVENTORY_MOVEMENTS : "movimenta"
     PRODUCTS ||--o{ SALE_ITEMS : "vendido em"
     PRODUCTS ||--o{ INVENTORY_MOVEMENTS : "movimentado por"
-    PAYMENTS ||--o| PAYMENT_PAGMAXX : "se online"
+    PAYMENTS ||--o| PAYMENT_ASAAS : "se online"
 ```
 
 Visão lógica A–J (inclui o que ainda não nasceu no banco):
@@ -134,14 +135,14 @@ núcleo de cadastro, venda e nota (abaixo). CRM, assistente, assinatura e
 financeiro completo entram quando o módulo existir — tabela vazia não nasce
 antes.
 
-Integrações (Focus, PagMaxx) são **satélites 1:0..1**, não colunas em
+Integrações (Focus, Asaas) são **satélites 1:0..1**, não colunas em
 `companies` / `payments`.
 
 | Grupo                  | Tabelas                                                                                    | Módulo dono       |
 | ---------------------- | ------------------------------------------------------------------------------------------ | ----------------- |
-| Empresa e acesso       | `companies`, `users` (`company_id` no owner/staff), `company_focus`, `company_pagmaxx`     | `core` + `fiscal` |
-| Cadastros e estoque    | `customers`, `customer_addresses`, `products` (saldo na coluna), `inventory_movements`     | `core`            |
-| Venda e nota           | `sales`, `sale_items`, `payments`, `payment_pagmaxx`, `invoices` (`kind` `nfce` \| `nfse`) | `core` + `fiscal` |
+| Empresa e acesso       | `companies`, `users` (`company_id` no owner/staff), `company_focus`, `company_asaas`       | `core` + `fiscal` |
+| Cadastros e estoque    | `customers`, `customer_asaas`, `customer_addresses`, `products` (saldo na coluna), `inventory_movements` | `core`            |
+| Venda e nota           | `sales`, `sale_items`, `payments`, `payment_asaas`, `invoices` (`kind` `nfce` \| `nfse`)   | `core` + `fiscal` |
 | Financeiro             | `receivables`, `payables`, `settlements`, `ledger_accounts`                                | `core`            |
 | Agenda / CRM / suporte | `appointments`, `crm_cards`, `support_tickets`, `ticket_messages`                          | `core`            |
 | Assistente             | `conversations`, `messages`, `confirmations`                                               | `agent`           |
@@ -151,7 +152,7 @@ Integrações (Focus, PagMaxx) são **satélites 1:0..1**, não colunas em
 **Fundido de propósito (não criar tabela):** `categories` e `suppliers` → texto em
 `products` / `payables`; `crm_comments` → `crm_cards.comments` jsonb;
 `tool_calls` → `messages.tool_calls` jsonb; `plans` → `subscriptions.plan_code`;
-`pix_charges` / `payment_links` → `payment_pagmaxx` (e `receivables.collection_url` depois);
+`pix_charges` / `payment_links` → `payment_asaas` (e `receivables.collection_url` depois);
 custo fixo → `payables.is_template`.
 
 **Não neste recorte:** `company_users` ([ADR-0004](../decisoes/adr/0004-usuario-uma-empresa.md)),
@@ -159,7 +160,7 @@ custo fixo → `payables.is_template`.
 `invoice_inutilizations`, `company_provider_accounts`, `bank_accounts`,
 `bank_transactions`, `reconciliations`, `entries`, `tax_rules`, cofre de PFX.
 
-**Não gravar:** arquivo/senha do A1; PAN; senha PagMaxx; JWT PagMaxx (Redis);
+**Não gravar:** arquivo/senha do A1; PAN; chave da subconta Asaas em claro; `authToken` do webhook em claro;
 CSC em resposta de API; `habilita_nfe`; payload municipal `/v2/nfse`.
 
 Não em `companies`: limite de desconto de staff (RF-008, depois), D+ de cartão
@@ -169,7 +170,7 @@ TX), telefone de WhatsApp separado, endereço em jsonb, coluna derivada
 
 ### Catálogo de colunas (cadastro e fiscal)
 
-Só o que o lojista informa, o que mandamos à Focus/PagMaxx/CEP/CNPJ ou o que
+Só o que o lojista informa, o que mandamos à Focus/Asaas/CEP/CNPJ ou o que
 gravamos da resposta. Schema Drizzle + SQL em [`packages/db`](../../packages/db).
 Além das colunas abaixo, valem as [convenções](#convenções-de-schema)
 (`id`, `company_id` nas tabelas de negócio, `created_at` / `updated_at`).
@@ -180,7 +181,7 @@ grava a empresa mesmo inelegível — **sem** linha em `company_focus`.
 
 #### `companies`
 
-Cadastro visível e regime. Sem colunas Focus/PagMaxx.
+Cadastro visível e regime. Sem colunas Focus/Asaas.
 
 | Coluna                                                                                  | Origem                                                                       | Vai para API?                                                                          |
 | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
@@ -210,13 +211,25 @@ não tem satélite — evita dez nulos em toda empresa.
 | `certificate_status`, `certificate_expires_at` | Focus / parse na borda **sem** PFX              |
 | `has_nfce_csc`                                 | CSC foi encaminhado; **não** o valor            |
 
-#### `company_pagmaxx`
+#### `company_asaas`
 
-Linha **só** quando o lojista inicia o KYC. Sem KYC, sem satélite.
+Linha **só** quando o lojista inicia o KYC (subconta não-BaaS). Sem KYC, sem
+satélite.
 
-| Coluna                                          | Origem  |
-| ----------------------------------------------- | ------- |
-| `onboarding_status`, `account_id`, `secret_ref` | PagMaxx |
+| Coluna                                                                 | Origem                                      |
+| ---------------------------------------------------------------------- | ------------------------------------------- |
+| `onboarding_status`, `asaas_account_id`, `wallet_id`                   | `POST /v3/accounts` / `GET /v3/myAccount/status` |
+| `api_key_secret_ref`, `webhook_auth_secret_ref`                        | cofre — nunca em claro                      |
+| `platform_customer_id`                                                 | `cus_` na conta-pai (SaaS)                  |
+| `estimated_monthly_income_cents`                                       | `incomeValue` na criação da subconta        |
+
+#### `customer_asaas`
+
+Id do cliente na **subconta**. Linha só quando a cobrança precisa de `customer`.
+
+| Coluna              | Origem                    |
+| ------------------- | ------------------------- |
+| `asaas_customer_id` | `POST /v3/customers`      |
 
 #### `products`
 
@@ -242,11 +255,12 @@ a DPS pode ir sem tomador completo — a Nacional admite.
 Snapshot `ncm` / `codigo_tributacao_nacional_iss` / `codigo_nbs` no fechamento.
 Só preenche o que o item usa (produto vs serviço).
 
-#### `payments` e `payment_pagmaxx`
+#### `payments` e `payment_asaas`
 
-`payments` tem forma e valor. Pix/link/cartão online ganham linha em
-`payment_pagmaxx` (`provider_payment_id`, `checkout_url`, evento). Dinheiro e
-maquininha **não** têm satélite.
+`payments` tem forma e valor (`cash`, `pix`, `boleto`, `debit`, `credit`,
+`wallet`). Pix/boleto/link/cartão online ganham linha em `payment_asaas`
+(`provider_payment_id`, `billing_type`, `pix_payload` / `bank_slip_url`,
+evento). Dinheiro e maquininha **não** têm satélite.
 
 #### `invoices`
 
@@ -256,7 +270,7 @@ NFC-e; NFS-e usa `number` e verificação no `provider_payload`.
 
 #### `webhook_events`
 
-Inbox Focus/PagMaxx. `UNIQUE (provider, event_id)`. `company_id` preenchido
+Inbox Focus/Asaas. `UNIQUE (provider, event_id)`. `company_id` preenchido
 depois de casar o evento. Sem RLS no insert — a API ainda não tem tenant.
 
 ### Estados da venda
@@ -282,7 +296,7 @@ Duas falhas distintas, dois desfechos:
    venda pela metade. Estoque, recebível e auditoria entram juntos
    ([RNF-046](../produto/requisitos-nao-funcionais.md)); o PDV mostra o erro e
    reenvia com a mesma chave de idempotência ([RNF-043](../produto/requisitos-nao-funcionais.md)).
-2. **A venda já gravou e o resto falha** (Focus, webhook PagMaxx) — a venda permanece;
+2. **A venda já gravou e o resto falha** (Focus, webhook Asaas) — a venda permanece;
    o estado filho (nota, recebível, outbox) fica explícito na consulta.
 
 Quem persiste isso é `core` + `db` (NR-022, schema, RF-054), não `domain`.
@@ -323,7 +337,7 @@ Com RLS, **toda consulta filtra por `company_id`**. Índice que não começa por
 | Código de barras                                         | `(company_id, barcode)` — único                                            |
 | Vencimento                                               | `(company_id, due_date) WHERE settled_at IS NULL` — parcial                |
 | Idempotência                                             | `(company_id, idempotency_key)` — único                                    |
-| Webhook (PagMaxx / Focus)                                | `UNIQUE (provider, event_id)` em `webhook_events` — sem tenant na inserção |
+| Webhook (Asaas / Focus)                                  | `UNIQUE (provider, event_id)` em `webhook_events` — sem tenant na inserção |
 
 ## Transações
 
@@ -344,7 +358,7 @@ export async function registerSale(deps, ctx, input) {
 }
 ```
 
-Efeitos externos (emitir nota na Focus, cobrar na PagMaxx, enviar mensagem)
+Efeitos externos (emitir nota na Focus, cobrar no Asaas, enviar mensagem)
 **não** entram na transação: vão para a fila via padrão _outbox_. Sem isso, um
 erro de rede com a Focus desfaz uma venda já concluída.
 

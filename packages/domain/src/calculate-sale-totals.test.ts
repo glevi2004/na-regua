@@ -116,9 +116,9 @@ describe('calculateSaleTotals — RF-040 / US-020', () => {
     expect(totals.marginRate).toBe(0)
   })
 
-  it('cash, pix e wallet nao geram tarifa — D9', () => {
+  it('cash, pix, boleto e wallet nao geram tarifa — D9', () => {
     const items = [saleItem({ unitPrice: Money.parse('100.00'), unitCost: Money.parse('40.00') })]
-    for (const method of ['cash', 'pix', 'wallet'] as const) {
+    for (const method of ['cash', 'pix', 'boleto', 'wallet'] as const) {
       const totals = calculateSaleTotals(items, [pay(method, '100.00')], simples, fees, at)
       expect(totals.cardFeeAmount.isZero()).toBe(true)
     }

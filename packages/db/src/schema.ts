@@ -2,6 +2,7 @@ import { sql } from 'drizzle-orm'
 import {
   bigint,
   boolean,
+  date,
   index,
   integer,
   jsonb,
@@ -72,13 +73,17 @@ export const companyFocus = pgTable('company_focus', {
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 })
 
-export const companyPagmaxx = pgTable('company_pagmaxx', {
+export const companyAsaas = pgTable('company_asaas', {
   companyId: uuid('company_id')
     .primaryKey()
     .references(() => companies.id),
   onboardingStatus: text('onboarding_status').notNull().default('not_started'),
-  accountId: text('account_id'),
-  secretRef: text('secret_ref'),
+  asaasAccountId: text('asaas_account_id'),
+  walletId: text('wallet_id'),
+  apiKeySecretRef: text('api_key_secret_ref'),
+  webhookAuthSecretRef: text('webhook_auth_secret_ref'),
+  platformCustomerId: text('platform_customer_id'),
+  estimatedMonthlyIncomeCents: bigint('estimated_monthly_income_cents', { mode: 'number' }),
   updatedAt: timestamp('updated_at', { withTimezone: true, mode: 'date' }).notNull().defaultNow(),
 })
 
@@ -103,6 +108,20 @@ export const customers = pgTable(
     index('customers_company_document_idx').on(t.companyId, t.document),
     index('customers_company_phone_idx').on(t.companyId, t.phone),
   ],
+)
+
+export const customerAsaas = pgTable(
+  'customer_asaas',
+  {
+    customerId: uuid('customer_id')
+      .primaryKey()
+      .references(() => customers.id, { onDelete: 'cascade' }),
+    companyId: uuid('company_id')
+      .notNull()
+      .references(() => companies.id),
+    asaasCustomerId: text('asaas_customer_id').notNull(),
+  },
+  (t) => [index('customer_asaas_company_idx').on(t.companyId)],
 )
 
 export const customerAddresses = pgTable(
@@ -241,8 +260,8 @@ export const payments = pgTable(
   (t) => [index('payments_company_sale_idx').on(t.companyId, t.saleId)],
 )
 
-export const paymentPagmaxx = pgTable(
-  'payment_pagmaxx',
+export const paymentAsaas = pgTable(
+  'payment_asaas',
   {
     paymentId: uuid('payment_id')
       .primaryKey()
@@ -254,9 +273,14 @@ export const paymentPagmaxx = pgTable(
     providerStatus: text('provider_status'),
     checkoutUrl: text('checkout_url'),
     providerEventId: text('provider_event_id').unique(),
+    billingType: text('billing_type'),
+    pixPayload: text('pix_payload'),
+    bankSlipUrl: text('bank_slip_url'),
+    identificationField: text('identification_field'),
+    dueDate: date('due_date', { mode: 'date' }),
     cardTokenRef: text('card_token_ref'),
   },
-  (t) => [index('payment_pagmaxx_company_idx').on(t.companyId)],
+  (t) => [index('payment_asaas_company_idx').on(t.companyId)],
 )
 
 export const invoices = pgTable(

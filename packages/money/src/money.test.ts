@@ -11,7 +11,7 @@ describe('Money.parse', () => {
     ['100', 10000n],
     ['0.01', 1n],
     ['-25,50', -2550n],
-    ['129.9', 12990n], // formato que a PagMaxx devolve
+    ['129.9', 12990n], // formato que o Asaas devolve
   ])('interpreta %s como %s centavos', (input, cents) => {
     expect(Money.parse(input).cents).toBe(cents)
   })

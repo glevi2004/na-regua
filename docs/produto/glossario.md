@@ -40,7 +40,7 @@ evento, fila e chave de tradução.
 | Acréscimo          | `Surcharge`        |                                                             |
 | Devolução          | `SaleReturn`       |                                                             |
 | Cancelamento       | `SaleCancellation` | Distinto de devolução: cancela antes da liquidação          |
-| Forma de pagamento | `PaymentMethod`    | `debit`, `credit`, `pix`, `cash`, `wallet`                  |
+| Forma de pagamento | `PaymentMethod`    | `debit`, `credit`, `pix`, `boleto`, `cash`, `wallet`        |
 | Pagamento          | `Payment`          | Um `Sale` pode ter vários (venda dividida)                  |
 | Parcela            | `Installment`      |                                                             |
 | Plano de parcelas  | `InstallmentPlan`  | Valor, tarifa, líquido e vencimento de cada quota           |

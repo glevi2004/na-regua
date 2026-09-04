@@ -78,6 +78,11 @@ describe('RLS por linha — RF-121, RF-122', () => {
     expect(rows[0]?.n).toBe(0)
   })
 
+  it('nao cria company_asaas ate o lojista iniciar o KYC', async () => {
+    const rows = await admin<{ n: number }[]>`SELECT count(*)::int AS n FROM company_asaas`
+    expect(rows[0]?.n).toBe(0)
+  })
+
   it('register_owner cria usuario sem empresa; attach_user_company liga depois', async () => {
     const userId = randomUUID()
     await app`SELECT register_owner(${userId}, 'Dona', 'dona@loja.com', '41999990002', 'hash')`

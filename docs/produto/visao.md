@@ -116,9 +116,9 @@ O que o produto conscientemente **não** se propõe a ser:
 - Não é um **marketplace** neste recorte — está no [roadmap](escopo-mvp.md#roadmap-depois-deste-recorte).
 - Não é um **sistema contábil**. Gera dado fiscal correto e exportável para o
   contador; não substitui o contador.
-- Não é uma **instituição de pagamento**. Pix, link e cartão online passam pela
-  [PagMaxx](../arquitetura/integracoes/pagmaxx.md) **na conta do lojista**
-  ([ADR-0006](../decisoes/adr/0006-conta-pagmaxx-por-lojista.md)). Dinheiro e
+- Não é uma **instituição de pagamento**. Pix, boleto, link e cartão online passam pelo
+  [Asaas](../arquitetura/integracoes/asaas.md) **na subconta do lojista**
+  ([ADR-0008](../decisoes/adr/0008-subconta-asaas-nao-baas.md)). Dinheiro e
   maquininha só são registrados. Não custodamos o dinheiro da venda.
 
 ## Documentos relacionados

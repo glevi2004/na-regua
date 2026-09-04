@@ -29,7 +29,7 @@ export function calculateInstallmentPlan(
 ```
 
 **O que não faz:** ler banco, chamar API, orquestrar caso de uso, decidir
-autorização. Isso é `core`. Também **não** chama Focus (NFC-e) nem PagMaxx no
+autorização. Isso é `core`. Também **não** chama Focus (NFC-e) nem Asaas no
 fechamento: a nota é assíncrona (NR-042) e a tarifa vem de tabela local
 (NR-044 alimenta a tabela depois; aqui só consulta).
 
@@ -65,7 +65,7 @@ dinheiro.**
 | `grossAmount`   | soma de `unitPrice * quantity`                                  |
 | `costAmount`    | soma de `unitCost * quantity`                                   |
 | `taxAmount`     | aliquota sobre o **bruto de cada item** (D2)                    |
-| `cardFeeAmount` | tarifa de `debit`/`credit`; `cash`, `pix`, `wallet` = zero (D9) |
+| `cardFeeAmount` | tarifa de `debit`/`credit`; `cash`, `pix`, `boleto`, `wallet` = zero (D9) |
 | `netAmount`     | bruto − imposto − tarifa                                        |
 | `marginAmount`  | líquido − custo (D1)                                            |
 | `marginRate`    | `marginAmount / grossAmount * 100` (quatro casas, truncado)     |
@@ -79,7 +79,7 @@ Híbrido.
 Parcelas de `credit` (RF-038): `Money.allocate` (resto nas primeiras — RNF-045),
 tarifa **sobre o bruto de cada parcela** (D8), `netAmount` da parcela é o
 recebível (D7). Vencimento: `at + N * settlementDays` em UTC, padrão 30 dias
-(D6). Máximo 21x (PagMaxx).
+(D6). Máximo 21x (Asaas).
 
 Bandeira ausente no balcão: entrada `unknown` ou a **pior** taxa daquele
 número de parcelas (D5). Persistência/UI da tabela é de `core`/web (D10).
@@ -100,13 +100,13 @@ número de parcelas (D5). Persistência/UI da tabela é de `core`/web (D10).
 ### A tabela de tarifas não vem da API em tempo de venda
 
 `CardFeeTable` é **dado configurado**, atualizado periodicamente. Não se chama
-`simulate-fee` no fechamento da venda, por três motivos:
+a API do Asaas no fechamento da venda, por três motivos:
 
 1. [RNF-003](../../docs/produto/requisitos-nao-funcionais.md) — a venda fecha em ≤ 1,5 s; chamada externa no caminho crítico é risco
 2. [RNF-041](../../docs/produto/requisitos-nao-funcionais.md) — o cálculo tem que ser auditável, e não se audita resposta de terceiro cujo formato varia
-3. No balcão não temos o número do cartão, que a API exige para identificar a bandeira
+3. A tabela vem de `GET /v3/myAccount/fees/` na subconta, fora do caminho crítico — não de `POST /v3/payments/simulate`
 
-Detalhes em [`integracoes/pagmaxx.md`](../../docs/arquitetura/integracoes/pagmaxx.md#2-a-resposta-de-simulate-fee-não-tem-contrato-estável).
+Detalhes em [`integracoes/asaas.md`](../../docs/arquitetura/integracoes/asaas.md#tarifas-de-cartão).
 
 ## Testes
 

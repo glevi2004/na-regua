@@ -126,7 +126,7 @@ porque o escopo tem que ser um módulo real.
 | ---------------------------------------------------- | --------------------------------------------------------------- |
 | Cabeçalho ≤ 72 caracteres                            | —                                                               |
 | Descrição no imperativo, minúscula, sem ponto final  | `registrar venda`, não `Registrou a venda.`                     |
-| Nome próprio e sigla podem ter maiúscula **no meio** | `criar base de CI/CD com PagMaxx` ✅ · `Criar Base De CI/CD` ❌ |
+| Nome próprio e sigla podem ter maiúscula **no meio** | `criar base de CI/CD com Asaas` ✅ · `Criar Base De CI/CD` ❌ |
 | Corpo explica **por quê**, não o quê                 | o diff já mostra o quê                                          |
 | `Refs: NR-xxx` obrigatório no rodapé                 | liga ao ledger e ao Monday                                      |
 | Breaking change: `!` antes do `:` **e** rodapé       | `refactor(contracts)!:`                                         |

@@ -24,7 +24,7 @@
 
 **24 dos 157 dias-desenvolvedor do backlog ativo estão bloqueados por 6 decisões
 em aberto** (marca, auth, LLM, memória do agente, hospedagem, cupons). Focus,
-PagMaxx e WhatsApp Cloud API já têm ADR. Ver
+Asaas e WhatsApp Cloud API já têm ADR. Ver
 [Decisões](docs/decisoes/README.md) e [Task Ledger](docs/processo/task-ledger.md).
 
 ---
@@ -34,8 +34,8 @@ PagMaxx e WhatsApp Cloud API já têm ADR. Ver
 Duas formas de uso sobre a mesma base:
 
 - **Aplicativo (web e mobile)** — jornadas A–J: cadastro, estoque, vendas com
-  NFC-e e NFS-e Nacional via Focus NFe, financeiro, CRM, agenda, empresa, assinatura PagMaxx,
-  chamados e assistente. Pix, link e cartão online passam pela PagMaxx;
+  NFC-e e NFS-e Nacional via Focus NFe, financeiro, CRM, agenda, empresa, assinatura Asaas,
+  chamados e assistente. Pix, boleto, link e cartão online passam pelo Asaas;
   dinheiro e maquininha só são registrados.
 - **Assistente de IA no WhatsApp (Cloud API oficial)** — as mesmas operações
   do ERP por mensagem, sobre os mesmos casos de uso.
@@ -77,8 +77,8 @@ na-regua/
 │   ├── fiscal/       adapter Focus NFe (NFC-e e NFS-e Nacional)
 │   ├── whatsapp/     adapter WhatsApp Cloud API
 │   ├── banking/      adapter Open Finance (adiado)
-│   ├── billing/      adapter de assinatura SaaS (PagMaxx)
-│   ├── payments/     adapter PagMaxx — Pix, link, cartão online
+│   ├── billing/      adapter de assinatura SaaS (Asaas, conta-pai)
+│   ├── payments/     adapter Asaas — Pix, boleto, link, cartão online
 │   ├── money/        tipo Money — centavos, sem float
 │   └── ui/           tokens e componentes compartilhados
 ├── docs/             documentação (ver índice abaixo)
@@ -103,7 +103,7 @@ Cada módulo documenta a si mesmo no próprio README:
 | `packages/whatsapp`  | adapter WhatsApp Cloud API              | [README](packages/whatsapp/README.md)  |
 | `packages/banking`   | adapter Open Finance (adiado)           | [README](packages/banking/README.md)   |
 | `packages/billing`   | adapter de assinatura                   | [README](packages/billing/README.md)   |
-| `packages/payments`  | adapter de PSP (Pix, link de pagamento) | [README](packages/payments/README.md)  |
+| `packages/payments`  | adapter de PSP (Pix, boleto, link, cartão) | [README](packages/payments/README.md)  |
 | `packages/money`     | valores monetários                      | [README](packages/money/README.md)     |
 | `packages/ui`        | design system                           | [README](packages/ui/README.md)        |
 | `infra`              | infraestrutura e deploy                 | [README](infra/README.md)              |

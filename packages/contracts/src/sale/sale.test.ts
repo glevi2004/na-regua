@@ -36,6 +36,11 @@ describe('pagamento', () => {
     expect(r.success).toBe(true)
   })
 
+  it('aceita boleto a vista', () => {
+    const r = paymentInputSchema.safeParse({ method: 'boleto', amountCents: 1990 })
+    expect(r.success).toBe(true)
+  })
+
   it('recusa parcelamento fora do credito', () => {
     const r = paymentInputSchema.safeParse({ method: 'pix', amountCents: 100, installments: 3 })
     expect(r.success).toBe(false)
@@ -45,7 +50,7 @@ describe('pagamento', () => {
   it.each([
     [{ method: 'credit', amountCents: 100, installments: 0 }, 'zero parcelas'],
     [{ method: 'credit', amountCents: 100, installments: 22 }, 'acima do teto de 21'],
-    [{ method: 'boleto', amountCents: 100 }, 'forma inexistente'],
+    [{ method: 'cheque', amountCents: 100 }, 'forma inexistente'],
     [{ method: 'cash', amountCents: 12.5 }, 'valor decimal'],
   ])('recusa %o (%s)', (entrada, _motivo) => {
     expect(paymentInputSchema.safeParse(entrada).success).toBe(false)

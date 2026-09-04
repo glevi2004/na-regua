@@ -1,20 +1,20 @@
 ---
 adr: 0003
 titulo: PagMaxx como PSP das vendas e da assinatura SaaS
-status: aceita
+status: substituida
 data: 2026-09-02
 decisores:
   - Produto
   - Trilha 2 — Plataforma & Integrações
 substitui: null
-substituida_por: null
+substituida_por: 0007
 ---
 
 # ADR-0003 — PagMaxx como PSP das vendas e da assinatura SaaS
 
 |                       |                                                                  |
 | --------------------- | ---------------------------------------------------------------- |
-| **Status**            | Aceita                                                           |
+| **Status**            | Substituída por [ADR-0007](0007-asaas.md)                        |
 | **Data**              | 2026-09-02                                                       |
 | **Decisores**         | Produto + Trilha 2                                               |
 | **Decisão de origem** | [DEC-006](../README.md#dec-006), [DEC-010](../README.md#dec-010) |

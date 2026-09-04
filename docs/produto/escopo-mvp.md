@@ -20,12 +20,12 @@ verdade. O menu real está em
 | ----- | --------------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
 | **A** | Cadastro        | Pessoa no signup (nome, e-mail, telefone, senha); cupom e Pix da assinatura; empresa (CNPJ) em `/app/empresa`           | Preencher empresa no mesmo passo do signup    |
 | **B** | Estoque         | Produto plano: código, EAN, NCM, custo, venda, saldo, mínimo, movimentações                                             | Variação, kit, depósito, lote                 |
-| **C** | Vendas          | Carrinho, clientes, PagMaxx (Pix/link/cartão online), registro de dinheiro/maquininha, NFC-e e NFS-e Nacional via Focus | TEF, orçamento/delivery                       |
+| **C** | Vendas          | Carrinho, clientes, Asaas (Pix/boleto/link/cartão online), registro de dinheiro/maquininha, NFC-e e NFS-e Nacional via Focus | TEF, orçamento/delivery                       |
 | **D** | Financeiro      | Contas a pagar, a receber, plano de contas                                                                              | Bancos, Open Finance, conciliação             |
 | **E** | CRM e agenda    | Quadro (a fazer / andamento / concluído); compromissos                                                                  | Funil de marketing, agendamento pelo cliente  |
 | **F** | Dashboard       | KPIs em `/app` (faturamento, ticket, a receber, a pagar)                                                                | DRE completo como produto separado            |
 | **G** | Conta e empresa | Editar dados pessoais e da empresa; regime + declaração Híbrido; A1+CSC só se elegível                                  | Cofre nosso de certificado; multi-empresa     |
-| **H** | Assinatura      | Planos, trial, PagMaxx `/subscriptions`, estado Restrita                                                                | —                                             |
+| **H** | Assinatura      | Planos, trial, Asaas `POST /v3/subscriptions` na conta-pai, estado Restrita                                                 | —                                             |
 | **I** | Suporte         | Chamados com mensagens e anexo                                                                                          | —                                             |
 | **J** | Assistente      | Mesmos casos de uso no web, app e WhatsApp Cloud API                                                                    | Lib não oficial; atendimento ao cliente final |
 
@@ -40,7 +40,7 @@ Detalhe em [`fluxos.md`](../arquitetura/fluxos.md#venda-completa).
 
 ```
 selecionar cliente → montar carrinho → pagamento
-   (PagMaxx: Pix · link · cartão online  |  registro: dinheiro · maquininha)
+   (Asaas: Pix · boleto · link · cartão online  |  registro: dinheiro · maquininha)
    → emissão NFC-e ou NFS-e Nacional na Focus (se elegível e habilitada)
 ```
 
@@ -50,7 +50,7 @@ Ao fechar a venda o sistema calcula, sem intervenção:
 | ------------------------------------------------------------------------- | ---------------------------------------------------- |
 | Custo dos itens                                                           | [`packages/domain`](../../packages/domain/README.md) |
 | Imposto conforme regime (estimativa / Simples)                            | [`packages/domain`](../../packages/domain/README.md) |
-| Tarifa de cartão (tabela; PagMaxx `simulate-fee` fora do caminho crítico) | [`packages/domain`](../../packages/domain/README.md) |
+| Tarifa de cartão (tabela; Asaas `GET /v3/myAccount/fees/` fora do caminho crítico) | [`packages/domain`](../../packages/domain/README.md) |
 | Líquido → recebível                                                       | [`packages/core`](../../packages/core/README.md)     |
 
 A nota **não** fala com a SEFAZ nem com o Ambiente Nacional. A Focus autoriza ou rejeita;
@@ -60,8 +60,8 @@ recorte**; o layout da tela ainda será definido. Sem elegibilidade
 ([DEC-017](../decisoes/README.md#dec-017)) a venda fecha e a nota não entra na
 fila.
 
-PagMaxx só processa se o credenciamento do lojista estiver aprovado
-([ADR-0006](../decisoes/adr/0006-conta-pagmaxx-por-lojista.md)). Sem isso,
+Asaas só processa se a subconta do lojista estiver aprovada
+([ADR-0008](../decisoes/adr/0008-subconta-asaas-nao-baas.md)). Sem isso,
 dinheiro/maquininha ainda registram.
 
 ---
@@ -75,7 +75,7 @@ Prioridade no que a lojista faz várias vezes ao dia. Vale **web, app e WhatsApp
 | **MUST**   | Consultar (vendas do dia, a receber, a pagar, estoque, saldo de cliente) |
 | **MUST**   | Cadastrar cliente                                                        |
 | **MUST**   | Lançar venda simples                                                     |
-| **MUST**   | Enviar cobrança (link PagMaxx quando habilitado)                         |
+| **MUST**   | Enviar cobrança (link Asaas quando habilitado)                           |
 | **SHOULD** | Lançar conta a pagar/receber                                             |
 | **SHOULD** | Cadastrar produto                                                        |
 | **SHOULD** | Resumo de período                                                        |
@@ -131,7 +131,7 @@ IA proativa · atendimento ao cliente final · portal do contador · marketplace
 - [ ] Lojista real opera um mês sem planilha paralela
 - [ ] Jornadas A–J cobertas no web (e o que for MUST no mobile)
 - [ ] NFC-e e NFS-e Nacional autorizadas em homologação Focus, incluindo rejeição visível
-- [ ] Pix ou link PagMaxx dá baixa por webhook em homologação
+- [ ] Pix, boleto ou link Asaas dá baixa por webhook em homologação
 - [ ] Assistente cobre MUST acima no WhatsApp Cloud API (ou adapter falso + contrato)
 - [ ] Assinatura: trial, pagamento, estado Restrita
 - [ ] Chamado de suporte ida e volta
@@ -143,4 +143,4 @@ IA proativa · atendimento ao cliente final · portal do contador · marketplace
 - [Visão](visao.md)
 - [User Stories](user-stories.md)
 - [Task Ledger](../processo/task-ledger.md)
-- [Focus](../arquitetura/integracoes/focusnfe.md) · [PagMaxx](../arquitetura/integracoes/pagmaxx.md)
+- [Focus](../arquitetura/integracoes/focusnfe.md) · [Asaas](../arquitetura/integracoes/asaas.md)

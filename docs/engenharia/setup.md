@@ -141,7 +141,7 @@ e ninguém tem motivo para colocar credencial de produção na máquina.
 ### Testar webhook local
 
 Os provedores exigem URL **HTTPS pública** — `localhost` é recusado no cadastro
-(vale para [PagMaxx](../arquitetura/integracoes/pagmaxx.md) e para o WhatsApp).
+(vale para [Asaas](../arquitetura/integracoes/asaas.md) e para o WhatsApp).
 Use um túnel:
 
 ```bash

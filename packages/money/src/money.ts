@@ -31,7 +31,7 @@ export class Money {
    * Cria a partir de uma string decimal ("49.90", "1.234,56", "R$ 49,90").
    *
    * Aceita string — nao `number` — de proposito: e assim que valor entra vindo
-   * de API externa (a PagMaxx devolve `129.9`) sem passar por ponto flutuante.
+   * de API externa (o Asaas devolve `129.9`) sem passar por ponto flutuante.
    */
   static parse(input: string, currency: Currency = 'BRL'): Money {
     const cleaned = input.replace(/[^\d,.-]/g, '').trim()

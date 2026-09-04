@@ -1,4 +1,4 @@
--- Schema enxuto: so o que o lojista informa, o que vai para Focus/PagMaxx/CEP
+-- Schema enxuto: so o que o lojista informa, o que vai para Focus/Asaas/CEP
 -- e o que volta dessas APIs. Satelites evitam coluna nula em toda empresa.
 -- RLS com FORCE: o dono da tabela tambem obedece. Superuser continua bypass
 -- — a aplicacao usa naregua_app (NOSUPERUSER).
@@ -65,14 +65,18 @@ CREATE TABLE company_focus (
   )
 );
 
--- Linha so existe quando o lojista inicia o KYC PagMaxx.
-CREATE TABLE company_pagmaxx (
+-- Linha so existe quando o lojista inicia o KYC Asaas (subconta nao-BaaS).
+CREATE TABLE company_asaas (
   company_id uuid PRIMARY KEY REFERENCES companies (id),
   onboarding_status text NOT NULL DEFAULT 'not_started',
-  account_id text,
-  secret_ref text,
+  asaas_account_id text,
+  wallet_id text,
+  api_key_secret_ref text,
+  webhook_auth_secret_ref text,
+  platform_customer_id text,
+  estimated_monthly_income_cents bigint,
   updated_at timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT company_pagmaxx_onboarding_status_check CHECK (
+  CONSTRAINT company_asaas_onboarding_status_check CHECK (
     onboarding_status IN ('not_started', 'pending', 'approved', 'rejected')
   )
 );
@@ -96,6 +100,15 @@ CREATE INDEX customers_company_document_idx ON customers (company_id, document)
   WHERE document IS NOT NULL;
 CREATE INDEX customers_company_phone_idx ON customers (company_id, phone)
   WHERE phone IS NOT NULL;
+
+-- Id do cliente na subconta Asaas. Linha so quando a cobranca precisa de customer.
+CREATE TABLE customer_asaas (
+  customer_id uuid PRIMARY KEY REFERENCES customers (id) ON DELETE CASCADE,
+  company_id uuid NOT NULL REFERENCES companies (id),
+  asaas_customer_id text NOT NULL
+);
+
+CREATE INDEX customer_asaas_company_idx ON customer_asaas (company_id);
 
 -- Endereco so quando tomador/destinatario precisa dele na nota.
 CREATE TABLE customer_addresses (
@@ -203,24 +216,29 @@ CREATE TABLE payments (
   installments integer,
   brand text,
   created_at timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT payments_method_check CHECK (method IN ('cash', 'pix', 'debit', 'credit', 'wallet'))
+  CONSTRAINT payments_method_check CHECK (method IN ('cash', 'pix', 'boleto', 'debit', 'credit', 'wallet'))
 );
 
 CREATE INDEX payments_company_sale_idx ON payments (company_id, sale_id);
 
--- Colunas PagMaxx so na linha online. Dinheiro/maquininha nao tem satelite.
-CREATE TABLE payment_pagmaxx (
+-- Colunas Asaas so na linha online. Dinheiro/maquininha nao tem satelite.
+CREATE TABLE payment_asaas (
   payment_id uuid PRIMARY KEY REFERENCES payments (id),
   company_id uuid NOT NULL REFERENCES companies (id),
   provider_payment_id text,
   provider_status text,
   checkout_url text,
   provider_event_id text,
+  billing_type text,
+  pix_payload text,
+  bank_slip_url text,
+  identification_field text,
+  due_date date,
   card_token_ref text,
-  CONSTRAINT payment_pagmaxx_event_id_unique UNIQUE (provider_event_id)
+  CONSTRAINT payment_asaas_event_id_unique UNIQUE (provider_event_id)
 );
 
-CREATE INDEX payment_pagmaxx_company_idx ON payment_pagmaxx (company_id);
+CREATE INDEX payment_asaas_company_idx ON payment_asaas (company_id);
 
 CREATE TABLE invoices (
   id uuid PRIMARY KEY,
@@ -329,15 +347,16 @@ BEGIN
   FOREACH t IN ARRAY ARRAY[
     'users',
     'company_focus',
-    'company_pagmaxx',
+    'company_asaas',
     'customers',
     'customer_addresses',
+    'customer_asaas',
     'products',
     'inventory_movements',
     'sales',
     'sale_items',
     'payments',
-    'payment_pagmaxx',
+    'payment_asaas',
     'invoices'
   ]
   LOOP

@@ -181,7 +181,7 @@ export interface InvoiceIssuer {
 export function createFocusNfeIssuer(config: FocusConfig): InvoiceIssuer
 ```
 
-Isso vale agora que Focus, PagMaxx e WhatsApp Cloud API estão escolhidos:
+Isso vale agora que Focus, Asaas e WhatsApp Cloud API estão escolhidos:
 a **porta** continua; o adapter concreto já tem nome. `banking` está adiado
 ([DEC-005](../decisoes/README.md#dec-005)). LLM permanece [DEC-007](../decisoes/README.md#dec-007).
 

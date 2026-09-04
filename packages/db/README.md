@@ -6,9 +6,10 @@ Schema Drizzle, migrations SQL, políticas RLS.
 isolamento: [ADR-0001](../../docs/decisoes/adr/0001-rls-por-linha.md)
 
 O Postgres materializa o [catálogo enxuto](../../docs/arquitetura/dados.md#catálogo-de-colunas-cadastro-e-fiscal):
-só o que o lojista informa, o que vai para Focus/PagMaxx/CEP e o que volta.
-Focus e PagMaxx são satélites (`company_focus`, `company_pagmaxx`,
-`payment_pagmaxx`) — empresa inelegível para nota **não** ganha colunas nulas.
+só o que o lojista informa, o que vai para Focus/Asaas/CEP e o que volta.
+Focus e Asaas são satélites (`company_focus`, `company_asaas`,
+`customer_asaas`, `payment_asaas`) — empresa inelegível para nota **não**
+ganha colunas nulas.
 
 Isolamento entre **lojas** é RLS por linha. Um **usuário** pertence a uma
 empresa (`users.company_id`, nullable até `/app/empresa`) —

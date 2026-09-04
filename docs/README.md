@@ -42,7 +42,7 @@ Público: desenvolvedores.
 | [`arquitetura/dados.md`](arquitetura/dados.md)             | Modelo de dados, estratégia multi-tenant, RLS, migrations e auditoria        |
 | [`arquitetura/seguranca.md`](arquitetura/seguranca.md)     | Autenticação, autorização, gestão de segredos e conformidade com a LGPD      |
 | [`arquitetura/modulos.md`](arquitetura/modulos.md)         | Tabela-índice de todos os módulos, com fronteiras e donos                    |
-| [`arquitetura/integracoes/`](arquitetura/integracoes/)     | Avaliação e desenho de cada provedor externo — uma página por fornecedor     |
+| [`arquitetura/integracoes/`](arquitetura/integracoes/)     | Provedores: [Focus](arquitetura/integracoes/focusnfe.md), [Asaas](arquitetura/integracoes/asaas.md) ([fluxo](arquitetura/integracoes/fluxo-asaas.md), [split](arquitetura/integracoes/split-decision.md)) |
 
 ### 🔧 Engenharia — _como trabalhamos_
 
@@ -82,7 +82,7 @@ Público: todo o time.
 | Arquivo                                                                                                           | O que é                                                                                                      |
 | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | [`assets/ZapGestor_Apresentacao.pdf`](assets/ZapGestor_Apresentacao.pdf) · [md](assets/zapgestor-apresentacao.md) | Apresentação comercial — fonte primária do escopo de produto                                                 |
-| [`assets/PagMaxx-Documentacao-da-API.pdf`](assets/PagMaxx-Documentacao-da-API.pdf) · [md](assets/pagmaxx-api.md)  | Documentação da API do PSP — avaliada em [`integracoes/pagmaxx.md`](arquitetura/integracoes/pagmaxx.md)      |
+| [`assets/PagMaxx-Documentacao-da-API.pdf`](assets/PagMaxx-Documentacao-da-API.pdf) · [md](assets/pagmaxx-api.md)  | Documentação bruta da API PagMaxx — **substituída**. Contrato vigente: [`integracoes/asaas.md`](arquitetura/integracoes/asaas.md) · [`fluxo-asaas.md`](arquitetura/integracoes/fluxo-asaas.md) · [`split-decision.md`](arquitetura/integracoes/split-decision.md) |
 | [`assets/Pro Comércio KV Rebranding.pdf`](assets/) · [md](assets/pro-comercio-rebranding.md)                      | Identidade visual ProComércio — paleta, fontes e marcas derivadas. Ver [DEC-001](decisoes/README.md#dec-001) |
 
 Os `.md` ao lado de cada PDF são conversões geradas por

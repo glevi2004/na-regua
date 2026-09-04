@@ -74,25 +74,25 @@ tudo. Um papel só significaria abrir mão do isolamento —
 | `AUTH_PROVIDER` |  ✅  |      | `fake`                   | `fake` \| provedor escolhido                |
 | `JWT_SECRET`    |  ✅  |  🔒  | valor de desenvolvimento | assinatura de token. **Trocar em produção** |
 
-### PSP — PagMaxx · [ADR-0003](../decisoes/adr/0003-pagmaxx.md)
+### PSP e assinatura — Asaas · [ADR-0007](../decisoes/adr/0007-asaas.md)
 
-Detalhes em [`integracoes/pagmaxx.md`](../arquitetura/integracoes/pagmaxx.md).
+Detalhes em [`integracoes/asaas.md`](../arquitetura/integracoes/asaas.md).
+Subconta por lojista: [ADR-0008](../decisoes/adr/0008-subconta-asaas-nao-baas.md).
+Split nas vendas: [DEC-018](../decisoes/README.md#dec-018) (aberta — não enviar
+`split[]` até fechar).
 
-| Variável                   | Obr. | Seg. | local                                 | Descrição                      |
-| -------------------------- | :--: | :--: | ------------------------------------- | ------------------------------ |
-| `PAYMENTS_PROVIDER`        |  ✅  |      | `fake`                                | `fake` \| `pagmaxx`            |
-| `PAGMAXX_BASE_URL`         |      |      | `https://api.homolog.pagmaxx.com/api` | homologação ou produção        |
-| `PAGMAXX_API_KEY`          |      |  🔒  | vazio                                 | `pay-secure`, tokenização, 3DS |
-| `PAGMAXX_ACCOUNT_EMAIL`    |      |  🔒  | vazio                                 | JWT — Pix, links e assinaturas |
-| `PAGMAXX_ACCOUNT_PASSWORD` |      |  🔒  | vazio                                 | idem                           |
-| `PAGMAXX_WEBHOOK_SECRET`   |      |  🔒  | vazio                                 | validação do HMAC-SHA256       |
+| Variável                   | Obr. | Seg. | local                                 | Descrição                                      |
+| -------------------------- | :--: | :--: | ------------------------------------- | ---------------------------------------------- |
+| `PAYMENTS_PROVIDER`        |  ✅  |      | `fake`                                | `fake` \| `asaas`                              |
+| `BILLING_PROVIDER`         |      |      | `fake`                                | `fake` \| `asaas` — mensalidade na conta-pai   |
+| `ASAAS_BASE_URL`           |      |      | `https://api-sandbox.asaas.com/v3`    | sandbox ou produção                            |
+| `ASAAS_API_KEY`            |      |  🔒  | vazio                                 | chave da **conta-pai**                         |
+| `ASAAS_USER_AGENT`         |      |      | vazio                                 | identificar a aplicação                        |
+| `ASAAS_WEBHOOK_AUTH_TOKEN` |      |  🔒  | vazio                                 | `authToken` dos webhooks da conta-pai          |
+| `ASAAS_WALLET_ID`          |      |      | vazio                                 | `walletId` da pai — só se DEC-018 escolher Split |
 
-> [!CAUTION]
-> `PAGMAXX_ACCOUNT_PASSWORD` é **senha de conta**, não chave de API com escopo
-> restrito. A PagMaxx exige isso para Pix, links e assinaturas, e a mesma
-> credencial dá acesso a gestão de conta e usuários. Guarde no gerenciador de
-> segredos com acesso mínimo, e acompanhe
-> [QST-009](../decisoes/README.md#qst-009), que pede escopo maior para a API Key.
+Chave da subconta e `authToken` do webhook por lojista **não** são env global:
+vão ao cofre, referenciados por `company_asaas`.
 
 ### WhatsApp — Cloud API · [ADR-0005](../decisoes/adr/0005-whatsapp-cloud-api.md)
 
@@ -158,7 +158,7 @@ Isso é decisão de arquitetura, não conveniência:
 | O sistema sobe local sem credencial nenhuma                   | ninguém precisa de conta em fornecedor para trabalhar                    |
 | Ninguém tem motivo para pôr credencial de produção na máquina | [RNF-070](../produto/requisitos-nao-funcionais.md) fica fácil de cumprir |
 | Teste de integração roda na CI sem segredo                    | pipeline mais simples e mais rápido                                      |
-| Trabalho não espera credencial de terceiro                    | o boot local não depende de Focus, PagMaxx ou Meta                       |
+| Trabalho não espera credencial de terceiro                    | o boot local não depende de Focus, Asaas ou Meta                         |
 
 Regra: **o adapter falso implementa a mesma porta**, inclusive os caminhos de
 erro. Falso que só devolve sucesso esconde exatamente o que precisa ser testado.

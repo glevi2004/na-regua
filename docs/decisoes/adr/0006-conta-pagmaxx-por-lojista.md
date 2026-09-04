@@ -1,19 +1,19 @@
 ---
 adr: 0006
 titulo: Conta PagMaxx por lojista, KYC fora do caminho crítico
-status: aceita
+status: substituida
 data: 2026-09-02
 decisores:
   - Produto
 substitui: null
-substituida_por: null
+substituida_por: 0008
 ---
 
 # ADR-0006 — Conta PagMaxx por lojista, KYC fora do caminho crítico
 
 |                       |                                 |
 | --------------------- | ------------------------------- |
-| **Status**            | Aceita                          |
+| **Status**            | Substituída por [ADR-0008](0008-subconta-asaas-nao-baas.md) |
 | **Data**              | 2026-09-02                      |
 | **Decisores**         | Produto                         |
 | **Decisão de origem** | [DEC-015](../README.md#dec-015) |

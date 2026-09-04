@@ -10,7 +10,7 @@ import { idSchema, moneyCentsSchema, rateSchema } from '../common/primitives.js'
  */
 
 /** Formas aceitas no fechamento — RF-034. */
-export const paymentMethodSchema = z.enum(['cash', 'pix', 'debit', 'credit', 'wallet'], {
+export const paymentMethodSchema = z.enum(['cash', 'pix', 'boleto', 'debit', 'credit', 'wallet'], {
   errorMap: () => ({ message: 'Forma de pagamento invalida.' }),
 })
 export type PaymentMethod = z.infer<typeof paymentMethodSchema>

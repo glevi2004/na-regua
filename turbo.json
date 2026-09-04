@@ -11,7 +11,7 @@
     "REDIS_URL",
     "API_PORT",
     "LOG_LEVEL",
-    "PAGMAXX_*",
+    "ASAAS_*",
     "WHATSAPP_*",
     "FISCAL_*"
   ],

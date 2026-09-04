@@ -25,7 +25,7 @@ flowchart TB
 
     FOCUS["Focus NFe<br/><i>NFC-e (SEFAZ) e NFS-e Nacional</i>"]
     META["WhatsApp Cloud API<br/><i>oficial da Meta</i>"]
-    PSP["PagMaxx<br/><i>Pix, link, cartão online, assinatura</i>"]
+    PSP["Asaas<br/><i>Pix, boleto, link, cartão, assinatura</i>"]
     LLM["Provedor de LLM<br/><i>interpretação de linguagem</i>"]
 
     LOJISTA -->|app, web e WhatsApp| SYS
@@ -39,11 +39,11 @@ flowchart TB
     SYS <-->|interpreta intenção| LLM
 ```
 
-**Integrações externas no recorte A–J:** Focus NFe (NFC-e e NFS-e Nacional), PagMaxx,
+**Integrações externas no recorte A–J:** Focus NFe (NFC-e e NFS-e Nacional), Asaas,
 WhatsApp Cloud API, LLM ([DEC-007](../decisoes/README.md#dec-007) ainda aberta).
-LLM ([DEC-007](../decisoes/README.md#dec-007) ainda aberta). Open Finance está
+Open Finance está
 [adiado](../decisoes/README.md#dec-005). Adapters isolam os provedores mesmo
-com Focus e PagMaxx já escolhidos.
+com Focus e Asaas já escolhidos.
 
 ## Nível 2 — Containers
 
@@ -74,7 +74,7 @@ flowchart TB
     end
 
     subgraph externos["Provedores externos"]
-        EXT["Focus NFe · PagMaxx · WhatsApp Cloud API · LLM"]
+        EXT["Focus NFe · Asaas · WhatsApp Cloud API · LLM"]
     end
 
     MOBILE -->|HTTPS| API
@@ -157,7 +157,7 @@ validações e a auditoria.
 | Isolamento             | RLS no PostgreSQL                 | Isolamento que não depende de o desenvolvedor lembrar do `WHERE` — [ADR-0001](../decisoes/adr/0001-rls-por-linha.md)                                                             |
 | Acesso                 | 1 usuário ↔ 1 empresa             | Staff depois, mesma loja — [ADR-0004](../decisoes/adr/0004-usuario-uma-empresa.md)                                                                                               |
 | Fiscal                 | Focus NFe, NFC-e e NFS-e Nacional | Só MEI/Simples sem Híbrido; A1 transita; não falamos com SEFAZ nem o Ambiente Nacional — [ADR-0002](../decisoes/adr/0002-focus-nfe.md), [DEC-017](../decisoes/README.md#dec-017) |
-| PSP e assinatura       | PagMaxx                           | Pix, link, cartão online; dinheiro/maquininha só registro — [ADR-0003](../decisoes/adr/0003-pagmaxx.md)                                                                          |
+| PSP e assinatura       | Asaas                             | Pix, boleto, link, cartão online; dinheiro/maquininha só registro — [ADR-0007](../decisoes/adr/0007-asaas.md)                                                                     |
 | WhatsApp               | Cloud API oficial                 | Sem lib não oficial — [ADR-0005](../decisoes/adr/0005-whatsapp-cloud-api.md)                                                                                                     |
 | Validação              | Zod em `contracts`                | O mesmo schema serve a HTTP, tipos e tools do agente                                                                                                                             |
 

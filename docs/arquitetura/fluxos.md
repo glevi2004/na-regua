@@ -82,7 +82,7 @@ sequenceDiagram
 4. **Estado visível ao lojista é composto**, não um `status` na venda. Nota,
    recebível e falha de job vivem nas tabelas deles — ver
    [`dados.md`](dados.md#estados-da-venda).
-   Falha no `registerSale` = nenhuma linha; falha na Focus/PagMaxx depois = venda
+   Falha no `registerSale` = nenhuma linha; falha na Focus/Asaas depois = venda
    existe com o estado filho explícito (RF-054, US-025).
 
 ## Venda pelo WhatsApp
@@ -278,7 +278,7 @@ flowchart LR
     G --> H([valor percebido])
 
     C -.->|opcional, depois| I[vincular WhatsApp]
-    B -.->|opcional, depois| K[KYC PagMaxx<br/>Pix/link]
+    B -.->|opcional, depois| K[KYC Asaas<br/>Pix/boleto/link]
 
     style H fill:#14532d,color:#fff
 ```

@@ -106,7 +106,7 @@ Objetivo: emitir NFC-e e NFS-e Nacional e controlar contas a pagar e receber.
 | NR-041 | `worker`: consumidores de fila (emissão, mensagem, cobrança)                                              |   🟠   | `worker`          |   3 | NR-040 | —    | RNF-004, RF-130                    |   ⬜   |
 | NR-042 | `fiscal`: adapter Focus NFe — empresas, NFC-e, NFS-e Nacional, webhook, gate MEI/Simples, sem cofre de A1 |   🟠   | `fiscal`          |   5 | NR-040 | —    | RF-045–054, RF-133–134, RF-143–146 |   ⬜   |
 | NR-043 | `payments`: porta `PaymentGateway` + adapter falso                                                        |   🟠   | `payments` `core` |   2 | NR-022 | —    | RF-063                             |   ⬜   |
-| NR-044 | `payments`: adapter PagMaxx — Pix, link, cartão online, webhook HMAC                                      |   🟠   | `payments`        |   4 | NR-043 | —    | RF-140, RF-141, RF-034             |   ⬜   |
+| NR-044 | `payments`: adapter Asaas — Pix, boleto, link, cartão online, webhook                                    |   🟠   | `payments`        |   4 | NR-043 | —    | RF-140, RF-141, RF-034             |   ⬜   |
 | NR-073 | `mobile`: pagamento, resumo com líquido e margem                                                          |   🟢   | `mobile`          |   3 | NR-071 | —    | US-018–020                         |   ⬜   |
 | NR-074 | `web`: contas a pagar e a receber                                                                         |   🟢   | `web`             |   4 | NR-029 | —    | E6, E7                             |   ⬜   |
 
@@ -122,7 +122,7 @@ Objetivo: operar o ERP por mensagem e cobrar a mensalidade.
 | NR-060 | `agent`: runtime com tools geradas de `contracts`                     |   🟠   | `agent`           |   5 | NR-046, NR-005 | **DEC-007** | RF-096–102             |   🚧   |
 | NR-061 | `agent`: confirmação de ação sensível, com expiração                  |   🟠   | `agent`           |   2 | NR-060         | —           | RF-103, RF-104         |   ⬜   |
 | NR-062 | `agent`: contexto de conversa isolado por empresa                     |   🟠   | `agent`           |   3 | NR-060         | **DEC-011** | RF-105, RF-106         |   🚧   |
-| NR-063 | `billing`: assinatura PagMaxx, trial, inadimplência e estado restrito |   🟠   | `billing`         |   4 | NR-044         | —           | RF-110–118             |   ⬜   |
+| NR-063 | `billing`: assinatura Asaas (conta-pai), trial, inadimplência e estado restrito |   🟠   | `billing`         |   4 | NR-044         | —           | RF-110–118             |   ⬜   |
 | NR-075 | `web`: planos, assinatura e cupom                                     |   🟢   | `web`             |   3 | NR-063         | DEC-012     | E12                    |   🚧   |
 
 ## Sprint 5 — Relatórios, CRM, suporte (sem bancos)
@@ -196,7 +196,8 @@ está feito.
 | [DEC-001](../decisoes/README.md#dec-001) nome/marca   | NR-011                 |            2 |
 | [DEC-012](../decisoes/README.md#dec-012) cupons       | NR-075                 |            3 |
 
-Focus, PagMaxx e WhatsApp Cloud API **não** bloqueiam mais o desenho (ADRs 0002–0006).
+Focus, Asaas e WhatsApp Cloud API **não** bloqueiam mais o desenho (ADRs 0002, 0005, 0007, 0008).
+DEC-018 (Split) **não** bloqueia o adapter falso.
 DEC-005 só trava o backlog adiado de bancos.
 
 ## Carga por trilha

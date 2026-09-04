@@ -136,18 +136,20 @@ exige credencial.
 | Contrato de webhook | CI                | corpo gravado do provedor real, validado contra o parser |
 
 O terceiro é o que mais paga. Guarde o corpo real de um webhook e teste contra
-ele — inclusive os casos que a documentação da
-[PagMaxx](../arquitetura/integracoes/pagmaxx.md#6-detalhes-que-geram-bug-se-ignorados)
-avisa que existem: `type` nulo, `payment.approved` que nunca chega, `amount`
-como decimal.
+ele — inclusive os casos que a documentação do
+[Asaas](../arquitetura/integracoes/asaas.md#como-o-asaas-nos-avisa-webhooks)
+avisa que existem: `PAYMENT_RECEIVED` em boleto/cartão é crédito D+ (não
+liquida a venda), payload que ganha campos novos, `value` como decimal.
 
 ```ts
-it('trata evento com type nulo sem quebrar', () => {
-  expect(parseWebhook(eventoComTypeNulo)).toEqual({ ignored: true })
+it('nao liquida venda no PAYMENT_RECEIVED de boleto', () => {
+  expect(mapAsaasEvent({ event: 'PAYMENT_RECEIVED', billingType: 'BOLETO' })).toEqual({
+    kind: 'account_credit',
+  })
 })
 
-it('converte amount decimal para centavos sem passar por float', () => {
-  expect(parsePayment({ amount: 129.9 }).amount.cents).toBe(12990n)
+it('converte value decimal para centavos sem passar por float', () => {
+  expect(parsePayment({ value: 129.9 }).amount.cents).toBe(12990n)
 })
 ```
 

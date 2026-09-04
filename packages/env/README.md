@@ -51,7 +51,7 @@ vira um ciclo de tentativa e erro.
 
 ## Por que a matriz não está inteira aqui
 
-`ambientes.md` lista variáveis dos adapters. Focus, PagMaxx e WhatsApp Cloud
+`ambientes.md` lista variáveis dos adapters. Focus, Asaas e WhatsApp Cloud
 API já têm ADR; este pacote ainda só valida o que os apps **leem hoje**.
 Exigir token Focus no boot local quebraria o modo `fake`.
 

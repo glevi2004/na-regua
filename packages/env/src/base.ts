@@ -34,7 +34,7 @@ export type BaseEnv = z.infer<typeof baseEnvSchema>
  * Nome do provedor de um adapter — pagamentos, fiscal, WhatsApp, banking,
  * agente, autenticacao.
  *
- * Focus, PagMaxx e WhatsApp Cloud API ja tem ADR. Banking esta adiado
+ * Focus, Asaas e WhatsApp Cloud API ja tem ADR. Banking esta adiado
  * (DEC-005). LLM e auth continuam abertos (DEC-007, DEC-008). `fake` permanece
  * o default local.
  */

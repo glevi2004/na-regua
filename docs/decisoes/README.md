@@ -44,15 +44,17 @@ PR**, e a linha sai da tabela de abertas.
 
 | Estado             | Qtd | Quais                                      |
 | ------------------ | --: | ------------------------------------------ |
-| 🔴 Aberta          |   6 | DEC-007, 008, 009, 011, 012, 013           |
+| 🔴 Aberta          |   7 | DEC-007, 008, 009, 011, 012, 013, 018      |
 | 🟡 Em análise      |   1 | DEC-001                                    |
 | ⚪ Adiada          |   2 | DEC-005, DEC-014                           |
 | 🟢 Decidida        |   8 | DEC-002, 003, 004, 006, 010, 015, 016, 017 |
-| ❓ Pergunta aberta |  12 | QST-001 a QST-012                          |
+| ❓ Pergunta aberta |  11 | QST-001 a QST-012 (QST-009 encerrada)      |
 
 **Bloqueando o MVP agora:** DEC-008, DEC-009.
-Auth e hospedagem ainda travam Sprint 1. Fiscal, WhatsApp e PagMaxx **não**
-travam mais o desenho — as ADRs 0002–0006 fecharam provedor e recorte.
+Auth e hospedagem ainda travam Sprint 1. Fiscal, WhatsApp e Asaas **não**
+travam mais o desenho — as ADRs 0002, 0005, 0007 e 0008 fecharam provedor e
+recorte. Split nas vendas é [DEC-018](#dec-018) e **não** bloqueia o adapter
+falso.
 
 ---
 
@@ -64,27 +66,27 @@ Fonte de verdade das telas: [`apps/web`](../../apps/web). Espinha do produto:
 | ------- | ------------------------------------------------------------------------------------ |
 | **A**   | Cadastro pessoal no signup; dados da empresa (CNPJ) em `/app/empresa`                |
 | **B**   | Estoque: produtos simples, quantidades, movimentações                                |
-| **C**   | Vendas, clientes, PagMaxx (Pix/link/cartão online), NFC-e e NFS-e Nacional via Focus |
+| **C**   | Vendas, clientes, Asaas (Pix/boleto/link/cartão online), NFC-e e NFS-e Nacional via Focus |
 | **D**   | Contas a pagar, a receber, plano de contas — **sem** bancos/Open Finance             |
 | **E**   | CRM (quadro de 3 colunas) e agenda — no primeiro recorte                             |
 | **F**   | Dashboard de KPIs em `/app`                                                          |
 | **G**   | Dados pessoais e da empresa; regime + Híbrido; A1 + CSC só se elegível para a Focus  |
-| **H**   | Plano de assinatura (PagMaxx `/subscriptions`)                                       |
+| **H**   | Plano de assinatura (Asaas `/v3/subscriptions` na conta-pai)                         |
 | **I**   | Chamados de suporte                                                                  |
 | **J**   | Assistente no web, app e WhatsApp Cloud API oficial                                  |
 
 Decisões de recorte fechadas junto com as ADRs (não viram DEC extra):
 
 1. **Documentos G:** A1 (`.pfx`) + CSC/`id_token` NFC-e vão para a **Focus**.
-   KYC da **PagMaxx** é esteira separada, só para Pix/link/cartão online
-   ([ADR-0006](adr/0006-conta-pagmaxx-por-lojista.md)).
+   KYC do **Asaas** é esteira separada, só para Pix/boleto/link/cartão online
+   ([ADR-0008](adr/0008-subconta-asaas-nao-baas.md)).
 2. **Nota no primeiro recorte:** **NFC-e e NFS-e Nacional** via Focus. Sem NF-e
    modelo 55. O layout do passo fiscal no front ainda será definido
    (`nfce | nfse | sem_nota`).
 3. **Onboarding:** como o web — pessoa, cupom, termos, Pix da assinatura; empresa
    depois em `/app/empresa`. Emissão fiscal é pulável até o A1 ser aceito na Focus.
 4. **WhatsApp:** [ADR-0005](adr/0005-whatsapp-cloud-api.md) — Cloud API oficial.
-5. **Conta PagMaxx:** [ADR-0006](adr/0006-conta-pagmaxx-por-lojista.md).
+5. **Conta Asaas:** [ADR-0008](adr/0008-subconta-asaas-nao-baas.md).
 6. **CRM e chamados:** entram no primeiro recorte, modelo mínimo.
 7. **Bancos / Open Finance:** [DEC-005](#dec-005) adiada — fora do caminho de
    desenvolvimento.
@@ -310,6 +312,26 @@ Pré-MVP usa **tag única `v0.x.y`** no monorepo. Quando os deploys de `api`,
 
 ---
 
+### <a id="dec-018"></a>DEC-018 — Split nas vendas Asaas
+
+|              |                                                                                          |
+| ------------ | ---------------------------------------------------------------------------------------- |
+| **Status**   | 🔴 Aberta                                                                                |
+| **Dono**     | Produto + jurídico                                                                       |
+| **Prazo**    | Antes de enviar `split[]` em produção (não bloqueia adapter falso nem o contrato)        |
+| **Bloqueia** | Take-rate por venda · NR-044 só na parte de Split, não no Pix/boleto/link/cartão         |
+
+**Pergunta.** A plataforma tira uma fatia de cada venda Asaas, ou só cobra a
+mensalidade na conta-pai?
+
+Insumo: [`split-decision.md`](../arquitetura/integracoes/split-decision.md)
+(opções A sem Split, B split na subconta, C cobrança na pai).
+
+Não reabre [ADR-0008](adr/0008-subconta-asaas-nao-baas.md) (não-BaaS vs BaaS).
+Quando fechar: ADR nova e o mesmo PR atualiza o adapter.
+
+---
+
 ## Perguntas em aberto
 
 Resolvem-se com informação, não com escolha. Uma pergunta respondida vira
@@ -325,10 +347,10 @@ atualização de documento — e às vezes abre uma `DEC`.
 | <a id="qst-006"></a>**QST-006** | As [personas](../produto/personas.md) foram validadas com lojistas reais?                                                 | Produto              | Hoje são inferência a partir da apresentação comercial                                                                                                             | Sprint 2                    |
 | <a id="qst-007"></a>**QST-007** | As metas [M1–M7](../produto/visao.md#métricas-de-sucesso) são realistas?                                                  | Produto              | São hipóteses; meta errada leva a decisão errada                                                                                                                   | Sprint 2                    |
 | <a id="qst-008"></a>**QST-008** | Os alvos numéricos dos [RNFs](../produto/requisitos-nao-funcionais.md) batem com o aparelho e a internet do público-alvo? | Produto + Trilha 3   | Calibrados por estimativa, não por medição                                                                                                                         | Sprint 3                    |
-| <a id="qst-009"></a>**QST-009** | A PagMaxx pode estender o escopo da API Key para Pix, links e assinaturas?                                                | PagMaxx              | Hoje essas rotas exigem guardar **e-mail e senha** da conta — ver [a ressalva](../arquitetura/integracoes/pagmaxx.md#3-autenticação-server-to-server-é-incompleta) | Antes do contrato           |
-| <a id="qst-010"></a>**QST-010** | A PagMaxx tem ou terá API de captura presencial (maquininha, TEF, tap-on-phone)?                                          | PagMaxx              | Não muda a escolha atual (só registro) — informativo                                                                                                               | Quando houver roadmap deles |
-| <a id="qst-011"></a>**QST-011** | ProComércio é a marca guarda-chuva e este ERP é uma das soluções dela, ou é o nome do próprio ERP?                        | Produto / fundadores | Resolve [DEC-001](#dec-001) e define qual das 5 paletas derivadas o produto usa                                                                                    | Sprint 1                    |
-| <a id="qst-012"></a>**QST-012** | Já existe conta PagMaxx ativa e acesso ao ambiente de homologação?                                                        | Produto              | Sem homologação não há como testar `packages/payments`                                                                                                             | Sprint 2                    |
+| <a id="qst-009"></a>**QST-009** | Encerrada — Asaas usa API Key (`access_token`); não há senha de conta. | —                    | [ADR-0007](adr/0007-asaas.md)                                                                                                                                        | Encerrada 2026-09-04        |
+| <a id="qst-010"></a>**QST-010** | O Asaas tem ou terá API de captura presencial (maquininha, TEF, tap-on-phone)?                            | Asaas                | Não muda a escolha atual (só registro) — informativo                                                                                                               | Quando houver roadmap deles |
+| <a id="qst-011"></a>**QST-011** | ProComércio é a marca guarda-chuva e este ERP é uma das soluções dela, ou é o nome do próprio ERP?        | Produto / fundadores | Resolve [DEC-001](#dec-001) e define qual das 5 paletas derivadas o produto usa                                                                                    | Sprint 1                    |
+| <a id="qst-012"></a>**QST-012** | Já existe conta Asaas (sandbox da conta-pai) e acesso para criar subcontas?                               | Produto              | Sem sandbox não há como testar `packages/payments`                                                                                                                 | Sprint 2                    |
 
 ---
 
@@ -341,10 +363,12 @@ links que já apontam para cá.
 | ------------------------------------------------- | ----------------------------------------------------- | ---------- |
 | [ADR-0001](adr/0001-rls-por-linha.md)             | Isolamento multi-tenant por RLS por linha             | 2026-09-01 |
 | [ADR-0002](adr/0002-focus-nfe.md)                 | Emissão fiscal via Focus NFe (NFC-e e NFS-e Nacional) | 2026-09-02 |
-| [ADR-0003](adr/0003-pagmaxx.md)                   | PagMaxx nas vendas online e na assinatura SaaS        | 2026-09-02 |
+| [ADR-0003](adr/0003-pagmaxx.md)                   | PagMaxx nas vendas e na assinatura — **substituída** por 0007 | 2026-09-02 |
 | [ADR-0004](adr/0004-usuario-uma-empresa.md)       | Um usuário, uma empresa                               | 2026-09-02 |
 | [ADR-0005](adr/0005-whatsapp-cloud-api.md)        | WhatsApp Cloud API oficial                            | 2026-09-02 |
-| [ADR-0006](adr/0006-conta-pagmaxx-por-lojista.md) | Conta PagMaxx por lojista                             | 2026-09-02 |
+| [ADR-0006](adr/0006-conta-pagmaxx-por-lojista.md) | Conta PagMaxx por lojista — **substituída** por 0008  | 2026-09-02 |
+| [ADR-0007](adr/0007-asaas.md)                     | Asaas nas vendas online e na assinatura SaaS          | 2026-09-04 |
+| [ADR-0008](adr/0008-subconta-asaas-nao-baas.md)   | Subconta Asaas não-BaaS por lojista                   | 2026-09-04 |
 
 ### <a id="dec-002"></a>DEC-002 — Estratégia multi-tenant
 
@@ -382,21 +406,22 @@ Quem pode emitir: [DEC-017](#dec-017).
 
 ### <a id="dec-006"></a>DEC-006 — PSP / adquirente
 
-|             |                                               |
-| ----------- | --------------------------------------------- |
-| **Status**  | 🟢 Decidida — [ADR-0003](adr/0003-pagmaxx.md) |
-| **Escolha** | PagMaxx para Pix, link e cartão online        |
-| **Data**    | 2026-09-02                                    |
+|             |                                             |
+| ----------- | ------------------------------------------- |
+| **Status**  | 🟢 Decidida — [ADR-0007](adr/0007-asaas.md) |
+| **Escolha** | Asaas para Pix, boleto, link e cartão online |
+| **Data**    | 2026-09-04 (substitui a escolha de PSP de 2026-09-02) |
 
 Dinheiro e maquininha: só registro. Sem TEF no recorte.
+Contrato: [`integracoes/asaas.md`](../arquitetura/integracoes/asaas.md).
 
 ### <a id="dec-010"></a>DEC-010 — Cobrança de mensalidade (provedor)
 
-|             |                                               |
-| ----------- | --------------------------------------------- |
-| **Status**  | 🟢 Decidida — [ADR-0003](adr/0003-pagmaxx.md) |
-| **Escolha** | PagMaxx `/subscriptions/*`                    |
-| **Data**    | 2026-09-02                                    |
+|             |                                             |
+| ----------- | ------------------------------------------- |
+| **Status**  | 🟢 Decidida — [ADR-0007](adr/0007-asaas.md) |
+| **Escolha** | Asaas `/v3/subscriptions` na conta-pai      |
+| **Data**    | 2026-09-04 (substitui a escolha de PSP de 2026-09-02) |
 
 Ainda produto (não bloqueia adapter): preço e trial → [QST-002](#qst-002).
 Estado `Restrita`: bloquear escrita, nunca leitura nem exportação
@@ -404,11 +429,11 @@ Estado `Restrita`: bloquear escrita, nunca leitura nem exportação
 
 ### <a id="dec-015"></a>DEC-015 — Modelo de conta no PSP
 
-|             |                                                                 |
-| ----------- | --------------------------------------------------------------- |
-| **Status**  | 🟢 Decidida — [ADR-0006](adr/0006-conta-pagmaxx-por-lojista.md) |
-| **Escolha** | Uma conta PagMaxx por lojista; KYC fora do caminho crítico      |
-| **Data**    | 2026-09-02                                                      |
+|             |                                                                           |
+| ----------- | ------------------------------------------------------------------------- |
+| **Status**  | 🟢 Decidida — [ADR-0008](adr/0008-subconta-asaas-nao-baas.md)             |
+| **Escolha** | Subconta Asaas não-BaaS por lojista; KYC fora do caminho crítico          |
+| **Data**    | 2026-09-04 (substitui o modelo de conta no PSP de 2026-09-02)             |
 
 ### <a id="dec-016"></a>DEC-016 — Relação usuário–empresa
 

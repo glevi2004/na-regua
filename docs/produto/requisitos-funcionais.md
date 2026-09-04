@@ -77,7 +77,7 @@ Staff, Open Finance e cofre de A1 saíram do caminho crítico.
 | RF-031 | Recusar desconto superior ao total da venda ou ao limite do papel do operador                              | US-016 | `domain`    |  M  | ⬜  |
 | RF-032 | Vincular venda a um cliente, com busca e criação sem sair do fluxo de venda                                | US-017 | `core`      |  M  | ⬜  |
 | RF-033 | Permitir venda sem cliente identificado, exceto quando a forma de pagamento for `wallet`                   | US-017 | `core`      |  M  | ⬜  |
-| RF-034 | Registrar pagamento em `cash`, `pix`, `debit`, `credit` ou `wallet`                                        | US-018 | `core`      |  M  | ⬜  |
+| RF-034 | Registrar pagamento em `cash`, `pix`, `boleto`, `debit`, `credit` ou `wallet`                               | US-018 | `core`      |  M  | ⬜  |
 | RF-035 | Calcular troco para pagamento em `cash` superior ao total                                                  | US-018 | `domain`    |  M  | ⬜  |
 | RF-036 | Garantir idempotência no fechamento da venda, impedindo duplicidade em caso de reenvio                     | US-018 | `core`      |  M  | ⬜  |
 | RF-037 | Aceitar pagamento dividido entre várias formas, exigindo que a soma seja exatamente o total                | US-019 | `core`      |  M  | ⬜  |
@@ -221,7 +221,7 @@ Staff, Open Finance e cofre de A1 saíram do caminho crítico.
 | RF-130 | Reprocessar job falho com espera crescente e limite de tentativas antes de descartar                            | US-064 | `worker`    |  M  | ⬜  |
 | RF-131 | Registrar acesso administrativo a dados de tenant com justificativa                                             | US-064 | `core`      |  M  | ⬜  |
 
-## E14 — Cadastro, Focus, CRM, suporte, painel, PagMaxx na venda
+## E14 — Cadastro, Focus, CRM, suporte, painel, Asaas na venda
 
 | ID     | Requisito                                                                                                                    | US     | Módulo dono | Pri | St  |
 | ------ | ---------------------------------------------------------------------------------------------------------------------------- | ------ | ----------- | :-: | :-: |
@@ -233,8 +233,8 @@ Staff, Open Finance e cofre de A1 saíram do caminho crítico.
 | RF-137 | Persistir comentários e movimento de coluna do card de CRM                                                                   | US-069 | `core`      |  M  | ⬜  |
 | RF-138 | Abrir chamado de suporte com protocolo, categoria, mensagens e anexo                                                         | US-070 | `core`      |  M  | ⬜  |
 | RF-139 | Marcar mensagens do suporte como lidas ao abrir o chamado                                                                    | US-070 | `core`      |  M  | ⬜  |
-| RF-140 | Gerar cobrança PagMaxx (Pix, link ou cartão online) na venda quando o credenciamento estiver ok                              | US-071 | `payments`  |  M  | ⬜  |
-| RF-141 | Liquidar recebível no webhook `payment.authorized` com HMAC e id de evento únicos                                            | US-071 | `payments`  |  M  | ⬜  |
+| RF-140 | Gerar cobrança Asaas (Pix, boleto, link ou cartão online) na venda quando a subconta estiver aprovada        | US-071 | `payments`  |  M  | ⬜  |
+| RF-141 | Liquidar recebível nos webhooks `PAYMENT_RECEIVED` (Pix) e `PAYMENT_CONFIRMED` (boleto/cartão), com `asaas-access-token` e id de evento únicos | US-071 | `payments`  |  M  | ⬜  |
 | RF-142 | Atualizar nome, e-mail e telefone do usuário autenticado                                                                     | US-072 | `core`      |  M  | ⬜  |
 | RF-143 | Emitir NFS-e Nacional (`POST /v2/nfsen`) a partir de uma venda fechada; gravar `kind=nfse` e aguardar autorização assíncrona | US-073 | `fiscal`    |  M  | ⬜  |
 | RF-144 | Validar código de tributação nacional (e NBS quando exigido) antes de enviar NFS-e Nacional à Focus                          | US-073 | `fiscal`    |  M  | ⬜  |
@@ -277,7 +277,7 @@ Quem implementa o quê. Base para a divisão de trilhas em
 | [DEC-012](../decisoes/README.md#dec-012) cupons            | RF-114, RF-115         |
 
 WhatsApp ([DEC-003](../decisoes/README.md#dec-003)), Focus ([DEC-004](../decisoes/README.md#dec-004))
-e PagMaxx ([DEC-006](../decisoes/README.md#dec-006), [DEC-010](../decisoes/README.md#dec-010))
+e Asaas ([DEC-006](../decisoes/README.md#dec-006), [DEC-010](../decisoes/README.md#dec-010))
 **não** bloqueiam mais o desenho das portas — só homologação/credencial.
 
 Um requisito bloqueado **pode** ter sua interface e seus testes escritos antes

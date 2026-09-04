@@ -56,9 +56,9 @@ m.toJSON()                     // { cents: '4990', currency: 'BRL' }
 
 ### `parse` aceita string, nunca `number`
 
-De propósito. É assim que valor chega de API externa — a
-[PagMaxx](../../docs/arquitetura/integracoes/pagmaxx.md#1-valores-vêm-como-decimal-não-centavos)
-devolve `129.9` como número e `"100.00"` como string, na mesma API. Aceitar
+De propósito. É assim que valor chega de API externa — o
+[Asaas](../../docs/arquitetura/integracoes/asaas.md#cobrança-da-venda--o-que-recebemos-e-gravamos)
+devolve `129.9` em `value` / `netValue`. Aceitar
 `number` seria deixar o erro de precisão entrar pela porta da frente.
 
 ### `allocate` distribui o resto

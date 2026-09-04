@@ -2,8 +2,8 @@
 
 Adapter de assinatura SaaS — a **nossa** mensalidade.
 
-**Estado:** 🔴 não implementado · PagMaxx `/subscriptions`
-([ADR-0003](../../docs/decisoes/adr/0003-pagmaxx.md)) · `NR-063`
+**Estado:** 🔴 não implementado · Asaas `POST /v3/subscriptions` na conta-pai
+([ADR-0007](../../docs/decisoes/adr/0007-asaas.md)) · `NR-063`
 
 ## Responsabilidade
 
@@ -30,8 +30,12 @@ substituibilidade é a única razão de ele existir.
 
 São **dois problemas de negócio diferentes**: aqui é a nossa receita; em
 [`payments`](../payments/README.md) é o dinheiro do lojista. Podem usar o mesmo
-fornecedor hoje ([PagMaxx](../../docs/arquitetura/integracoes/pagmaxx.md)) e
+fornecedor hoje ([Asaas](../../docs/arquitetura/integracoes/asaas.md)) e
 fornecedores diferentes amanhã, sem que um afete o outro.
+
+A identidade Asaas também é outra: `billing` autentica com `ASAAS_API_KEY` da
+**conta-pai** e cobra um `cus_` (`company_asaas.platform_customer_id`).
+`payments` usa a chave da **subconta** do lojista.
 
 ## O que a porta precisa cobrir
 
@@ -71,7 +75,7 @@ Falso que só devolve sucesso esconde exatamente o que precisa ser testado.
 
 ## Variáveis de ambiente
 
-Usa as mesmas credenciais `PAGMAXX_*` de [`payments`](../payments/README.md),
-com `/subscriptions/*`.
+`BILLING_PROVIDER`, `ASAAS_BASE_URL`, `ASAAS_API_KEY` (conta-pai),
+`ASAAS_USER_AGENT`, `ASAAS_WEBHOOK_AUTH_TOKEN`.
 
 Ver [`ambientes.md`](../../docs/engenharia/ambientes.md).

@@ -9,7 +9,7 @@ export type CardFeeRate = {
 
 /**
  * Tabela configurada por empresa. Nao vem da API no fechamento da venda —
- * RNF-003, RNF-041, NR-004. Quem alimenta (lojista ou PagMaxx) e outro modulo.
+ * RNF-003, RNF-041, NR-004. Quem alimenta (lojista ou Asaas) e outro modulo.
  */
 export type CardFeeTable = {
   readonly rates: readonly CardFeeRate[]

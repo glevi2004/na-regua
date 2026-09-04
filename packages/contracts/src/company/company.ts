@@ -28,13 +28,13 @@ export type TaxRegime = z.infer<typeof taxRegimeSchema>
 export const certificateStatusSchema = z.enum(['missing', 'valid', 'expired', 'rejected'])
 export type CertificateStatus = z.infer<typeof certificateStatusSchema>
 
-export const pagmaxxOnboardingStatusSchema = z.enum([
+export const asaasOnboardingStatusSchema = z.enum([
   'not_started',
   'pending',
   'approved',
   'rejected',
 ])
-export type PagmaxxOnboardingStatus = z.infer<typeof pagmaxxOnboardingStatusSchema>
+export type AsaasOnboardingStatus = z.infer<typeof asaasOnboardingStatusSchema>
 
 const cepSchema = z
   .string()
@@ -106,7 +106,7 @@ export const companyOutputSchema = z.object({
   certificateStatus: certificateStatusSchema,
   certificateExpiresAt: z.string().nullable(),
   hasNfceCsc: z.boolean(),
-  pagmaxxOnboardingStatus: pagmaxxOnboardingStatusSchema,
+  asaasOnboardingStatus: asaasOnboardingStatusSchema,
   createdAt: z.string(),
 })
 

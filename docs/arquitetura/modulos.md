@@ -81,7 +81,7 @@ flowchart TB
 
 ### Adaptadores
 
-Cada um implementa uma **porta declarada por `core`**. Focus, PagMaxx e
+Cada um implementa uma **porta declarada por `core`**. Focus, Asaas e
 WhatsApp Cloud API já têm ADR; o adapter continua existindo para o modo `fake`
 e para troca futura. Banking está adiado. LLM segue [DEC-007](../decisoes/README.md#dec-007).
 
@@ -91,8 +91,8 @@ e para troca futura. Banking está adiado. LLM segue [DEC-007](../decisoes/READM
 | `packages/fiscal`   | `InvoiceIssuer`                                     | Focus NFe (NFC-e e NFS-e Nacional; gate MEI/Simples) | [ADR-0002](../decisoes/adr/0002-focus-nfe.md)          | 🟠 2   | [README](../../packages/fiscal/README.md)   |
 | `packages/whatsapp` | `MessageSender`                                     | WhatsApp Cloud API oficial                           | [ADR-0005](../decisoes/adr/0005-whatsapp-cloud-api.md) | 🟠 2   | [README](../../packages/whatsapp/README.md) |
 | `packages/banking`  | `BankStatementProvider`                             | **Adiado** — Open Finance / OFX                      | [DEC-005](../decisoes/README.md#dec-005)               | 🟠 2   | [README](../../packages/banking/README.md)  |
-| `packages/billing`  | `SubscriptionProvider`                              | PagMaxx `/subscriptions`                             | [ADR-0003](../decisoes/adr/0003-pagmaxx.md)            | 🟠 2   | [README](../../packages/billing/README.md)  |
-| `packages/payments` | `PaymentGateway`                                    | PagMaxx — Pix, link, cartão online                   | [ADR-0003](../decisoes/adr/0003-pagmaxx.md)            | 🟠 2   | [README](../../packages/payments/README.md) |
+| `packages/billing`  | `SubscriptionProvider`                              | Asaas `POST /v3/subscriptions` (conta-pai)           | [ADR-0007](../decisoes/adr/0007-asaas.md)              | 🟠 2   | [README](../../packages/billing/README.md)  |
+| `packages/payments` | `PaymentGateway`                                    | Asaas — Pix, boleto, link, cartão online             | [ADR-0007](../decisoes/adr/0007-asaas.md)              | 🟠 2   | [README](../../packages/payments/README.md) |
 
 ### Interface
 
