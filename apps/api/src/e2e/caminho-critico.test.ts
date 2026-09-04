@@ -5,6 +5,7 @@ import {
   createProductInputSchema,
   createSaleInputSchema,
 } from '@na-regua/contracts'
+import { PLANO_DE_CONTAS_PADRAO } from '@na-regua/core'
 import { getClient, migrate, withTenant } from '@na-regua/db'
 import Fastify, { type FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
@@ -152,6 +153,20 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
 
   const sql = () => getClient(DATABASE_URL!)
 
+  /*
+   * Toda consulta deste arquivo filtra por `company_id` NA MAO.
+   *
+   * O `withTenant` define o tenant, mas quem o faz valer e a RLS — e a conexao
+   * daqui e a da propria api, dona do banco no runner. Superusuario ignora a
+   * politica, entao apoiar-se nela aqui e apoiar-se em nada: a assercao de
+   * numeracao voltou [1, 1, 2, 2] justamente por isso, enxergando as vendas da
+   * execucao anterior alem das suas.
+   *
+   * Filtro explicito acerta com politica e sem ela. E o codigo de PRODUCAO
+   * continua sem filtro de proposito (ADR-0001) — la o papel e comum, e o
+   * `checkIsolation` da subida recusa abrir a porta se nao for.
+   */
+
   /**
    * Mutavel de proposito: no onboarding ainda nao existe empresa, e a partir
    * dele toda chamada corre sob a que acabou de nascer. E o que torna o teste
@@ -279,9 +294,15 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
       const contas = await withTenant(
         sql(),
         principal.companyId,
-        (tx) => tx<{ total: string }[]>`SELECT count(*) AS total FROM accounts`,
+        (tx) => tx<{ total: string }[]>`
+          SELECT count(*) AS total FROM accounts WHERE company_id = ${principal.companyId}
+        `,
       )
-      expect(Number(contas[0]!.total)).toBeGreaterThan(0)
+
+      /* Exato, e nao "maior que zero": o plano tem tamanho conhecido, e um
+         numero qualquer passaria mesmo se a consulta enxergasse outras lojas —
+         que foi o defeito que este arquivo teve. */
+      expect(Number(contas[0]!.total)).toBe(PLANO_DE_CONTAS_PADRAO.length)
     })
 
     it('cadastra o produto que sera vendido', async () => {
@@ -352,7 +373,7 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
         principal.companyId,
         (tx) => tx<{ amount_cents: string; net_amount_cents: string }[]>`
           SELECT amount_cents, net_amount_cents FROM receivables
-          WHERE sale_id = ${r.json().sale.id}
+          WHERE company_id = ${principal.companyId} AND sale_id = ${r.json().sale.id}
           ORDER BY due_date
         `,
       )
@@ -378,7 +399,9 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
       const linhas = await withTenant(
         sql(),
         principal.companyId,
-        (tx) => tx<{ number: number }[]>`SELECT number FROM sales ORDER BY number`,
+        (tx) => tx<{ number: string }[]>`
+          SELECT number FROM sales WHERE company_id = ${principal.companyId} ORDER BY number
+        `,
       )
 
       /* `Number`: a coluna e bigint e o postgres.js devolve STRING para nao
