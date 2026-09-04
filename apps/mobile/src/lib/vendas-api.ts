@@ -425,12 +425,36 @@ const METODO: Record<FormaPagamento, 'cash' | 'pix' | 'debit' | 'credit' | 'wall
   carteira: 'wallet',
 }
 
+/**
+ * A venda como o servidor a gravou — US-020.
+ *
+ * Todos os valores vem da RESPOSTA, nenhum e recalculado aqui. O imposto usa a
+ * aliquota da empresa e a tarifa usa a tabela do cadastro; refazer essa conta
+ * no celular daria dois numeros para a mesma venda, e o que o lojista veria
+ * dependeria de qual tela ele abriu.
+ */
 export type VendaRegistrada = {
   readonly id: string
   readonly numero: number
+  readonly brutoCentavos: number
+  readonly custoCentavos: number
+  readonly impostoCentavos: number
+  readonly tarifaCentavos: number
+  readonly liquidoCentavos: number
   readonly trocoCentavos: number
   /** `true` quando o servidor devolveu uma venda que JA existia — RNF-043. */
   readonly reenvio: boolean
+}
+
+/**
+ * Margem sobre o bruto, em pontos — RF-042.
+ *
+ * Liquido menos custo, sobre o bruto. `null` quando nao houve bruto: dividir
+ * por zero daria `Infinity`, e "margem: Infinity%" e pior que "—".
+ */
+export function margemEmPontos(v: VendaRegistrada): number | null {
+  if (v.brutoCentavos === 0) return null
+  return Math.round(((v.liquidoCentavos - v.custoCentavos) / v.brutoCentavos) * 100 * 10) / 10
 }
 
 export type ResultadoFecharVenda =
@@ -462,7 +486,16 @@ export async function fecharVenda(
   opcoes: { clienteId?: string; descontoCentavos?: number } = {},
 ): Promise<ResultadoFecharVenda> {
   const r = await chamarApi<{
-    sale: { id: string; number: number; changeCents: number }
+    sale: {
+      id: string
+      number: number
+      grossAmountCents: number
+      costAmountCents: number
+      taxAmountCents: number
+      cardFeeAmountCents: number
+      netAmountCents: number
+      changeCents: number
+    }
     replayed: boolean
   }>('/sales', {
     method: 'POST',
@@ -490,10 +523,27 @@ export async function fecharVenda(
     venda: {
       id: r.dados.sale.id,
       numero: r.dados.sale.number,
+      brutoCentavos: r.dados.sale.grossAmountCents,
+      custoCentavos: r.dados.sale.costAmountCents,
+      impostoCentavos: r.dados.sale.taxAmountCents,
+      tarifaCentavos: r.dados.sale.cardFeeAmountCents,
+      liquidoCentavos: r.dados.sale.netAmountCents,
       trocoCentavos: r.dados.sale.changeCents,
       reenvio: r.dados.replayed,
     },
   }
+}
+
+/**
+ * O que ainda falta pagar — US-019.
+ *
+ * Devolve em centavos e pode ser NEGATIVO: pagaram a mais. So `dinheiro` vira
+ * troco (RF-035); a mais no cartao ou no pix e erro de digitacao, e a tela
+ * precisa distinguir os dois.
+ */
+export function faltaPagarCentavos(totalCentavos: number, pagamentos: Pagamento[]): number {
+  const pago = pagamentos.reduce((soma, p) => soma + Math.round(p.valor * 100), 0)
+  return totalCentavos - pago
 }
 
 /**

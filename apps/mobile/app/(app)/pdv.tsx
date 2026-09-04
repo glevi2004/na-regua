@@ -5,7 +5,9 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import Cabecalho from '@/components/Cabecalho'
 import {
   fecharVenda,
+  margemEmPontos,
   novaChaveDeVenda,
+  type VendaRegistrada,
   FORMAS,
   paraItemCarrinho,
   produtoPorEan,
@@ -34,6 +36,8 @@ export default function Pdv() {
   const [lendo, setLendo] = useState(false)
   const [forma, setForma] = useState<FormaPagamento>('dinheiro')
   const [fechando, setFechando] = useState(false)
+  /** A ultima venda fechada, com a decomposicao — US-020. */
+  const [resumo, setResumo] = useState<VendaRegistrada | null>(null)
   /**
    * A chave do fechamento em andamento — RNF-043.
    *
@@ -206,6 +210,8 @@ Pagamento em ${rotulo}.`,
         acao={<Botao onPress={() => setLendo(true)}>Bipar</Botao>}
       />
 
+      {resumo !== null ? <ResumoDaVenda venda={resumo} onFechar={() => setResumo(null)} /> : null}
+
       {itens.length === 0 ? (
         <Vazio
           titulo="Nada no carrinho"
@@ -303,6 +309,26 @@ Pagamento em ${rotulo}.`,
 }
 
 const estilos = StyleSheet.create({
+  /* Resumo da venda — US-020. */
+  resumo: {
+    margin: espaco.lg,
+    padding: espaco.lg,
+    borderRadius: raio.md,
+    backgroundColor: cores.superficieAlta,
+    gap: espaco.sm,
+  },
+  resumoTitulo: { fontSize: fonte.corpo, fontWeight: peso.pesado, color: cores.texto },
+  resumoAviso: { fontSize: fonte.micro, color: cores.textoFraco },
+  resumoLinha: { flexDirection: 'row', justifyContent: 'space-between' },
+  resumoRotulo: { fontSize: fonte.pequeno, color: cores.textoFraco },
+  resumoValor: { fontSize: fonte.pequeno, color: cores.texto },
+  resumoDestaque: { fontWeight: peso.pesado, color: cores.texto },
+  resumoMargem: {
+    fontSize: fonte.pequeno,
+    fontWeight: peso.forte,
+    color: cores.acento,
+    marginTop: espaco.sm,
+  },
   tela: { flex: 1, backgroundColor: cores.fundo },
 
   cabecalho: {
@@ -390,3 +416,69 @@ const estilos = StyleSheet.create({
   acoes: { flexDirection: 'row', gap: espaco.sm },
   acaoPrincipal: { flex: 1 },
 })
+
+/**
+ * O resumo da venda fechada — US-020, RF-040 a RF-042.
+ *
+ * Bruto, custo, imposto, tarifa, liquido e margem. Todos vem do SERVIDOR: o
+ * imposto usa a aliquota da empresa e a tarifa usa a tabela do cadastro.
+ * Recalcular aqui daria dois numeros para a mesma venda, e o que o lojista
+ * veria dependeria de qual tela ele abriu.
+ *
+ * Fica na tela ate ele dispensar. Um alerta que se fecha sozinho nao cumpre
+ * "quero ver quanto sobra" — ninguem le liquido de passagem.
+ */
+function ResumoDaVenda({ venda, onFechar }: { venda: VendaRegistrada; onFechar: () => void }) {
+  const margem = margemEmPontos(venda)
+
+  return (
+    <View style={estilos.resumo}>
+      <Text style={estilos.resumoTitulo}>
+        {venda.reenvio ? `Venda ${venda.numero} — ja registrada` : `Venda ${venda.numero}`}
+      </Text>
+
+      {venda.reenvio ? (
+        <Text style={estilos.resumoAviso}>Esta venda ja tinha entrado. Nada foi duplicado.</Text>
+      ) : null}
+
+      <LinhaResumo rotulo="Bruto" centavos={venda.brutoCentavos} />
+      <LinhaResumo rotulo="Custo" centavos={venda.custoCentavos} />
+      <LinhaResumo rotulo="Imposto" centavos={venda.impostoCentavos} />
+      <LinhaResumo rotulo="Tarifa de cartao" centavos={venda.tarifaCentavos} />
+      <LinhaResumo rotulo="Liquido" centavos={venda.liquidoCentavos} destaque />
+
+      <Text style={estilos.resumoMargem}>
+        {/* Ponto e virgula na margem: 12,4% e 12,6% sao diferentes na conta do
+            mes, e arredondar para inteiro apagaria isso. */}
+        Margem: {margem === null ? '—' : `${margem.toString().replace('.', ',')}%`}
+      </Text>
+
+      {venda.trocoCentavos > 0 ? (
+        <LinhaResumo rotulo="Troco" centavos={venda.trocoCentavos} destaque />
+      ) : null}
+
+      <Botao variante="secundario" onPress={onFechar} largura>
+        Nova venda
+      </Botao>
+    </View>
+  )
+}
+
+function LinhaResumo({
+  rotulo,
+  centavos,
+  destaque = false,
+}: {
+  rotulo: string
+  centavos: number
+  destaque?: boolean
+}) {
+  return (
+    <View style={estilos.resumoLinha}>
+      <Text style={[estilos.resumoRotulo, destaque && estilos.resumoDestaque]}>{rotulo}</Text>
+      <Text style={[estilos.resumoValor, destaque && estilos.resumoDestaque]}>
+        {formatMoney(centavos / 100)}
+      </Text>
+    </View>
+  )
+}

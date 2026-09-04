@@ -93,8 +93,11 @@ function escopo(tx: TransactionSql, companyId: string): SaleTransaction {
       const [linha] = await tx<Record<string, unknown>[]>`
         SELECT id,
                number,
-               gross_amount_cents AS "grossAmountCents",
-               net_amount_cents   AS "netAmountCents",
+               gross_amount_cents   AS "grossAmountCents",
+               cost_amount_cents    AS "costAmountCents",
+               tax_amount_cents     AS "taxAmountCents",
+               card_fee_amount_cents AS "cardFeeAmountCents",
+               net_amount_cents     AS "netAmountCents",
                change_cents       AS "changeCents",
                created_at         AS "createdAt"
           FROM sales
@@ -142,8 +145,11 @@ async function inserirVenda(
     })}
     RETURNING id,
               number,
-              gross_amount_cents AS "grossAmountCents",
-              net_amount_cents   AS "netAmountCents",
+              gross_amount_cents   AS "grossAmountCents",
+              cost_amount_cents    AS "costAmountCents",
+              tax_amount_cents     AS "taxAmountCents",
+              card_fee_amount_cents AS "cardFeeAmountCents",
+              net_amount_cents     AS "netAmountCents",
               change_cents       AS "changeCents",
               created_at         AS "createdAt"
   `
@@ -230,6 +236,9 @@ function vendaGravada(linha: Record<string, unknown>): RegisteredSale {
     id: linha.id as string,
     number: numero(linha.number),
     grossAmountCents: numero(linha.grossAmountCents),
+    costAmountCents: numero(linha.costAmountCents),
+    taxAmountCents: numero(linha.taxAmountCents),
+    cardFeeAmountCents: numero(linha.cardFeeAmountCents),
     netAmountCents: numero(linha.netAmountCents),
     changeCents: numero(linha.changeCents),
     createdAt:

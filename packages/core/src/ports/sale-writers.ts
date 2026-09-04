@@ -117,10 +117,22 @@ export type NewSale = {
 }
 
 /** O que a venda gravada devolve. Numero e sequencial por empresa. */
+/**
+ * A venda como ela ficou gravada.
+ *
+ * Traz a decomposicao inteira — bruto, custo, imposto, tarifa e liquido — e nao
+ * so bruto e liquido. US-020 pede exatamente esses numeros no resumo, e a
+ * alternativa seria a tela recalcular a partir do carrinho: o mesmo calculo em
+ * dois lugares, com o do cliente usando a tabela de tarifas que ele achar. Os
+ * valores ja existem nas colunas de `sales`; o que faltava era devolve-los.
+ */
 export type RegisteredSale = {
   readonly id: string
   readonly number: number
   readonly grossAmountCents: number
+  readonly costAmountCents: number
+  readonly taxAmountCents: number
+  readonly cardFeeAmountCents: number
   readonly netAmountCents: number
   readonly changeCents: number
   readonly createdAt: string
