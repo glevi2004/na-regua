@@ -1,0 +1,136 @@
+import { updateFiscalCredentialsInputSchema } from '@na-regua/contracts'
+import type { FastifyInstance } from 'fastify'
+import { requireContext } from '../plugins/execution-context.js'
+import { LIMITE_DE_ESCRITA } from '../plugins/rate-limit.js'
+import { validate } from '../plugins/validate.js'
+
+/**
+ * Configuracao da emissao fiscal — NR-042, RF-004, RNF-022.
+ *
+ * Estas duas rotas sao a unica porta de entrada dos segredos de emissao. O que
+ * entra e cifrado antes de tocar o banco (`secret-box`), e o que sai NUNCA
+ * inclui segredo — so se ele existe e ate quando o certificado vale.
+ */
+
+export type CredenciaisFiscaisDeps = {
+  readonly fiscalCredentials: {
+    salvar(entrada: {
+      readonly companyId: string
+      readonly focusToken?: string
+      readonly certificadoBase64?: string
+      readonly senhaDoCertificado?: string
+      readonly certificadoVenceEm?: string
+      readonly atualizadoPor: string
+    }): Promise<void>
+    situacao(companyId: string): Promise<{
+      readonly temToken: boolean
+      readonly temCertificado: boolean
+      readonly certificadoVenceEm: string | null
+    }>
+  }
+}
+
+/** Teto do corpo: um certificado A1 tem poucos KB, e base64 infla um terco. */
+const TETO_DO_CERTIFICADO = 512 * 1024
+
+/**
+ * `deps` nulo quando `SECRETS_KEY` nao esta definida.
+ *
+ * As rotas continuam EXISTINDO e respondem 503 com a explicacao. Nao
+ * registra-las daria 404, e 404 diz "esta tela nao existe" para quem so
+ * precisa saber que o servidor esta sem a chave de cifragem — a acao de quem
+ * le e diferente nos dois casos.
+ */
+export function registerFiscalRoutes(
+  app: FastifyInstance,
+  deps: CredenciaisFiscaisDeps | null,
+): void {
+  if (deps === null) {
+    const indisponivel = async (
+      _r: unknown,
+      reply: { code: (n: number) => { send: (b: unknown) => unknown } },
+    ) =>
+      reply.code(503).send({
+        error: {
+          code: 'UNAVAILABLE',
+          message:
+            'Configuracao de emissao fiscal indisponivel: o servidor esta sem a chave de ' +
+            'cifragem de segredos. Fale com o suporte.',
+        },
+      })
+
+    app.get('/empresa/credenciais-fiscais', indisponivel)
+    app.put('/empresa/credenciais-fiscais', indisponivel)
+    return
+  }
+
+  /**
+   * O que esta configurado — sem os segredos.
+   *
+   * A tela precisa distinguir "nunca configurou" de "configurado e vencendo",
+   * e as duas respostas cabem em tres campos. Devolver o token para a tela
+   * "conferir" seria desfazer a cifragem na saida.
+   */
+  app.get('/empresa/credenciais-fiscais', async (request, reply) => {
+    const ctx = requireContext(request)
+
+    const s = await deps.fiscalCredentials.situacao(ctx.companyId)
+
+    return reply.code(200).send({
+      hasToken: s.temToken,
+      hasCertificate: s.temCertificado,
+      certificateExpiresAt: s.certificadoVenceEm,
+    })
+  })
+
+  /**
+   * Grava token e certificado — RF-004.
+   *
+   * `PUT` e parcial de proposito: quem troca so o certificado nao perde o
+   * token. O repositorio preserva o que nao veio, e um formulario que envia
+   * apenas o campo alterado nao apaga o resto.
+   *
+   * Responde a SITUACAO, e nao "ok": depois de gravar, a tela precisa do novo
+   * vencimento para mostrar, e uma segunda chamada para descobrir isso seria
+   * uma ida a mais por nada.
+   */
+  app.put(
+    '/empresa/credenciais-fiscais',
+    { bodyLimit: TETO_DO_CERTIFICADO, config: { rateLimit: LIMITE_DE_ESCRITA } },
+    async (request, reply) => {
+      const ctx = requireContext(request)
+      const input = validate(updateFiscalCredentialsInputSchema, request.body)
+
+      /*
+       * O `refine` do contrato ja garante que certificado, senha e vencimento
+       * chegam juntos — mas o TypeScript nao le `refine`. A checagem explicita
+       * e o que faz os tres entrarem como um bloco, em vez de `!` em cada um.
+       */
+      const temCertificado =
+        input.certificateBase64 !== undefined &&
+        input.certificatePassword !== undefined &&
+        input.certificateExpiresAt !== undefined
+
+      await deps.fiscalCredentials.salvar({
+        companyId: ctx.companyId,
+        ...(input.focusToken === undefined ? {} : { focusToken: input.focusToken }),
+        ...(temCertificado
+          ? {
+              certificadoBase64: input.certificateBase64!,
+              senhaDoCertificado: input.certificatePassword!,
+              certificadoVenceEm: input.certificateExpiresAt!,
+            }
+          : {}),
+        atualizadoPor: ctx.userId,
+      })
+
+      const s = await deps.fiscalCredentials.situacao(ctx.companyId)
+
+      return reply.code(200).send({
+        hasToken: s.temToken,
+        hasCertificate: s.temCertificado,
+        certificateExpiresAt: s.certificadoVenceEm,
+      })
+    },
+  )
+}

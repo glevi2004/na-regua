@@ -26,10 +26,19 @@ export default function CertificadoDigital({
 }) {
   const inputId = useId()
   const senhaId = useId()
+  const validadeId = useId()
   const inputRef = useRef<HTMLInputElement>(null)
 
   const [arquivo, setArquivo] = useState<File | null>(null)
   const [senha, setSenha] = useState('')
+  /*
+   * A validade e PERGUNTADA, e nao lida do arquivo.
+   *
+   * Ler PKCS#12 exige biblioteca que o projeto nao tem. Sem a data, o aviso de
+   * vencimento (RF-004) e impossivel e o lojista descobriria que o certificado
+   * venceu quando a nota parasse de sair.
+   */
+  const [validoAte, setValidoAte] = useState('')
   const [enviando, setEnviando] = useState(false)
   const [erro, setErro] = useState<string | null>(null)
 
@@ -42,8 +51,7 @@ export default function CertificadoDigital({
     setErro(null)
     setEnviando(true)
 
-    /* SUBSTITUIR POR: POST /empresa/certificado */
-    const resultado = await enviarCertificado(arquivo, senha)
+    const resultado = await enviarCertificado(arquivo, senha, validoAte)
     setEnviando(false)
 
     if (!resultado.ok) {
@@ -54,6 +62,7 @@ export default function CertificadoDigital({
     onChange(resultado.certificado)
     setArquivo(null)
     setSenha('')
+    setValidoAte('')
     if (inputRef.current) inputRef.current.value = ''
   }
 
@@ -61,6 +70,7 @@ export default function CertificadoDigital({
     onChange(null)
     setArquivo(null)
     setSenha('')
+    setValidoAte('')
     setErro(null)
     if (inputRef.current) inputRef.current.value = ''
   }
@@ -78,7 +88,7 @@ export default function CertificadoDigital({
 
           <div className={styles.certInfo}>
             <strong>{certificado.nomeArquivo}</strong>
-            <span>{certificado.titular}</span>
+            {/* O titular saiu: sem abrir o arquivo, exibi-lo seria inventar. */}
           </div>
 
           {expirado ? <Badge tone="warning">Expirado</Badge> : <Badge tone="success">Valido</Badge>}
@@ -159,6 +169,31 @@ export default function CertificadoDigital({
             autoComplete="off"
             placeholder="Senha definida na emissao"
           />
+        </div>
+
+        <div className={styles.certField}>
+          <label className={styles.certLabel} htmlFor={validadeId}>
+            Valido ate
+          </label>
+          <input
+            id={validadeId}
+            type="date"
+            className={styles.certInput}
+            value={validoAte}
+            onChange={(e) => {
+              setValidoAte(e.target.value)
+              setErro(null)
+            }}
+            disabled={enviando}
+          />
+          {/*
+            A data esta no proprio certificado — quem emitiu tem no e-mail, e o
+            Windows mostra ao abrir o arquivo. Perguntar e o preco de nao ter
+            leitor de PKCS#12: sem ela nao ha como avisar antes do vencimento.
+          */}
+          <span className={styles.certAjuda}>
+            Esta na propria emissao do certificado. Sem ela nao conseguimos avisar antes de vencer.
+          </span>
         </div>
       </div>
 

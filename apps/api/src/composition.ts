@@ -29,6 +29,7 @@ import {
   createChartOfAccountsRepository,
   createCompanyRepository,
   createCustomerRepository,
+  createFiscalCredentials,
   createPayableQueries,
   createPayableUnitOfWork,
   createProductRepository,
@@ -37,6 +38,7 @@ import {
   createSaleUnitOfWork,
   createUserDirectory,
   getClient,
+  lerChaveDeSegredo,
   type DatabaseHealth,
 } from '@na-regua/db'
 import { createFileStatementReader } from '@na-regua/banking'
@@ -44,6 +46,7 @@ import type { CadastroDeps } from './routes/cadastro.js'
 import type { ConciliacaoDeps } from './routes/conciliacao.js'
 import type { ContabilidadeDeps } from './routes/contabilidade.js'
 import type { ContasDeps } from './routes/contas.js'
+import type { CredenciaisFiscaisDeps } from './routes/fiscal.js'
 import { loadApiEnv } from '@na-regua/env'
 import { Redis } from 'ioredis'
 
@@ -288,6 +291,25 @@ export function buildContabilidadeDeps(): ContabilidadeDeps {
     /* Mesma pendencia das outras: `db` nao expoe repositorio de auditoria. */
     audit: new InMemoryAuditTrail(),
   }
+}
+
+/**
+ * Configuracao da emissao fiscal — NR-042, RF-004.
+ *
+ * LANCA sem `SECRETS_KEY`, e nao guarda em texto puro. Um caminho alternativo
+ * "sem cifragem para desenvolvimento" seria o jeito mais provavel de um token
+ * de producao acabar legivel no banco: ninguem lembra de trocar de volta.
+ */
+export function buildFiscalDeps(): CredenciaisFiscaisDeps {
+  if (env.SECRETS_KEY === undefined) {
+    throw new Error(
+      'SECRETS_KEY nao definida: sem ela nao ha como cifrar o token e o certificado do ' +
+        'lojista. Gere com `openssl rand -base64 32` e defina no ambiente.',
+    )
+  }
+
+  const sql = getClient(env.DATABASE_URL)
+  return { fiscalCredentials: createFiscalCredentials(sql, lerChaveDeSegredo(env.SECRETS_KEY)) }
 }
 
 export function buildContasDeps(): ContasDeps {

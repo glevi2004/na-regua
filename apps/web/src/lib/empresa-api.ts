@@ -133,42 +133,117 @@ export type Certificado = {
   nomeArquivo: string
   /** Data de expiracao no formato ISO (AAAA-MM-DD). */
   validoAte: string
-  titular: string
 }
+
+/**
+ * A configuracao de emissao fiscal — NR-042, RF-004.
+ *
+ * ## O certificado NAO e aberto no navegador
+ *
+ * O arquivo vai em base64 e a senha vai junto, direto para a api por HTTPS, que
+ * cifra os dois antes de tocar o banco. O navegador nao abre o `.pfx`, nao le a
+ * senha e nao guarda nenhum dos dois.
+ *
+ * ## Por que a tela pergunta a validade
+ *
+ * A versao anterior desta funcao prometia que "o backend abre o .pfx e extrai
+ * titular e validade". Ler PKCS#12 exige biblioteca que o projeto nao tem, e
+ * escolher uma so para isso e decisao que nao cabia nesta tarefa.
+ *
+ * Entao a validade e PERGUNTADA. E pior para quem cadastra e melhor que a
+ * alternativa: sem ela, o aviso de vencimento (RF-004) e impossivel, e o
+ * lojista descobriria que o certificado venceu quando a nota parasse de sair.
+ *
+ * O TITULAR saiu da tela pelo mesmo motivo — sem abrir o arquivo, exibi-lo
+ * seria inventar.
+ */
+export type SituacaoFiscal = {
+  hasToken: boolean
+  hasCertificate: boolean
+  certificateExpiresAt: string | null
+}
+
+async function chamarFiscal(
+  init?: RequestInit,
+): Promise<{ ok: true; dados: SituacaoFiscal } | { ok: false; error: string }> {
+  let resposta: Response
+  try {
+    resposta = await fetch('/api/empresa/credenciais-fiscais', {
+      ...init,
+      headers: { 'content-type': 'application/json' },
+      credentials: 'same-origin',
+    })
+  } catch {
+    return { ok: false, error: 'Sem conexao. Verifique sua internet.' }
+  }
+
+  const corpo = (await resposta.json().catch(() => ({}))) as SituacaoFiscal & {
+    error?: { message?: string }
+  }
+
+  if (!resposta.ok) {
+    return { ok: false, error: corpo.error?.message ?? 'Nao foi possivel salvar.' }
+  }
+
+  return { ok: true, dados: corpo }
+}
+
+export const carregarSituacaoFiscal = () => chamarFiscal()
+
+/** Guarda o token do emissor. */
+export const salvarTokenFiscal = (focusToken: string) =>
+  chamarFiscal({ method: 'PUT', body: JSON.stringify({ focusToken }) })
 
 export type UploadResult = { ok: true; certificado: Certificado } | { ok: false; error: string }
 
-/**
- * SUBSTITUIR POR: POST /empresa/certificado (multipart)
- *
- * O backend abre o .pfx com a senha, extrai titular e validade, e guarda o
- * arquivo cifrado. Se a senha estiver errada, devolve 422 — e por isso que
- * a tela precisa tratar o erro de senha separadamente do erro de rede.
- */
-export async function enviarCertificado(arquivo: File, senha: string): Promise<UploadResult> {
-  await delay(1500)
-
-  if (!senha) {
-    return { ok: false, error: 'Informe a senha do certificado.' }
-  }
+export async function enviarCertificado(
+  arquivo: File,
+  senha: string,
+  validoAte: string,
+): Promise<UploadResult> {
+  if (senha === '') return { ok: false, error: 'Informe a senha do certificado.' }
+  if (validoAte === '') return { ok: false, error: 'Informe ate quando o certificado vale.' }
 
   const nome = arquivo.name.toLowerCase()
   if (!nome.endsWith('.pfx') && !nome.endsWith('.p12')) {
     return { ok: false, error: 'O certificado precisa ser um arquivo .pfx ou .p12.' }
   }
 
-  /* Senha de exemplo para exercitar o caminho de erro. */
-  if (senha === 'errada') {
-    return { ok: false, error: 'Senha do certificado incorreta.' }
+  /*
+   * Base64 em pedacos: `String.fromCharCode(...bytes)` de uma vez estoura a
+   * pilha, e certificado com cadeia completa passa de 10 KB com folga.
+   */
+  const bytes = new Uint8Array(await arquivo.arrayBuffer())
+  let binario = ''
+  const PEDACO = 0x8000
+  for (let i = 0; i < bytes.length; i += PEDACO) {
+    binario += String.fromCharCode(...bytes.subarray(i, i + PEDACO))
   }
+
+  const r = await chamarFiscal({
+    method: 'PUT',
+    body: JSON.stringify({
+      certificateBase64: btoa(binario),
+      certificatePassword: senha,
+      certificateExpiresAt: validoAte,
+    }),
+  })
+
+  if (!r.ok) return { ok: false, error: r.error }
 
   return {
     ok: true,
     certificado: {
-      status: 'valido',
+      /* O estado vem da DATA que o servidor confirmou, e nao do que a tela
+         achava — sao a mesma coisa hoje e nao serao no dia em que a api
+         normalizar a entrada. */
+      status:
+        r.dados.certificateExpiresAt !== null &&
+        r.dados.certificateExpiresAt < new Date().toISOString().slice(0, 10)
+          ? 'expirado'
+          : 'valido',
       nomeArquivo: arquivo.name,
-      validoAte: '2027-03-14',
-      titular: 'MERCEARIA SOL NASCENTE LTDA',
+      validoAte: r.dados.certificateExpiresAt ?? validoAte,
     },
   }
 }

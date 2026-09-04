@@ -226,3 +226,12 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Ajuda do campo de validade do certificado — NR-042. */
+.certAjuda {
+  display: block;
+  margin-top: 6px;
+  font-size: 12.5px;
+  color: var(--app-muted);
+  line-height: 1.5;
+}
