@@ -89,3 +89,52 @@
     flex: 1;
   }
 }
+
+/* Clientes parecidos — RF-010. A decisao de reusar e de quem esta no balcao. */
+.duplicados {
+  position: fixed;
+  inset-inline: 1rem;
+  bottom: 1rem;
+  max-width: 30rem;
+  margin-inline: auto;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--nr-border, #d8dee9);
+  border-radius: 0.75rem;
+  background: var(--nr-surface, #fff);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 12%);
+  z-index: 20;
+}
+
+.duplicadosTitulo {
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+}
+
+.duplicadosLista {
+  margin: 0 0 0.875rem;
+  padding-left: 1.1rem;
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.9375rem;
+}
+
+.duplicadosAcoes {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
+.duplicadosAcoes button {
+  padding: 0.5rem 0.875rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--nr-border, #d8dee9);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.duplicadosAcoes button:last-child {
+  border-color: transparent;
+  background: var(--nr-accent, #2f6fed);
+  color: #fff;
+}

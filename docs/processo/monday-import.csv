@@ -25,7 +25,7 @@ NR-027 — api: rota de venda com chave de idempotência,Sprint 2 — Cadastros 
 "NR-030 — api: observabilidade — requestId, log estruturado, rastreamento",Sprint 2 — Cadastros e venda,Trilha 2 — Plataforma & Integracoes,Done,Medium,2,Sprint 2,NR-009,,api worker,"RNF-058, RNF-059",docs/processo/task-ledger.md
 NR-070 — mobile: cadastro de produto com leitor de código de barras,Sprint 2 — Cadastros e venda,Trilha 3 — Clientes,Not started,Medium,3,Sprint 2,NR-026,,mobile,"US-009, RF-017",docs/processo/task-ledger.md
 "NR-071 — mobile: carrinho, seleção de cliente e fechamento de venda",Sprint 2 — Cadastros e venda,Trilha 3 — Clientes,Not started,Medium,5,Sprint 2,NR-027,,mobile,US-014–019,docs/processo/task-ledger.md
-NR-072 — web: backoffice de cadastros,Sprint 2 — Cadastros e venda,Trilha 3 — Clientes,Not started,Medium,3,Sprint 2,NR-026,,web,"E1, E2, E3",docs/processo/task-ledger.md
+NR-072 — web: backoffice de cadastros,Sprint 2 — Cadastros e venda,Trilha 3 — Clientes,Done,Medium,3,Sprint 2,NR-026,,web,"E1, E2, E3",docs/processo/task-ledger.md
 "NR-028 — core: contas a pagar e a receber, com recorrência",Sprint 3 — Fiscal e financeiro,Trilha 1 — Nucleo & Dados,Done,Medium,3,Sprint 3,NR-020,,core,RF-055–067,docs/processo/task-ledger.md
 "NR-029 — core: baixa, baixa parcial e estorno",Sprint 3 — Fiscal e financeiro,Trilha 1 — Nucleo & Dados,Done,Medium,2,Sprint 3,NR-028,,core,"RF-059, RF-066, RF-067",docs/processo/task-ledger.md
 NR-040 — fiscal: porta InvoiceIssuer + adapter falso,Sprint 3 — Fiscal e financeiro,Trilha 2 — Plataforma & Integracoes,Done,Medium,2,Sprint 3,NR-005,,fiscal core,RF-045,docs/processo/task-ledger.md

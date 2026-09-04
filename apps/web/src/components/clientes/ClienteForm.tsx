@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { buscarCep, UFS } from '@/lib/empresa-api'
 import { buscarCnpj } from '@/lib/empresa-api'
-import { buscarCpf, salvarCliente } from '@/lib/clientes-api'
+import { buscarCpf, type CandidatoCliente, salvarCliente } from '@/lib/clientes-api'
 import {
   maskCelular,
   maskCEP,
@@ -71,6 +71,8 @@ export default function ClienteForm() {
   const [avisoCep, setAvisoCep] = useState<string | null>(null)
   const [avisoDoc, setAvisoDoc] = useState<string | null>(null)
   const [toast, setToast] = useState<{ msg: string; tone: 'success' | 'error' } | null>(null)
+  /** Clientes parecidos que a api encontrou — RF-010. */
+  const [duplicados, setDuplicados] = useState<CandidatoCliente[] | null>(null)
 
   const rotuloDocumento = tipo === 'fisica' ? 'CPF' : 'CNPJ'
   const rotuloNome = tipo === 'fisica' ? 'Nome completo' : 'Razao social'
@@ -203,12 +205,44 @@ export default function ClienteForm() {
 
     setSalvando(true)
 
-    /* SUBSTITUIR POR: POST /clientes */
     const resultado = await salvarCliente({ ...campos, tipoPessoa: tipo })
     setSalvando(false)
 
     if (!resultado.ok) {
+      /*
+       * Duplicado NAO e erro — RF-010. A api devolve os candidatos em vez de
+       * recusar, e a decisao de reusar o existente e de quem esta no balcao,
+       * com o cliente na frente. Mostrar "erro ao salvar" aqui esconderia a
+       * escolha e faria a pessoa tentar de novo, com o mesmo resultado.
+       */
+      if ('duplicados' in resultado) {
+        setDuplicados(resultado.duplicados)
+        return
+      }
       setToast({ msg: resultado.error, tone: 'error' })
+      return
+    }
+
+    setToast({ msg: 'Cliente cadastrado.', tone: 'success' })
+    router.push('/app/clientes')
+  }
+
+  /**
+   * Cadastra apesar do parecido — RF-010.
+   *
+   * O `id` sintetico e o que faz `salvarCliente` mandar
+   * `?duplicado=permitir`: e a segunda passada, depois de a pessoa ter visto a
+   * lista e decidido. Sem ele, a api responderia 409 de novo e o dialogo
+   * reabriria em laco.
+   */
+  async function cadastrarMesmoAssim() {
+    setDuplicados(null)
+    setSalvando(true)
+    const r = await salvarCliente({ ...campos, tipoPessoa: tipo, id: 'permitir-duplicado' })
+    setSalvando(false)
+
+    if (!r.ok) {
+      setToast({ msg: 'duplicados' in r ? 'Nao foi possivel cadastrar.' : r.error, tone: 'error' })
       return
     }
 
@@ -443,6 +477,31 @@ export default function ClienteForm() {
           </Button>
         </div>
       </form>
+
+      {duplicados !== null ? (
+        <div className={styles.duplicados} role="dialog" aria-label="Clientes parecidos">
+          <p className={styles.duplicadosTitulo}>
+            Ja existe cliente com este telefone ou documento.
+          </p>
+          <ul className={styles.duplicadosLista}>
+            {duplicados.map((c) => (
+              <li key={c.id}>
+                <strong>{c.name}</strong>
+                {c.phone ? <span> · {c.phone}</span> : null}
+                {c.document ? <span> · {c.document}</span> : null}
+              </li>
+            ))}
+          </ul>
+          <div className={styles.duplicadosAcoes}>
+            <button type="button" onClick={() => setDuplicados(null)}>
+              Voltar e conferir
+            </button>
+            <button type="button" onClick={() => void cadastrarMesmoAssim()} disabled={salvando}>
+              Cadastrar mesmo assim
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {toast ? (
         <Toast message={toast.msg} tone={toast.tone} onClose={() => setToast(null)} />
