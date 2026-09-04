@@ -1,9 +1,10 @@
+import { useRouter } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Cabecalho from '@/components/Cabecalho'
 import { produtos } from '@/lib/mock-data'
-import { nivelEstoque } from '@/lib/produtos-api'
+import { buscarEan, nivelEstoque } from '@/lib/produtos-api'
 import { produtoPorEan } from '@/lib/vendas-api'
 import { formatMoney } from '@/lib/format'
 import type { Produto } from '@/lib/types'
@@ -16,7 +17,14 @@ export default function Catalogo() {
   const [busca, setBusca] = useState('')
   const [categoria, setCategoria] = useState('')
   const [lendo, setLendo] = useState(false)
+  const router = useRouter()
   const [encontrado, setEncontrado] = useState<Produto | null>(null)
+  const [consultando, setConsultando] = useState(false)
+  const [avisoLeitura, setAvisoLeitura] = useState<{
+    tom: 'novo' | 'erro'
+    texto: string
+    ean?: string
+  } | null>(null)
 
   const categorias = useMemo(() => [...new Set(produtos.map((p) => p.categoria))].sort(), [])
 
@@ -33,13 +41,44 @@ export default function Catalogo() {
     })
   }, [busca, categoria])
 
-  function aoLerCodigo(codigo: string) {
-    const produto = produtoPorEan(codigo)
-    setEncontrado(produto)
+  /**
+   * O que fazer com o codigo lido — RF-018.
+   *
+   * A consulta vai a api, e nao ao catalogo em memoria: o balcao precisa saber
+   * se o produto existe NA LOJA, e a lista carregada na tela pode estar
+   * desatualizada em relacao ao que outro operador acabou de cadastrar.
+   *
+   * Fecha o leitor ANTES de consultar. A camera continuar aberta enquanto a
+   * rede responde faz o leitor bipar de novo no mesmo codigo, e a tela recebe
+   * duas leituras.
+   */
+  async function aoLerCodigo(codigo: string) {
     setLendo(false)
+    setConsultando(true)
+    setAvisoLeitura(null)
 
-    /* Achou: joga na busca para a pessoa ver o item na lista tambem. */
-    if (produto) setBusca(produto.descricao)
+    const r = await buscarEan(codigo)
+    setConsultando(false)
+
+    if (r.situacao === 'cadastrado') {
+      /* Joga na busca para a pessoa ver o item na lista tambem. */
+      setBusca(r.descricao)
+      setEncontrado(produtoPorEan(codigo) ?? null)
+      return
+    }
+
+    if (r.situacao === 'novo') {
+      /* Nao e erro: e o caminho de cadastrar. A tela oferece a acao em vez de
+         so dizer que nao achou. */
+      setAvisoLeitura({
+        tom: 'novo',
+        texto: `Codigo ${r.ean} ainda nao esta cadastrado.`,
+        ean: r.ean,
+      })
+      return
+    }
+
+    setAvisoLeitura({ tom: 'erro', texto: r.mensagem })
   }
 
   return (
@@ -55,7 +94,7 @@ export default function Catalogo() {
           placeholderTextColor={cores.textoFraco}
           accessibilityLabel="Buscar produto"
         />
-        <Botao onPress={() => setLendo(true)}>Bipar</Botao>
+        <Botao onPress={() => setLendo(true)}>{consultando ? '...' : 'Bipar'}</Botao>
       </View>
 
       {/* Categorias em faixa horizontal: no celular nao cabe empilhado. */}
@@ -77,6 +116,21 @@ export default function Catalogo() {
           </Pressable>
         )}
       />
+
+      {avisoLeitura !== null ? (
+        <View style={avisoLeitura.tom === 'novo' ? estilos.avisoNovo : estilos.avisoErro}>
+          <Text style={estilos.avisoTexto}>{avisoLeitura.texto}</Text>
+          {avisoLeitura.ean !== undefined ? (
+            <Botao
+              onPress={() =>
+                router.push({ pathname: '/produto-novo', params: { ean: avisoLeitura.ean } })
+              }
+            >
+              Cadastrar
+            </Botao>
+          ) : null}
+        </View>
+      ) : null}
 
       {encontrado === null && busca.trim() && lista.length === 0 ? (
         <Vazio
@@ -100,7 +154,11 @@ export default function Catalogo() {
         />
       )}
 
-      <LeitorCodigo aberto={lendo} onLer={aoLerCodigo} onFechar={() => setLendo(false)} />
+      <LeitorCodigo
+        aberto={lendo}
+        onLer={(codigo) => void aoLerCodigo(codigo)}
+        onFechar={() => setLendo(false)}
+      />
     </SafeAreaView>
   )
 }
@@ -133,6 +191,25 @@ function LinhaProduto({ produto }: { produto: Produto }) {
 }
 
 const estilos = StyleSheet.create({
+  /* Leitura de codigo — RF-018. Dois tons porque as acoes sao opostas:
+     "nao cadastrado" convida a cadastrar, "erro" convida a tentar de novo. */
+  avisoNovo: {
+    marginHorizontal: espaco.lg,
+    marginBottom: espaco.md,
+    padding: espaco.md,
+    borderRadius: raio.md,
+    backgroundColor: cores.superficieAlta,
+    gap: espaco.sm,
+  },
+  avisoErro: {
+    marginHorizontal: espaco.lg,
+    marginBottom: espaco.md,
+    padding: espaco.md,
+    borderRadius: raio.md,
+    backgroundColor: cores.erroFundo,
+    gap: espaco.sm,
+  },
+  avisoTexto: { color: cores.texto, fontSize: fonte.pequeno },
   tela: { flex: 1, backgroundColor: cores.fundo },
 
   cabecalho: { paddingHorizontal: espaco.lg, paddingTop: espaco.md, gap: 2 },

@@ -3,7 +3,6 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, View } fr
 import { useRouter } from 'expo-router'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { entrar } from '@/lib/auth-api'
-import { abrirSessao } from '@/lib/session'
 import { validateCredential, validateLoginPassword } from '@/lib/validation'
 import Botao from '@/components/ui/Botao'
 import Campo from '@/components/ui/Campo'
@@ -29,7 +28,6 @@ export default function Login() {
     setErroGeral(null)
     setCarregando(true)
 
-    /* SUBSTITUIR POR: POST /auth/login */
     const r = await entrar(credencial, senha)
 
     if (!r.ok) {
@@ -38,7 +36,9 @@ export default function Login() {
       return
     }
 
-    await abrirSessao(r.usuario)
+    /* `entrar` ja guardou a sessao e o token — inclusive a escolha de loja,
+       que precisa do token da primeira resposta para ser autenticada. Chamar
+       `abrirSessao` aqui de novo sobrescreveria com dados incompletos. */
     /* replace e nao push: voltar do app para o login nao faz sentido. */
     router.replace('/inicio')
   }
