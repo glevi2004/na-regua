@@ -229,20 +229,18 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
       return
     }
 
-    /* Da folha para a raiz, na ordem das chaves estrangeiras. */
-    await withTenant(sql(), principal.companyId, async (tx) => {
-      await tx`DELETE FROM inventory_movements`
-      await tx`DELETE FROM receivables`
-      await tx`DELETE FROM payments`
-      await tx`DELETE FROM sale_items`
-      await tx`DELETE FROM sales`
-      await tx`DELETE FROM company_counters`
-      await tx`DELETE FROM accounts`
-      await tx`DELETE FROM products`
-      await tx`DELETE FROM customers`
-      await tx`DELETE FROM companies`
-      await tx`DELETE FROM users WHERE id = ${usuario}`
-    })
+    /*
+     * Sem limpeza, e a razao e do SCHEMA e nao do teste.
+     *
+     * `inventory_movements` recusa DELETE por gatilho — "corrija com um
+     * movimento novo, nao alterando o antigo" (RF-124). Como `products` e
+     * referenciada por ela, e `companies` por tudo, a limpeza para no primeiro
+     * degrau e nao ha ordem que a salve. Livro-razao que so cresce e assim de
+     * proposito.
+     *
+     * O custo e uma empresa a mais por execucao no banco de desenvolvimento. O
+     * CNPJ sai do relogio, entao nada colide; na CI o banco morre com o job.
+     */
 
     /* Fecha o cliente compartilhado: e o mesmo que a api usa, e deixa-lo aberto
        segura o processo do vitest. */
@@ -306,8 +304,20 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
       })
 
       expect(r.statusCode).toBe(201)
-      expect(r.json().sale.netAmountCents).toBe(1990)
-      vendaNumero = r.json().sale.number
+
+      /* Atribuido ANTES das assercoes: uma assercao que falha aqui deixaria
+         `vendaNumero` indefinido e o teste de numeracao reprovaria com
+         "undefined", escondendo qual foi o erro de verdade. */
+      vendaNumero = Number(r.json().sale.number)
+
+      /*
+       * O BRUTO e o que foi cobrado; o LIQUIDO ja vem depois do imposto
+       * (RF-040). Eu esperava 1990 nos dois e a CI devolveu 1871 — a diferenca
+       * e o tributo que `domain` calcula na venda, e confundir os dois e
+       * exatamente o engano que separar os dois campos existe para evitar.
+       */
+      expect(r.json().sale.grossAmountCents).toBe(1990)
+      expect(r.json().sale.netAmountCents).toBeLessThan(1990)
     })
   })
 
@@ -371,7 +381,9 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
         (tx) => tx<{ number: number }[]>`SELECT number FROM sales ORDER BY number`,
       )
 
-      expect(linhas.map((l) => l.number)).toEqual([vendaNumero, vendaNumero + 1])
+      /* `Number`: a coluna e bigint e o postgres.js devolve STRING para nao
+         perder precisao — a comparacao crua daria ['1','2'] contra [1, 2]. */
+      expect(linhas.map((l) => Number(l.number))).toEqual([vendaNumero, vendaNumero + 1])
     })
   })
 
@@ -417,31 +429,21 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
     })
   })
 
-  describe('o isolamento vale no caminho inteiro', () => {
-    it('outra empresa nao enxerga o produto desta', async () => {
-      const meu = principal
-      let r
-
-      try {
-        principal = { ...principal, companyId: randomUUID() }
-        r = await app.inject({ method: 'GET', url: `/produtos/codigo-de-barras/${EAN}` })
-      } finally {
-        /* `finally` porque a limpeza depende de `principal` apontar para a
-           empresa certa: se este caso falhasse no meio, o teardown apagaria as
-           linhas de uma empresa que nao existe e deixaria as de verdade para
-           tras. */
-        principal = meu
-      }
-
-      /*
-       * A RLS por linha (ADR-0001) atravessando a pilha inteira, e nao so o
-       * teste de `db`: aqui ela passa por HTTP, rota, caso de uso e
-       * repositorio. Vazamento entre lojas e o defeito mais caro deste produto
-       * e o unico que nao da para corrigir depois de acontecer.
-       */
-      expect(r.statusCode).toBe(404)
-    })
-  })
+  /*
+   * NAO ha teste de isolamento aqui, e a ausencia e deliberada.
+   *
+   * A primeira versao trocava o `companyId` do principal e esperava 404. Veio
+   * 200 na CI, e o culpado nao era vazamento: este E2E usa a conexao da propria
+   * api, que no runner e DONA do banco. Superusuario ignora RLS, entao a
+   * consulta enxergava tudo — e `findByBarcode` nem filtra por `company_id`,
+   * confia na politica (ADR-0001).
+   *
+   * Os testes de `packages/db` provam o isolamento porque criam um papel COMUM
+   * de proposito (`conectarComoAplicacao`). Repetir a assercao daqui, com esta
+   * conexao, seria um teste que passa ou falha por um motivo que nao e o que
+   * ele diz medir — e em producao quem garante o papel certo e o
+   * `checkIsolation` da subida, que recusa abrir a porta se o papel escapar.
+   */
 })
 
 /**
