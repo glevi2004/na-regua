@@ -1,7 +1,14 @@
-import { createFakeInvoiceIssuer } from '@na-regua/fiscal'
+import { createFakeInvoiceIssuer, criarEmissorFocusNfe } from '@na-regua/fiscal'
+import {
+  createFiscalCredentials,
+  createInvoiceStore,
+  getClient,
+  lerChaveDeSegredo,
+} from '@na-regua/db'
 import { createFakeMessageSender } from '@na-regua/whatsapp'
 import type { Queue } from 'bullmq'
 import type { ConsumerDeps, OverdueReader } from './consumers/types.js'
+import { loadWorkerEnv } from '@na-regua/env'
 import { log } from './logging.js'
 import type { QueueName } from './queues.js'
 
@@ -41,9 +48,45 @@ const leitorDeVencidosPendente: OverdueReader = {
   },
 }
 
+/* Validado uma vez, aqui na raiz de composicao — NR-006. */
+const env = loadWorkerEnv()
+
+/**
+ * O emissor de nota — DEC-004, NR-042.
+ *
+ * `fake` nao emite nada. `focusnfe` fala com o provedor de verdade, e para
+ * isso precisa do banco (credenciais cifradas por lojista) e da chave que as
+ * decifra.
+ *
+ * A falta de qualquer um dos dois LANCA, e nao cai no falso em silencio: um
+ * worker que acha estar emitindo e nao esta e a pior falha possivel aqui — o
+ * lojista vende, ve "nota emitida" e descobre meses depois, com o contador, que
+ * nunca saiu documento nenhum.
+ */
+function montarEmissor(): ConsumerDeps['invoices'] {
+  if (env.FISCAL_PROVIDER === 'fake') return createFakeInvoiceIssuer()
+
+  if (env.DATABASE_URL === undefined || env.SECRETS_KEY === undefined) {
+    throw new Error(
+      'FISCAL_PROVIDER=focusnfe exige DATABASE_URL e SECRETS_KEY. ' +
+        'Sem elas nao ha como ler o token do lojista, e emitir em nome dele seria impossivel.',
+    )
+  }
+
+  const sql = getClient(env.DATABASE_URL)
+  /* `lerChaveDeSegredo` recusa chave curta ou placeholder — ver secret-box.ts. */
+  const chave = lerChaveDeSegredo(env.SECRETS_KEY)
+
+  return criarEmissorFocusNfe({
+    ambiente: env.FISCAL_AMBIENTE,
+    credenciais: createFiscalCredentials(sql, chave),
+    store: createInvoiceStore(sql),
+  })
+}
+
 export function montarDeps(queues: Map<QueueName, Queue>): ConsumerDeps {
   return {
-    invoices: createFakeInvoiceIssuer(),
+    invoices: montarEmissor(),
     messages: createFakeMessageSender(),
     overdue: leitorDeVencidosPendente,
     enqueue: {

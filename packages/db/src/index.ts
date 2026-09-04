@@ -48,3 +48,8 @@ export type { RlsStatus } from './rls-guard.js'
 /* --- Isolamento: a ponte entre o ExecutionContext e a politica de RLS --- */
 export { withPlatformScope, withTenant } from './tenant.js'
 export type { TenantId } from './tenant.js'
+
+/* Segredo de lojista cifrado em coluna — RF-004, RNF-022, NR-042. */
+export { ChaveDeSegredoInvalida, cifrar, decifrar, lerChaveDeSegredo } from './secret-box.js'
+export { createFiscalCredentials } from './fiscal-credentials-repository.js'
+export type { SituacaoFiscalDaEmpresa } from './fiscal-credentials-repository.js'
