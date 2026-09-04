@@ -1,11 +1,12 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
+  carregarContasAPagar,
+  type ContaAPagar,
   baixarTitulo,
   estornarTitulo,
   exportar,
-  listarContasPagar,
   listarContasReceber,
   ROTULO_SITUACAO,
   situacaoDoTitulo,
@@ -26,6 +27,42 @@ import FormularioTitulo from './FormularioTitulo'
 import styles from './financeiro.module.css'
 
 /** Forma comum entre conta a pagar e a receber, para a lista trabalhar. */
+/**
+ * O status da api para o vocabulario da tela.
+ *
+ * Os dois modelos discordam num ponto que importa: o web trata `vencido` como
+ * STATUS, e a api o calcula a partir da data — la e faixa, nao estado. Uma
+ * conta vencida continua `open` no servidor.
+ *
+ * Entao `vencido` sai daqui pela DATA, e nao do campo. Mapear `open` para
+ * `aberto` sempre faria a tela perder o destaque de atraso; inventar um status
+ * `vencido` no servidor faria a mesma conta mudar de estado a meia-noite sem
+ * ninguem tocar nela.
+ */
+function statusDaApi(status: string, vencimento: string): StatusTitulo {
+  if (status === 'settled') return 'pago'
+  if (status === 'partially_settled') return 'parcial'
+  return daysUntil(vencimento) < 0 ? 'vencido' : 'aberto'
+}
+
+function paraLinhaDaApi(c: ContaAPagar): Linha {
+  return {
+    id: c.id,
+    contraparte: c.supplier,
+    descricao: c.description,
+    vencimento: c.dueDate,
+    /* Centavos para reais na borda: a tela inteira trabalha em reais. */
+    valor: c.amountCents / 100,
+    valorBaixado: c.settledAmountCents / 100,
+    status: statusDaApi(c.status, c.dueDate),
+    /* A api ainda nao guarda banco nem classificacao no titulo — a coluna
+       `category` existe, mas o plano de contas (NR-032) nao esta ligado a
+       ela. Vazio e honesto; inventar seria pior. */
+    banco: '',
+    classificacao: c.category ?? '',
+  }
+}
+
 type Linha = {
   id: string
   contraparte: string
@@ -55,9 +92,40 @@ export default function ContasView({ tipo }: { tipo: 'pagar' | 'receber' }) {
 
   /* Estado local: sem backend, a lista precisa refletir baixa e estorno
      para a tela ser navegavel de verdade. */
+  /*
+   * CONTAS A PAGAR vem da api (NR-074). CONTAS A RECEBER continua no mock: a
+   * tabela `receivables` existe desde a 0003, mas nao ha caso de uso de listar
+   * em `core` nem rota na api — e uma tela alimentada por dado inventado ao
+   * lado de uma tela real seria pior que duas telas mock, porque ninguem
+   * saberia qual e qual.
+   *
+   * Isso esta dito no PR. A metade que falta e uma tarefa: listar recebiveis.
+   */
   const [linhas, setLinhas] = useState<Linha[]>(() =>
-    pagar ? listarContasPagar().map(paraLinhaPagar) : listarContasReceber().map(paraLinhaReceber),
+    pagar ? [] : listarContasReceber().map(paraLinhaReceber),
   )
+  const [carregando, setCarregando] = useState(pagar)
+  const [erroCarga, setErroCarga] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!pagar) return
+
+    void (async () => {
+      const r = await carregarContasAPagar()
+      setCarregando(false)
+
+      if (!r.ok) {
+        setErroCarga(r.erro)
+        return
+      }
+
+      /* O servidor ja agrupa e ja soma. A tela achata para a lista que ela
+         desenha, mas NAO recalcula total: somar aqui daria um numero que pode
+         divergir do relatorio, e "quanto preciso ter em caixa" nao pode ter
+         duas respostas. */
+      setLinhas(r.dados.grupos.flatMap((g) => g.payables.map(paraLinhaDaApi)))
+    })()
+  }, [pagar])
 
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>('todos')
   const [filtroClassificacao, setFiltroClassificacao] = useState('')

@@ -8,6 +8,7 @@
  * Se um import de `db` ou de adapter aparecer fora daqui, a verificacao de
  * fronteiras na CI barra o PR — e com razao.
  */
+import { randomUUID } from 'node:crypto'
 import {
   type AuthDeps,
   createDefaultSaleSettings,
@@ -26,6 +27,8 @@ import {
   createAppointmentRepository,
   createCompanyRepository,
   createCustomerRepository,
+  createPayableQueries,
+  createPayableUnitOfWork,
   createProductRepository,
   createSaleUnitOfWork,
   createUserDirectory,
@@ -33,6 +36,7 @@ import {
   type DatabaseHealth,
 } from '@na-regua/db'
 import type { CadastroDeps } from './routes/cadastro.js'
+import type { ContasDeps } from './routes/contas.js'
 import { loadApiEnv } from '@na-regua/env'
 import { Redis } from 'ioredis'
 
@@ -226,5 +230,24 @@ export function buildAgendaDeps(): AgendaDeps {
   return {
     appointments: createAppointmentRepository(getClient(env.DATABASE_URL)),
     reminders: createReminderScheduler(getRedis()),
+  }
+}
+
+/**
+ * Dependencias de contas a pagar — NR-074.
+ *
+ * `ids` e `uow` sao o mesmo objeto porque a implementacao em `db` nao gera id
+ * de recorrencia — ela usa o do `randomUUID` do Node, injetado aqui. Manter o
+ * gerador como porta e o que deixa o teste saber o que vai sair.
+ */
+export function buildContasDeps(): ContasDeps {
+  const sql = getClient(env.DATABASE_URL)
+  return {
+    uow: createPayableUnitOfWork(sql),
+    queries: createPayableQueries(sql),
+    ids: { next: () => randomUUID() },
+    /* Mesma pendencia da autenticacao: `db` nao expoe repositorio de
+       auditoria, entao a trilha do lancamento fica em memoria. */
+    audit: new InMemoryAuditTrail(),
   }
 }

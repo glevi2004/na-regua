@@ -266,3 +266,93 @@ export const ROTULO_SITUACAO: Record<SituacaoVisual, string> = {
   quitado: 'Quitado',
   parcial: 'Baixa parcial',
 }
+
+/* -------------------------------------------------------------------------- */
+/* Contas a pagar contra a api — NR-074                                       */
+/* -------------------------------------------------------------------------- */
+
+/** Onde a conta cai em relacao a hoje — RF-061. */
+export type FaixaDeVencimento = 'overdue' | 'today' | 'week' | 'month' | 'later'
+
+export const ROTULO_FAIXA: Record<FaixaDeVencimento, string> = {
+  overdue: 'Vencidas',
+  today: 'Vencem hoje',
+  week: 'Proximos 7 dias',
+  month: 'Este mes',
+  later: 'Mais adiante',
+}
+
+export type ContaAPagar = {
+  id: string
+  supplier: string
+  description: string
+  amountCents: number
+  settledAmountCents: number
+  dueDate: string
+  status: 'open' | 'partially_settled' | 'settled' | 'cancelled'
+  /** Classificacao contabil. Nulo enquanto ninguem classificou. */
+  category: string | null
+  recurrenceId: string | null
+  occurrenceNumber: number | null
+  occurrenceCount: number | null
+}
+
+export type GrupoDeVencimento = {
+  faixa: FaixaDeVencimento
+  payables: ContaAPagar[]
+  /** Soma do que AINDA falta pagar, nao do valor original. */
+  totalCents: number
+}
+
+export type ContasAPagarAgrupadas = {
+  grupos: GrupoDeVencimento[]
+  totalCents: number
+  /** RF-062: o destaque na abertura do sistema. */
+  temVencidas: boolean
+}
+
+export type ResultadoContas<T> = { ok: true; dados: T } | { ok: false; erro: string }
+
+async function pedir<T>(caminho: string, init?: RequestInit): Promise<ResultadoContas<T>> {
+  let resposta: Response
+  try {
+    resposta = await fetch(caminho, {
+      ...init,
+      headers: { 'content-type': 'application/json' },
+      credentials: 'same-origin',
+    })
+  } catch {
+    return { ok: false, erro: 'Sem conexao. Verifique sua internet.' }
+  }
+
+  const corpo = (await resposta.json().catch(() => ({}))) as {
+    error?: { message?: string }
+  }
+
+  if (!resposta.ok) {
+    return { ok: false, erro: corpo.error?.message ?? 'Nao foi possivel carregar.' }
+  }
+
+  return { ok: true, dados: corpo as unknown as T }
+}
+
+/**
+ * A lista agrupada — RF-061, RF-062.
+ *
+ * O agrupamento e o TOTAL vem do servidor. A tela nao soma nada: somar aqui
+ * daria um numero que pode divergir do que o relatorio mostra, e "quanto
+ * preciso ter em caixa esta semana" nao pode ter duas respostas.
+ */
+export const carregarContasAPagar = (): Promise<ResultadoContas<ContasAPagarAgrupadas>> =>
+  pedir<ContasAPagarAgrupadas>('/api/contas-a-pagar')
+
+/** Lancar — RF-055, RF-057. Devolve quantas ocorrencias entraram. */
+export const lancarContaAPagar = (entrada: {
+  supplier: string
+  description: string
+  amountCents: number
+  dueDate: string
+  category?: string
+  recurrence?: { frequency: 'weekly' | 'monthly'; occurrences: number }
+}): Promise<ResultadoContas<{ payables: ContaAPagar[]; count: number }>> =>
+  pedir('/api/contas-a-pagar', { method: 'POST', body: JSON.stringify(entrada) })

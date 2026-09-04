@@ -169,24 +169,26 @@ chamada veja uma exceção consciente e não um esquecimento.
 
 ## Tabelas
 
-| Tabela              | Tenant                | Migration                  |
-| ------------------- | --------------------- | -------------------------- |
-| `companies`         | **é** o tenant (`id`) | `0002_cadastros`           |
-| `users`             | via `company_users`   | `0002_cadastros`           |
-| `company_users`     | `company_id`          | `0002_cadastros`           |
-| `categories`        | `company_id`          | `0002_cadastros`           |
-| `customers`         | `company_id`          | `0002_cadastros`           |
-| `products`          | `company_id`          | `0002_cadastros`           |
-| `company_counters`  | `company_id`          | `0003_vendas_e_financeiro` |
-| `sales`             | `company_id`          | `0003_vendas_e_financeiro` |
-| `sale_items`        | `company_id`          | `0003_vendas_e_financeiro` |
-| `payments`          | `company_id`          | `0003_vendas_e_financeiro` |
-| `receivables`       | `company_id`          | `0003_vendas_e_financeiro` |
-| `settlements`       | `company_id`          | `0003_vendas_e_financeiro` |
-| `sale_returns`      | `company_id`          | `0003_vendas_e_financeiro` |
-| `sale_return_items` | `company_id`          | `0003_vendas_e_financeiro` |
-| `appointments`      | `company_id`          | `0006_agenda`              |
-| `audit_log`         | `company_id` (sem FK) | `0007_auditoria`           |
+| Tabela                | Tenant                | Migration                  |
+| --------------------- | --------------------- | -------------------------- |
+| `companies`           | **é** o tenant (`id`) | `0002_cadastros`           |
+| `users`               | via `company_users`   | `0002_cadastros`           |
+| `company_users`       | `company_id`          | `0002_cadastros`           |
+| `categories`          | `company_id`          | `0002_cadastros`           |
+| `customers`           | `company_id`          | `0002_cadastros`           |
+| `products`            | `company_id`          | `0002_cadastros`           |
+| `company_counters`    | `company_id`          | `0003_vendas_e_financeiro` |
+| `sales`               | `company_id`          | `0003_vendas_e_financeiro` |
+| `sale_items`          | `company_id`          | `0003_vendas_e_financeiro` |
+| `payments`            | `company_id`          | `0003_vendas_e_financeiro` |
+| `receivables`         | `company_id`          | `0003_vendas_e_financeiro` |
+| `settlements`         | `company_id`          | `0003_vendas_e_financeiro` |
+| `sale_returns`        | `company_id`          | `0003_vendas_e_financeiro` |
+| `sale_return_items`   | `company_id`          | `0003_vendas_e_financeiro` |
+| `appointments`        | `company_id`          | `0006_agenda`              |
+| `audit_log`           | `company_id` (sem FK) | `0007_auditoria`           |
+| `payables`            | `company_id`          | `0010_contas_a_pagar`      |
+| `payable_settlements` | `company_id`          | `0010_contas_a_pagar`      |
 
 Dois casos fogem do `company_id`, e os dois de propósito:
 

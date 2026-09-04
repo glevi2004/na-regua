@@ -4,6 +4,7 @@ import {
   buildAgendaDeps,
   buildAuthDeps,
   buildCadastroDeps,
+  buildContasDeps,
   getRedis,
   buildSaleDeps,
   checkDatabase,
@@ -19,6 +20,7 @@ import { registerSession } from './plugins/session.js'
 import { registerAgendaRoutes } from './routes/agenda.js'
 import { registerAuthRoutes } from './routes/auth.js'
 import { registerCadastroRoutes } from './routes/cadastro.js'
+import { registerContasRoutes } from './routes/contas.js'
 import { registerSaleRoutes } from './routes/sales.js'
 
 // RNF-058: log estruturado (JSON) com requestId, companyId e userId.
@@ -78,6 +80,7 @@ async function registrarRotas(): Promise<void> {
   registerSaleRoutes(app, buildSaleDeps())
   registerAgendaRoutes(app, buildAgendaDeps())
   registerCadastroRoutes(app, buildCadastroDeps())
+  registerContasRoutes(app, buildContasDeps())
 }
 
 async function main(): Promise<void> {
