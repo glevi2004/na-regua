@@ -1,4 +1,9 @@
-import type { BankTransactionDirection, EntryKind } from '@na-regua/contracts'
+import type {
+  BankTransactionDirection,
+  BankTransactionListItem,
+  BankTransactionScope,
+  EntryKind,
+} from '@na-regua/contracts'
 import type { CompanyId } from '../context.js'
 import type {
   BankTransactionSnapshot,
@@ -117,6 +122,44 @@ export class InMemoryReconciliation implements ReconciliationUnitOfWork, Reconci
         l.dueDate >= de &&
         l.dueDate <= ate,
     )
+  }
+
+  /**
+   * A fila, ordenada da mais antiga para a mais nova — como o repositorio.
+   *
+   * A ORDEM faz parte do contrato e por isso o falso a imita. Um falso que
+   * devolvesse na ordem de insercao deixaria passar um repositorio sem
+   * `ORDER BY`: os dois pareceriam concordar enquanto o teste inserisse em
+   * ordem cronologica, que e como todo teste insere.
+   */
+  async listTransactions(
+    companyId: CompanyId,
+    scope: BankTransactionScope,
+  ): Promise<readonly BankTransactionListItem[]> {
+    return this.transacoes
+      .filter((t) => t.companyId === companyId)
+      .filter((t) =>
+        scope === 'pending' ? t.reconciledEntryId === null : t.reconciledEntryId !== null,
+      )
+      .sort((a, b) => a.postedOn.localeCompare(b.postedOn))
+      .map((t) => {
+        const ligado =
+          t.reconciledEntryId === null ? undefined : this.lancamento(t.reconciledEntryId)
+
+        return {
+          ...t,
+          reconciledWith:
+            ligado === undefined
+              ? null
+              : {
+                  kind: ligado.entryKind,
+                  id: ligado.id,
+                  counterparty: ligado.counterparty,
+                  description: ligado.description,
+                  dueDate: ligado.dueDate,
+                },
+        }
+      })
   }
 
   async transaction<T>(

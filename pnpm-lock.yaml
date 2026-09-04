@@ -66,6 +66,9 @@ importers:
       '@fastify/rate-limit':
         specifier: ^11.2.0
         version: 11.2.0
+      '@na-regua/banking':
+        specifier: workspace:*
+        version: link:../../packages/banking
       '@na-regua/contracts':
         specifier: workspace:*
         version: link:../../packages/contracts

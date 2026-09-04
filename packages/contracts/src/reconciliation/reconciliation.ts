@@ -86,3 +86,46 @@ export const undoReconciliationInputSchema = z
   .strict()
 
 export type UndoReconciliationInput = z.infer<typeof undoReconciliationInputSchema>
+
+/**
+ * A fila da tela — NR-076.
+ *
+ * Dois recortes e nao um filtro livre: a tela de conciliacao tem exatamente
+ * duas perguntas, "o que falta conferir" e "o que ja conferi" (esta segunda so
+ * existe para poder desfazer, RF-080). Filtro livre convidaria cada tela a
+ * inventar o proprio recorte, e a fila e a mesma para todo mundo.
+ */
+export const bankTransactionScopeSchema = z.enum(['pending', 'reconciled'])
+
+export type BankTransactionScope = z.infer<typeof bankTransactionScopeSchema>
+
+export const listBankTransactionsInputSchema = z
+  .object({ scope: bankTransactionScopeSchema.default('pending') })
+  .strict()
+
+export type ListBankTransactionsInput = z.infer<typeof listBankTransactionsInputSchema>
+
+/**
+ * O lancamento com que a transacao foi conciliada, resumido.
+ *
+ * Existe para o desfazer ser uma decisao e nao um salto no escuro: "desfazer a
+ * conciliacao de R$ 340,00" nao diz nada, e "desfazer — Energia, Enel, vence
+ * 10/03" diz se e essa mesmo. Sao os tres campos que identificam o lancamento
+ * para quem lancou, e nada alem.
+ */
+export const reconciledEntrySummarySchema = z.object({
+  kind: entryKindSchema,
+  id: idSchema,
+  counterparty: z.string(),
+  description: z.string(),
+  dueDate: dateSchema,
+})
+
+export type ReconciledEntrySummary = z.infer<typeof reconciledEntrySummarySchema>
+
+export const bankTransactionListItemSchema = bankTransactionOutputSchema.extend({
+  /** Nulo na fila; preenchido no recorte das conciliadas. */
+  reconciledWith: reconciledEntrySummarySchema.nullable(),
+})
+
+export type BankTransactionListItem = z.infer<typeof bankTransactionListItemSchema>

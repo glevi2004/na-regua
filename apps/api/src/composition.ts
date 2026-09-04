@@ -25,17 +25,22 @@ import {
   checkConnection,
   closeConnection,
   createAppointmentRepository,
+  createBankTransactionWriter,
   createCompanyRepository,
   createCustomerRepository,
   createPayableQueries,
   createPayableUnitOfWork,
   createProductRepository,
+  createReconciliationQueries,
+  createReconciliationUnitOfWork,
   createSaleUnitOfWork,
   createUserDirectory,
   getClient,
   type DatabaseHealth,
 } from '@na-regua/db'
+import { createFileStatementReader } from '@na-regua/banking'
 import type { CadastroDeps } from './routes/cadastro.js'
+import type { ConciliacaoDeps } from './routes/conciliacao.js'
 import type { ContasDeps } from './routes/contas.js'
 import { loadApiEnv } from '@na-regua/env'
 import { Redis } from 'ioredis'
@@ -240,6 +245,37 @@ export function buildAgendaDeps(): AgendaDeps {
  * de recorrencia — ela usa o do `randomUUID` do Node, injetado aqui. Manter o
  * gerador como porta e o que deixa o teste saber o que vai sair.
  */
+/**
+ * Extrato e conciliacao — NR-076.
+ *
+ * Uma instancia de leitura sob dois nomes: `queries` e a porta que o caso de
+ * uso de sugestao declara, `listQueries` a que o da fila declara, e as duas sao
+ * leitura do mesmo repositorio. Criar duas seria abrir duas vezes o que a
+ * conexao ja compartilha.
+ *
+ * A trilha e a MESMA nos dois ramos de proposito: importar e conciliar contam
+ * a historia de um extrato so, e duas trilhas separadas obrigariam quem audita
+ * a juntar as pontas.
+ */
+export function buildConciliacaoDeps(): ConciliacaoDeps {
+  const sql = getClient(env.DATABASE_URL)
+  const queries = createReconciliationQueries(sql)
+  /* Mesma pendencia das outras: `db` nao expoe repositorio de auditoria. */
+  const audit = new InMemoryAuditTrail()
+
+  return {
+    uow: createReconciliationUnitOfWork(sql),
+    queries,
+    listQueries: queries,
+    audit,
+    import: {
+      parser: createFileStatementReader(),
+      transactions: createBankTransactionWriter(sql),
+      audit,
+    },
+  }
+}
+
 export function buildContasDeps(): ContasDeps {
   const sql = getClient(env.DATABASE_URL)
   return {

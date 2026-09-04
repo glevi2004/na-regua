@@ -1,0 +1,271 @@
+/* ===================== Conciliacao bancaria — NR-076 ===================== */
+
+/*
+ * O input de arquivo fica escondido e e disparado pelo botao: o controle nativo
+ * nao aceita estilo e ficaria fora do resto da tela. `display: none` NAO serve
+ * — em alguns navegadores o `.click()` programatico e ignorado num elemento sem
+ * caixa. Fora da tela, ele continua sendo um input de verdade.
+ */
+.arquivoOculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ===================== Abas ===================== */
+
+.abas {
+  display: flex;
+  gap: 8px;
+  margin: 18px 0 12px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.aba,
+.abaAtiva {
+  padding: 9px 16px;
+  font-size: 14px;
+  border-bottom: 2px solid transparent;
+  transition:
+    color var(--transition),
+    border-color var(--transition);
+}
+
+.aba {
+  color: var(--app-muted);
+}
+
+.aba:hover {
+  color: var(--app-text);
+}
+
+.abaAtiva {
+  color: var(--app-accent);
+  border-bottom-color: var(--app-accent);
+  font-weight: 600;
+}
+
+/* ===================== Lista do extrato ===================== */
+
+.transacoes {
+  display: flex;
+  flex-direction: column;
+}
+
+.transacao {
+  display: grid;
+  grid-template-columns: 1fr auto auto auto;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.transacao:last-child {
+  border-bottom: none;
+}
+
+.principal {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.principal strong {
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+
+.contraparte {
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+.data {
+  font-size: 13px;
+  color: var(--app-muted);
+  white-space: nowrap;
+}
+
+/*
+ * Entrada e saida por COR e por sinal, nunca so pela cor: quem nao distingue as
+ * duas continua lendo o "+" e o "−" (RNF-052).
+ */
+.saida,
+.entrada {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.saida {
+  color: var(--app-text);
+}
+
+.entrada {
+  color: var(--app-destaque);
+}
+
+.acao {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+@media (max-width: 720px) {
+  .transacao {
+    grid-template-columns: 1fr auto;
+    row-gap: 8px;
+  }
+
+  .acao {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+  }
+}
+
+/* ===================== Dialogos ===================== */
+
+.dialogRoot {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+}
+
+.dialogBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 8, 20, 0.62);
+}
+
+.dialogPainel {
+  position: relative;
+  width: min(620px, 100%);
+  max-height: 86vh;
+  overflow-y: auto;
+  padding: 22px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+}
+
+.dialogCabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.dialogTitulo {
+  font-family: var(--font-display);
+  font-size: 18px;
+}
+
+.dialogResumo {
+  margin-top: 4px;
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+.dialogFechar {
+  font-size: 22px;
+  line-height: 1;
+  color: var(--app-muted);
+  transition: color var(--transition);
+}
+
+.dialogFechar:hover {
+  color: var(--app-text);
+}
+
+.dialogAcoes {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+/* ===================== Sugestoes ===================== */
+
+.sugestoes {
+  display: flex;
+  flex-direction: column;
+}
+
+.sugestao {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.sugestao:last-child {
+  border-bottom: none;
+}
+
+.sugestaoDados {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 12.5px;
+  color: var(--app-muted);
+  text-align: right;
+}
+
+@media (max-width: 620px) {
+  .sugestao {
+    grid-template-columns: 1fr;
+  }
+
+  .sugestaoDados {
+    text-align: left;
+  }
+}
+
+.formCriar {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--app-border);
+}
+
+/* O caminho secundario: existe, e nao compete com aceitar a sugestao. */
+.alternativa {
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--app-accent);
+  text-align: left;
+  transition: opacity var(--transition);
+}
+
+.alternativa:hover {
+  opacity: 0.78;
+}
+
+.aviso {
+  font-size: 13px;
+  color: var(--app-muted);
+  line-height: 1.55;
+}
+
+.erro {
+  margin-top: 14px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--app-danger-soft);
+  color: var(--app-danger);
+  font-size: 13px;
+}

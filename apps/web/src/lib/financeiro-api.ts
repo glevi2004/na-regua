@@ -21,6 +21,7 @@
  */
 
 import { contasPagar, contasReceber, planoContas, custosFixos, bancos, clientes } from './mock-data'
+import { pedir, type Resultado } from './http'
 import type { ContaPagar, ContaReceber, CustoFixo, PlanoContas, StatusTitulo } from './types'
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -311,30 +312,12 @@ export type ContasAPagarAgrupadas = {
   temVencidas: boolean
 }
 
-export type ResultadoContas<T> = { ok: true; dados: T } | { ok: false; erro: string }
-
-async function pedir<T>(caminho: string, init?: RequestInit): Promise<ResultadoContas<T>> {
-  let resposta: Response
-  try {
-    resposta = await fetch(caminho, {
-      ...init,
-      headers: { 'content-type': 'application/json' },
-      credentials: 'same-origin',
-    })
-  } catch {
-    return { ok: false, erro: 'Sem conexao. Verifique sua internet.' }
-  }
-
-  const corpo = (await resposta.json().catch(() => ({}))) as {
-    error?: { message?: string }
-  }
-
-  if (!resposta.ok) {
-    return { ok: false, erro: corpo.error?.message ?? 'Nao foi possivel carregar.' }
-  }
-
-  return { ok: true, dados: corpo as unknown as T }
-}
+/**
+ * O mesmo `Resultado` de `lib/http`, sob o nome que as telas de contas ja
+ * usam. Alias e nao copia: um segundo tipo com a mesma forma passaria a
+ * divergir na primeira vez que um deles ganhasse um campo.
+ */
+export type ResultadoContas<T> = Resultado<T>
 
 /**
  * A lista agrupada — RF-061, RF-062.

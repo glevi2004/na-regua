@@ -165,6 +165,7 @@ export { DURACAO_DA_SESSAO_HORAS, login, selectCompany } from './auth/login.js'
 export { FakeIdentityProvider, InMemoryLoginThrottle, InMemorySessionIssuer } from './auth/fakes.js'
 /* Idem: a trilha so persiste quando `db` expuser repositorio de auditoria. */
 export { InMemoryAuditTrail } from './audit/fakes.js'
+export { InMemoryReconciliation } from './reconciliation/fakes.js'
 export type { AuthDeps, LoginMeta } from './auth/login.js'
 export type {
   IdentityProvider,
@@ -183,6 +184,8 @@ export {
   undoReconciliation,
 } from './reconciliation/reconcile.js'
 export { JANELA_DE_DIAS, suggestMatches } from './reconciliation/suggest-matches.js'
+export { listBankTransactions } from './reconciliation/list-transactions.js'
+export type { ListBankTransactionsDeps } from './reconciliation/list-transactions.js'
 export type { ReconciliationDeps, SugestaoDeConciliacao } from './reconciliation/suggest-matches.js'
 export type {
   BankTransactionSnapshot,

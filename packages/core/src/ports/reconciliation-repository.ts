@@ -1,4 +1,9 @@
-import type { BankTransactionOutput, EntryKind } from '@na-regua/contracts'
+import type {
+  BankTransactionListItem,
+  BankTransactionOutput,
+  BankTransactionScope,
+  EntryKind,
+} from '@na-regua/contracts'
 import type { CompanyId, UserId } from '../context.js'
 
 /**
@@ -127,4 +132,20 @@ export type ReconciliationQueries = {
     de: string,
     ate: string,
   ): Promise<readonly LancamentoConciliavel[]>
+
+  /**
+   * A fila — NR-076.
+   *
+   * Ordenada da MAIS ANTIGA para a mais nova, e nao ao contrario. Transacao
+   * antiga sem conferir e a que preocupa: ela e a que ja passou do mes que o
+   * contador fechou. Fila com a mais recente no topo empurraria justamente essa
+   * para o fim de uma lista que ninguem rola ate o fim.
+   *
+   * `reconciledWith` volta preenchido so no recorte `reconciled` — na fila
+   * ele seria nulo em toda linha, e a junção custaria em todas elas.
+   */
+  listTransactions(
+    companyId: CompanyId,
+    scope: BankTransactionScope,
+  ): Promise<readonly BankTransactionListItem[]>
 }
