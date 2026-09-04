@@ -1,5 +1,13 @@
 import { z } from 'zod'
-import { dateTimeSchema, idSchema, nameSchema, roleSchema } from '../common/primitives.js'
+import {
+  dateTimeSchema,
+  emailSchema,
+  idSchema,
+  nameSchema,
+  phoneSchema,
+  roleSchema,
+} from '../common/primitives.js'
+import { cnpjSchema } from '../common/document.js'
 
 /** Autenticacao, sessao e convite — RF-005, RF-119, RF-120. */
 
@@ -115,3 +123,34 @@ export const invitedUserOutputSchema = z.object({
 })
 
 export type InvitedUserOutput = z.infer<typeof invitedUserOutputSchema>
+
+/**
+ * Cadastro de conta — NR-014, RF-001, RF-002.
+ *
+ * Pessoa e empresa juntas, numa chamada so. Sao dois cadastros no banco, e
+ * separa-los em duas telas criaria o estado em que existe uma pessoa sem loja
+ * ou uma loja sem dono — os dois inuteis, e o segundo sem ninguem que possa
+ * consertar.
+ */
+export const signupInputSchema = z
+  .object({
+    /* Quem vai operar. */
+    name: nameSchema,
+    email: emailSchema,
+    phone: phoneSchema.optional(),
+    /**
+     * O segredo vai para o PROVEDOR de identidade, nunca para o nosso banco.
+     *
+     * Comprimento minimo aqui e nao no provedor porque a mensagem precisa
+     * chegar ao formulario junto dos outros campos — recusar depois, na
+     * chamada externa, faria a pessoa perder o que digitou.
+     */
+    secret: z.string().min(8, 'A senha precisa de ao menos 8 caracteres.').max(200),
+
+    /* A loja. */
+    legalName: z.string().trim().min(2, 'Informe a razao social.').max(200),
+    cnpj: cnpjSchema,
+  })
+  .strict()
+
+export type SignupInput = z.infer<typeof signupInputSchema>

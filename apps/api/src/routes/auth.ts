@@ -1,5 +1,13 @@
-import { loginInputSchema, selectCompanyInputSchema } from '@na-regua/contracts'
-import { AppError, type AuthDeps, type LoginMeta, login, selectCompany } from '@na-regua/core'
+import { loginInputSchema, selectCompanyInputSchema, signupInputSchema } from '@na-regua/contracts'
+import {
+  AppError,
+  type AuthDeps,
+  type LoginMeta,
+  login,
+  selectCompany,
+  signup,
+  type SignupDeps,
+} from '@na-regua/core'
 import type { FastifyInstance, FastifyRequest } from 'fastify'
 import { LIMITE_DE_AUTENTICACAO } from '../plugins/rate-limit.js'
 import { validate } from '../plugins/validate.js'
@@ -31,7 +39,18 @@ function meta(request: FastifyRequest, channel: 'app' | 'whatsapp' = 'app'): Log
   }
 }
 
-export function registerAuthRoutes(app: FastifyInstance, deps: AuthDeps): void {
+/**
+ * O cadastro precisa de MAIS que o login.
+ *
+ * Login so verifica e emite sessao; cadastro escreve empresa, usuario, vinculo
+ * e plano de contas. Os dois vivem no mesmo arquivo porque sao a mesma porta de
+ * entrada do sistema, e as dependencias somam em vez de se misturarem — assim
+ * fica visivel que o cadastro toca mais coisa, e que o login continua nao
+ * tocando nenhuma delas.
+ */
+export type AuthRouteDeps = AuthDeps & SignupDeps
+
+export function registerAuthRoutes(app: FastifyInstance, deps: AuthRouteDeps): void {
   /**
    * Entrar — RF-119, RF-120.
    *
@@ -39,6 +58,30 @@ export function registerAuthRoutes(app: FastifyInstance, deps: AuthDeps): void {
    * uma loja entra e **depois** escolhe (US-059). Nao e estado de erro, e o
    * corpo diz qual e a situacao em `activeCompanyId` e `memberships`.
    */
+  /**
+   * Cadastro de conta — NR-014, RF-001, RF-002.
+   *
+   * PUBLICA: nao passa por `requireContext`. Quem cadastra ainda nao tem
+   * sessao nem empresa — exigir contexto aqui seria exigir que a pessoa ja
+   * estivesse dentro para poder entrar.
+   *
+   * O limite de autenticacao vale igual: e o mesmo tipo de superficie do login,
+   * e sem ele o cadastro vira um jeito de descobrir quais CNPJ ja existem.
+   */
+  app.post(
+    '/auth/signup',
+    { config: { rateLimit: LIMITE_DE_AUTENTICACAO } },
+    async (request, reply) => {
+      const input = validate(signupInputSchema, request.body)
+
+      const sessao = await signup(deps, input, new Date())
+
+      /* 201: criou pessoa, loja e vinculo. E ja devolve a sessao aberta — quem
+         acabou de cadastrar quer usar o sistema, nao digitar tudo de novo. */
+      return reply.code(201).send(sessao)
+    },
+  )
+
   app.post(
     '/auth/login',
     { config: { rateLimit: LIMITE_DE_AUTENTICACAO } },

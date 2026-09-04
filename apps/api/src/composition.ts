@@ -10,7 +10,6 @@
  */
 import { randomUUID } from 'node:crypto'
 import {
-  type AuthDeps,
   createDefaultSaleSettings,
   FakeIdentityProvider,
   InMemoryAuditTrail,
@@ -19,6 +18,7 @@ import {
   type RegisterSaleDeps,
 } from '@na-regua/core'
 import type { AgendaDeps } from './routes/agenda.js'
+import type { AuthRouteDeps } from './routes/auth.js'
 import { createReminderScheduler } from './reminder-scheduler.js'
 import {
   assertRlsEnforced,
@@ -170,10 +170,25 @@ export function buildSaleDeps(): RegisterSaleDeps {
  * e a ADR-0002 registra que essa espera nao bloqueia codigo: as duas satisfazem
  * a mesma porta, e trocar e trocar esta funcao.
  */
-export function buildAuthDeps(): AuthDeps {
+export function buildAuthDeps(): AuthRouteDeps {
+  const sql = getClient(env.DATABASE_URL)
+
+  /*
+   * A MESMA instancia serve de `provider` e de `registrar`.
+   *
+   * O falso guarda as credenciais num mapa proprio: duas instancias seriam dois
+   * mapas, o cadastro escreveria num e o login leria do outro — e a pessoa
+   * cadastrava e nao entrava. E exatamente o defeito que este trecho existe
+   * para nao repetir.
+   */
+  const identidade = new FakeIdentityProvider()
+
   return {
-    provider: new FakeIdentityProvider(),
-    users: createUserDirectory(getClient(env.DATABASE_URL)),
+    provider: identidade,
+    registrar: identidade,
+    companies: createCompanyRepository(sql),
+    accounts: createChartOfAccountsRepository(sql),
+    users: createUserDirectory(sql),
     sessions: new InMemorySessionIssuer(),
     throttle: new InMemoryLoginThrottle(),
     /*

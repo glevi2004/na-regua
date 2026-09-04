@@ -6,12 +6,15 @@ import { useCallback, useState, type FormEvent } from 'react'
 import { createAccount, createPixCharge, fetchPixChargeStatus } from '@/lib/auth-api'
 import { saveSubscriptionStatus } from '@/lib/subscription-store'
 import {
+  maskCNPJ,
   maskPhone,
+  validateCNPJ,
   validateEmail,
   validateName,
   validatePassword,
   validatePasswordConfirm,
   validatePhone,
+  validateRequired,
   type FieldError,
 } from '@/lib/validation'
 import { plan } from '@/content/site'
@@ -41,6 +44,19 @@ export default function SignupFlow() {
   const [telefoneError, setTelefoneError] = useState<FieldError>(null)
   const [senhaError, setSenhaError] = useState<FieldError>(null)
   const [confirmacaoError, setConfirmacaoError] = useState<FieldError>(null)
+
+  /*
+   * A LOJA — RF-001, RF-002.
+   *
+   * Faltavam no formulario, e por isso o cadastro nao podia funcionar: a api
+   * cria pessoa e empresa juntas, e pessoa sem loja nao faz nada no sistema.
+   * Ficam na etapa 1 porque sao o que define a conta — perguntar depois do
+   * pagamento seria descobrir o CNPJ repetido tarde demais.
+   */
+  const [razaoSocial, setRazaoSocial] = useState('')
+  const [cnpj, setCnpj] = useState('')
+  const [razaoSocialError, setRazaoSocialError] = useState<FieldError>(null)
+  const [cnpjError, setCnpjError] = useState<FieldError>(null)
 
   /* Etapa 2 */
   const [cupom, setCupom] = useState('')
@@ -75,6 +91,10 @@ export default function SignupFlow() {
       telefone: validatePhone(telefone),
       senha: validatePassword(senha),
       confirmacao: validatePasswordConfirm(senha, confirmacao),
+      /* A loja entra no MESMO portao: deixar passar aqui adiaria a recusa de
+         CNPJ para depois do pagamento, que e o pior momento possivel. */
+      razaoSocial: validateRequired(razaoSocial, 'a razao social'),
+      cnpj: validateCNPJ(cnpj),
     }
 
     setNomeError(erros.nome)
@@ -82,6 +102,8 @@ export default function SignupFlow() {
     setTelefoneError(erros.telefone)
     setSenhaError(erros.senha)
     setConfirmacaoError(erros.confirmacao)
+    setRazaoSocialError(erros.razaoSocial)
+    setCnpjError(erros.cnpj)
 
     if (Object.values(erros).some(Boolean)) return
     setStep(2)
@@ -98,12 +120,13 @@ export default function SignupFlow() {
     setErroCriacao(null)
     setCriando(true)
 
-    /* SUBSTITUIR POR: POST /auth/signup */
     const resultado = await createAccount({
       nome,
       email,
       telefone,
       senha,
+      razaoSocial,
+      cnpj,
       cupom: cupomValido,
     })
 
@@ -170,6 +193,33 @@ export default function SignupFlow() {
               inputMode="email"
               placeholder="voce@empresa.com.br"
               autoComplete="email"
+            />
+
+            <TextField
+              label="Razao social da empresa"
+              value={razaoSocial}
+              onChange={(v) => {
+                setRazaoSocial(v)
+                if (razaoSocialError) setRazaoSocialError(validateRequired(v, 'a razao social'))
+              }}
+              onBlur={() => setRazaoSocialError(validateRequired(razaoSocial, 'a razao social'))}
+              error={razaoSocialError}
+              placeholder="Mercearia Sol Nascente LTDA"
+              autoComplete="organization"
+            />
+
+            <TextField
+              label="CNPJ"
+              value={cnpj}
+              onChange={(v) => {
+                const mascarado = maskCNPJ(v)
+                setCnpj(mascarado)
+                if (cnpjError) setCnpjError(validateCNPJ(mascarado))
+              }}
+              onBlur={() => setCnpjError(validateCNPJ(cnpj))}
+              error={cnpjError}
+              inputMode="numeric"
+              placeholder="00.000.000/0000-00"
             />
 
             <TextField
