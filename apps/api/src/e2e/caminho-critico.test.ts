@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto'
 import { getClient, migrate, withTenant } from '@na-regua/db'
 import Fastify, { type FastifyInstance } from 'fastify'
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { registerErrorHandler } from '../plugins/error-handler.js'
 import type { AuthenticatedPrincipal } from '../plugins/execution-context.js'
 import { registerRateLimit } from '../plugins/rate-limit.js'
@@ -81,6 +81,21 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
   const CNPJ = `5${Date.now()}`.slice(0, 14)
 
   beforeAll(async () => {
+    /*
+     * O job Verificar da CI fornece DATABASE_URL, DATABASE_MIGRATION_URL e
+     * REDIS_URL, e mais nada. `loadApiEnv` exige tambem API_URL e JWT_SECRET,
+     * e lanca sem eles — foi assim que este arquivo reprovou na primeira
+     * rodada.
+     *
+     * Preenchidos aqui, e nao no workflow: sao exigencia do VALIDADOR, nao
+     * deste teste. O E2E nao emite nem verifica token (nao ha rota de login),
+     * entao um segredo de mentira e honesto — e por o segredo de verdade no
+     * workflow seria pedir uma variavel de CI para um caminho que ninguem
+     * exercita. O `??` deixa o ambiente real vencer, se algum dia houver um.
+     */
+    vi.stubEnv('API_URL', process.env.API_URL ?? 'http://localhost:3333')
+    vi.stubEnv('JWT_SECRET', process.env.JWT_SECRET ?? 'segredo-que-o-e2e-nao-usa')
+
     composicao = await import('../composition.js')
 
     await migrate(MIGRATION_URL!)
@@ -122,9 +137,22 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
   afterAll(async () => {
     await app?.close()
 
+    /*
+     * Guarda para o caso de o `beforeAll` ter falhado.
+     *
+     * Sem ela, a limpeza estoura em `principal.companyId` indefinido e o
+     * relatorio mostra ESSE erro no lugar do que realmente quebrou — foi o que
+     * aconteceu aqui: a causa era variavel de ambiente faltando, e a CI acusou
+     * "Cannot read properties of undefined".
+     */
+    if (composicao === undefined || principal === undefined) {
+      vi.unstubAllEnvs()
+      return
+    }
+
     /* Da folha para a raiz, na ordem das chaves estrangeiras. */
     await withTenant(sql(), principal.companyId, async (tx) => {
-      await tx`DELETE FROM stock_movements`
+      await tx`DELETE FROM inventory_movements`
       await tx`DELETE FROM receivables`
       await tx`DELETE FROM payments`
       await tx`DELETE FROM sale_items`
@@ -140,6 +168,7 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
     /* Fecha o cliente compartilhado: e o mesmo que a api usa, e deixa-lo aberto
        segura o processo do vitest. */
     await composicao.shutdown()
+    vi.unstubAllEnvs()
   })
 
   /*
@@ -193,7 +222,7 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
           salePriceCents: 1990,
           costPriceCents: 1200,
           barcode: EAN,
-          stockQuantity: 10,
+          stock: 10,
         },
       })
 
@@ -326,13 +355,19 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
 
   describe('o isolamento vale no caminho inteiro', () => {
     it('outra empresa nao enxerga o produto desta', async () => {
-      const outra = { ...principal, companyId: randomUUID() }
       const meu = principal
-      principal = outra
+      let r
 
-      const r = await app.inject({ method: 'GET', url: `/produtos/codigo-de-barras/${EAN}` })
-
-      principal = meu
+      try {
+        principal = { ...principal, companyId: randomUUID() }
+        r = await app.inject({ method: 'GET', url: `/produtos/codigo-de-barras/${EAN}` })
+      } finally {
+        /* `finally` porque a limpeza depende de `principal` apontar para a
+           empresa certa: se este caso falhasse no meio, o teardown apagaria as
+           linhas de uma empresa que nao existe e deixaria as de verdade para
+           tras. */
+        principal = meu
+      }
 
       /*
        * A RLS por linha (ADR-0001) atravessando a pilha inteira, e nao so o
