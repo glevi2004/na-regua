@@ -38,6 +38,17 @@ const AMBIENTE = {
   JWT_SECRET: 'apenas-para-teste',
 }
 
+/*
+ * Teto generoso, e a razao nao e lentidao de teste.
+ *
+ * `carregar()` faz `vi.resetModules()` e reimporta `composition.js` a cada
+ * caso — e o grafo dele so cresce: `core`, `db`, `banking`, `env`, `ioredis`.
+ * O PRIMEIRO caso paga a transpilacao inteira e ja passou dos 5s do padrao
+ * aqui, com folga cada vez menor. Um teto maior e a resposta certa: o que se
+ * mede neste arquivo e a LOGICA dos tres desfechos, nunca o tempo de carga.
+ */
+vi.setConfig({ testTimeout: 30_000 })
+
 async function carregar() {
   vi.resetModules()
   for (const [chave, valor] of Object.entries(AMBIENTE)) vi.stubEnv(chave, valor)

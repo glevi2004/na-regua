@@ -6,6 +6,7 @@ import type {
   NewProduct,
   ProductRepository,
 } from '@na-regua/core'
+import { InMemoryChartOfAccounts } from '@na-regua/core'
 import Fastify, { type FastifyInstance } from 'fastify'
 import { afterEach, describe, expect, it } from 'vitest'
 import { registerErrorHandler } from '../plugins/error-handler.js'
@@ -99,7 +100,12 @@ function cadastroEmMemoria() {
     countAll: async (companyId) => produtos.filter((p) => p.companyId === companyId).length,
   }
 
-  return { companies, customers, products, empresas, clientes, produtos }
+  /* O onboarding semeia o plano de contas (RF-081, NR-077), entao a rota
+     precisa da porta. Falso de verdade, e nao um objeto vazio: assim o teste
+     do 201 prova que a semeadura roda, em vez de so nao explodir. */
+  const accounts = new InMemoryChartOfAccounts()
+
+  return { companies, customers, products, accounts, empresas, clientes, produtos }
 }
 
 async function buildApp(principal: AuthenticatedPrincipal | null = PRINCIPAL) {

@@ -83,7 +83,7 @@ export class InMemoryPayables implements PayableUnitOfWork, PayableQueries, IdGe
             dueDate: n.dueDate,
             status: 'open',
             attachmentKey: n.attachmentKey,
-            category: n.category,
+            accountId: n.accountId,
             recurrenceId: n.recurrenceId,
             occurrenceNumber: n.occurrenceNumber,
             occurrenceCount: n.occurrenceCount,

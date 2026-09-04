@@ -55,11 +55,13 @@ function paraLinhaDaApi(c: ContaAPagar): Linha {
     valor: c.amountCents / 100,
     valorBaixado: c.settledAmountCents / 100,
     status: statusDaApi(c.status, c.dueDate),
-    /* A api ainda nao guarda banco nem classificacao no titulo — a coluna
-       `category` existe, mas o plano de contas (NR-032) nao esta ligado a
-       ela. Vazio e honesto; inventar seria pior. */
+    /* O banco da baixa nao vem no titulo — ele mora em `payable_settlements`,
+       uma linha por baixa, e o titulo pode ter varias. Vazio e honesto. */
     banco: '',
-    classificacao: c.category ?? '',
+    /* A classificacao agora e id de conta (NR-077), e esta lista mostra NOME.
+       Buscar o nome exige o plano carregado; a tela de contas ainda nao o
+       carrega, entao mostra vazio em vez de mostrar um uuid. */
+    classificacao: '',
   }
 }
 

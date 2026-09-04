@@ -1,4 +1,5 @@
 import type { AccountOutput, AccountType, EntryKind } from '@na-regua/contracts'
+import type { ContaPadrao } from '../accounting/default-chart.js'
 import type { CompanyId, UserId } from '../context.js'
 
 /**
@@ -66,6 +67,22 @@ export type ChartOfAccountsRepository = {
     entryKind: EntryKind,
     counterparty: string,
   ): Promise<readonly { accountId: string; accountName: string; times: number }[]>
+
+  /**
+   * Semeia o plano padrao ao concluir o onboarding — RF-081.
+   *
+   * Idempotente: grava ignorando nome que ja existe, e devolve quantas
+   * entraram. A semeadura roda FORA da transacao que cria a empresa, e sem
+   * isso uma segunda tentativa depois de falha parcial pararia no meio com
+   * nome repetido — deixando o plano incompleto, que e pior que vazio porque
+   * parece pronto.
+   */
+  insertDefaults(
+    companyId: CompanyId,
+    contas: readonly ContaPadrao[],
+    createdBy: UserId,
+    createdAt: Date,
+  ): Promise<number>
 
   /** Lancamentos do periodo, por competencia — RF-085, RF-086. */
   entriesBetween(

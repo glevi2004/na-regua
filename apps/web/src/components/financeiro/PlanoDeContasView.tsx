@@ -1,16 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import {
   excluirCustoFixo,
   gerarContasDeCustosFixos,
   listarCustosFixos,
-  listarPlanos,
   NOMES_BANCOS,
   salvarCustoFixo,
-  salvarPlanoContas,
 } from '@/lib/financeiro-api'
-import type { CustoFixo, PlanoContas } from '@/lib/types'
+import {
+  apagarConta,
+  carregarPlano,
+  type ContaContabil,
+  criarConta,
+  ROTULO_DO_TIPO,
+  type TipoDeConta,
+} from '@/lib/contabilidade-api'
+import type { CustoFixo } from '@/lib/types'
 import { formatMoney } from '@/lib/format'
 import { Badge, Card, EmptyState, PageHeader, Stat } from '@/components/ui/UI'
 import { Button } from '@/components/ui/Button'
@@ -30,11 +36,21 @@ function paraNumero(valor: string): number {
 }
 
 export default function PlanoDeContasView() {
-  const [planos, setPlanos] = useState<PlanoContas[]>(() => listarPlanos())
+  /*
+   * O plano de contas vem da api (NR-077). Custos fixos continuam no mock: eles
+   * sao outra coisa — uma previsao recorrente de gasto, sem tabela nem caso de
+   * uso — e misturar os dois aqui daria a impressao de que os dois sao reais.
+   */
+  const [contas, setContas] = useState<ContaContabil[]>([])
+  const [carregandoPlano, setCarregandoPlano] = useState(true)
+  const [erroPlano, setErroPlano] = useState<string | null>(null)
+
   const [custos, setCustos] = useState<CustoFixo[]>(() => listarCustosFixos())
 
-  const [novoPlano, setNovoPlano] = useState('')
+  const [novoNome, setNovoNome] = useState('')
+  const [novoTipo, setNovoTipo] = useState<TipoDeConta>('expense')
   const [salvandoPlano, setSalvandoPlano] = useState(false)
+  const [apagando, setApagando] = useState<ContaContabil | null>(null)
 
   const [editando, setEditando] = useState<CustoFixo | null>(null)
   const [formAberto, setFormAberto] = useState(false)
@@ -43,10 +59,27 @@ export default function PlanoDeContasView() {
   const [processando, setProcessando] = useState(false)
   const [toast, setToast] = useState<{ msg: string; tone: 'success' | 'error' } | null>(null)
 
+  const buscarPlano = useCallback(async () => {
+    const r = await carregarPlano()
+    setCarregandoPlano(false)
+
+    if (!r.ok) {
+      setErroPlano(r.erro)
+      return
+    }
+
+    setErroPlano(null)
+    setContas(r.dados.accounts)
+  }, [])
+
+  useEffect(() => {
+    /* `async` explicito: os `setState` vem todos depois do await. */
+    void (async () => {
+      await buscarPlano()
+    })()
+  }, [buscarPlano])
+
   const totalCustosFixos = custos.reduce((acc, c) => acc + c.valor, 0)
-  const gastoTotal = planos
-    .filter((p) => p.tipo === 'despesa')
-    .reduce((acc, p) => acc + p.gastoMes, 0)
 
   /* ---------------------------------------------------------------- *
    * Plano de conta
@@ -56,18 +89,42 @@ export default function PlanoDeContasView() {
     event.preventDefault()
 
     setSalvandoPlano(true)
-    /* SUBSTITUIR POR: POST /financeiro/planos */
-    const r = await salvarPlanoContas(novoPlano)
+    const r = await criarConta({ name: novoNome.trim(), type: novoTipo })
     setSalvandoPlano(false)
 
     if (!r.ok) {
-      setToast({ msg: r.error, tone: 'error' })
+      setToast({ msg: r.erro, tone: 'error' })
       return
     }
 
-    setPlanos((p) => [...p, { id: r.id, nome: novoPlano.trim(), tipo: 'despesa', gastoMes: 0 }])
-    setNovoPlano('')
-    setToast({ msg: 'Plano de conta criado.', tone: 'success' })
+    /* Recarrega em vez de empurrar na lista: a ORDEM e do servidor (receita,
+       deducao, custo, despesa) e reproduzi-la aqui daria um segundo lugar para
+       ela mudar de ideia. */
+    setNovoNome('')
+    await buscarPlano()
+    setToast({ msg: 'Conta criada.', tone: 'success' })
+  }
+
+  /* Nome proprio: `confirmarExclusao` ja e a de custos fixos, logo abaixo.
+     Duas funcoes com o mesmo nome no mesmo escopo compilam ate o TypeScript
+     reclamar — e em JavaScript puro a segunda simplesmente vence. */
+  async function confirmarExclusaoDeConta() {
+    if (apagando === null) return
+
+    setProcessando(true)
+    const r = await apagarConta(apagando.id)
+    setProcessando(false)
+    setApagando(null)
+
+    if (!r.ok) {
+      /* A recusa da RF-082 chega com o NUMERO de lancamentos na mensagem —
+         "esta conta tem 42 lancamentos" diz que ele ia mexer em coisa seria. */
+      setToast({ msg: r.erro, tone: 'error' })
+      return
+    }
+
+    await buscarPlano()
+    setToast({ msg: 'Conta apagada.', tone: 'success' })
   }
 
   /* ---------------------------------------------------------------- *
@@ -125,45 +182,102 @@ export default function PlanoDeContasView() {
       />
 
       <div className="statRow">
-        <Stat label="Planos cadastrados" value={String(planos.length)} />
+        <Stat label="Contas no plano" value={String(contas.length)} />
         <Stat
           label="Custos fixos"
           value={String(custos.length)}
           hint={formatMoney(totalCustosFixos) + ' por mes'}
         />
-        <Stat label="Gasto no mes" value={formatMoney(gastoTotal)} hint="somando as despesas" />
+        {/* O gasto por conta mora no DRE, que soma o periodo escolhido. Repetir
+            um "gasto no mes" aqui daria dois numeros para a mesma pergunta, e
+            eles divergiriam no primeiro dia em que os periodos nao batessem. */}
+        <Stat
+          label="Contas de despesa"
+          value={String(contas.filter((c) => c.type === 'expense').length)}
+          hint="o resultado do periodo esta no DRE"
+        />
       </div>
 
       <div className={styles.duasColunas}>
         {/* --- Planos --- */}
-        <Card title="Planos de conta">
+        <Card title="Plano de contas">
           <form onSubmit={criarPlano} className={styles.novoPlano}>
             <input
               className={styles.input}
-              value={novoPlano}
-              onChange={(e) => setNovoPlano(e.target.value)}
-              placeholder="Nome do plano de conta"
-              aria-label="Nome do plano de conta"
+              value={novoNome}
+              onChange={(e) => setNovoNome(e.target.value)}
+              placeholder="Nome da conta"
+              aria-label="Nome da conta"
             />
-            <Button type="submit" disabled={salvandoPlano || !novoPlano.trim()}>
+            <select
+              className={styles.input}
+              value={novoTipo}
+              onChange={(e) => setNovoTipo(e.target.value as TipoDeConta)}
+              aria-label="Tipo da conta"
+            >
+              {/* Os quatro tipos, sempre. O tipo decide de que lado do DRE a
+                  conta entra, e nao ha padrao seguro: uma receita cadastrada
+                  como despesa inverte o resultado do mes. */}
+              {(Object.keys(ROTULO_DO_TIPO) as TipoDeConta[]).map((t) => (
+                <option key={t} value={t}>
+                  {ROTULO_DO_TIPO[t]}
+                </option>
+              ))}
+            </select>
+            <Button type="submit" disabled={salvandoPlano || novoNome.trim().length < 2}>
               {salvandoPlano ? <Spinner size={15} /> : <IconPlus size={16} />}
               Criar
             </Button>
           </form>
 
-          <ul className={styles.planos}>
-            {planos.map((p) => (
-              <li key={p.id} className={styles.plano}>
-                <span className={styles.planoNome}>
-                  <strong>{p.nome}</strong>
-                  <Badge tone={p.tipo === 'receita' ? 'success' : 'neutral'}>
-                    {p.tipo === 'receita' ? 'Receita' : 'Despesa'}
-                  </Badge>
-                </span>
-                <span className={styles.planoValor}>{formatMoney(p.gastoMes)}</span>
-              </li>
-            ))}
-          </ul>
+          {carregandoPlano ? (
+            <EmptyState title="Carregando o plano" description="Buscando as contas." />
+          ) : erroPlano !== null ? (
+            <EmptyState
+              title="Nao deu para carregar o plano"
+              description={erroPlano}
+              action={
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setCarregandoPlano(true)
+                    setErroPlano(null)
+                    void buscarPlano()
+                  }}
+                >
+                  Tentar de novo
+                </Button>
+              }
+            />
+          ) : (
+            <ul className={styles.planos}>
+              {contas.map((c) => (
+                <li key={c.id} className={styles.plano}>
+                  <span className={styles.planoNome}>
+                    <strong>{c.name}</strong>
+                    <Badge tone={c.type === 'revenue' ? 'success' : 'neutral'}>
+                      {ROTULO_DO_TIPO[c.type]}
+                    </Badge>
+                  </span>
+                  {/* Conta do plano padrao nao tem botao de apagar — RF-081.
+                      Mostra-lo e deixar a api recusar seria oferecer uma acao
+                      que nunca funciona. */}
+                  {c.isDefault ? (
+                    <span className={styles.planoValor}>padrao</span>
+                  ) : (
+                    <button
+                      type="button"
+                      className={styles.custoExcluir}
+                      onClick={() => setApagando(c)}
+                      aria-label={`Apagar ${c.name}`}
+                    >
+                      <IconTrash size={15} />
+                    </button>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
         </Card>
 
         {/* --- Custos fixos --- */}
@@ -243,7 +357,7 @@ export default function PlanoDeContasView() {
       {formAberto ? (
         <FormCustoFixo
           custo={editando}
-          planos={planos.map((p) => p.nome)}
+          planos={contas.map((c) => c.name)}
           onSalvo={(salvo) => {
             setCustos((atual) =>
               editando ? atual.map((c) => (c.id === salvo.id ? salvo : c)) : [...atual, salvo],
@@ -259,6 +373,18 @@ export default function PlanoDeContasView() {
             setFormAberto(false)
             setEditando(null)
           }}
+        />
+      ) : null}
+
+      {apagando !== null ? (
+        <ConfirmarDialog
+          titulo="Apagar esta conta?"
+          descricao={`"${apagando.name}" sai do plano. Se ela tiver lancamentos, a operacao e recusada — o historico nao muda de classificacao sozinho.`}
+          rotuloConfirmar="Apagar"
+          tom="perigo"
+          processando={processando}
+          onConfirmar={() => void confirmarExclusaoDeConta()}
+          onCancelar={() => setApagando(null)}
         />
       ) : null}
 

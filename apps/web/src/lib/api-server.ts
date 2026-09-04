@@ -77,6 +77,16 @@ export async function chamarApi<T>(
   }
 
   if (resposta.ok) {
+    /*
+     * `204 No Content` NAO tem corpo, e `json()` num corpo vazio lanca.
+     *
+     * Sem esta guarda, apagar uma conta do plano (RF-082) funcionava na api e
+     * voltava 500 para a tela: a operacao dava certo e o lojista via erro, que
+     * e o pior desencontro possivel — ele tentaria de novo e receberia "conta
+     * nao encontrada".
+     */
+    if (resposta.status === 204) return { ok: true, dados: undefined as T }
+
     return { ok: true, dados: (await resposta.json()) as T }
   }
 

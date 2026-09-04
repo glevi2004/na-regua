@@ -43,7 +43,11 @@ export async function encaminhar(
   })
 
   return r.ok
-    ? NextResponse.json(r.dados, { status: opcoes.okStatus ?? 200 })
+    ? /* `dados` vem indefinido quando a api responde 204 (apagar conta do
+         plano, por exemplo). `NextResponse.json(undefined)` escreve o texto
+         "undefined" no corpo, que estoura no parse do navegador — entao vira
+         um objeto de verdade. */
+      NextResponse.json(r.dados ?? { ok: true }, { status: opcoes.okStatus ?? 200 })
     : /*
        * O corpo CRU da api quando ele existe, e nao so codigo e mensagem.
        *

@@ -127,6 +127,8 @@ describe.skipIf(!DATABASE_URL)('extrato e conciliacao — NR-076', () => {
         await tx`DELETE FROM bank_transactions`
         await tx`DELETE FROM receivables`
         await tx`DELETE FROM payables`
+        /* Depois dos lancamentos: `account_id` referencia com RESTRICT. */
+        await tx`DELETE FROM accounts`
         await tx`DELETE FROM companies`
       })
     }
@@ -335,22 +337,45 @@ describe.skipIf(!DATABASE_URL)('extrato e conciliacao — NR-076', () => {
       expect(achado?.netAmountCents).toBe(12_000)
     })
 
-    it('recusa accountId em vez de descartar em silencio', async () => {
-      await expect(
-        uow.transaction(empresaA, (tx) =>
-          tx.insertEntry({
-            companyId: empresaA,
-            entryKind: 'payable',
-            counterparty: 'Enel',
-            description: 'Energia',
-            amountCents: 1_000,
-            dueDate: '2026-09-10',
-            accountId: randomUUID(),
-            createdBy: usuarioA,
-            createdAt: AGORA,
-          }),
-        ),
-      ).rejects.toThrow(/NR-032|Classificacao/i)
+    it('grava a conta contabil escolhida — RF-083', async () => {
+      const [conta] = await withTenant(
+        sql,
+        empresaA,
+        (tx) => tx<{ id: string }[]>`
+          INSERT INTO accounts (company_id, name, type)
+          VALUES (${empresaA}, 'Tarifas bancarias', 'expense')
+          RETURNING id
+        `,
+      )
+
+      const criado = await uow.transaction(empresaA, (tx) =>
+        tx.insertEntry({
+          companyId: empresaA,
+          entryKind: 'payable',
+          counterparty: 'Banco',
+          description: 'Tarifa de manutencao',
+          amountCents: 3_490,
+          dueDate: '2026-09-10',
+          accountId: conta!.id,
+          createdBy: usuarioA,
+          createdAt: AGORA,
+        }),
+      )
+
+      /*
+       * Ate a NR-077 este caminho LANCAVA: nao havia tabela `accounts`, e
+       * gravar sem a conta seria descartar em silencio uma classificacao que o
+       * lojista acredita ter feito. Agora a coluna existe e o que se prova e
+       * que ela chega no banco.
+       */
+      const [linha] = await withTenant(
+        sql,
+        empresaA,
+        (tx) => tx<{ account_id: string | null }[]>`
+          SELECT account_id FROM payables WHERE id = ${criado.id}
+        `,
+      )
+      expect(linha?.account_id).toBe(conta!.id)
     })
   })
 

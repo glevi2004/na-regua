@@ -5,7 +5,7 @@ import type {
   LancamentoClassificado,
   NewAccount,
 } from '../ports/chart-of-accounts.js'
-import { PLANO_DE_CONTAS_PADRAO } from './default-chart.js'
+import { type ContaPadrao, PLANO_DE_CONTAS_PADRAO } from './default-chart.js'
 
 /**
  * Plano de contas em memoria, com filtro por empresa de verdade.
@@ -31,7 +31,42 @@ export class InMemoryChartOfAccounts implements ChartOfAccountsRepository {
   private lancamentos: (LancamentoClassificado & { readonly companyId: CompanyId })[] = []
   private sequencia = 0
 
-  /** Semeia o plano padrao, como o onboarding fara — RF-081. */
+  /**
+   * O metodo da PORTA, que o onboarding chama — RF-081.
+   *
+   * Idempotente por nome, como o `ON CONFLICT` do repositorio de verdade. Um
+   * falso que aceitasse repetido deixaria passar uma semeadura chamada duas
+   * vezes: o teste ficaria verde e o lojista veria o plano em dobro.
+   */
+  async insertDefaults(
+    companyId: CompanyId,
+    contas: readonly ContaPadrao[],
+    _createdBy: string,
+    _createdAt: Date,
+  ): Promise<number> {
+    let entraram = 0
+
+    for (const c of contas) {
+      const existe = this.contas.some(
+        (x) => x.companyId === companyId && x.name.toLowerCase() === c.name.toLowerCase(),
+      )
+      if (existe) continue
+
+      this.sequencia += 1
+      this.contas.push({
+        id: `acc-${this.sequencia}`,
+        companyId,
+        name: c.name,
+        type: c.type,
+        isDefault: true,
+      })
+      entraram += 1
+    }
+
+    return entraram
+  }
+
+  /** Atalho de teste: o mesmo plano, sem precisar do contexto do onboarding. */
   semearPadrao(companyId: CompanyId): void {
     for (const c of PLANO_DE_CONTAS_PADRAO) {
       this.sequencia += 1

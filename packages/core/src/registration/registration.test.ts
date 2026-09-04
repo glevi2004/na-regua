@@ -7,6 +7,8 @@ import {
   InMemoryCustomerRepository,
   InMemoryProductRepository,
 } from './fakes.js'
+import { InMemoryChartOfAccounts } from '../accounting/fakes.js'
+import { PLANO_DE_CONTAS_PADRAO } from '../accounting/default-chart.js'
 import { registerCompany } from './register-company.js'
 import { assertIdentifiable, registerCustomer } from './register-customer.js'
 import { findProductByBarcode, generateInternalCode, registerProduct } from './register-product.js'
@@ -35,8 +37,9 @@ const empresaValida = {
 describe('registerCompany — RF-001, RF-002', () => {
   it('cadastra a empresa', async () => {
     const companies = new InMemoryCompanyRepository()
+    const accounts = new InMemoryChartOfAccounts()
 
-    const empresa = await registerCompany({ companies }, contexto(), empresaValida)
+    const empresa = await registerCompany({ companies, accounts }, contexto(), empresaValida)
 
     expect(empresa.cnpj).toBe('12345678000195')
     expect(empresa.createdAt).toBe(AGORA.toISOString())
@@ -44,26 +47,29 @@ describe('registerCompany — RF-001, RF-002', () => {
 
   it('usa a razao social como nome fantasia quando ele nao vem', async () => {
     const companies = new InMemoryCompanyRepository()
-    const empresa = await registerCompany({ companies }, contexto(), empresaValida)
+    const accounts = new InMemoryChartOfAccounts()
+    const empresa = await registerCompany({ companies, accounts }, contexto(), empresaValida)
     expect(empresa.tradeName).toBe('Mercearia do Joao LTDA')
   })
 
   it('recusa CNPJ repetido', async () => {
     const companies = new InMemoryCompanyRepository()
-    await registerCompany({ companies }, contexto(), empresaValida)
+    const accounts = new InMemoryChartOfAccounts()
+    await registerCompany({ companies, accounts }, contexto(), empresaValida)
 
-    await expect(registerCompany({ companies }, contexto(), empresaValida)).rejects.toThrow(
-      /ja tem cadastro/i,
-    )
+    await expect(
+      registerCompany({ companies, accounts }, contexto(), empresaValida),
+    ).rejects.toThrow(/ja tem cadastro/i)
   })
 
   it('nao revela nada da empresa existente na recusa — RF-002', async () => {
     const companies = new InMemoryCompanyRepository()
-    await registerCompany({ companies }, contexto(), empresaValida)
+    const accounts = new InMemoryChartOfAccounts()
+    await registerCompany({ companies, accounts }, contexto(), empresaValida)
 
     expect.assertions(3)
     try {
-      await registerCompany({ companies }, contexto(), {
+      await registerCompany({ companies, accounts }, contexto(), {
         ...empresaValida,
         legalName: 'Outra Empresa ME',
       })
@@ -80,8 +86,36 @@ describe('registerCompany — RF-001, RF-002', () => {
     }
   })
 
+  it('a empresa nasce com o plano de contas padrao — RF-081', async () => {
+    const companies = new InMemoryCompanyRepository()
+    const accounts = new InMemoryChartOfAccounts()
+
+    const empresa = await registerCompany({ companies, accounts }, contexto(), empresaValida)
+
+    /*
+     * Sem isto o lojista abre a tela de classificacao vazia, e a resposta
+     * pratica dele e nao classificar nada — o que reduz o DRE a uma linha so.
+     */
+    const plano = await accounts.list(empresa.id)
+    expect(plano).toHaveLength(PLANO_DE_CONTAS_PADRAO.length)
+    expect(plano.every((c) => c.isDefault)).toBe(true)
+  })
+
+  it('semear duas vezes nao duplica o plano', async () => {
+    const companies = new InMemoryCompanyRepository()
+    const accounts = new InMemoryChartOfAccounts()
+
+    const empresa = await registerCompany({ companies, accounts }, contexto(), empresaValida)
+    /* A semeadura roda fora da transacao da empresa: refazer precisa ser
+       seguro, senao a recuperacao de uma falha parcial deixa o plano em dobro. */
+    await accounts.insertDefaults(empresa.id, PLANO_DE_CONTAS_PADRAO, 'usr-1', AGORA)
+
+    expect(await accounts.list(empresa.id)).toHaveLength(PLANO_DE_CONTAS_PADRAO.length)
+  })
+
   it('nao exige papel na empresa, porque ela ainda nao existe', async () => {
     const companies = new InMemoryCompanyRepository()
+    const accounts = new InMemoryChartOfAccounts()
 
     /*
      * Unico caso de uso de escrita sem `assertCanWrite`. Quem cria a empresa
@@ -89,7 +123,7 @@ describe('registerCompany — RF-001, RF-002', () => {
      * outra loja, que nao diz nada sobre esta.
      */
     const empresa = await registerCompany(
-      { companies },
+      { companies, accounts },
       contexto({ role: 'accountant' as Role }),
       empresaValida,
     )
