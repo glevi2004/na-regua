@@ -21,6 +21,11 @@ export { lerMigrations, migrate } from './migrate.js'
 export type { Migration, MigrationResult } from './migrate.js'
 
 /* --- Repositorios: implementam as portas declaradas por core --- */
+export {
+  createCompanyRepository,
+  createCustomerRepository,
+  createProductRepository,
+} from './registration-repositories.js'
 export { createSaleUnitOfWork } from './sale-unit-of-work.js'
 
 /* Diretorio de usuarios — NR-014. Le por fora da RLS, pelas funcoes auth_* da

@@ -21,11 +21,15 @@ import {
   assertRlsEnforced,
   checkConnection,
   closeConnection,
+  createCompanyRepository,
+  createCustomerRepository,
+  createProductRepository,
   createSaleUnitOfWork,
   createUserDirectory,
   getClient,
   type DatabaseHealth,
 } from '@na-regua/db'
+import type { CadastroDeps } from './routes/cadastro.js'
 import { loadApiEnv } from '@na-regua/env'
 import { Redis } from 'ioredis'
 
@@ -183,5 +187,21 @@ export function assertAuthUsavelEmProducao(): void {
         'A sessao e a desaceleracao tambem sao de memoria (ADR-0002). ' +
         'Defina um provedor real antes de subir.',
     )
+  }
+}
+
+/**
+ * Dependencias de cadastro — NR-026.
+ *
+ * Os tres repositorios sao reais. `companies` e o unico que precisa de
+ * tratamento especial na escrita — a politica raiz exige que a empresa nasca
+ * sob o proprio tenant, e o repositorio cuida disso.
+ */
+export function buildCadastroDeps(): CadastroDeps {
+  const sql = getClient(env.DATABASE_URL)
+  return {
+    companies: createCompanyRepository(sql),
+    customers: createCustomerRepository(sql),
+    products: createProductRepository(sql),
   }
 }
