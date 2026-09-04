@@ -54,7 +54,7 @@ export async function createPayable(
     amountCents: input.amountCents,
     dueDate,
     attachmentKey: input.attachmentKey ?? null,
-    category: input.category ?? null,
+    accountId: input.accountId ?? null,
     recurrenceId,
     occurrenceNumber: recorrente ? i + 1 : null,
     occurrenceCount: recorrente ? vencimentos.length : null,

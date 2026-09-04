@@ -51,8 +51,15 @@ export const createPayableInputSchema = z
      * requisicao e o jeito de descobrir o limite de corpo do servidor.
      */
     attachmentKey: z.string().trim().max(512).optional(),
-    /** Classificacao contabil, para o relatorio do contador. */
-    category: z.string().trim().max(80).optional(),
+    /**
+     * Classificacao contabil — RF-083.
+     *
+     * Id de conta do plano, e nao texto livre. A NR-074 tinha um `category`
+     * de texto aqui: era invencao minha (a RF-055 nao pede campo de categoria)
+     * e passou a duplicar o plano de contas quando ele ganhou tabela, dando
+     * DUAS respostas para "como esta conta esta classificada".
+     */
+    accountId: idSchema.optional(),
     recurrence: recurrenceInputSchema.optional(),
   })
   .strict()
@@ -66,7 +73,7 @@ export const createReceivableInputSchema = z
     amountCents: moneyCentsSchema.min(1, 'Conta de zero nao e conta.'),
     dueDate: dateSchema,
     customerId: idSchema.optional(),
-    category: z.string().trim().max(80).optional(),
+    accountId: idSchema.optional(),
   })
   .strict()
 
@@ -86,7 +93,8 @@ export const payableOutputSchema = z.object({
   dueDate: z.string(),
   status: payableStatusSchema,
   attachmentKey: z.string().nullable(),
-  category: z.string().nullable(),
+  /** Conta do plano. Nulo cai em "Sem classificacao" no DRE. */
+  accountId: idSchema.nullable(),
   /** Liga as ocorrencias da mesma recorrencia. Nulo em conta avulsa. */
   recurrenceId: idSchema.nullable(),
   /** Ocorrencia N de M — o que a tela mostra como "3/12". */

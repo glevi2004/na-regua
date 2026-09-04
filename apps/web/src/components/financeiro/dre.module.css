@@ -1,0 +1,142 @@
+/* ===================== DRE simplificado — NR-077 ===================== */
+
+.periodo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.aviso {
+  font-size: 13px;
+  color: var(--app-muted);
+  line-height: 1.55;
+}
+
+/* ===================== O resumo ===================== */
+
+.resumo {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.resumo th {
+  text-align: left;
+  font-weight: 400;
+  font-size: 14px;
+  padding: 9px 0;
+}
+
+.resumo td {
+  text-align: right;
+  /* Alinha os algarismos em coluna: sem isto, R$ 1.000,00 e R$ 999,00 ficam
+     tortos e comparar de relance deixa de funcionar. */
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  padding: 9px 0;
+}
+
+/* Total de bloco: e o que o olho procura ao descer o relatorio. */
+.linhaTotal th,
+.linhaTotal td {
+  font-weight: 600;
+  border-top: 1px solid var(--app-border);
+}
+
+/*
+ * Prejuizo por COR e pelo sinal, nunca so pela cor — o valor ja vem com "−"
+ * do formatador quando negativo (RNF-052).
+ */
+.negativo {
+  color: var(--app-danger);
+}
+
+.margem {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--app-border);
+  font-size: 13px;
+  color: var(--app-muted);
+}
+
+/* ===================== O detalhe por conta ===================== */
+
+.detalhe {
+  margin-top: 22px;
+}
+
+.grupo {
+  border-bottom: 1px solid var(--app-border);
+}
+
+.grupo:last-child {
+  border-bottom: none;
+}
+
+.grupoBotao {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  font-size: 14px;
+  text-align: left;
+  transition: color var(--transition);
+}
+
+.grupoBotao:hover {
+  color: var(--app-accent);
+}
+
+.grupoContagem {
+  font-size: 12.5px;
+  color: var(--app-muted);
+}
+
+.contas {
+  display: flex;
+  flex-direction: column;
+  padding: 0 0 12px;
+}
+
+.conta {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 14px;
+  padding: 7px 0 7px 14px;
+  font-size: 13.5px;
+  border-left: 2px solid var(--app-border);
+}
+
+/* "Sem classificacao" e uma linha de verdade, e nao um erro — mas o tom mais
+   apagado convida a classificar. */
+.semConta {
+  color: var(--app-muted);
+  font-style: italic;
+}
+
+.contaContagem {
+  font-size: 12.5px;
+  color: var(--app-muted);
+  white-space: nowrap;
+}
+
+.contaValor {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+@media (max-width: 620px) {
+  .conta {
+    grid-template-columns: 1fr auto;
+  }
+
+  .contaContagem {
+    grid-column: 1 / -1;
+  }
+}

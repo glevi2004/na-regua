@@ -257,40 +257,25 @@ function escopo(tx: TransactionSql): ReconciliationTransaction {
     },
 
     insertEntry: async (l: NovoLancamentoDeTransacao) => {
-      /*
-       * Guarda, e nao um campo ignorado em silencio.
-       *
-       * A classificacao (RF-083) so existe em `core`: a tabela `accounts` da
-       * NR-032 ainda nao tem migration, entao nao ha para onde apontar. A rota
-       * ja recusa `accountId` com mensagem propria; isto aqui e a garantia de
-       * que nenhum outro caminho grave um lancamento fingindo ter classificado.
-       */
-      if (l.accountId !== null) {
-        throw new Error(
-          'Classificacao ainda nao tem tabela (NR-032 sem migration). ' +
-            'Grave o lancamento sem accountId.',
-        )
-      }
-
       const [linha] =
         l.entryKind === 'payable'
           ? await tx<{ id: string }[]>`
               INSERT INTO payables
                 (company_id, supplier, description, amount_cents, due_date,
-                 created_by, created_at, updated_at)
+                 account_id, created_by, created_at, updated_at)
               VALUES (${l.companyId}, ${l.counterparty}, ${l.description},
-                      ${l.amountCents}, ${l.dueDate},
+                      ${l.amountCents}, ${l.dueDate}, ${l.accountId},
                       ${l.createdBy}, ${l.createdAt}, ${l.createdAt})
               RETURNING id
             `
           : await tx<{ id: string }[]>`
               INSERT INTO receivables
                 (company_id, origin, counterparty, description, amount_cents,
-                 net_amount_cents, due_date, created_by, created_at, updated_at)
+                 net_amount_cents, due_date, account_id, created_by, created_at, updated_at)
               /* \`net_amount_cents\` igual ao bruto: o valor JA e o que caiu no
                  banco — veio do extrato. Nao ha tarifa a prever depois do fato. */
               VALUES (${l.companyId}, 'manual', ${l.counterparty}, ${l.description},
-                      ${l.amountCents}, ${l.amountCents}, ${l.dueDate},
+                      ${l.amountCents}, ${l.amountCents}, ${l.dueDate}, ${l.accountId},
                       ${l.createdBy}, ${l.createdAt}, ${l.createdAt})
               RETURNING id
             `

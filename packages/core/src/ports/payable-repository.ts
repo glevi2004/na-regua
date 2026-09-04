@@ -18,7 +18,7 @@ export type NewPayable = {
   /** `AAAA-MM-DD`. Conta vence num dia, nao num instante. */
   readonly dueDate: string
   readonly attachmentKey: string | null
-  readonly category: string | null
+  readonly accountId: string | null
   readonly recurrenceId: string | null
   readonly occurrenceNumber: number | null
   readonly occurrenceCount: number | null

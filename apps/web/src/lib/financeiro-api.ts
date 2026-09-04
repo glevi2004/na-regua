@@ -292,7 +292,7 @@ export type ContaAPagar = {
   dueDate: string
   status: 'open' | 'partially_settled' | 'settled' | 'cancelled'
   /** Classificacao contabil. Nulo enquanto ninguem classificou. */
-  category: string | null
+  accountId: string | null
   recurrenceId: string | null
   occurrenceNumber: number | null
   occurrenceCount: number | null
@@ -335,7 +335,7 @@ export const lancarContaAPagar = (entrada: {
   description: string
   amountCents: number
   dueDate: string
-  category?: string
+  accountId?: string
   recurrence?: { frequency: 'weekly' | 'monthly'; occurrences: number }
 }): Promise<ResultadoContas<{ payables: ContaAPagar[]; count: number }>> =>
   pedir('/api/contas-a-pagar', { method: 'POST', body: JSON.stringify(entrada) })

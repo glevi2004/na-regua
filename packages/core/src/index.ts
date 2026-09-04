@@ -166,6 +166,7 @@ export { FakeIdentityProvider, InMemoryLoginThrottle, InMemorySessionIssuer } fr
 /* Idem: a trilha so persiste quando `db` expuser repositorio de auditoria. */
 export { InMemoryAuditTrail } from './audit/fakes.js'
 export { InMemoryReconciliation } from './reconciliation/fakes.js'
+export { InMemoryChartOfAccounts } from './accounting/fakes.js'
 export type { AuthDeps, LoginMeta } from './auth/login.js'
 export type {
   IdentityProvider,

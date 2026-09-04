@@ -26,6 +26,7 @@ import {
   closeConnection,
   createAppointmentRepository,
   createBankTransactionWriter,
+  createChartOfAccountsRepository,
   createCompanyRepository,
   createCustomerRepository,
   createPayableQueries,
@@ -41,6 +42,7 @@ import {
 import { createFileStatementReader } from '@na-regua/banking'
 import type { CadastroDeps } from './routes/cadastro.js'
 import type { ConciliacaoDeps } from './routes/conciliacao.js'
+import type { ContabilidadeDeps } from './routes/contabilidade.js'
 import type { ContasDeps } from './routes/contas.js'
 import { loadApiEnv } from '@na-regua/env'
 import { Redis } from 'ioredis'
@@ -215,6 +217,8 @@ export function buildCadastroDeps(): CadastroDeps {
     companies: createCompanyRepository(sql),
     customers: createCustomerRepository(sql),
     products: createProductRepository(sql),
+    /* O onboarding semeia o plano de contas padrao — RF-081, NR-077. */
+    accounts: createChartOfAccountsRepository(sql),
   }
 }
 
@@ -273,6 +277,16 @@ export function buildConciliacaoDeps(): ConciliacaoDeps {
       transactions: createBankTransactionWriter(sql),
       audit,
     },
+  }
+}
+
+/** Plano de contas, classificacao e DRE — NR-077. */
+export function buildContabilidadeDeps(): ContabilidadeDeps {
+  const sql = getClient(env.DATABASE_URL)
+  return {
+    accounts: createChartOfAccountsRepository(sql),
+    /* Mesma pendencia das outras: `db` nao expoe repositorio de auditoria. */
+    audit: new InMemoryAuditTrail(),
   }
 }
 

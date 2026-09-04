@@ -346,7 +346,7 @@ describe('criar lancamento a partir da transacao — RF-079', () => {
     expect(c.repo.transacao(transacao.id)?.reconciledEntryId).toBe(r.json().entryId)
   })
 
-  it('RECUSA accountId em vez de descartar em silencio', async () => {
+  it('aceita accountId agora que o plano de contas tem tabela', async () => {
     const c = await buildApp()
     app = c.app
 
@@ -367,12 +367,15 @@ describe('criar lancamento a partir da transacao — RF-079', () => {
     })
 
     /*
-     * A tabela `accounts` (NR-032) nao tem migration. Aceitar e descartar daria
-     * ao lojista um lancamento que ele acredita ter classificado, e o erro so
-     * apareceria no relatorio do contador meses depois.
+     * Ate a NR-077 esta rota RECUSAVA o campo, porque a tabela `accounts` nao
+     * existia e aceitar era descartar em silencio — o lojista acreditaria ter
+     * classificado e o erro so apareceria no relatorio do contador. A tabela
+     * chegou; a recusa saiu.
+     *
+     * Que a conta realmente e GRAVADA e assunto do teste de `db`: o falso
+     * daqui nao tem coluna, e afirma-lo com ele seria afirmar nada.
      */
-    expect(r.statusCode).toBe(400)
-    expect(c.repo.quantosLancamentos()).toBe(0)
+    expect(r.statusCode).toBe(201)
   })
 })
 

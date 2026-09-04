@@ -56,6 +56,7 @@ const navItems: NavItem[] = [
       { href: '/app/financeiro/contas-a-pagar', label: 'Contas a pagar' },
       { href: '/app/financeiro/contas-a-receber', label: 'Contas a receber' },
       { href: '/app/financeiro/conciliacao', label: 'Conciliacao' },
+      { href: '/app/financeiro/dre', label: 'DRE' },
     ],
   },
   { href: '/app/crm', label: 'CRM', icon: IconList },

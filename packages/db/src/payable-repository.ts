@@ -28,7 +28,7 @@ type Linha = {
   due_date: Date | string
   status: string
   attachment_key: string | null
-  category: string | null
+  account_id: string | null
   recurrence_id: string | null
   occurrence_number: number | null
   occurrence_count: number | null
@@ -58,7 +58,7 @@ const paraSaida = (l: Linha): PayableOutput => ({
   dueDate: paraDia(l.due_date),
   status: l.status as PayableOutput['status'],
   attachmentKey: l.attachment_key,
-  category: l.category,
+  accountId: l.account_id,
   recurrenceId: l.recurrence_id,
   occurrenceNumber: l.occurrence_number,
   occurrenceCount: l.occurrence_count,
@@ -87,7 +87,7 @@ function escopo(tx: TransactionSql): PayableTransaction {
             amount_cents: c.amountCents,
             due_date: c.dueDate,
             attachment_key: c.attachmentKey,
-            category: c.category,
+            account_id: c.accountId,
             recurrence_id: c.recurrenceId,
             occurrence_number: c.occurrenceNumber,
             occurrence_count: c.occurrenceCount,

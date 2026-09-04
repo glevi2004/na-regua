@@ -122,13 +122,11 @@ export function registerConciliacaoRoutes(app: FastifyInstance, deps: Conciliaca
   /**
    * Criar o lancamento a partir da transacao e conciliar — RF-079.
    *
-   * `accountId` e RECUSADO aqui, e nao ignorado.
-   *
-   * A classificacao (RF-083) existe em `core` desde a NR-032, mas a tabela
-   * `accounts` ainda nao tem migration — nao ha para onde apontar. Aceitar o
-   * campo e descartar daria ao lojista um lancamento que ele acredita ter
-   * classificado, e o erro so apareceria no relatorio do contador, meses
-   * depois. Recusar com mensagem propria e ruim; silencio e pior.
+   * `accountId` passou a ser ACEITO na NR-077, quando a tabela `accounts`
+   * finalmente ganhou migration. Ate ali esta rota o recusava com mensagem
+   * propria: aceitar e descartar daria ao lojista um lancamento que ele
+   * acredita ter classificado, e o erro so apareceria no relatorio do contador
+   * meses depois.
    */
   app.post(
     '/conciliacao/transacoes/:id/lancamento',
@@ -138,13 +136,10 @@ export function registerConciliacaoRoutes(app: FastifyInstance, deps: Conciliaca
       const { id } = request.params as { id: string }
       const corpo = (request.body ?? {}) as Record<string, unknown>
 
-      const input = validate(
-        createEntryFromTransactionInputSchema
-          .omit({ accountId: true })
-          .strict()
-          .describe('Classificacao ainda nao disponivel: a tabela de contas nao existe.'),
-        { ...corpo, transactionId: id },
-      )
+      const input = validate(createEntryFromTransactionInputSchema, {
+        ...corpo,
+        transactionId: id,
+      })
 
       const r = await createEntryFromTransaction(deps, ctx, input)
 
