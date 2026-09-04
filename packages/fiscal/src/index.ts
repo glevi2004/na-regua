@@ -13,3 +13,11 @@
  */
 export { chaveDeAcesso, createFakeInvoiceIssuer, FakeInvoiceIssuer } from './fake-issuer.js'
 export type { FakeInvoiceIssuerOptions } from './fake-issuer.js'
+
+/* Emissor real — Focus NFe, NR-042 / DEC-004. A guarda de notas viaja junto:
+   ela nao e cache, e o que torna o cancelamento por chave possivel e o que
+   mantem o XML fora da conta do provedor. */
+export { criarEmissorFocusNfe, FOCUS_NFE_URLS, reaisDeCentavos } from './focusnfe-issuer.js'
+export type { AmbienteFocusNfe, CredenciaisFocusNfe, FocusNfeOptions } from './focusnfe-issuer.js'
+export { InMemoryInvoiceStore } from './invoice-store.js'
+export type { InvoiceStore, NotaGuardada } from './invoice-store.js'

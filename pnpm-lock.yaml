@@ -387,6 +387,9 @@ importers:
       '@na-regua/env':
         specifier: workspace:*
         version: link:../env
+      '@na-regua/fiscal':
+        specifier: workspace:*
+        version: link:../fiscal
       '@na-regua/money':
         specifier: workspace:*
         version: link:../money

@@ -42,15 +42,15 @@ PR**, e a linha sai da tabela de abertas.
 
 ## Painel
 
-| Estado             | Qtd | Quais                                           |
-| ------------------ | --: | ----------------------------------------------- |
-| 🔴 Aberta          |   9 | DEC-003, 004, 005, 007, 009, 011, 012, 013, 015 |
-| 🟡 Em análise      |   3 | DEC-001, 006, 010                               |
-| ⚪ Adiada          |   1 | DEC-014                                         |
-| 🟢 Decidida        |   2 | DEC-002, 008                                    |
-| ❓ Pergunta aberta |  12 | QST-001 a QST-012                               |
+| Estado             | Qtd | Quais                                      |
+| ------------------ | --: | ------------------------------------------ |
+| 🔴 Aberta          |   8 | DEC-003, 005, 007, 009, 011, 012, 013, 015 |
+| 🟡 Em análise      |   3 | DEC-001, 006, 010                          |
+| ⚪ Adiada          |   1 | DEC-014                                    |
+| 🟢 Decidida        |   2 | DEC-002, 008                               |
+| ❓ Pergunta aberta |  12 | QST-001 a QST-012                          |
 
-**Bloqueando o MVP agora:** DEC-003, DEC-004, DEC-009.
+**Bloqueando o MVP agora:** DEC-003, DEC-009.
 Essas três travam trabalho de implementação já na Sprint 1.
 
 A DEC-008 fechou — [ADR-0002](adr/0002-autenticacao-identidade-propria.md).
@@ -129,7 +129,7 @@ BSP entrega mais rápido, Meta sai mais barato em escala. A porta
 
 |              |                                                                                                                                  |
 | ------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Status**   | 🔴 Aberta                                                                                                                        |
+| **Status**   | 🟢 **Decidida — Focus NFe**                                                                                                      |
 | **Dono**     | Trilha 2 — Plataforma & Integrações                                                                                              |
 | **Prazo**    | **Sprint 2**                                                                                                                     |
 | **Bloqueia** | `packages/fiscal` · [RF-045 a RF-054](../produto/requisitos-funcionais.md) · [E5](../produto/user-stories.md#e5--emissão-fiscal) |
@@ -146,6 +146,26 @@ varia por cidade) · contingência ([RF-052](../produto/requisitos-funcionais.md
 **Recomendação.** Integração direta com a SEFAZ está fora de cogitação para um
 time de 3 pessoas: é um projeto inteiro por si só. Escolher provedor, priorizando
 NFC-e (MVP) e cobertura de NFS-e nas cidades-alvo.
+
+**Decisão (2026-09-04): Focus NFe.**
+
+O adapter entrou com a [NR-042](../processo/task-ledger.md). Três propriedades
+do provedor moldaram o desenho, e estão no código:
+
+- **NFC-e é síncrona** — autoriza ou rejeita na mesma requisição, diferente da
+  NF-e. Não há fila nem consulta obrigatória depois.
+- **Autenticação é Basic com senha vazia** — `Base64("token:")`. Não é
+  cabeçalho de API key.
+- **A referência (`ref`) é nossa e é o `saleId`** — única por token, e não
+  reutilizável depois que a nota autoriza. Isso dá metade da idempotência que a
+  [RNF-043](../produto/requisitos-nao-funcionais.md) exige.
+
+**O que ficou pendente:** as credenciais por lojista. Cada empresa tem seu token
+Focus NFe, e não há coluna para guardá-lo — guardar em texto puro seria
+regressão de segurança. Ele entra junto com o certificado A1 cifrado
+([RF-004](../produto/requisitos-funcionais.md)), que tem o mesmo problema e a
+mesma solução. Até lá o adapter existe, passa na suíte de contrato e não está
+ligado à composição.
 
 ---
 

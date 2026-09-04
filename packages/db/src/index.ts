@@ -29,6 +29,7 @@ export {
 } from './registration-repositories.js'
 export { createPayableQueries, createPayableUnitOfWork } from './payable-repository.js'
 export { createChartOfAccountsRepository } from './chart-of-accounts-repository.js'
+export { createInvoiceStore } from './invoice-repository.js'
 export {
   createBankTransactionWriter,
   createReconciliationQueries,
