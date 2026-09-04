@@ -198,22 +198,47 @@ function escopo(tx: TransactionSql): ReconciliationTransaction {
      * atualiza a linha.
      *
      * O outro empate — duas transacoes disputando o MESMO lancamento — nao cabe
-     * neste `WHERE`, porque ele olha a transacao e o conflito esta do outro
-     * lado. Quem decide ali sao os indices unicos por lancamento, e a violacao
-     * chega como excecao. Ela vira `false` pelo mesmo motivo: para quem esta na
-     * tela, os dois casos sao "alguem chegou antes, recarregue".
+     * naquele `WHERE`, porque ele olha a transacao e o conflito esta do outro
+     * lado. Por isso o `NOT EXISTS`: ele resolve o caso comum na PROPRIA
+     * escrita, devolvendo zero linhas em vez de esbarrar no indice.
+     *
+     * A primeira versao confiava so no indice e num `catch` do 23505. A CI
+     * mostrou por que nao funciona: em Postgres, statement que falha aborta a
+     * transacao inteira, entao o `catch` devolvia `false`, o postgres.js
+     * mandava COMMIT numa transacao ja abortada e relancava o erro original. O
+     * `catch` nunca teve chance — ele parecia certo e nao era.
+     *
+     * O indice continua, e continua sendo quem decide a corrida de verdade:
+     * duas transacoes simultaneas passam as duas pelo `NOT EXISTS` (nenhuma ve
+     * a linha nao confirmada da outra) e a segunda esbarra nele. Por isso a
+     * escrita mora num SAVEPOINT — assim a violacao desfaz so ela mesma, a
+     * transacao de fora sobrevive, e o `false` chega a quem chamou como
+     * "alguem chegou antes, recarregue" em vez de virar erro de servidor.
      */
     link: async (_empresa, transactionId, entryKind, entryId, at) => {
+      /* `coluna = NULL` nunca e verdadeiro, entao o lado que nao se aplica se
+         anula sozinho no `NOT EXISTS` — sem precisar de dois ramos de SQL. */
+      const contaAPagar = entryKind === 'payable' ? entryId : null
+      const recebivel = entryKind === 'receivable' ? entryId : null
+
       try {
-        const linhas = await tx<{ id: string }[]>`
-          UPDATE bank_transactions
-          SET reconciled_payable_id = ${entryKind === 'payable' ? entryId : null},
-              reconciled_receivable_id = ${entryKind === 'receivable' ? entryId : null},
-              reconciled_at = ${at}
-          WHERE id = ${transactionId}
-            AND reconciled_at IS NULL
-          RETURNING id
-        `
+        const linhas = await tx.savepoint(
+          (sp) => sp<{ id: string }[]>`
+            UPDATE bank_transactions
+            SET reconciled_payable_id = ${contaAPagar},
+                reconciled_receivable_id = ${recebivel},
+                reconciled_at = ${at}
+            WHERE id = ${transactionId}
+              AND reconciled_at IS NULL
+              AND NOT EXISTS (
+                SELECT 1 FROM bank_transactions b2
+                WHERE b2.reconciled_payable_id = ${contaAPagar}
+                   OR b2.reconciled_receivable_id = ${recebivel}
+              )
+            RETURNING id
+          `,
+        )
+
         return linhas.length === 1
       } catch (erro) {
         if ((erro as { code?: string }).code === VIOLACAO_DE_UNICIDADE) return false

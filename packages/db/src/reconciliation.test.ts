@@ -231,6 +231,37 @@ describe.skipIf(!DATABASE_URL)('extrato e conciliacao — NR-076', () => {
       expect(segunda).toBe(false)
     })
 
+    it('recusar o empate deixa a transacao de fora AINDA utilizavel', async () => {
+      await writer.insertIgnoringDuplicates([
+        transacao(empresaA, { externalId: 'VIVA-1' }),
+        transacao(empresaA, { externalId: 'VIVA-2' }),
+      ])
+      const t1 = await idDaTransacao(empresaA, 'VIVA-1')
+      const t2 = await idDaTransacao(empresaA, 'VIVA-2')
+      const conta = await criarConta(empresaA, 5_000, '2026-09-10')
+
+      await uow.transaction(empresaA, (tx) => tx.link(empresaA, t1, 'payable', conta, AGORA))
+
+      /*
+       * O teste que faltava. O primeiro corte confiava so no indice unico e num
+       * `catch` do 23505 — e em Postgres um statement que falha aborta a
+       * transacao INTEIRA, entao o `catch` devolvia `false`, o COMMIT vinha
+       * por cima de uma transacao morta e o erro original voltava assim mesmo.
+       *
+       * Provar que `link` devolve `false` nao bastava: ele devolvia. O que
+       * quebrava era tudo que viesse DEPOIS, dentro da mesma transacao — e e
+       * exatamente o que `createEntryFromTransaction` faz.
+       */
+      const resultado = await uow.transaction(empresaA, async (tx) => {
+        const casou = await tx.link(empresaA, t2, 'payable', conta, AGORA)
+        const aindaLe = await tx.findTransaction(empresaA, t2)
+        return { casou, aindaLe }
+      })
+
+      expect(resultado.casou).toBe(false)
+      expect(resultado.aindaLe?.id).toBe(t2)
+    })
+
     it('desfazer devolve os dois para a fila, sem apagar o lancamento', async () => {
       await writer.insertIgnoringDuplicates([transacao(empresaA, { externalId: 'UNDO-1' })])
       const tId = await idDaTransacao(empresaA, 'UNDO-1')
