@@ -1,37 +1,49 @@
+import AsyncStorage from '@react-native-async-storage/async-storage'
+import * as SecureStore from 'expo-secure-store'
+
 /**
- * Sessao do usuario no mobile.
+ * Sessao do usuario no aplicativo — NR-070.
  *
- * Diferente do web, que guarda a sessao em cookie para o `proxy.ts` do
- * Next conseguir ler no servidor, aqui nao ha servidor no meio: o app
- * fala direto com a API. Por isso o armazenamento e o AsyncStorage.
+ * Diferente do web, que passa por Route Handlers do Next para o token nunca
+ * chegar ao JavaScript da pagina, aqui o app fala direto com a api. Nao ha
+ * servidor no meio e nao ha XSS — o que ha e um aparelho que pode ser perdido,
+ * emprestado ou ter backup extraido.
  *
- * QUANDO O BACKEND EXISTIR: o que fica guardado aqui passa a ser o token
- * devolvido pelo POST /auth/login. Para producao, token deve ir em
- * `expo-secure-store` (Keychain no iOS, Keystore no Android) e nao em
- * AsyncStorage, que e texto puro — trocar antes de sair do prototipo.
+ * ## Por que o token NAO fica no AsyncStorage
+ *
+ * O AsyncStorage e texto puro no sistema de arquivos do app. Em aparelho com
+ * root, e em backups nao criptografados, ele e legivel. Guardar ali um token
+ * que abre doze horas de sessao seria deixar a chave debaixo do tapete.
+ *
+ * O `expo-secure-store` usa Keychain no iOS e Keystore no Android — o mesmo
+ * lugar onde o sistema guarda senha. O comentario que existia neste arquivo ja
+ * dizia isso ("trocar antes de sair do prototipo"); agora que ha token de
+ * verdade, trocou.
+ *
+ * O que NAO e segredo — nome, empresa ativa — continua no AsyncStorage: ele e
+ * mais rapido, aceita objeto grande, e nao ha nada a proteger ali.
  */
 
-import AsyncStorage from '@react-native-async-storage/async-storage'
+const CHAVE_PERFIL = 'eibuddy:perfil'
+const CHAVE_TOKEN = 'eibuddy:token'
 
-const CHAVE = 'eibuddy:sessao'
-
+/** O que a interface precisa mostrar sobre quem entrou. */
 export type Sessao = {
+  userId: string
   nome: string
-  email: string
   empresa: string
 }
 
-export async function abrirSessao(sessao: Sessao): Promise<void> {
-  try {
-    await AsyncStorage.setItem(CHAVE, JSON.stringify(sessao))
-  } catch {
-    /* Falha de storage nao derruba o login — a sessao vale ate fechar. */
-  }
+export async function abrirSessao(sessao: Sessao, token: string): Promise<void> {
+  await Promise.all([
+    AsyncStorage.setItem(CHAVE_PERFIL, JSON.stringify(sessao)).catch(() => undefined),
+    guardarToken(token),
+  ])
 }
 
 export async function lerSessao(): Promise<Sessao | null> {
   try {
-    const bruto = await AsyncStorage.getItem(CHAVE)
+    const bruto = await AsyncStorage.getItem(CHAVE_PERFIL)
     return bruto ? (JSON.parse(bruto) as Sessao) : null
   } catch {
     return null
@@ -39,9 +51,41 @@ export async function lerSessao(): Promise<Sessao | null> {
 }
 
 export async function encerrarSessao(): Promise<void> {
+  await Promise.all([
+    AsyncStorage.removeItem(CHAVE_PERFIL).catch(() => undefined),
+    /*
+     * Apagar o TOKEN e o que de fato encerra. Se so o perfil saisse, a tela
+     * mostraria "entre na sua conta" com um token valido ainda guardado — e a
+     * proxima chamada continuaria autenticada.
+     */
+    SecureStore.deleteItemAsync(CHAVE_TOKEN).catch(() => undefined),
+  ])
+}
+
+async function guardarToken(token: string): Promise<void> {
   try {
-    await AsyncStorage.removeItem(CHAVE)
+    await SecureStore.setItemAsync(CHAVE_TOKEN, token, {
+      /*
+       * So depois do primeiro desbloqueio, e nunca em backup. Sem isto, o token
+       * viajaria no backup do aparelho para outro dispositivo — e uma sessao
+       * restaurada de backup e uma sessao que ninguem abriu.
+       */
+      keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+    })
   } catch {
-    /* ignorado */
+    /*
+     * Aparelho sem armazenamento seguro disponivel. NAO cai para o
+     * AsyncStorage: silenciosamente guardar em texto puro seria pior que
+     * falhar, porque ninguem descobriria. Sem token, a proxima chamada responde
+     * 401 e a pessoa entra de novo.
+     */
+  }
+}
+
+export async function lerToken(): Promise<string | null> {
+  try {
+    return await SecureStore.getItemAsync(CHAVE_TOKEN)
+  } catch {
+    return null
   }
 }

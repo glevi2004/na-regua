@@ -1,3 +1,4 @@
+import { chamarApi } from './api'
 /**
  * ============================================================================
  * PONTOS DE INTEGRACAO — MODULO DE PRODUTOS
@@ -19,7 +20,6 @@
  * vezes e registrar quem importou.
  */
 
-import { produtos } from './mock-data'
 import type { Produto } from './types'
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -60,52 +60,46 @@ export type DadosEan = {
 
 export type EanResult = { ok: true; dados: DadosEan } | { ok: false; error: string }
 
-/** SUBSTITUIR POR: GET /catalogo/ean/:ean */
-export async function buscarEan(ean: string): Promise<EanResult> {
-  await delay(850)
+/**
+ * O que o leitor achou — RF-018.
+ *
+ * Tres desfechos, e a diferenca entre eles e o que a tela precisa saber:
+ *
+ * - `cadastrado`: o codigo JA e de um produto da loja. O mais util nao e
+ *   cadastrar de novo, e abrir o que existe.
+ * - `novo`: a loja nao tem esse codigo. Segue para o cadastro com o campo
+ *   preenchido.
+ * - `erro`: nao deu para perguntar.
+ *
+ * Antes isto devolvia `{ ok: false }` para "ja cadastrado", o que fazia a tela
+ * mostrar mensagem de erro para o caso mais comum e mais util do balcao.
+ */
+export type LeituraDeCodigo =
+  | { readonly situacao: 'cadastrado'; readonly produtoId: string; readonly descricao: string }
+  | { readonly situacao: 'novo'; readonly ean: string }
+  | { readonly situacao: 'erro'; readonly mensagem: string }
 
-  const limpo = ean.replace(/\D/g, '')
-  if (limpo.length < 8) {
-    return { ok: false, error: 'Codigo de barras incompleto.' }
+export async function buscarEan(ean: string): Promise<LeituraDeCodigo> {
+  const limpo = ean.replace(/D/g, '')
+
+  /* Confere antes de ir a rede: EAN tem 8, 12, 13 ou 14 digitos, e leitura
+     truncada e comum quando a etiqueta esta amassada. */
+  if (![8, 12, 13, 14].includes(limpo.length)) {
+    return { situacao: 'erro', mensagem: 'Codigo de barras incompleto. Tente ler de novo.' }
   }
 
-  /* Primeiro procura no proprio catalogo — se o produto ja existe, o mais
-     util e avisar, nao criar um duplicado. */
-  const jaCadastrado = produtos.find((p) => p.ean === limpo)
-  if (jaCadastrado) {
-    return {
-      ok: false,
-      error: `Este codigo ja esta no produto "${jaCadastrado.descricao}".`,
-    }
+  const r = await chamarApi<ProdutoDaApi>(`/produtos/codigo-de-barras/${limpo}`)
+
+  if (r.ok) {
+    return { situacao: 'cadastrado', produtoId: r.dados.id, descricao: r.dados.description }
   }
 
-  const base: Record<string, DadosEan> = {
-    '7891000100103': {
-      descricao: 'Leite condensado 395g',
-      ncm: '0402.99.00',
-      categoria: 'Mercearia',
-    },
-    '7894900011517': {
-      descricao: 'Refrigerante cola 2L',
-      ncm: '2202.10.00',
-      categoria: 'Bebidas',
-    },
-  }
+  /* 404 aqui e resposta, nao falha: o codigo lido e de produto que a loja ainda
+     nao cadastrou, que e exatamente o caminho de cadastrar. */
+  if (r.status === 404) return { situacao: 'novo', ean: limpo }
 
-  const dados = base[limpo]
-  if (!dados) {
-    return {
-      ok: false,
-      error: 'Codigo nao encontrado na base. Preencha os dados manualmente.',
-    }
-  }
-
-  return { ok: true, dados }
+  return { situacao: 'erro', mensagem: r.message }
 }
-
-/* -------------------------------------------------------------------------- */
-/* Busca assistida de NCM                                                     */
-/* -------------------------------------------------------------------------- */
 
 export type SugestaoNcm = { codigo: string; descricao: string }
 
@@ -150,12 +144,35 @@ export type DadosProduto = {
   imagem: string | null
 }
 
-/** SUBSTITUIR POR: POST /produtos ou PUT /produtos/:id */
+type ProdutoDaApi = { id: string; internalCode: string; description: string }
+
+/**
+ * Cadastra o produto — RF-017, RF-019.
+ *
+ * **Fornecedor, categoria, NCM e imagem nao sao enviados.** O contrato e
+ * `.strict()` e nao tem esses campos, entao manda-los faria a requisicao
+ * INTEIRA ser recusada. `categoria` existe como `categoryId` na api, mas a
+ * tela guarda o NOME — inventar a correspondencia aqui seria adivinhar. Mesma
+ * lacuna registrada no web (NR-072).
+ */
 export async function salvarProduto(
   dados: DadosProduto,
 ): Promise<{ ok: true; id: string } | { ok: false; error: string }> {
-  await delay(900)
-  return { ok: true, id: dados.id ?? `prod-${Date.now()}` }
+  const r = await chamarApi<ProdutoDaApi>('/produtos', {
+    method: 'POST',
+    body: {
+      description: dados.descricao,
+      ...(dados.ean ? { barcode: dados.ean.replace(/D/g, '') } : {}),
+      unitOfMeasure: 'un',
+      /* A tela trabalha em reais; o contrato exige centavos inteiros
+         (RNF-044). A conversao acontece AQUI, na borda. */
+      salePriceCents: Math.round(dados.precoVenda * 100),
+      costPriceCents: Math.round(dados.precoCusto * 100),
+      minStock: Math.round(dados.estoqueMinimo),
+    },
+  })
+
+  return r.ok ? { ok: true, id: r.dados.id } : { ok: false, error: r.message }
 }
 
 /** SUBSTITUIR POR: POST /produtos/importar */
