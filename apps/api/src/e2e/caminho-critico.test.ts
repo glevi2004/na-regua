@@ -179,7 +179,8 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
      * O job Verificar da CI fornece DATABASE_URL, DATABASE_MIGRATION_URL e
      * REDIS_URL, e mais nada. `loadApiEnv` exige tambem API_URL e JWT_SECRET,
      * e lanca sem eles — foi assim que este arquivo reprovou na primeira
-     * rodada.
+     * rodada. REDIS_URL entrou na lista depois, pelo motivo inverso: a CI da, e
+     * a maquina de desenvolvimento nem sempre.
      *
      * Preenchidos aqui, e nao no workflow: sao exigencia do VALIDADOR, nao
      * deste teste. O E2E nao emite nem verifica token (nao ha rota de login),
@@ -189,6 +190,10 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
      */
     vi.stubEnv('API_URL', process.env.API_URL ?? 'http://localhost:3333')
     vi.stubEnv('JWT_SECRET', process.env.JWT_SECRET ?? 'segredo-que-o-e2e-nao-usa')
+    /* REDIS_URL entrou depois: a CI fornece, entao a falta so aparecia na
+       maquina de quem nao sobe a infra local. O limitador aqui e registrado sem
+       cliente e conta em memoria — a variavel existe so para o validador. */
+    vi.stubEnv('REDIS_URL', process.env.REDIS_URL ?? 'redis://localhost:6379')
 
     composicao = await import('../composition.js')
 
