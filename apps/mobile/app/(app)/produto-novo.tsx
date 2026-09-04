@@ -29,6 +29,17 @@ import { cores, espaco, fonte, peso } from '@/theme/tokens'
  *
  * O estoque minimo entra com zero. Quem quiser alerta de reposicao configura no
  * web depois — pedir isso agora seria mais um campo entre a pessoa e a venda.
+ *
+ * ## A consequencia fiscal, dita em voz alta
+ *
+ * Produto cadastrado por aqui nasce SEM NCM, CFOP e CST/CSOSN (NR-042). Ele
+ * vende normalmente, e a nota fiscal dele nao sai ate alguem completar a
+ * classificacao no web — a emissao recusa antes de transmitir e diz qual
+ * produto falta (RF-046).
+ *
+ * E a troca certa para o balcao com cliente esperando: a venda acontece, e o
+ * que falta e um dado que so o contador costuma saber. Pedir tres codigos
+ * fiscais aqui seria trocar uma venda perdida por uma nota adiada.
  */
 export default function ProdutoNovoScreen() {
   const router = useRouter()

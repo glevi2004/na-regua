@@ -92,6 +92,10 @@ export type NewProduct = {
   readonly categoryId?: string | undefined
   readonly createdBy: UserId
   readonly createdAt: Date
+  /* Fiscais — RF-046. Nulos ate o lojista informar. */
+  readonly ncm: string | null
+  readonly cfop: string | null
+  readonly taxSituationCode: string | null
 }
 
 export type ProductRepository = {

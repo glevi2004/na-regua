@@ -37,6 +37,17 @@ export default function ProdutoForm() {
   const [descricao, setDescricao] = useState('')
   const [ean, setEan] = useState('')
   const [ncm, setNcm] = useState('')
+  /*
+   * CFOP e situacao tributaria — RF-046, entram com a NR-042.
+   *
+   * Os tres campos fiscais sao OPCIONAIS aqui: exigi-los travaria o cadastro no
+   * dia da instalacao, e a RF-017 pede que ele seja rapido. Quem cobra a falta
+   * e a emissao da nota, que recusa antes de transmitir e diz qual produto
+   * precisa ser classificado — o momento em que a informacao faz falta de
+   * verdade.
+   */
+  const [cfop, setCfop] = useState('')
+  const [situacaoTributaria, setSituacaoTributaria] = useState('')
   const [categoria, setCategoria] = useState('')
   const [fornecedor, setFornecedor] = useState('')
   const [precoCusto, setPrecoCusto] = useState('')
@@ -159,6 +170,8 @@ export default function ProdutoForm() {
       descricao,
       ean,
       ncm,
+      cfop,
+      situacaoTributaria,
       categoria,
       fornecedor,
       precoCusto: custo,
@@ -283,7 +296,7 @@ export default function ProdutoForm() {
         </Card>
 
         {/* ---------------- NCM ---------------- */}
-        <Card title="Classificacao fiscal (NCM)">
+        <Card title="Classificacao fiscal">
           <FormGrid>
             <Field label="NCM" span={4}>
               <Input
@@ -293,7 +306,37 @@ export default function ProdutoForm() {
               />
             </Field>
 
-            <Field label="Nao sabe o NCM?" span={8} hint="Descreva o produto e escolha na lista.">
+            <Field
+              label="CFOP"
+              span={4}
+              hint="5102 e revenda comum. Bebida e cigarro com imposto ja recolhido usam 5405."
+            >
+              <Input
+                value={cfop}
+                onChange={(e) => setCfop(e.target.value)}
+                placeholder="5102"
+                inputMode="numeric"
+              />
+            </Field>
+
+            <Field
+              label="CST ou CSOSN"
+              span={4}
+              /* A dica NAO deduz o codigo a partir do regime: substituicao
+                 tributaria depende do produto E do estado, muda por convenio, e
+                 errar para menos e sonegacao. Dizer como o codigo se parece e
+                 ajudar; escolher por ele seria dar conselho fiscal. */
+              hint="Empresa do Simples usa CSOSN (3 digitos, ex. 102). Regime normal usa CST (2, ex. 00)."
+            >
+              <Input
+                value={situacaoTributaria}
+                onChange={(e) => setSituacaoTributaria(e.target.value)}
+                placeholder="102"
+                inputMode="numeric"
+              />
+            </Field>
+
+            <Field label="Nao sabe o NCM?" span={12} hint="Descreva o produto e escolha na lista.">
               <div className={styles.inline}>
                 <Input
                   value={termoNcm}

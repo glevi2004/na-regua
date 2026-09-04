@@ -175,6 +175,9 @@ type LinhaProduto = {
   category_id: string | null
   is_active: boolean
   created_at: Date
+  ncm: string | null
+  cfop: string | null
+  tax_situation_code: string | null
 }
 
 const paraProduto = (l: LinhaProduto): ProductOutput => ({
@@ -187,6 +190,9 @@ const paraProduto = (l: LinhaProduto): ProductOutput => ({
   costPriceCents: numero(l.cost_price_cents),
   /* `numeric` tambem volta como string — e `null` continua `null`. */
   taxRate: l.tax_rate === null ? null : numero(l.tax_rate),
+  ncm: l.ncm,
+  cfop: l.cfop,
+  taxSituationCode: l.tax_situation_code,
   /* A coluna chama `stock_quantity`; o contrato chama `stock`. */
   stock: l.stock_quantity,
   minStock: l.min_stock,
@@ -203,10 +209,12 @@ export function createProductRepository(sql: Sql): ProductRepository {
           INSERT INTO products
             (company_id, description, barcode, internal_code, unit_of_measure,
              sale_price_cents, cost_price_cents, tax_rate, min_stock, category_id,
+             ncm, cfop, tax_situation_code,
              created_by, created_at)
           VALUES (${p.companyId}, ${p.description}, ${p.barcode ?? null}, ${p.internalCode},
                   ${p.unitOfMeasure}, ${p.salePriceCents}, ${p.costPriceCents},
                   ${p.taxRate ?? null}, ${p.minStock}, ${p.categoryId ?? null},
+                  ${p.ncm}, ${p.cfop}, ${p.taxSituationCode},
                   ${p.createdBy}, ${p.createdAt})
           RETURNING *
         `,

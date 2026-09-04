@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { cfopSchema, ncmSchema, taxSituationCodeSchema } from '../invoice/invoice.js'
 import {
   barcodeSchema,
   idSchema,
@@ -27,6 +28,22 @@ export const createProductInputSchema = z
     costPriceCents: moneyCentsSchema,
     /** Aliquota propria. Ausente = usa a do regime da empresa. */
     taxRate: rateSchema.optional(),
+
+    /*
+     * Campos fiscais — RF-046. Todos OPCIONAIS no cadastro.
+     *
+     * Exigir os tres aqui travaria o balcao no dia da instalacao, e a RF-017
+     * pede cadastro rapido. Quem cobra e a EMISSAO: ela recusa antes de
+     * transmitir e diz qual produto falta classificar, que e o momento em que
+     * a informacao realmente faz falta.
+     */
+    ncm: ncmSchema.optional(),
+    /* Varia por produto: 5102 e revenda comum, 5405 e revenda com ST ja
+       recolhida — e uma mercearia tem os dois na mesma prateleira. */
+    cfop: cfopSchema.optional(),
+    /* CST (2 digitos) no regime normal, CSOSN (3) no Simples. Qual vale sai do
+       regime da empresa — ver `situacaoTributariaPadrao` em `domain`. */
+    taxSituationCode: taxSituationCodeSchema.optional(),
     stock: z.number().int('Estoque precisa ser inteiro.').default(0),
     /** Abaixo disto a tela avisa que precisa repor. */
     minStock: z.number().int('Estoque minimo precisa ser inteiro.').nonnegative().default(0),
@@ -79,6 +96,10 @@ export const productOutputSchema = z.object({
   salePriceCents: z.number().int(),
   costPriceCents: z.number().int(),
   taxRate: z.number().nullable(),
+  /* Fiscais — RF-046. Nulos ate o lojista informar; a emissao e quem cobra. */
+  ncm: z.string().nullable(),
+  cfop: z.string().nullable(),
+  taxSituationCode: z.string().nullable(),
   stock: z.number().int(),
   minStock: z.number().int(),
   categoryId: idSchema.nullable(),
