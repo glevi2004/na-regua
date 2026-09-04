@@ -120,8 +120,10 @@ export {
   findProductByBarcode,
   generateInternalCode,
   registerProduct,
+  searchProducts,
+  TETO_DO_CATALOGO,
 } from './registration/register-product.js'
-export type { RegisterProductDeps } from './registration/register-product.js'
+export type { RegisterProductDeps, SearchProductsDeps } from './registration/register-product.js'
 
 /* --- LGPD: exportacao e anonimizacao — NR-031 --- */
 export { anonymizeCustomer, NOME_ANONIMIZADO } from './privacy/anonymize-customer.js'

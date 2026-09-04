@@ -101,6 +101,23 @@ export type ProductRepository = {
   findByBarcode(companyId: CompanyId, barcode: string): Promise<ProductOutput | undefined>
 
   /**
+   * Catalogo para o balcao — RF-019.
+   *
+   * O `termo` chega ate o SQL de proposito, ao contrario do valor na
+   * conciliacao: aqui nao ha regra nenhuma para esconder, e filtrar em memoria
+   * significaria carregar o catalogo inteiro a cada tecla digitada. Uma loja de
+   * mercearia tem milhares de itens.
+   *
+   * Sem `deleted_at`: produto apagado nao se vende. O `limite` existe porque
+   * a tela mostra uma lista, nao um banco de dados — quem nao achou refina a
+   * busca, e devolver dez mil linhas so trava o navegador.
+   */
+  search(
+    companyId: CompanyId,
+    criterio: { readonly termo?: string; readonly limite: number },
+  ): Promise<readonly ProductOutput[]>
+
+  /**
    * Quantos produtos a empresa tem, para gerar o proximo codigo interno.
    *
    * Contagem, e nao "proximo codigo": gerar o codigo e regra (o formato), e

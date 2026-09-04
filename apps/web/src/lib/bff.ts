@@ -25,8 +25,16 @@ const semSessao = () =>
 export type OpcoesDeEncaminhamento = {
   readonly method?: string
   readonly body?: unknown
-  /** Codigo do sucesso, quando nao e 200. */
+  /**
+   * Forca o codigo do sucesso.
+   *
+   * Raro: por padrao o status da API e REPASSADO, porque ele carrega
+   * informacao — 201 criou, 200 era reenvio. Use so quando a rota do BFF tiver
+   * um contrato proprio, e sabendo que achata a distincao.
+   */
   readonly okStatus?: number
+  /** Cabecalhos extras. Ver `chamarApi`. */
+  readonly headers?: Record<string, string>
 }
 
 export async function encaminhar(
@@ -40,6 +48,7 @@ export async function encaminhar(
     method: opcoes.method,
     body: opcoes.body,
     token,
+    headers: opcoes.headers,
   })
 
   return r.ok
@@ -47,7 +56,7 @@ export async function encaminhar(
          plano, por exemplo). `NextResponse.json(undefined)` escreve o texto
          "undefined" no corpo, que estoura no parse do navegador — entao vira
          um objeto de verdade. */
-      NextResponse.json(r.dados ?? { ok: true }, { status: opcoes.okStatus ?? 200 })
+      NextResponse.json(r.dados ?? { ok: true }, { status: opcoes.okStatus ?? r.status })
     : /*
        * O corpo CRU da api quando ele existe, e nao so codigo e mensagem.
        *

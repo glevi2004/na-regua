@@ -124,6 +124,34 @@ export class InMemoryProductRepository implements ProductRepository {
     return achado ? this.semTenant(achado) : undefined
   }
 
+  /**
+   * Busca por descricao ou codigo, sem depender de caixa.
+   *
+   * O falso imita o LIMITE e a ORDEM do repositorio de verdade. Um falso que
+   * devolvesse tudo, em qualquer ordem, deixaria passar um SQL sem `LIMIT` —
+   * e o defeito so apareceria na loja com catalogo grande, que e a que menos
+   * pode travar.
+   */
+  async search(
+    companyId: CompanyId,
+    criterio: { readonly termo?: string; readonly limite: number },
+  ): Promise<readonly ProductOutput[]> {
+    const termo = criterio.termo?.trim().toLowerCase() ?? ''
+
+    return [...this.registros.values()]
+      .filter((p) => p.companyId === companyId)
+      .filter(
+        (p) =>
+          termo === '' ||
+          p.description.toLowerCase().includes(termo) ||
+          p.internalCode.toLowerCase().includes(termo) ||
+          (p.barcode ?? '').includes(termo),
+      )
+      .sort((a, b) => a.description.localeCompare(b.description))
+      .slice(0, criterio.limite)
+      .map((p) => this.semTenant(p))
+  }
+
   async countAll(companyId: CompanyId): Promise<number> {
     return [...this.registros.values()].filter((p) => p.companyId === companyId).length
   }

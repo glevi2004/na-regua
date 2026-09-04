@@ -30,7 +30,18 @@ type EnvelopeDeErro = {
 }
 
 export type Resposta<T> =
-  | { readonly ok: true; readonly dados: T }
+  | {
+      readonly ok: true
+      readonly dados: T
+      /**
+       * O codigo que a api respondeu, e nao um 200 presumido.
+       *
+       * Nem todo sucesso e igual: a venda responde 201 quando cria e 200
+       * quando reconhece um reenvio pela chave de idempotencia (RNF-043).
+       * Achatar os dois faria quem integra contar duas vendas onde houve uma.
+       */
+      readonly status: number
+    }
   | {
       readonly ok: false
       readonly status: number
@@ -57,7 +68,13 @@ const INDISPONIVEL = 'Nao conseguimos falar com o servidor. Tente de novo em ins
 
 export async function chamarApi<T>(
   caminho: string,
-  opcoes: { method?: string; body?: unknown; token?: string | undefined } = {},
+  opcoes: {
+    method?: string
+    body?: unknown
+    token?: string | undefined
+    /** Cabecalhos extras da rota. Hoje so a chave de idempotencia (RNF-043). */
+    headers?: Record<string, string>
+  } = {},
 ): Promise<Resposta<T>> {
   let resposta: Response
 
@@ -66,6 +83,9 @@ export async function chamarApi<T>(
       method: opcoes.method ?? 'GET',
       headers: {
         'content-type': 'application/json',
+        ...opcoes.headers,
+        /* O token vem DEPOIS dos extras: nenhum cabecalho de rota pode
+           sobrescrever a autorizacao por engano. */
         ...(opcoes.token === undefined ? {} : { authorization: `Bearer ${opcoes.token}` }),
       },
       ...(opcoes.body === undefined ? {} : { body: JSON.stringify(opcoes.body) }),
@@ -85,9 +105,11 @@ export async function chamarApi<T>(
      * e o pior desencontro possivel — ele tentaria de novo e receberia "conta
      * nao encontrada".
      */
-    if (resposta.status === 204) return { ok: true, dados: undefined as T }
+    if (resposta.status === 204) {
+      return { ok: true, dados: undefined as T, status: 204 }
+    }
 
-    return { ok: true, dados: (await resposta.json()) as T }
+    return { ok: true, dados: (await resposta.json()) as T, status: resposta.status }
   }
 
   /*

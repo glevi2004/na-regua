@@ -226,6 +226,37 @@ export function createProductRepository(sql: Sql): ProductRepository {
       return linha === undefined ? undefined : paraProduto(linha)
     },
 
+    /**
+     * O catalogo do balcao — RF-019.
+     *
+     * O termo vai para o SQL porque aqui nao ha regra a esconder, e filtrar em
+     * memoria significaria carregar o catalogo inteiro a cada tecla. `ILIKE`
+     * resolve a caixa sem `lower()` dos dois lados.
+     *
+     * Ordena por descricao para a lista nao dancar entre buscas iguais — sem
+     * `ORDER BY`, o Postgres pode devolver em qualquer ordem e a tela pisca.
+     */
+    search: async (companyId, criterio) => {
+      const linhas = await withTenant(
+        sql,
+        companyId,
+        (tx) => tx<LinhaProduto[]>`
+          SELECT * FROM products
+          WHERE deleted_at IS NULL
+          ${
+            criterio.termo === undefined
+              ? tx``
+              : tx`AND (description ILIKE ${'%' + criterio.termo + '%'}
+                     OR internal_code ILIKE ${'%' + criterio.termo + '%'}
+                     OR barcode = ${criterio.termo})`
+          }
+          ORDER BY description
+          LIMIT ${criterio.limite}
+        `,
+      )
+      return linhas.map(paraProduto)
+    },
+
     countAll: async (companyId) => {
       const [linha] = await withTenant(
         sql,

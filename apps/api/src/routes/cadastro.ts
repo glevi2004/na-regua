@@ -11,6 +11,7 @@ import {
   type RegisterCustomerDeps,
   registerProduct,
   type RegisterProductDeps,
+  searchProducts,
 } from '@na-regua/core'
 import type { FastifyInstance } from 'fastify'
 import { requireContext } from '../plugins/execution-context.js'
@@ -102,6 +103,25 @@ export function registerCadastroRoutes(app: FastifyInstance, deps: CadastroDeps)
    * acesso a recurso, nao filtro sobre colecao. A distincao aparece na
    * resposta — 404 quando nao existe, e nao lista vazia.
    */
+  /**
+   * O catalogo do balcao — RF-019.
+   *
+   * `GET /produtos?q=` e busca sobre colecao, ao contrario do codigo de barras,
+   * que e acesso a recurso. A diferenca aparece na resposta: aqui lista vazia e
+   * uma resposta legitima ("nada com esse nome"), la e 404.
+   */
+  app.get('/produtos', async (request, reply) => {
+    const ctx = requireContext(request)
+    const { q, limite } = (request.query ?? {}) as { q?: string; limite?: string }
+
+    const produtos = await searchProducts(deps, ctx, {
+      ...(q === undefined ? {} : { termo: q }),
+      ...(limite === undefined ? {} : { limite: Number(limite) }),
+    })
+
+    return reply.code(200).send({ products: produtos })
+  })
+
   app.get('/produtos/codigo-de-barras/:codigo', async (request, reply) => {
     const ctx = requireContext(request)
     const { codigo } = request.params as { codigo: string }

@@ -11,6 +11,5 @@ export async function POST(
   return encaminhar(`/conciliacao/transacoes/${encodeURIComponent(id)}/lancamento`, {
     method: 'POST',
     body: await corpoDe(request),
-    okStatus: 201,
   })
 }

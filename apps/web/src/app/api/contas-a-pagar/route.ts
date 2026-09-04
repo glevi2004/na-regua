@@ -19,6 +19,5 @@ export async function POST(request: Request) {
   return encaminhar('/contas-a-pagar', {
     method: 'POST',
     body: await corpoDe(request),
-    okStatus: 201,
   })
 }
