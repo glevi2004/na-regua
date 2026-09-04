@@ -39,6 +39,7 @@ export type PixCharge = {
 }
 
 export type PixChargeStatus = 'pending' | 'paid' | 'expired'
+import { chamarApi } from './api'
 import type { FormaPagamento, Produto } from './types'
 
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms))
@@ -403,4 +404,105 @@ export async function estornarVenda(
 
   const itensDevolvidos = venda.itens.reduce((acc, i) => acc + i.quantidade, 0)
   return { ok: true, itensDevolvidos }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Fechamento da venda contra a api — NR-071, RF-036, RNF-043                 */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * O metodo como o contrato o chama.
+ *
+ * A tela usa portugues (`dinheiro`, `carteira`); o contrato usa o vocabulario
+ * do glossario (`cash`, `wallet`). A traducao acontece AQUI, na borda, e nao
+ * espalhada — senao cada tela inventa a sua e uma delas erra.
+ */
+const METODO: Record<FormaPagamento, 'cash' | 'pix' | 'debit' | 'credit' | 'wallet'> = {
+  dinheiro: 'cash',
+  pix: 'pix',
+  debito: 'debit',
+  credito: 'credit',
+  carteira: 'wallet',
+}
+
+export type VendaRegistrada = {
+  readonly id: string
+  readonly numero: number
+  readonly trocoCentavos: number
+  /** `true` quando o servidor devolveu uma venda que JA existia — RNF-043. */
+  readonly reenvio: boolean
+}
+
+export type ResultadoFecharVenda =
+  | { readonly ok: true; readonly venda: VendaRegistrada }
+  | { readonly ok: false; readonly erro: string }
+
+/**
+ * Fecha a venda — RF-036, RNF-043.
+ *
+ * ## Sobre `chaveDeIdempotencia`
+ *
+ * Ela e PARAMETRO, e nao gerada aqui dentro, e essa e a decisao que faz a
+ * idempotencia funcionar. Se fosse gerada a cada chamada, o reenvio depois de
+ * uma falha de rede criaria uma SEGUNDA venda — com segundo estoque baixado e
+ * segundo recebivel — e o cabecalho existiria sem proteger nada, que e pior que
+ * nao te-lo, porque parece protegido.
+ *
+ * Quem chama gera a chave uma vez, quando o operador confirma, e reusa em toda
+ * tentativa daquele fechamento.
+ *
+ * O total daqui NAO e enviado: o servidor recalcula preco, imposto e taxa a
+ * partir do cadastro. O que a tela mostrou e referencia para o operador, nao
+ * fonte da verdade — se divergir, quem esta certo e o servidor.
+ */
+export async function fecharVenda(
+  itens: ItemCarrinho[],
+  pagamentos: Pagamento[],
+  chaveDeIdempotencia: string,
+  opcoes: { clienteId?: string; descontoCentavos?: number } = {},
+): Promise<ResultadoFecharVenda> {
+  const r = await chamarApi<{
+    sale: { id: string; number: number; changeCents: number }
+    replayed: boolean
+  }>('/sales', {
+    method: 'POST',
+    idempotencyKey: chaveDeIdempotencia,
+    body: {
+      ...(opcoes.clienteId === undefined ? {} : { customerId: opcoes.clienteId }),
+      items: itens.map((i) => ({
+        productId: i.produtoId,
+        quantity: i.quantidade,
+        /* Centavos inteiros na borda — RNF-044. */
+        unitPriceCents: Math.round(i.precoUnitario * 100),
+      })),
+      payments: pagamentos.map((p) => ({
+        method: METODO[p.forma],
+        amountCents: Math.round(p.valor * 100),
+      })),
+      ...(opcoes.descontoCentavos === undefined ? {} : { discountCents: opcoes.descontoCentavos }),
+    },
+  })
+
+  if (!r.ok) return { ok: false, erro: r.message }
+
+  return {
+    ok: true,
+    venda: {
+      id: r.dados.sale.id,
+      numero: r.dados.sale.number,
+      trocoCentavos: r.dados.sale.changeCents,
+      reenvio: r.dados.replayed,
+    },
+  }
+}
+
+/**
+ * Uma chave por fechamento.
+ *
+ * `crypto.randomUUID` existe no Hermes do SDK 57. O prefixo nao e enfeite: no
+ * log do servidor, uma chave que se identifica como vinda do PDV do celular
+ * poupa a pergunta "de onde veio isto" quando alguem investigar um reenvio.
+ */
+export function novaChaveDeVenda(): string {
+  return `pdv-${crypto.randomUUID()}`
 }

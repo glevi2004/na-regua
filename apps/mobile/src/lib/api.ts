@@ -45,7 +45,19 @@ const SEM_CONEXAO = 'Sem conexao com o servidor. Verifique a internet e tente de
 
 export async function chamarApi<T>(
   caminho: string,
-  opcoes: { method?: string; body?: unknown } = {},
+  opcoes: {
+    method?: string
+    body?: unknown
+    /**
+     * Chave de idempotencia — RNF-043.
+     *
+     * Obrigatoria em `POST /sales`. Quem chama e responsavel por REUSAR a
+     * mesma chave ao tentar de novo: gerar uma nova a cada tentativa faz o
+     * cabecalho existir e nao proteger nada, que e pior que nao te-lo, porque
+     * parece protegido.
+     */
+    idempotencyKey?: string
+  } = {},
 ): Promise<Resposta<T>> {
   const token = await lerToken()
 
@@ -56,6 +68,9 @@ export async function chamarApi<T>(
       headers: {
         'content-type': 'application/json',
         ...(token === null ? {} : { authorization: `Bearer ${token}` }),
+        ...(opcoes.idempotencyKey === undefined
+          ? {}
+          : { 'idempotency-key': opcoes.idempotencyKey }),
       },
       ...(opcoes.body === undefined ? {} : { body: JSON.stringify(opcoes.body) }),
     })

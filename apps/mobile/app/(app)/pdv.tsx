@@ -1,8 +1,11 @@
-import { useState } from 'react'
+import { useRouter } from 'expo-router'
+import { useRef, useState } from 'react'
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Cabecalho from '@/components/Cabecalho'
 import {
+  fecharVenda,
+  novaChaveDeVenda,
   FORMAS,
   paraItemCarrinho,
   produtoPorEan,
@@ -10,6 +13,8 @@ import {
   subtotalItem,
   type ItemCarrinho,
 } from '@/lib/vendas-api'
+import { buscarEan } from '@/lib/produtos-api'
+import type { FormaPagamento } from '@/lib/types'
 import { formatMoney } from '@/lib/format'
 import Botao from '@/components/ui/Botao'
 import { Vazio } from '@/components/ui/Cartao'
@@ -24,18 +29,58 @@ import { cores, espaco, fonte, peso, raio } from '@/theme/tokens'
  * celular, cada passo a mais e um cliente esperando na fila.
  */
 export default function Pdv() {
+  const router = useRouter()
   const [itens, setItens] = useState<ItemCarrinho[]>([])
   const [lendo, setLendo] = useState(false)
-  const [forma, setForma] = useState<string>('dinheiro')
+  const [forma, setForma] = useState<FormaPagamento>('dinheiro')
+  const [fechando, setFechando] = useState(false)
+  /**
+   * A chave do fechamento em andamento — RNF-043.
+   *
+   * Guardada em `ref` e nao em estado: ela nao muda o que a tela desenha, e um
+   * `setState` aqui provocaria render a toa no meio do fechamento. O que
+   * importa e que ela SOBREVIVA entre tentativas — gerar uma nova a cada toque
+   * faria o reenvio virar uma segunda venda.
+   */
+  const chaveDoFechamento = useRef<string | null>(null)
 
   const total = subtotalCarrinho(itens)
   const quantidade = itens.reduce((acc, i) => acc + i.quantidade, 0)
 
-  function adicionarPorCodigo(codigo: string) {
-    const produto = produtoPorEan(codigo)
+  /**
+   * Bipou: procura na api, nao no catalogo em memoria.
+   *
+   * A lista carregada na tela pode estar velha em relacao ao que outro operador
+   * acabou de cadastrar — e no balcao isso significa dizer "nao existe" para um
+   * produto que existe.
+   */
+  async function adicionarPorCodigo(codigo: string) {
+    setLendo(false)
 
+    const r = await buscarEan(codigo)
+
+    if (r.situacao === 'erro') {
+      Alert.alert('Nao deu para ler', r.mensagem)
+      return
+    }
+
+    if (r.situacao === 'novo') {
+      Alert.alert('Produto nao cadastrado', `O codigo ${r.ean} nao esta no catalogo desta loja.`, [
+        { text: 'Voltar', style: 'cancel' },
+        {
+          text: 'Cadastrar',
+          onPress: () => router.push({ pathname: '/produto-novo', params: { ean: r.ean } }),
+        },
+      ])
+      return
+    }
+
+    /* Achou na api. O carrinho ainda usa o produto do catalogo local para
+       preco e estoque — trocar isso e a NR-073, que traz o resumo com liquido.
+       Aqui o ganho e nao inventar item que a loja nao tem. */
+    const produto = produtoPorEan(codigo)
     if (!produto) {
-      Alert.alert('Nao encontrado', `O codigo ${codigo} nao esta no catalogo.`)
+      Alert.alert('Produto sem dados locais', r.descricao)
       return
     }
 
@@ -69,23 +114,86 @@ export default function Pdv() {
     ])
   }
 
+  /**
+   * Fecha a venda — RF-036, RNF-043.
+   *
+   * A chave de idempotencia e gerada UMA VEZ, quando o operador confirma, e
+   * reusada em toda tentativa deste fechamento. E o que faz o reenvio depois de
+   * uma falha de rede devolver a MESMA venda em vez de criar uma segunda.
+   *
+   * So e descartada quando a venda entra — a partir dai, o proximo fechamento e
+   * outra venda e merece chave nova.
+   */
+  async function confirmar() {
+    /*
+     * Fiado exige cliente identificado — o contrato recusa sem ele.
+     *
+     * E o app AINDA NAO consegue identificar: nao ha rota de listar clientes na
+     * api, nem caso de uso em `core` para isso. Um seletor alimentado pelo mock
+     * local mandaria um id que o servidor nao conhece, e a venda falharia com
+     * uma mensagem que nao explica nada.
+     *
+     * Entao a recusa e explicita e diz onde fazer. Melhor que um seletor que
+     * parece funcionar e quebra no fechamento, com o cliente na frente.
+     */
+    if (forma === 'carteira') {
+      Alert.alert(
+        'Fiado ainda nao pelo app',
+        'Venda no fiado precisa de cliente identificado, e a busca de clientes ' +
+          'ainda nao existe aqui. Feche esta venda pelo computador.',
+      )
+      return
+    }
+
+    chaveDoFechamento.current ??= novaChaveDeVenda()
+    setFechando(true)
+
+    const r = await fecharVenda(
+      itens,
+      [{ id: 'p1', forma, valor: total, status: 'confirmado' }],
+      chaveDoFechamento.current,
+      {},
+    )
+
+    setFechando(false)
+
+    if (!r.ok) {
+      /* NAO limpa a chave: a proxima tentativa e do MESMO fechamento. */
+      Alert.alert(
+        'Nao deu para fechar',
+        `${r.erro}
+
+O carrinho continua aqui. Tente de novo.`,
+      )
+      return
+    }
+
+    chaveDoFechamento.current = null
+    setItens([])
+
+    Alert.alert(
+      r.venda.reenvio ? 'Venda ja registrada' : 'Venda registrada',
+      r.venda.reenvio
+        ? `Esta venda ja tinha entrado (numero ${r.venda.numero}). Nada foi duplicado.`
+        : `Numero ${r.venda.numero}` +
+            (r.venda.trocoCentavos > 0
+              ? `
+Troco: ${formatMoney(r.venda.trocoCentavos / 100)}`
+              : ''),
+    )
+  }
+
   function fechar() {
     const rotulo = FORMAS.find((f) => f.valor === forma)?.rotulo ?? forma
 
     Alert.alert(
       'Fechar a venda',
-      `${quantidade} item(ns) · ${formatMoney(total)}\nPagamento em ${rotulo}.`,
+      `${quantidade} item(ns) · ${formatMoney(total)}
+Pagamento em ${rotulo}.`,
+
       [
         { text: 'Voltar', style: 'cancel' },
-        {
-          text: 'Fechar',
-          onPress: () => {
-            /* SUBSTITUIR POR: POST /vendas — o servidor recalcula preco,
-               imposto e taxa. O total daqui e so referencia. */
-            setItens([])
-            Alert.alert('Venda registrada', 'O carrinho foi esvaziado.')
-          },
-        },
+        { text: 'Fechar', onPress: () => void confirmar() },
       ],
     )
   }
@@ -173,15 +281,23 @@ export default function Pdv() {
               Cancelar
             </Botao>
             <View style={estilos.acaoPrincipal}>
-              <Botao onPress={fechar} largura>
-                Fechar venda
+              {/* O toque duplo aqui e SEGURO por causa da chave de
+                  idempotencia — a segunda requisicao devolve a mesma venda.
+                  O estado de carregando existe para a pessoa saber que algo
+                  esta acontecendo, nao para proteger o servidor. */}
+              <Botao onPress={fechar} carregando={fechando} largura>
+                {fechando ? 'Fechando...' : 'Fechar venda'}
               </Botao>
             </View>
           </View>
         </View>
       ) : null}
 
-      <LeitorCodigo aberto={lendo} onLer={adicionarPorCodigo} onFechar={() => setLendo(false)} />
+      <LeitorCodigo
+        aberto={lendo}
+        onLer={(codigo) => void adicionarPorCodigo(codigo)}
+        onFechar={() => setLendo(false)}
+      />
     </SafeAreaView>
   )
 }
