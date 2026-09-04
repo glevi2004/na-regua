@@ -39,6 +39,16 @@ export const apiEnvSchema = baseEnvSchema.extend({
    * adapter de autenticacao (DEC-008), nao deste pacote.
    */
   JWT_SECRET: z.string().min(1, 'JWT_SECRET e obrigatoria. Defina um valor em .env.'),
+
+  /**
+   * Chave de 32 bytes em base64 que cifra os segredos de lojista — RNF-022.
+   *
+   * Opcional: sem ela a api sobe e a configuracao de emissao fiscal fica
+   * indisponivel, o que e melhor que nao subir. A rota recusa com mensagem
+   * propria, e `lerChaveDeSegredo` (em `db`) confere tamanho e forca — validar
+   * nos dois lugares daria duas respostas para "esta chave serve".
+   */
+  SECRETS_KEY: z.string().optional(),
 })
 
 export type ApiEnv = z.infer<typeof apiEnvSchema>

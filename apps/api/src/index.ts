@@ -6,6 +6,7 @@ import {
   buildCadastroDeps,
   buildConciliacaoDeps,
   buildContabilidadeDeps,
+  buildFiscalDeps,
   buildContasDeps,
   getRedis,
   buildSaleDeps,
@@ -25,6 +26,7 @@ import { registerCadastroRoutes } from './routes/cadastro.js'
 import { registerConciliacaoRoutes } from './routes/conciliacao.js'
 import { registerContabilidadeRoutes } from './routes/contabilidade.js'
 import { registerContasRoutes } from './routes/contas.js'
+import { registerFiscalRoutes } from './routes/fiscal.js'
 import { registerSaleRoutes } from './routes/sales.js'
 
 // RNF-058: log estruturado (JSON) com requestId, companyId e userId.
@@ -87,6 +89,22 @@ async function registrarRotas(): Promise<void> {
   registerContasRoutes(app, buildContasDeps())
   registerConciliacaoRoutes(app, buildConciliacaoDeps())
   registerContabilidadeRoutes(app, buildContabilidadeDeps())
+
+  /*
+   * A falta da chave de cifragem NAO impede a api de subir: ela desliga uma
+   * tela, e derrubar o processo inteiro por isso seria trocar um recurso
+   * ausente por indisponibilidade total. O aviso no log e o que faz alguem
+   * notar antes do lojista.
+   */
+  try {
+    registerFiscalRoutes(app, buildFiscalDeps())
+  } catch (erro) {
+    app.log.warn(
+      { motivo: (erro as Error).message },
+      'configuracao de emissao fiscal desligada — ver SECRETS_KEY',
+    )
+    registerFiscalRoutes(app, null)
+  }
 }
 
 async function main(): Promise<void> {
