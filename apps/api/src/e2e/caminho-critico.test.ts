@@ -112,6 +112,10 @@ const PRODUTO = {
   costPriceCents: 1200,
   barcode: EAN,
   stock: 10,
+  /* Fiscais — NR-042, RF-046. Sem eles a nota nao sai. */
+  ncm: '09011110',
+  cfop: '5102',
+  taxSituationCode: '102',
 }
 
 const vendaDinheiro = (productId: string) => ({
@@ -319,6 +323,15 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
 
       expect(r.statusCode).toBe(201)
       produtoId = r.json().id
+
+      /*
+       * Os campos fiscais atravessam ate o banco — NR-042.
+       *
+       * Eles eram o que faltava para a emissao existir: o contrato exige NCM,
+       * CFOP e CST/CSOSN por item, e o cadastro nao tinha nenhum dos tres. O
+       * NCM chegou a ser digitado na tela do web e descartado em silencio.
+       */
+      expect(r.json()).toMatchObject({ ncm: '09011110', cfop: '5102', taxSituationCode: '102' })
     })
 
     it('registra a primeira venda', async () => {

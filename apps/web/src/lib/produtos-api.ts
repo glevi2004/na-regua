@@ -141,6 +141,10 @@ export type DadosProduto = {
   descricao: string
   ean: string
   ncm: string
+  /* Natureza da operacao — 5102 revenda comum, 5405 com ST ja recolhida. */
+  cfop: string
+  /* CST (2 digitos) ou CSOSN (3), conforme o regime da empresa. */
+  situacaoTributaria: string
   categoria: string
   fornecedor: string
   precoCusto: number
@@ -176,6 +180,21 @@ export async function salvarProduto(
         salePriceCents: Math.round(dados.precoVenda * 100),
         costPriceCents: Math.round(dados.precoCusto * 100),
         minStock: Math.round(dados.estoqueMinimo),
+
+        /*
+         * Fiscais — RF-046.
+         *
+         * O NCM ja era digitado nesta tela e NAO era enviado: o lojista
+         * preenchia e o sistema descartava em silencio, e a nota nao sairia por
+         * falta de um dado que ele achava ter informado. Os tres vao juntos
+         * agora, e so quando preenchidos — o cadastro continua rapido, e quem
+         * cobra a falta e a emissao, que sabe dizer qual produto travou.
+         */
+        ...(dados.ncm.trim() === '' ? {} : { ncm: dados.ncm.trim() }),
+        ...(dados.cfop.trim() === '' ? {} : { cfop: dados.cfop.trim() }),
+        ...(dados.situacaoTributaria.trim() === ''
+          ? {}
+          : { taxSituationCode: dados.situacaoTributaria.trim() }),
       }),
     })
   } catch {

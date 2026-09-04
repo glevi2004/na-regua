@@ -37,3 +37,12 @@ export type { PaymentInput, PaymentMethod } from './types/payment-input.js'
 export type { SaleItemInput } from './types/sale-item-input.js'
 export type { SaleTotals } from './types/sale-totals.js'
 export type { TaxRegime, TaxRules } from './types/tax-rules.js'
+
+/* CST/CSOSN e o regime que decide qual vale — RF-003, RF-046, NR-042. */
+export {
+  porQueNaoCombina,
+  situacaoCombinaComRegime,
+  situacaoTributariaPadrao,
+  usaCsosn,
+} from './situacao-tributaria.js'
+export type { RegimeTributario } from './situacao-tributaria.js'
