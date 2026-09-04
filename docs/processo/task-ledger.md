@@ -51,10 +51,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      58 |  158 |
-| ✅ Concluídas                 |      44 |  107 |
+| ✅ Concluídas                 |      45 |  111 |
 | 🚧 Bloqueadas por decisão     |       9 |   35 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |       4 |   14 |
+| ⬜ A fazer, pode começar hoje |       3 |   10 |
 
 > **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -132,7 +132,7 @@ Objetivo: emitir NFC-e e controlar contas a pagar e receber.
 | NR-043 | `payments`: porta `PaymentGateway` + adapter falso                     |   🟠   | `payments` `core` |   2 | NR-005 | —                | RF-063                 |   ✅   |
 | NR-044 | `payments`: adapter PagMaxx — Pix, link de pagamento, webhook com HMAC |   🟠   | `payments`        |   4 | NR-043 | DEC-006, DEC-015 | RF-034, RF-068         |   🚧   |
 | NR-073 | `mobile`: pagamento, resumo com líquido e margem                       |   🟢   | `mobile`          |   3 | NR-071 | —                | US-018–020             |   ✅   |
-| NR-074 | `web`: contas a pagar e a receber                                      |   🟢   | `web`             |   4 | NR-029 | —                | E6, E7                 |   ⬜   |
+| NR-074 | `web`: contas a pagar e a receber                                      |   🟢   | `web`             |   4 | NR-029 | —                | E6, E7                 |   ✅   |
 
 ## Sprint 4 — WhatsApp e assinatura
 

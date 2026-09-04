@@ -1,18 +1,19 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
+  carregarContasAPagar,
+  type ContaAPagar,
   baixarTitulo,
   estornarTitulo,
   exportar,
-  listarContasPagar,
   listarContasReceber,
   ROTULO_SITUACAO,
   situacaoDoTitulo,
   TIPOS_RECEBIMENTO,
   type SituacaoVisual,
 } from '@/lib/financeiro-api'
-import type { ContaPagar, ContaReceber, StatusTitulo } from '@/lib/types'
+import type { ContaReceber, StatusTitulo } from '@/lib/types'
 import { daysUntil, describeDueDate, formatDate, formatMoney } from '@/lib/format'
 import { Badge, Card, EmptyState, PageHeader, Stat } from '@/components/ui/UI'
 import { Button } from '@/components/ui/Button'
@@ -26,6 +27,42 @@ import FormularioTitulo from './FormularioTitulo'
 import styles from './financeiro.module.css'
 
 /** Forma comum entre conta a pagar e a receber, para a lista trabalhar. */
+/**
+ * O status da api para o vocabulario da tela.
+ *
+ * Os dois modelos discordam num ponto que importa: o web trata `vencido` como
+ * STATUS, e a api o calcula a partir da data — la e faixa, nao estado. Uma
+ * conta vencida continua `open` no servidor.
+ *
+ * Entao `vencido` sai daqui pela DATA, e nao do campo. Mapear `open` para
+ * `aberto` sempre faria a tela perder o destaque de atraso; inventar um status
+ * `vencido` no servidor faria a mesma conta mudar de estado a meia-noite sem
+ * ninguem tocar nela.
+ */
+function statusDaApi(status: string, vencimento: string): StatusTitulo {
+  if (status === 'settled') return 'pago'
+  if (status === 'partially_settled') return 'parcial'
+  return daysUntil(vencimento) < 0 ? 'vencido' : 'aberto'
+}
+
+function paraLinhaDaApi(c: ContaAPagar): Linha {
+  return {
+    id: c.id,
+    contraparte: c.supplier,
+    descricao: c.description,
+    vencimento: c.dueDate,
+    /* Centavos para reais na borda: a tela inteira trabalha em reais. */
+    valor: c.amountCents / 100,
+    valorBaixado: c.settledAmountCents / 100,
+    status: statusDaApi(c.status, c.dueDate),
+    /* A api ainda nao guarda banco nem classificacao no titulo — a coluna
+       `category` existe, mas o plano de contas (NR-032) nao esta ligado a
+       ela. Vazio e honesto; inventar seria pior. */
+    banco: '',
+    classificacao: c.category ?? '',
+  }
+}
+
 type Linha = {
   id: string
   contraparte: string
@@ -55,9 +92,66 @@ export default function ContasView({ tipo }: { tipo: 'pagar' | 'receber' }) {
 
   /* Estado local: sem backend, a lista precisa refletir baixa e estorno
      para a tela ser navegavel de verdade. */
+  /*
+   * CONTAS A PAGAR vem da api (NR-074). CONTAS A RECEBER continua no mock: a
+   * tabela `receivables` existe desde a 0003, mas nao ha caso de uso de listar
+   * em `core` nem rota na api — e uma tela alimentada por dado inventado ao
+   * lado de uma tela real seria pior que duas telas mock, porque ninguem
+   * saberia qual e qual.
+   *
+   * Isso esta dito no PR. A metade que falta e uma tarefa: listar recebiveis.
+   */
   const [linhas, setLinhas] = useState<Linha[]>(() =>
-    pagar ? listarContasPagar().map(paraLinhaPagar) : listarContasReceber().map(paraLinhaReceber),
+    pagar ? [] : listarContasReceber().map(paraLinhaReceber),
   )
+  const [carregando, setCarregando] = useState(pagar)
+  const [erroCarga, setErroCarga] = useState<string | null>(null)
+
+  /*
+   * Fora do efeito porque o botao de "tentar de novo" chama o MESMO caminho.
+   * Erro de rede que so oferece recarregar a pagina inteira faz o lojista
+   * perder os filtros que acabou de montar.
+   */
+  const carregar = useCallback(async () => {
+    const r = await carregarContasAPagar()
+    setCarregando(false)
+
+    if (!r.ok) {
+      setErroCarga(r.erro)
+      return
+    }
+
+    /* O servidor ja agrupa e ja soma. A tela achata para a lista que ela
+       desenha, mas NAO recalcula total: somar aqui daria um numero que pode
+       divergir do relatorio, e "quanto preciso ter em caixa" nao pode ter
+       duas respostas. */
+    setLinhas(r.dados.grupos.flatMap((g) => g.payables.map(paraLinhaDaApi)))
+  }, [])
+
+  useEffect(() => {
+    if (!pagar) return
+
+    /* O `async` explicito e para o lint, e o que ele diz e verdade: todo
+       `setState` de `carregar` vem DEPOIS do await, nunca sincrono no corpo
+       do efeito. Chamada nua, o compilador do React para no nome da funcao e
+       supoe o pior. */
+    void (async () => {
+      await carregar()
+    })()
+  }, [pagar, carregar])
+
+  /*
+   * A primeira carga JA comeca com `carregando`; quem precisa religa-lo e a
+   * retentativa. Por isso os dois `setState` moram aqui, num onClick, e nao
+   * dentro de `carregar` — chamado pelo efeito, `setCarregando(true)` roda
+   * sincrono na montagem e provoca um render em cascata (o lint reprova, e com
+   * razao: e um render inteiro jogado fora em toda abertura da tela).
+   */
+  const tentarDeNovo = () => {
+    setCarregando(true)
+    setErroCarga(null)
+    void carregar()
+  }
 
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>('todos')
   const [filtroClassificacao, setFiltroClassificacao] = useState('')
@@ -307,7 +401,19 @@ export default function ContasView({ tipo }: { tipo: 'pagar' | 'receber' }) {
         </div>
 
         {/* --- Lista --- */}
-        {filtradas.length === 0 ? (
+        {carregando ? (
+          <EmptyState title="Carregando contas" description="Buscando os titulos em aberto." />
+        ) : erroCarga !== null ? (
+          <EmptyState
+            title="Nao deu para carregar as contas"
+            description={erroCarga}
+            action={
+              <Button variant="secondary" onClick={tentarDeNovo}>
+                Tentar de novo
+              </Button>
+            }
+          />
+        ) : filtradas.length === 0 ? (
           <EmptyState
             title={
               linhas.length === 0
@@ -453,20 +559,6 @@ export default function ContasView({ tipo }: { tipo: 'pagar' | 'receber' }) {
 }
 
 /* ------------------------------------------------------------------ */
-
-function paraLinhaPagar(c: ContaPagar): Linha {
-  return {
-    id: c.id,
-    contraparte: c.fornecedor,
-    descricao: c.descricao,
-    vencimento: c.vencimento,
-    valor: c.valor,
-    valorBaixado: c.valorPago,
-    status: c.status,
-    banco: c.bancoNome,
-    classificacao: c.planoContasNome,
-  }
-}
 
 function paraLinhaReceber(c: ContaReceber): Linha {
   const tipoRotulo = TIPOS_RECEBIMENTO.find((t) => t.valor === c.tipo)?.rotulo ?? c.tipo
