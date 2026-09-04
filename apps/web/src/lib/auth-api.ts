@@ -151,16 +151,64 @@ export type SignupData = {
   email: string
   telefone: string
   senha: string
+  /**
+   * A LOJA. Sem estes dois nao ha cadastro — RF-001, RF-002.
+   *
+   * Eles faltavam no formulario, e por isso o cadastro nao podia funcionar: a
+   * api cria pessoa e empresa juntas, e uma pessoa sem loja nao consegue fazer
+   * nada no sistema.
+   */
+  razaoSocial: string
+  cnpj: string
   cupom: string | null
 }
 
-/** SUBSTITUIR POR: POST /auth/signup — deve devolver o id da conta criada. */
+/**
+ * Cria a conta — NR-014, RF-001, RF-002.
+ *
+ * Devolve a sessao JA ABERTA: o token vai para o cookie `httpOnly` no proprio
+ * handler, e quem cadastrou entra direto. Antes esta funcao era um `delay` que
+ * devolvia um id inventado — nada era criado, e o login depois falhava sem
+ * explicacao.
+ */
 export async function createAccount(
   data: SignupData,
 ): Promise<{ ok: true; accountId: string } | { ok: false; error: string }> {
-  await delay(1100)
-  void data
-  return { ok: true, accountId: 'acc-1' }
+  let resposta: Response
+  try {
+    resposta = await fetch('/api/auth/signup', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'same-origin',
+      body: JSON.stringify({
+        name: data.nome,
+        email: data.email,
+        ...(data.telefone.trim() === '' ? {} : { phone: data.telefone }),
+        secret: data.senha,
+        legalName: data.razaoSocial,
+        cnpj: data.cnpj,
+      }),
+    })
+  } catch {
+    return { ok: false, error: 'Sem conexao. Verifique sua internet.' }
+  }
+
+  const corpo = (await resposta.json().catch(() => ({}))) as {
+    userId?: string
+    error?: { message?: string; fields?: { path: string; message: string }[] }
+  }
+
+  if (!resposta.ok) {
+    /* A mensagem do CAMPO quando existe: "confira os campos indicados" nao diz
+       qual campo, e o formulario precisa apontar para um. */
+    const doCampo = corpo.error?.fields?.[0]?.message
+    return {
+      ok: false,
+      error: doCampo ?? corpo.error?.message ?? 'Nao foi possivel criar a conta.',
+    }
+  }
+
+  return { ok: true, accountId: corpo.userId ?? '' }
 }
 
 /* -------------------------------------------------------------------------- */

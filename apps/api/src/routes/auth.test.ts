@@ -1,9 +1,10 @@
-import type { AuthDeps } from '@na-regua/core'
 import {
   FakeIdentityProvider,
   InMemoryAuditTrail,
   InMemoryLoginThrottle,
   InMemorySessionIssuer,
+  InMemoryChartOfAccounts,
+  InMemoryCompanyRepository,
 } from '@na-regua/core'
 import Fastify, { type FastifyInstance } from 'fastify'
 import { afterEach, describe, expect, it } from 'vitest'
@@ -11,7 +12,7 @@ import { registerErrorHandler } from '../plugins/error-handler.js'
 import { requireContext } from '../plugins/execution-context.js'
 import { LIMITE_DE_AUTENTICACAO, registerRateLimit } from '../plugins/rate-limit.js'
 import { lerToken, registerSession } from '../plugins/session.js'
-import { registerAuthRoutes } from './auth.js'
+import { type AuthRouteDeps, registerAuthRoutes } from './auth.js'
 
 /**
  * O ciclo inteiro pelo Fastify: entrar, escolher loja, e so entao operar.
@@ -44,14 +45,30 @@ async function buildApp() {
       return undefined
     }
     async attachSubject() {}
-    async listMemberships() {
-      return this.vinculos
+    /* Vinculos por usuario, alem dos fixos da Marta: o cadastro cria pessoa e
+       loja novas, e o login logo depois precisa achar o vinculo DELA. */
+    porUsuario = new Map<string, { companyId: string; companyName: string; role: 'owner' }[]>()
+    async listMemberships(userId: string) {
+      return this.porUsuario.get(userId) ?? this.vinculos
     }
     async findMembership(companyId: string) {
       return this.vinculos.find((v) => v.companyId === companyId)
     }
-    async createUserWithAccess() {
-      throw new Error('nao usado')
+    /**
+     * O cadastro (NR-014) usa este caminho.
+     *
+     * Guarda o usuario sob o `subject` que o provedor falso emite
+     * (`fake:<identificador>`) — sem isso o login seguinte acharia a
+     * credencial valida e nenhum usuario, e recusaria com a mesma mensagem de
+     * senha errada.
+     */
+    async createUserWithAccess(convite: { companyId: string; name: string; email: string | null }) {
+      const usuario = { id: `user-${this.usuarios.size + 1}`, name: convite.name, isActive: true }
+      this.usuarios.set(`fake:${convite.email}`, usuario)
+      this.porUsuario.set(usuario.id, [
+        { companyId: convite.companyId, companyName: convite.name, role: 'owner' },
+      ])
+      return usuario
     }
     async grantAccess() {
       throw new Error('nao usado')
@@ -67,11 +84,16 @@ async function buildApp() {
   })
   const deps = {
     provider,
+    /* A MESMA instancia registra e verifica — duas seriam dois mapas de
+       credencial, e o cadastro escreveria num enquanto o login leria do outro. */
+    registrar: provider,
     users,
+    companies: new InMemoryCompanyRepository(),
+    accounts: new InMemoryChartOfAccounts(),
     sessions: new InMemorySessionIssuer(),
     throttle: new InMemoryLoginThrottle(),
     audit: new InMemoryAuditTrail(),
-  } as unknown as AuthDeps
+  } as unknown as AuthRouteDeps
 
   const app = Fastify({ logger: false })
   registerErrorHandler(app)
@@ -333,5 +355,107 @@ describe('limite de requisicoes — RNF-026', () => {
     const r = await entrar(app)
 
     expect(r.headers['x-ratelimit-limit']).toBe(String(LIMITE_DE_AUTENTICACAO.max))
+  })
+})
+
+describe('cadastro de conta — NR-014, RF-001', () => {
+  const CADASTRO = {
+    name: 'Ana Souza',
+    email: 'ana@mercearia.local',
+    phone: '41999990000',
+    secret: 'senha-de-teste-longa',
+    legalName: 'Mercearia da Ana LTDA',
+    cnpj: '11222333000181',
+  }
+
+  it('cria a conta e ja devolve a sessao aberta', async () => {
+    const c = await buildApp()
+    app = c.app
+
+    const r = await app.inject({ method: 'POST', url: '/auth/signup', payload: CADASTRO })
+
+    expect(r.statusCode).toBe(201)
+    expect(r.json().token).toBeTruthy()
+    expect(r.json().activeCompanyId).not.toBeNull()
+  })
+
+  it('DEPOIS do cadastro, o login funciona', async () => {
+    const c = await buildApp()
+    app = c.app
+
+    await app.inject({ method: 'POST', url: '/auth/signup', payload: CADASTRO })
+
+    const r = await app.inject({
+      method: 'POST',
+      url: '/auth/login',
+      payload: { identifier: CADASTRO.email, secret: CADASTRO.secret },
+    })
+
+    /*
+     * O teste que faltava. Antes, o cadastro nao existia — e mesmo com usuario
+     * no banco o login falhava, porque o provedor de identidade nascia sem
+     * credencial nenhuma. Provar que a conta e criada nao bastava: o que o
+     * lojista quer e ENTRAR depois.
+     */
+    expect(r.statusCode).toBe(200)
+    expect(r.json().activeCompanyId).not.toBeNull()
+  })
+
+  it('nao exige sessao — quem cadastra ainda nao tem', async () => {
+    const c = await buildApp()
+    app = c.app
+
+    const r = await app.inject({ method: 'POST', url: '/auth/signup', payload: CADASTRO })
+
+    /* Exigir contexto aqui seria exigir que a pessoa ja estivesse dentro para
+       poder entrar. */
+    expect(r.statusCode).not.toBe(401)
+  })
+
+  it('recusa CNPJ invalido antes de criar qualquer coisa', async () => {
+    const c = await buildApp()
+    app = c.app
+
+    const r = await app.inject({
+      method: 'POST',
+      url: '/auth/signup',
+      payload: { ...CADASTRO, cnpj: '00000000000000' },
+    })
+
+    expect(r.statusCode).toBe(400)
+  })
+
+  it('recusa senha curta com mensagem para o formulario', async () => {
+    const c = await buildApp()
+    app = c.app
+
+    const r = await app.inject({
+      method: 'POST',
+      url: '/auth/signup',
+      payload: { ...CADASTRO, secret: 'curta' },
+    })
+
+    /* A recusa vem daqui e nao do provedor: chegar do lado de la faria a pessoa
+       perder o que digitou. */
+    /* O manipulador de erro resume a mensagem e detalha em `fields` — e la que
+       o formulario le qual campo recusou. */
+    expect(r.statusCode).toBe(400)
+    expect(JSON.stringify(r.json().error.fields)).toMatch(/8 caracteres/)
+  })
+
+  it('CNPJ repetido responde 409, sem dizer de quem e', async () => {
+    const c = await buildApp()
+    app = c.app
+
+    await app.inject({ method: 'POST', url: '/auth/signup', payload: CADASTRO })
+
+    const r = await app.inject({
+      method: 'POST',
+      url: '/auth/signup',
+      payload: { ...CADASTRO, email: 'outra@loja.local' },
+    })
+
+    expect(r.statusCode).toBe(409)
+    expect(r.body).not.toContain('Mercearia da Ana')
   })
 })

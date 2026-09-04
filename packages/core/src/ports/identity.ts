@@ -39,6 +39,33 @@ export type IdentityProvider = {
   verify(credential: Credential): Promise<VerifiedIdentity | undefined>
 }
 
+/**
+ * Quem sabe CRIAR uma credencial — NR-014.
+ *
+ * Porta separada de `IdentityProvider`, e nao um metodo a mais nela, porque
+ * nem todo provedor a oferece: quando a identidade e alugada de verdade
+ * (ADR-0002), quem cria a credencial e a tela DELE, e o nosso cadastro so
+ * amarra a pessoa ja autenticada a uma empresa.
+ *
+ * Com `AUTH_PROVIDER=fake`, somos nos: o falso guarda o par e o login passa a
+ * funcionar. Sem esta porta, o cadastro criava a empresa e o usuario e a pessoa
+ * NAO conseguia entrar — o provedor falso nasce sem credencial nenhuma, entao
+ * `verify` devolvia indefinido para todo mundo.
+ */
+export type IdentityRegistrar = {
+  /**
+   * Cria a credencial e devolve o `subject` que o provedor passa a usar.
+   *
+   * `undefined` quando o identificador ja existe no provedor — resultado, e nao
+   * excecao, pelo mesmo motivo de `verify`: "ja tem conta" e uma resposta que o
+   * cadastro precisa tratar, nao uma falha.
+   */
+  register(
+    credential: Credential,
+    dados: { readonly email: string | null; readonly phone: string | null },
+  ): Promise<{ readonly subject: string } | undefined>
+}
+
 export type LocalUser = {
   readonly id: UserId
   readonly name: string
