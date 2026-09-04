@@ -47,7 +47,7 @@ NR-062 — agent: contexto de conversa isolado por empresa,Sprint 4 — WhatsApp
 NR-033 — core: conciliação com sugestão por valor e data,Sprint 5 — Bancos e relatórios,Trilha 1 — Nucleo & Dados,Done,Medium,3,Sprint 5,NR-032,,core,RF-078–080,docs/processo/task-ledger.md
 NR-047 — banking: importação de OFX/CSV,Sprint 5 — Bancos e relatórios,Trilha 2 — Plataforma & Integracoes,Done,Medium,3,Sprint 5,NR-033,,banking,"RF-076, RF-077",docs/processo/task-ledger.md
 NR-048 — banking: Open Finance,Sprint 5 — Bancos e relatórios,Trilha 2 — Plataforma & Integracoes,Blocked,High,4,Sprint 5,NR-047,DEC-005,banking,"RF-074, RF-075",docs/processo/task-ledger.md
-NR-076 — web: conciliação bancária,Sprint 5 — Bancos e relatórios,Trilha 3 — Clientes,Not started,Medium,3,Sprint 5,NR-033,,web,US-038,docs/processo/task-ledger.md
+NR-076 — web: conciliação bancária,Sprint 5 — Bancos e relatórios,Trilha 3 — Clientes,Done,Medium,3,Sprint 5,NR-033,,web,US-038,docs/processo/task-ledger.md
 "NR-077 — Relatórios: DRE, ranking e faturamento, no app e no assistente",Sprint 5 — Bancos e relatórios,Trilha 3 — Clientes,Not started,Medium,4,Sprint 5,NR-032,,web mobile,"US-041, US-053",docs/processo/task-ledger.md
 NR-016 — CHANGELOG gerado dos commits + processo de release,Backlog,Trilha 2 — Plataforma & Integracoes,Done,Low,1,Backlog,,,repo,—,docs/processo/task-ledger.md
 NR-034 — core: agenda e lembretes,Backlog,Trilha 1 — Nucleo & Dados,Done,Low,2,Backlog,,,core,RF-089–093,docs/processo/task-ledger.md

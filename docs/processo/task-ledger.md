@@ -51,12 +51,12 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      58 |  158 |
-| ✅ Concluídas                 |      45 |  111 |
+| ✅ Concluídas                 |      46 |  114 |
 | 🚧 Bloqueadas por decisão     |       9 |   35 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |       3 |   10 |
+| ⬜ A fazer, pode começar hoje |       2 |    7 |
 
-> **Números conferidos contra a `main` em 2026-09-02**, não estimados: cada
+> **Números conferidos contra a `main` em 2026-09-04**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
 > exceção — foi mesclado antes de a convenção de rodapé existir (PR #15).
 > As somas saem das linhas deste arquivo e fecham com o
