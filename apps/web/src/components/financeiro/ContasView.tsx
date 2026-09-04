@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   carregarContasAPagar,
   type ContaAPagar,
@@ -13,7 +13,7 @@ import {
   TIPOS_RECEBIMENTO,
   type SituacaoVisual,
 } from '@/lib/financeiro-api'
-import type { ContaPagar, ContaReceber, StatusTitulo } from '@/lib/types'
+import type { ContaReceber, StatusTitulo } from '@/lib/types'
 import { daysUntil, describeDueDate, formatDate, formatMoney } from '@/lib/format'
 import { Badge, Card, EmptyState, PageHeader, Stat } from '@/components/ui/UI'
 import { Button } from '@/components/ui/Button'
@@ -107,25 +107,51 @@ export default function ContasView({ tipo }: { tipo: 'pagar' | 'receber' }) {
   const [carregando, setCarregando] = useState(pagar)
   const [erroCarga, setErroCarga] = useState<string | null>(null)
 
+  /*
+   * Fora do efeito porque o botao de "tentar de novo" chama o MESMO caminho.
+   * Erro de rede que so oferece recarregar a pagina inteira faz o lojista
+   * perder os filtros que acabou de montar.
+   */
+  const carregar = useCallback(async () => {
+    const r = await carregarContasAPagar()
+    setCarregando(false)
+
+    if (!r.ok) {
+      setErroCarga(r.erro)
+      return
+    }
+
+    /* O servidor ja agrupa e ja soma. A tela achata para a lista que ela
+       desenha, mas NAO recalcula total: somar aqui daria um numero que pode
+       divergir do relatorio, e "quanto preciso ter em caixa" nao pode ter
+       duas respostas. */
+    setLinhas(r.dados.grupos.flatMap((g) => g.payables.map(paraLinhaDaApi)))
+  }, [])
+
   useEffect(() => {
     if (!pagar) return
 
+    /* O `async` explicito e para o lint, e o que ele diz e verdade: todo
+       `setState` de `carregar` vem DEPOIS do await, nunca sincrono no corpo
+       do efeito. Chamada nua, o compilador do React para no nome da funcao e
+       supoe o pior. */
     void (async () => {
-      const r = await carregarContasAPagar()
-      setCarregando(false)
-
-      if (!r.ok) {
-        setErroCarga(r.erro)
-        return
-      }
-
-      /* O servidor ja agrupa e ja soma. A tela achata para a lista que ela
-         desenha, mas NAO recalcula total: somar aqui daria um numero que pode
-         divergir do relatorio, e "quanto preciso ter em caixa" nao pode ter
-         duas respostas. */
-      setLinhas(r.dados.grupos.flatMap((g) => g.payables.map(paraLinhaDaApi)))
+      await carregar()
     })()
-  }, [pagar])
+  }, [pagar, carregar])
+
+  /*
+   * A primeira carga JA comeca com `carregando`; quem precisa religa-lo e a
+   * retentativa. Por isso os dois `setState` moram aqui, num onClick, e nao
+   * dentro de `carregar` — chamado pelo efeito, `setCarregando(true)` roda
+   * sincrono na montagem e provoca um render em cascata (o lint reprova, e com
+   * razao: e um render inteiro jogado fora em toda abertura da tela).
+   */
+  const tentarDeNovo = () => {
+    setCarregando(true)
+    setErroCarga(null)
+    void carregar()
+  }
 
   const [filtroStatus, setFiltroStatus] = useState<FiltroStatus>('todos')
   const [filtroClassificacao, setFiltroClassificacao] = useState('')
@@ -375,7 +401,19 @@ export default function ContasView({ tipo }: { tipo: 'pagar' | 'receber' }) {
         </div>
 
         {/* --- Lista --- */}
-        {filtradas.length === 0 ? (
+        {carregando ? (
+          <EmptyState title="Carregando contas" description="Buscando os titulos em aberto." />
+        ) : erroCarga !== null ? (
+          <EmptyState
+            title="Nao deu para carregar as contas"
+            description={erroCarga}
+            action={
+              <Button variant="secondary" onClick={tentarDeNovo}>
+                Tentar de novo
+              </Button>
+            }
+          />
+        ) : filtradas.length === 0 ? (
           <EmptyState
             title={
               linhas.length === 0
@@ -521,20 +559,6 @@ export default function ContasView({ tipo }: { tipo: 'pagar' | 'receber' }) {
 }
 
 /* ------------------------------------------------------------------ */
-
-function paraLinhaPagar(c: ContaPagar): Linha {
-  return {
-    id: c.id,
-    contraparte: c.fornecedor,
-    descricao: c.descricao,
-    vencimento: c.vencimento,
-    valor: c.valor,
-    valorBaixado: c.valorPago,
-    status: c.status,
-    banco: c.bancoNome,
-    classificacao: c.planoContasNome,
-  }
-}
 
 function paraLinhaReceber(c: ContaReceber): Linha {
   const tipoRotulo = TIPOS_RECEBIMENTO.find((t) => t.valor === c.tipo)?.rotulo ?? c.tipo

@@ -124,8 +124,16 @@ CREATE TABLE payable_settlements (
 -- baixa devolveriam a divida duas vezes e o titulo ficaria com saldo negativo —
 -- o caso de uso ja recusa, e aqui o banco garante contra escrita que nao passe
 -- por ele.
+-- Comeca por `company_id` como todo indice deste schema, e nao por
+-- `reverses_id` sozinho. A garantia e a mesma na pratica: a baixa referenciada
+-- pertence a uma empresa, e o caso de uso so a encontra dentro do proprio
+-- tenant. O que muda e que o indice passa a servir tambem as consultas que
+-- filtram por empresa — que sao todas, com RLS.
+--
+-- Ha um teste de schema que reprova indice fora dessa convencao, e ele pegou
+-- este na primeira execucao. A regra estava certa; o indice e que estava fora.
 CREATE UNIQUE INDEX payable_settlements_um_estorno_por_baixa
-  ON payable_settlements (reverses_id)
+  ON payable_settlements (company_id, reverses_id)
   WHERE reverses_id IS NOT NULL;
 
 CREATE INDEX payable_settlements_por_titulo
