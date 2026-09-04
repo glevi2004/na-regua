@@ -36,17 +36,26 @@ type Linha = {
 }
 
 /**
- * `date` volta como `Date` no postgres.js, e o contrato pede `AAAA-MM-DD`.
+ * O `Date` de uma coluna `date` vira `AAAA-MM-DD`.
  *
- * `toISOString().slice(0,10)` seria errado: o `Date` de uma coluna `date` vem
- * a meia-noite LOCAL, e converter para UTC pode recuar um dia. Ler os campos
- * locais acerta — e e o mesmo cuidado que o app tem em `hojeLocal`.
+ * O postgres.js devolve a coluna como meia-noite **UTC** — `2026-12-01` chega
+ * como `2026-12-01T00:00:00.000Z`. Entao os campos a ler sao os UTC.
+ *
+ * As tres copias desta funcao liam os campos LOCAIS, com um comentario meu
+ * afirmando o contrario ("vem a meia-noite local, e converter para UTC pode
+ * recuar um dia"). Era o inverso: em fuso negativo, a meia-noite UTC ainda e o
+ * dia ANTERIOR no relogio local, e ler campo local e que recuava. Em
+ * America/Sao_Paulo, todo vencimento aparecia um dia antes.
+ *
+ * A CI nunca pegaria: o runner roda em UTC, onde os dois caminhos dao o mesmo
+ * resultado. Apareceu ao subir um Postgres na maquina de desenvolvimento.
  */
 function paraDia(v: Date | string): string {
   if (typeof v === 'string') return v.slice(0, 10)
-  const mes = String(v.getMonth() + 1).padStart(2, '0')
-  const dia = String(v.getDate()).padStart(2, '0')
-  return `${v.getFullYear()}-${mes}-${dia}`
+  /* Campos UTC. Ver o comentario acima. */
+  const mes = String(v.getUTCMonth() + 1).padStart(2, '0')
+  const dia = String(v.getUTCDate()).padStart(2, '0')
+  return `${v.getUTCFullYear()}-${mes}-${dia}`
 }
 
 const paraSaida = (l: Linha): PayableOutput => ({
