@@ -3,6 +3,7 @@ import {
   assertAuthUsavelEmProducao,
   buildAgendaDeps,
   buildAuthDeps,
+  buildCadastroDeps,
   getRedis,
   buildSaleDeps,
   checkDatabase,
@@ -17,6 +18,7 @@ import { registerRateLimit } from './plugins/rate-limit.js'
 import { registerSession } from './plugins/session.js'
 import { registerAgendaRoutes } from './routes/agenda.js'
 import { registerAuthRoutes } from './routes/auth.js'
+import { registerCadastroRoutes } from './routes/cadastro.js'
 import { registerSaleRoutes } from './routes/sales.js'
 
 // RNF-058: log estruturado (JSON) com requestId, companyId e userId.
@@ -75,6 +77,7 @@ async function registrarRotas(): Promise<void> {
      modulo — ver o comentario em composition.ts. */
   registerSaleRoutes(app, buildSaleDeps())
   registerAgendaRoutes(app, buildAgendaDeps())
+  registerCadastroRoutes(app, buildCadastroDeps())
 }
 
 async function main(): Promise<void> {
