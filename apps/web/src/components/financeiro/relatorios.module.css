@@ -1,0 +1,201 @@
+/* ============ Faturamento e rankings — NR-077, US-041 ============ */
+
+.periodo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.aviso {
+  font-size: 13px;
+  color: var(--app-muted);
+  line-height: 1.55;
+}
+
+/* ===================== Blocos ===================== */
+
+.bloco {
+  padding-top: 24px;
+}
+
+.bloco + .bloco {
+  margin-top: 4px;
+  border-top: 1px solid var(--app-border);
+}
+
+.bloco:first-child {
+  padding-top: 0;
+}
+
+.blocoCabecalho {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.blocoTitulo {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 14px;
+}
+
+.blocoTotal {
+  font-size: 13px;
+  color: var(--app-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===================== Faturamento mes a mes ===================== */
+
+.meses {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.meses th[scope='col'] {
+  text-align: right;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--app-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.meses th[scope='col']:first-child {
+  text-align: left;
+}
+
+.meses th[scope='row'] {
+  text-align: left;
+  font-weight: 400;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.meses td,
+.meses th[scope='row'] {
+  /* Alinha os algarismos em coluna: sem isto, comparar meses de relance
+     deixa de funcionar. */
+  font-variant-numeric: tabular-nums;
+  font-size: 14px;
+  padding: 9px 0;
+  text-align: right;
+}
+
+.meses tbody tr + tr th,
+.meses tbody tr + tr td {
+  border-top: 1px solid var(--app-border);
+}
+
+/* Mes sem venda aparece PARADO, e nao ausente — US-041. O tom apagado diz
+   que o zero e resposta e nao falha de carregamento. */
+.mesParado th,
+.mesParado td {
+  color: var(--app-muted);
+}
+
+.valor {
+  white-space: nowrap;
+}
+
+/*
+ * A barra e decoracao: a tabela ao lado ja carrega o numero por extenso.
+ * Por isso ela e `aria-hidden` no componente e some na impressao.
+ */
+.barraCaixa {
+  display: inline-block;
+  width: 120px;
+  height: 6px;
+  margin-right: 10px;
+  vertical-align: middle;
+  border-radius: 3px;
+  background: var(--app-border);
+  overflow: hidden;
+}
+
+.barra {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  background: var(--app-accent);
+}
+
+/* ===================== Rankings ===================== */
+
+.ranking {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.posicao {
+  display: grid;
+  grid-template-columns: 26px 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  font-size: 14px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.posicao:last-child {
+  border-bottom: none;
+}
+
+.lugar {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--app-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.nome {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detalhe {
+  font-size: 12.5px;
+  color: var(--app-muted);
+  white-space: nowrap;
+}
+
+.sobra {
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--app-border);
+  font-size: 13px;
+  color: var(--app-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 640px) {
+  .barraCaixa {
+    display: none;
+  }
+
+  .posicao {
+    grid-template-columns: 26px 1fr auto;
+  }
+
+  .detalhe {
+    grid-column: 2 / -1;
+  }
+}
+
+@media print {
+  .barraCaixa {
+    display: none;
+  }
+}

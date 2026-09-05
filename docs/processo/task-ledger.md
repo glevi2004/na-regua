@@ -51,10 +51,10 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      58 |  158 |
-| ✅ Concluídas                 |      47 |  119 |
+| ✅ Concluídas                 |      48 |  123 |
 | 🚧 Bloqueadas por decisão     |       8 |   30 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |       2 |    7 |
+| ⬜ A fazer, pode começar hoje |       1 |    3 |
 
 > **Números conferidos contra a `main` em 2026-09-05**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -143,7 +143,7 @@ Objetivo: operar o ERP por mensagem e cobrar a mensalidade.
 | NR-031 | `core`: exportação completa e anonimização (LGPD)             |   🔵   | `core`            |   3 | NR-028         | —                | RF-125–128             |   ✅   |
 | NR-045 | `whatsapp`: porta `MessageSender` + adapter falso             |   🟠   | `whatsapp` `core` |   2 | NR-005         | —                | RF-015                 |   ✅   |
 | NR-046 | `whatsapp`: adapter real, webhook e consentimento             |   🟠   | `whatsapp`        |   4 | NR-045         | **DEC-003**      | RF-016, RF-094, RF-095 |   🚧   |
-| NR-060 | `agent`: runtime com tools geradas de `contracts`             |   🟠   | `agent`           |   5 | NR-046, NR-005 | **DEC-007**      | RF-096–102             |   🚧   |
+| NR-060 | `agent`: runtime com tools geradas de `contracts`             |   🟠   | `agent`           |   5 | NR-046, NR-005 | **DEC-007**      | RF-096–102, 108, 109   |   🚧   |
 | NR-061 | `agent`: confirmação de ação sensível, com expiração          |   🟠   | `agent`           |   2 | NR-060         | NR-060 → DEC-007 | RF-103, RF-104         |   🚧   |
 | NR-062 | `agent`: contexto de conversa isolado por empresa             |   🟠   | `agent`           |   3 | NR-060         | **DEC-011**      | RF-105, RF-106         |   🚧   |
 | NR-063 | `billing`: assinatura, trial, inadimplência e estado restrito |   🟠   | `billing`         |   4 | NR-044         | **DEC-010**      | RF-110–118             |   🚧   |
@@ -158,7 +158,7 @@ Objetivo: operar o ERP por mensagem e cobrar a mensalidade.
 | NR-047 | `banking`: importação de OFX/CSV                               |   🟠   | `banking`      |   3 | NR-033 | —           | RF-076, RF-077 |   ✅   |
 | NR-048 | `banking`: Open Finance                                        |   🟠   | `banking`      |   4 | NR-047 | **DEC-005** | RF-074, RF-075 |   🚧   |
 | NR-076 | `web`: conciliação bancária                                    |   🟢   | `web`          |   3 | NR-033 | —           | US-038         |   ✅   |
-| NR-077 | Relatórios: DRE, ranking e faturamento, no app e no assistente |   🟢   | `web` `mobile` |   4 | NR-032 | —           | US-041, US-053 |   ⬜   |
+| NR-077 | Relatórios: DRE, ranking e faturamento, no app e no assistente |   🟢   | `web` `mobile` |   4 | NR-032 | —           | US-041, US-053 |   ✅   |
 
 ## Backlog
 
