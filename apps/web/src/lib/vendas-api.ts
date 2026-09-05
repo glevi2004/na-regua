@@ -654,3 +654,18 @@ export async function estadoDaNota(vendaId: string): Promise<EstadoDaNota | null
     return null
   }
 }
+
+/**
+ * Pede ao servidor que confira as notas em contingencia — RF-053.
+ *
+ * Silenciosa de proposito: e uma atualizacao de fundo, e falhar nela nao muda
+ * nada do que o lojista veio fazer. O estado de cada nota continua vindo de
+ * `estadoDaNota`.
+ */
+export async function reconciliarContingencia(): Promise<void> {
+  await fetch('/api/vendas/notas/reconciliar', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    credentials: 'same-origin',
+  }).catch(() => undefined)
+}

@@ -222,3 +222,8 @@ export type {
   SaleFiscalReader,
   VendaParaNota,
 } from './ports/sale-fiscal.js'
+export { reconcileContingency } from './fiscal/reconcile-contingency.js'
+export type {
+  ReconcileContingencyDeps,
+  ResultadoDaReconciliacao,
+} from './fiscal/reconcile-contingency.js'

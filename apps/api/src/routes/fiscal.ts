@@ -1,6 +1,11 @@
 import type { InvoiceIssueResult } from '@na-regua/contracts'
 import { updateFiscalCredentialsInputSchema } from '@na-regua/contracts'
-import { requestInvoice, type RequestInvoiceDeps } from '@na-regua/core'
+import {
+  reconcileContingency,
+  type ReconcileContingencyDeps,
+  requestInvoice,
+  type RequestInvoiceDeps,
+} from '@na-regua/core'
 import type { FastifyInstance } from 'fastify'
 import { requireContext } from '../plugins/execution-context.js'
 import { LIMITE_DE_ESCRITA } from '../plugins/rate-limit.js'
@@ -14,15 +19,16 @@ import { validate } from '../plugins/validate.js'
  * inclui segredo — so se ele existe e ate quando o certificado vale.
  */
 
-export type EmissaoDeps = RequestInvoiceDeps & {
-  /** A nota ja emitida desta venda, para a tela mostrar o estado — RF-054. */
-  readonly store: {
-    findBySale(
-      companyId: string,
-      saleId: string,
-    ): Promise<{ resultado: InvoiceIssueResult } | undefined>
+export type EmissaoDeps = RequestInvoiceDeps &
+  ReconcileContingencyDeps & {
+    /** A nota ja emitida desta venda, para a tela mostrar o estado — RF-054. */
+    readonly store: {
+      findBySale(
+        companyId: string,
+        saleId: string,
+      ): Promise<{ resultado: InvoiceIssueResult } | undefined>
+    }
   }
-}
 
 export type CredenciaisFiscaisDeps = {
   readonly fiscalCredentials: {
@@ -86,6 +92,31 @@ export function registerEmissaoRoutes(app: FastifyInstance, deps: EmissaoDeps): 
    * `queued` quando ainda nao ha nota: a tela precisa distinguir "esperando" de
    * "nunca pedida", e as duas nao sao a mesma coisa para quem esta olhando.
    */
+  /**
+   * Reconcilia as notas em contingencia — RF-053.
+   *
+   * Pergunta ao provedor, em ordem, quais ja foram aceitas pela SEFAZ. NAO
+   * transmite: a documentacao do provedor nao define como uma nota emitida
+   * offline chega la depois, e inventar a chamada produziria nota duplicada ou
+   * nota que nunca chega.
+   *
+   * Rota e nao varredura automatica porque a varredura precisaria perguntar
+   * "quais empresas tem contingencia", e a politica de isolamento recusa ler
+   * tabela de negocio sem tenant. Aqui a empresa vem do contexto. E a mesma
+   * lacuna do `listOverdue`.
+   */
+  app.post(
+    '/vendas/notas/reconciliar',
+    { config: { rateLimit: LIMITE_DE_ESCRITA } },
+    async (request, reply) => {
+      const ctx = requireContext(request)
+
+      const r = await reconcileContingency(deps, ctx)
+
+      return reply.code(200).send(r)
+    },
+  )
+
   app.get('/vendas/:id/nota', async (request, reply) => {
     const ctx = requireContext(request)
     const { id } = request.params as { id: string }

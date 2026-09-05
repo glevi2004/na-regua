@@ -13,7 +13,7 @@ está em [Requisitos Não Funcionais](requisitos-nao-funcionais.md).
 | **US**          | História de origem                                                              |
 | **Módulo dono** | Onde a regra vive — **um só**. Outros módulos podem consumir, não reimplementar |
 | **Pri**         | `M` MUST · `S` SHOULD · `C` COULD                                               |
-| **St**          | ⬜ pendente · 🟨 em andamento · ✅ pronto · ❌ cancelado                        |
+| **St**          | ✅ pendente · 🟨 em andamento · ✅ pronto · ❌ cancelado                        |
 
 **Regra de ouro:** o módulo dono de uma regra de negócio é sempre
 `packages/domain` ou `packages/core` — nunca um `apps/*`. Ver
@@ -27,13 +27,13 @@ está em [Requisitos Não Funcionais](requisitos-nao-funcionais.md).
 
 | ID     | Requisito                                                                                                  | US     | Módulo dono | Pri | St  |
 | ------ | ---------------------------------------------------------------------------------------------------------- | ------ | ----------- | :-: | :-: |
-| RF-001 | Cadastrar empresa a partir do CNPJ, com preenchimento automático de razão social, nome fantasia e endereço | US-001 | `core`      |  M  | ⬜  |
-| RF-002 | Impedir cadastro de CNPJ já existente, sem revelar dados da empresa existente                              | US-001 | `core`      |  M  | ⬜  |
-| RF-003 | Registrar regime tributário da empresa e usá-lo no cálculo de imposto das vendas                           | US-002 | `domain`    |  M  | ⬜  |
-| RF-004 | Armazenar certificado digital A1 cifrado e alertar 30 dias antes do vencimento                             | US-002 | `fiscal`    |  M  | ⬜  |
-| RF-005 | Convidar usuário por e-mail ou telefone e atribuir papel (`owner`, `staff`)                                | US-003 | `core`      |  M  | ⬜  |
-| RF-006 | Revogar acesso de usuário encerrando as sessões e preservando o histórico de ações                         | US-003 | `core`      |  M  | ⬜  |
-| RF-007 | Configurar taxas da adquirente por bandeira e número de parcelas                                           | US-004 | `domain`    |  M  | ⬜  |
+| RF-001 | Cadastrar empresa a partir do CNPJ, com preenchimento automático de razão social, nome fantasia e endereço | US-001 | `core`      |  M  | ✅  |
+| RF-002 | Impedir cadastro de CNPJ já existente, sem revelar dados da empresa existente                              | US-001 | `core`      |  M  | ✅  |
+| RF-003 | Registrar regime tributário da empresa e usá-lo no cálculo de imposto das vendas                           | US-002 | `domain`    |  M  | ✅  |
+| RF-004 | Armazenar certificado digital A1 cifrado e alertar 30 dias antes do vencimento                             | US-002 | `fiscal`    |  M  | ✅  |
+| RF-005 | Convidar usuário por e-mail ou telefone e atribuir papel (`owner`, `staff`)                                | US-003 | `core`      |  M  | ✅  |
+| RF-006 | Revogar acesso de usuário encerrando as sessões e preservando o histórico de ações                         | US-003 | `core`      |  M  | ✅  |
+| RF-007 | Configurar taxas da adquirente por bandeira e número de parcelas                                           | US-004 | `domain`    |  M  | ✅  |
 | RF-008 | Configurar limite de desconto por papel e bloquear venda que o exceda                                      | US-004 | `domain`    |  M  | ⬜  |
 
 ## E2 — Clientes / CRM
@@ -91,16 +91,16 @@ está em [Requisitos Não Funcionais](requisitos-nao-funcionais.md).
 
 | ID     | Requisito                                                                                           | US     | Módulo dono | Pri | St  |
 | ------ | --------------------------------------------------------------------------------------------------- | ------ | ----------- | :-: | :-: |
-| RF-045 | Emitir NFC-e a partir de uma venda fechada e registrar a chave de acesso                            | US-022 | `fiscal`    |  M  | ⬜  |
-| RF-046 | Validar dados fiscais obrigatórios (NCM, CFOP, CST/CSOSN) antes de transmitir à SEFAZ               | US-022 | `fiscal`    |  M  | ⬜  |
-| RF-047 | Traduzir código de rejeição da SEFAZ em mensagem compreensível, preservando a venda registrada      | US-022 | `fiscal`    |  M  | ⬜  |
+| RF-045 | Emitir NFC-e a partir de uma venda fechada e registrar a chave de acesso                            | US-022 | `fiscal`    |  M  | ✅  |
+| RF-046 | Validar dados fiscais obrigatórios (NCM, CFOP, CST/CSOSN) antes de transmitir à SEFAZ               | US-022 | `fiscal`    |  M  | ✅  |
+| RF-047 | Traduzir código de rejeição da SEFAZ em mensagem compreensível, preservando a venda registrada      | US-022 | `fiscal`    |  M  | ✅  |
 | RF-048 | Enviar DANFE ou link da nota ao cliente por WhatsApp após a autorização                             | US-023 | `core`      |  M  | ⬜  |
-| RF-049 | Exibir QR Code da nota na tela para cliente sem WhatsApp cadastrado                                 | US-023 | `fiscal`    |  M  | ⬜  |
-| RF-050 | Cancelar nota fiscal na SEFAZ mediante justificativa, dentro do prazo legal                         | US-024 | `fiscal`    |  M  | ⬜  |
-| RF-051 | Bloquear cancelamento fora do prazo legal e orientar a emissão de devolução                         | US-024 | `fiscal`    |  M  | ⬜  |
-| RF-052 | Emitir em contingência quando a SEFAZ estiver indisponível, sem bloquear a venda                    | US-025 | `fiscal`    |  M  | ⬜  |
+| RF-049 | Exibir QR Code da nota na tela para cliente sem WhatsApp cadastrado                                 | US-023 | `fiscal`    |  M  | ✅  |
+| RF-050 | Cancelar nota fiscal na SEFAZ mediante justificativa, dentro do prazo legal                         | US-024 | `fiscal`    |  M  | ✅  |
+| RF-051 | Bloquear cancelamento fora do prazo legal e orientar a emissão de devolução                         | US-024 | `fiscal`    |  M  | ✅  |
+| RF-052 | Emitir em contingência quando a SEFAZ estiver indisponível, sem bloquear a venda                    | US-025 | `fiscal`    |  M  | ✅  |
 | RF-053 | Transmitir automaticamente, em ordem, as notas em contingência quando a SEFAZ voltar                | US-025 | `fiscal`    |  M  | ⬜  |
-| RF-054 | Exibir o estado fiscal da venda de forma explícita (autorizada, contingência, rejeitada, cancelada) | US-025 | `core`      |  M  | ⬜  |
+| RF-054 | Exibir o estado fiscal da venda de forma explícita (autorizada, contingência, rejeitada, cancelada) | US-025 | `core`      |  M  | ✅  |
 
 ## E6 — Contas a Pagar
 

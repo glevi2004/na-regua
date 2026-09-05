@@ -51,12 +51,12 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 |                               | Tarefas | Dias |
 | ----------------------------- | ------: | ---: |
 | Total                         |      58 |  158 |
-| ✅ Concluídas                 |      46 |  114 |
-| 🚧 Bloqueadas por decisão     |       9 |   35 |
+| ✅ Concluídas                 |      47 |  119 |
+| 🚧 Bloqueadas por decisão     |       8 |   30 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
 | ⬜ A fazer, pode começar hoje |       2 |    7 |
 
-> **Números conferidos contra a `main` em 2026-09-04**, não estimados: cada
+> **Números conferidos contra a `main` em 2026-09-05**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
 > exceção — foi mesclado antes de a convenção de rodapé existir (PR #15).
 > As somas saem das linhas deste arquivo e fecham com o
@@ -128,7 +128,7 @@ Objetivo: emitir NFC-e e controlar contas a pagar e receber.
 | NR-029 | `core`: baixa, baixa parcial e estorno                                 |   🔵   | `core`            |   2 | NR-028 | —                | RF-059, RF-066, RF-067 |   ✅   |
 | NR-040 | `fiscal`: porta `InvoiceIssuer` + adapter falso                        |   🟠   | `fiscal` `core`   |   2 | NR-005 | —                | RF-045                 |   ✅   |
 | NR-041 | `worker`: consumidores de fila (emissão, mensagem, cobrança)           |   🟠   | `worker`          |   3 | NR-040 | —                | RNF-004, RF-130        |   ✅   |
-| NR-042 | `fiscal`: adapter real, contingência e guarda de XML                   |   🟠   | `fiscal`          |   5 | NR-040 | **DEC-004**      | RF-045–054             |   🚧   |
+| NR-042 | `fiscal`: adapter real, contingência e guarda de XML                   |   🟠   | `fiscal`          |   5 | NR-040 | —                | RF-045–054             |   ✅   |
 | NR-043 | `payments`: porta `PaymentGateway` + adapter falso                     |   🟠   | `payments` `core` |   2 | NR-005 | —                | RF-063                 |   ✅   |
 | NR-044 | `payments`: adapter PagMaxx — Pix, link de pagamento, webhook com HMAC |   🟠   | `payments`        |   4 | NR-043 | DEC-006, DEC-015 | RF-034, RF-068         |   🚧   |
 | NR-073 | `mobile`: pagamento, resumo com líquido e margem                       |   🟢   | `mobile`          |   3 | NR-071 | —                | US-018–020             |   ✅   |
@@ -191,7 +191,7 @@ flowchart LR
     N22 --> N27["NR-027<br/>rota de venda"]
     N27 --> N71["NR-071<br/>PDV mobile"]
     N22 --> N40["NR-040<br/>porta fiscal ✅"]
-    N40 --> N42["NR-042<br/>NFC-e<br/>🚧 DEC-004"]
+    N40 --> N42["NR-042<br/>NFC-e<br/>✅"]
 
     style N42 fill:#7c2d12,color:#fff
     style N3 fill:#14532d,color:#fff
@@ -236,7 +236,7 @@ esses repositórios, e uma rota ligada a um _fake_ não é uma rota.
 | Decisão                                                                               | Diretas       | Em cascata | Dias parados |
 | ------------------------------------------------------------------------------------- | ------------- | ---------: | -----------: |
 | [DEC-007](../decisoes/README.md#dec-007) LLM                                          | NR-060        |          1 |            7 |
-| [DEC-004](../decisoes/README.md#dec-004) fiscal                                       | NR-042        |          — |            5 |
+| [DEC-004](../decisoes/README.md#dec-004) fiscal ✅                                    | — (NR-042 ✅) |          — |            0 |
 | [DEC-003](../decisoes/README.md#dec-003) WhatsApp                                     | NR-046        |          — |            4 |
 | [DEC-010](../decisoes/README.md#dec-010) cobrança                                     | NR-063        |          — |            4 |
 | [DEC-006](../decisoes/README.md#dec-006)/[DEC-015](../decisoes/README.md#dec-015) PSP | NR-044        |          — |            4 |

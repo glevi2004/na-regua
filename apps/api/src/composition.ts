@@ -44,6 +44,8 @@ import {
   type DatabaseHealth,
 } from '@na-regua/db'
 import { createFileStatementReader } from '@na-regua/banking'
+import { createFakeInvoiceIssuer, criarEmissorFocusNfe } from '@na-regua/fiscal'
+import type { InvoiceIssuer } from '@na-regua/core'
 import type { CadastroDeps } from './routes/cadastro.js'
 import type { ConciliacaoDeps } from './routes/conciliacao.js'
 import type { ContabilidadeDeps } from './routes/contabilidade.js'
@@ -339,11 +341,43 @@ export function buildFiscalDeps(): CredenciaisFiscaisDeps {
  */
 export function buildEmissaoDeps(): EmissaoDeps {
   const sql = getClient(env.DATABASE_URL)
+  const store = createInvoiceStore(sql)
+
   return {
     sales: createSaleFiscalReader(sql),
     queue: createInvoiceQueue(getRedis()),
-    store: createInvoiceStore(sql),
+    store,
+    /*
+     * A reconciliacao usa o emissor REAL quando ha chave e credenciais, e o
+     * falso quando nao ha — o mesmo criterio do worker. Consultar com o falso
+     * nao inventa nota: ele devolve o que a guarda tem.
+     */
+    invoices: montarEmissorDaApi(sql, store),
   }
+}
+
+/**
+ * O emissor que a api usa para CONSULTAR — NR-042, RF-053.
+ *
+ * A api nao emite: quem emite e o worker, pela fila. Mas reconciliar
+ * contingencia e uma leitura, e ela acontece quando a tela pergunta.
+ *
+ * Sem `SECRETS_KEY` cai no falso, e nao lanca: aqui a consequencia de nao ter
+ * chave e "a reconciliacao nao encontra nada", que e o mesmo que ela encontra
+ * quando nao ha contingencia. No worker e diferente — la a falta de chave
+ * significaria emitir sem poder, e por isso la ela LANCA.
+ */
+function montarEmissorDaApi(
+  sql: ReturnType<typeof getClient>,
+  store: ReturnType<typeof createInvoiceStore>,
+): InvoiceIssuer {
+  if (env.SECRETS_KEY === undefined) return createFakeInvoiceIssuer()
+
+  return criarEmissorFocusNfe({
+    ambiente: 'homologacao',
+    credenciais: createFiscalCredentials(sql, lerChaveDeSegredo(env.SECRETS_KEY)),
+    store,
+  })
 }
 
 export function buildContasDeps(): ContasDeps {

@@ -145,6 +145,50 @@ export function createInvoiceStore(sql: Sql): InvoiceStore {
       return linha === undefined ? nota : paraNota(nota.companyId, linha)
     },
 
+    /**
+     * As em contingencia, da mais antiga para a mais nova — RF-053.
+     *
+     * `ORDER BY issued_at` e o contrato: a SEFAZ recusa lacuna de numeracao, e
+     * reconciliar fora de ordem deixa buracos. O indice
+     * `invoices_em_contingencia` serve exatamente esta consulta.
+     */
+    listContingency: async (companyId) => {
+      const linhas = await withTenant(
+        sql,
+        companyId,
+        (tx) => tx<LinhaNota[]>`
+          SELECT * FROM invoices
+          WHERE company_id = ${companyId} AND status = 'contingency'
+          ORDER BY issued_at, sale_id
+        `,
+      )
+      return linhas.map((l) => paraNota(companyId, l))
+    },
+
+    /**
+     * A nota passou a autorizada — RF-053.
+     *
+     * Chave e numero NAO mudam: e a mesma nota, e o que mudou foi a SEFAZ
+     * confirmar. Por isso o `WHERE` casa pela venda e o `UPDATE` toca apenas o
+     * que a confirmacao trouxe.
+     */
+    markAuthorized: async (companyId, saleId, resultado) => {
+      if (resultado.status === 'rejected') return
+
+      await withTenant(
+        sql,
+        companyId,
+        (tx) => tx`
+          UPDATE invoices
+          SET status = ${resultado.status},
+              danfe_url = ${resultado.status === 'authorized' ? resultado.danfeUrl : null},
+              xml = ${resultado.xml},
+              updated_at = now()
+          WHERE company_id = ${companyId} AND sale_id = ${saleId}
+        `,
+      )
+    },
+
     markCancelled: async (companyId, accessKey, cancelamento) => {
       await withTenant(
         sql,
