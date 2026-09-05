@@ -52,9 +52,9 @@ consome. A porta é declarada pelo núcleo; a seta aponta para dentro
 | ----------------------------- | ------: | ---: |
 | Total                         |      58 |  158 |
 | ✅ Concluídas                 |      48 |  123 |
-| 🚧 Bloqueadas por decisão     |       8 |   30 |
+| 🚧 Bloqueadas por decisão     |       9 |   33 |
 | 🚧 Bloqueadas por dependência |       1 |    2 |
-| ⬜ A fazer, pode começar hoje |       1 |    3 |
+| ⬜ A fazer, pode começar hoje |       0 |    0 |
 
 > **Números conferidos contra a `main` em 2026-09-05**, não estimados: cada
 > ✅ tem commit mesclado com `Refs: NR-xxx` no histórico. O NR-012 é a
@@ -162,16 +162,16 @@ Objetivo: operar o ERP por mensagem e cobrar a mensalidade.
 
 ## Backlog
 
-| ID     | Tarefa                                               | Trilha | Módulo   | Est | Dep    | Bloq | US/RF           | Status |
-| ------ | ---------------------------------------------------- | :----: | -------- | --: | ------ | ---- | --------------- | :----: |
-| NR-016 | `CHANGELOG` gerado dos commits + processo de release |   🟠   | `repo`   |   1 | —      | —    | —               |   ✅   |
-| NR-034 | `core`: agenda e lembretes                           |   🔵   | `core`   |   2 | —      | —    | RF-089–093      |   ✅   |
-| NR-035 | `db`: schema de agenda (`appointments`)              |   🔵   | `db`     |   1 | NR-008 | —    | RF-089, RF-090  |   ✅   |
-| NR-036 | `api`: rotas de agenda                               |   🟠   | `api`    |   1 | NR-035 | —    | RF-089–093      |   ✅   |
-| NR-037 | `db`: repositórios da venda e trilha de estoque      |   🔵   | `db`     |   2 | NR-020 | —    | RF-024, RNF-046 |   ✅   |
-| NR-049 | E2E do caminho crítico (3 fluxos)                    |   🟠   | `repo`   |   3 | NR-071 | —    | RNF-068         |   ⬜   |
-| NR-078 | `mobile`: agenda                                     |   🟢   | `mobile` |   2 | NR-036 | —    | US-043–045      |   ✅   |
-| NR-079 | `web`: conteúdo real da landing                      |   🟢   | `web`    |   1 | —      | —    | —               |   ✅   |
+| ID     | Tarefa                                               | Trilha | Módulo   | Est | Dep    | Bloq                     | US/RF           | Status |
+| ------ | ---------------------------------------------------- | :----: | -------- | --: | ------ | ------------------------ | --------------- | :----: |
+| NR-016 | `CHANGELOG` gerado dos commits + processo de release |   🟠   | `repo`   |   1 | —      | —                        | —               |   ✅   |
+| NR-034 | `core`: agenda e lembretes                           |   🔵   | `core`   |   2 | —      | —                        | RF-089–093      |   ✅   |
+| NR-035 | `db`: schema de agenda (`appointments`)              |   🔵   | `db`     |   1 | NR-008 | —                        | RF-089, RF-090  |   ✅   |
+| NR-036 | `api`: rotas de agenda                               |   🟠   | `api`    |   1 | NR-035 | —                        | RF-089–093      |   ✅   |
+| NR-037 | `db`: repositórios da venda e trilha de estoque      |   🔵   | `db`     |   2 | NR-020 | —                        | RF-024, RNF-046 |   ✅   |
+| NR-049 | E2E do caminho crítico (3 fluxos)                    |   🟠   | `repo`   |   3 | NR-071 | **DEC-003**, **DEC-006** | RNF-068         |   🚧   |
+| NR-078 | `mobile`: agenda                                     |   🟢   | `mobile` |   2 | NR-036 | —                        | US-043–045      |   ✅   |
+| NR-079 | `web`: conteúdo real da landing                      |   🟢   | `web`    |   1 | —      | —                        | —               |   ✅   |
 
 ---
 
@@ -233,32 +233,39 @@ esses repositórios, e uma rota ligada a um _fake_ não é uma rota.
 
 ## Bloqueios por decisão
 
-| Decisão                                                                               | Diretas       | Em cascata | Dias parados |
-| ------------------------------------------------------------------------------------- | ------------- | ---------: | -----------: |
-| [DEC-007](../decisoes/README.md#dec-007) LLM                                          | NR-060        |          1 |            7 |
-| [DEC-004](../decisoes/README.md#dec-004) fiscal ✅                                    | — (NR-042 ✅) |          — |            0 |
-| [DEC-003](../decisoes/README.md#dec-003) WhatsApp                                     | NR-046        |          — |            4 |
-| [DEC-010](../decisoes/README.md#dec-010) cobrança                                     | NR-063        |          — |            4 |
-| [DEC-006](../decisoes/README.md#dec-006)/[DEC-015](../decisoes/README.md#dec-015) PSP | NR-044        |          — |            4 |
-| [DEC-005](../decisoes/README.md#dec-005) Open Finance                                 | NR-048        |          — |            4 |
-| [DEC-009](../decisoes/README.md#dec-009) hospedagem                                   | NR-015        |          — |            3 |
-| [DEC-011](../decisoes/README.md#dec-011) contexto da conversa                         | NR-062        |          — |            3 |
-| [DEC-012](../decisoes/README.md#dec-012) usuário e cupons                             | NR-075        |          — |            3 |
-| [DEC-001](../decisoes/README.md#dec-001) nome/marca                                   | — (NR-011 ✅) |          — |            0 |
+| Decisão                                                                                          | Diretas       | Em cascata | Dias parados |
+| ------------------------------------------------------------------------------------------------ | ------------- | ---------: | -----------: |
+| [DEC-007](../decisoes/README.md#dec-007) LLM                                                     | NR-060        |          1 |            7 |
+| [DEC-004](../decisoes/README.md#dec-004) fiscal ✅                                               | — (NR-042 ✅) |          — |            0 |
+| [DEC-003](../decisoes/README.md#dec-003) WhatsApp                                                | NR-046        |          — |            4 |
+| [DEC-010](../decisoes/README.md#dec-010) cobrança                                                | NR-063        |          — |            4 |
+| [DEC-006](../decisoes/README.md#dec-006)/[DEC-015](../decisoes/README.md#dec-015) PSP            | NR-044        |          — |            4 |
+| [DEC-005](../decisoes/README.md#dec-005) Open Finance                                            | NR-048        |          — |            4 |
+| [DEC-003](../decisoes/README.md#dec-003)/[DEC-006](../decisoes/README.md#dec-006) fluxo 3 do E2E | NR-049        |          — |            3 |
+| [DEC-009](../decisoes/README.md#dec-009) hospedagem                                              | NR-015        |          — |            3 |
+| [DEC-011](../decisoes/README.md#dec-011) contexto da conversa                                    | NR-062        |          — |            3 |
+| [DEC-012](../decisoes/README.md#dec-012) usuário e cupons                                        | NR-075        |          — |            3 |
+| [DEC-001](../decisoes/README.md#dec-001) nome/marca                                              | — (NR-011 ✅) |          — |            0 |
 
-**35 dos 84 dias-desenvolvedor restantes estão bloqueados por 10 decisões** —
-42% do que falta. Decidir continua rendendo, mas deixou de ser a única coisa que
-rende: existem 47 dias de trabalho liberado para tocar em paralelo às decisões
-que faltam.
+**Os 35 dias-desenvolvedor que restam estão TODOS bloqueados** — 33 por decisão
+e 2 por dependência de tarefa que também está bloqueada. A coluna "⬜ a fazer"
+zerou: não sobrou nenhuma tarefa que dê para começar hoje.
+
+Isso inverte a estratégia dos últimos meses. Enquanto havia trabalho liberado,
+valia decidir _em paralelo_; agora decidir é a única coisa que destrava
+qualquer coisa. As duas de maior alcance são a
+[DEC-003](../decisoes/README.md#dec-003) (WhatsApp) e a
+[DEC-007](../decisoes/README.md#dec-007) (LLM): juntas seguram 14 dias e o
+assistente inteiro, que é a promessa central do produto.
 
 Cada tarefa é contada **uma vez**, na decisão que aparece na sua própria coluna
 `Bloq`. Uma tarefa pode estar atrás de mais de uma: NR-075 espera a DEC-012 e,
 via NR-063, também a DEC-010 — somar as duas contaria o mesmo dia duas vezes.
 
-**Nenhuma decisão restante domina como a DEC-002 dominava.** A maior agora é a
-[DEC-007](../decisoes/README.md#dec-007), com 7 dias. O bloqueio deixou de ser
-concentrado, e isso muda a estratégia: antes valia parar tudo para decidir uma
-coisa; agora vale decidir enquanto o trabalho liberado anda.
+**Nenhuma decisão restante domina como a DEC-002 dominava.** A maior é a
+[DEC-007](../decisoes/README.md#dec-007), com 7 dias. O bloqueio continua
+espalhado — o que antes permitia tocar código enquanto se decidia, e agora
+significa apenas que nenhuma decisão isolada resolve o impasse.
 
 A [DEC-008](../decisoes/README.md#dec-008) fechou pela
 [ADR-0002](../decisoes/adr/0002-autenticacao-identidade-propria.md) e devolveu
