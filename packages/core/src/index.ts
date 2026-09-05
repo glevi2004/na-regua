@@ -212,3 +212,13 @@ export { signup } from './auth/signup.js'
 export type { SignupDeps } from './auth/signup.js'
 export type { IdentityRegistrar } from './ports/identity.js'
 export { InMemoryCompanyRepository } from './registration/fakes.js'
+
+/* O gatilho da emissao — NR-042, RF-045, RF-046. */
+export { requestInvoice } from './fiscal/request-invoice.js'
+export type { RequestInvoiceDeps } from './fiscal/request-invoice.js'
+export type {
+  InvoiceQueue,
+  ItemFiscalDaVenda,
+  SaleFiscalReader,
+  VendaParaNota,
+} from './ports/sale-fiscal.js'
