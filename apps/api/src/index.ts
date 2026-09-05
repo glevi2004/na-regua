@@ -6,6 +6,7 @@ import {
   buildCadastroDeps,
   buildConciliacaoDeps,
   buildContabilidadeDeps,
+  buildEmissaoDeps,
   buildFiscalDeps,
   buildContasDeps,
   getRedis,
@@ -26,7 +27,7 @@ import { registerCadastroRoutes } from './routes/cadastro.js'
 import { registerConciliacaoRoutes } from './routes/conciliacao.js'
 import { registerContabilidadeRoutes } from './routes/contabilidade.js'
 import { registerContasRoutes } from './routes/contas.js'
-import { registerFiscalRoutes } from './routes/fiscal.js'
+import { registerEmissaoRoutes, registerFiscalRoutes } from './routes/fiscal.js'
 import { registerSaleRoutes } from './routes/sales.js'
 
 // RNF-058: log estruturado (JSON) com requestId, companyId e userId.
@@ -89,6 +90,7 @@ async function registrarRotas(): Promise<void> {
   registerContasRoutes(app, buildContasDeps())
   registerConciliacaoRoutes(app, buildConciliacaoDeps())
   registerContabilidadeRoutes(app, buildContabilidadeDeps())
+  registerEmissaoRoutes(app, buildEmissaoDeps())
 
   /*
    * A falta da chave de cifragem NAO impede a api de subir: ela desliga uma

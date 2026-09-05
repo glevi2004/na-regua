@@ -30,6 +30,8 @@ import {
   createCompanyRepository,
   createCustomerRepository,
   createFiscalCredentials,
+  createInvoiceStore,
+  createSaleFiscalReader,
   createPayableQueries,
   createPayableUnitOfWork,
   createProductRepository,
@@ -46,7 +48,8 @@ import type { CadastroDeps } from './routes/cadastro.js'
 import type { ConciliacaoDeps } from './routes/conciliacao.js'
 import type { ContabilidadeDeps } from './routes/contabilidade.js'
 import type { ContasDeps } from './routes/contas.js'
-import type { CredenciaisFiscaisDeps } from './routes/fiscal.js'
+import { createInvoiceQueue } from './invoice-queue.js'
+import type { CredenciaisFiscaisDeps, EmissaoDeps } from './routes/fiscal.js'
 import { loadApiEnv } from '@na-regua/env'
 import { Redis } from 'ioredis'
 
@@ -325,6 +328,22 @@ export function buildFiscalDeps(): CredenciaisFiscaisDeps {
 
   const sql = getClient(env.DATABASE_URL)
   return { fiscalCredentials: createFiscalCredentials(sql, lerChaveDeSegredo(env.SECRETS_KEY)) }
+}
+
+/**
+ * Emissao da nota — NR-042, RNF-004.
+ *
+ * A fila usa o MESMO Redis do limitador (`getRedis()`), e nao uma conexao
+ * propria: sao o mesmo servidor, e duas conexoes por processo custam duas
+ * reconexoes toda vez que ele oscila.
+ */
+export function buildEmissaoDeps(): EmissaoDeps {
+  const sql = getClient(env.DATABASE_URL)
+  return {
+    sales: createSaleFiscalReader(sql),
+    queue: createInvoiceQueue(getRedis()),
+    store: createInvoiceStore(sql),
+  }
 }
 
 export function buildContasDeps(): ContasDeps {

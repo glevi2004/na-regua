@@ -2,12 +2,12 @@
 
 import { useEffect, useState } from 'react'
 import {
-  emitirNota,
+  estadoDaNota,
+  pedirNota,
   situacaoCertificado,
   type EstadoEmissao,
   type NotaEmitida,
   type SituacaoCertificado,
-  type TipoNotaFiscal,
 } from '@/lib/vendas-api'
 import { formatMoney } from '@/lib/format'
 import { Card } from '@/components/ui/UI'
@@ -45,21 +45,69 @@ export default function EtapaFiscal({
     }
   }, [])
 
-  async function emitir(tipo: TipoNotaFiscal) {
+  /**
+   * Pede a nota — RF-045.
+   *
+   * O servidor ENFILEIRA e responde 202: a venda nao espera a SEFAZ (RNF-004).
+   * Por isso a tela nao diz "emitida" ao voltar — ela passa a acompanhar o
+   * estado, que e o que a RF-054 pede que seja explicito.
+   */
+  async function emitir() {
     setEstado('processando')
     setErro(null)
 
-    /* SUBSTITUIR POR: POST /vendas/:id/notas */
-    const r = await emitirNota(vendaId, tipo, total)
+    const pedido = await pedirNota(vendaId)
 
-    if (!r.ok) {
-      setErro(r.error)
+    if (!pedido.ok) {
+      /* A recusa por classificacao (RF-046) chega com o NOME dos produtos que
+         faltam. Mostrar a mensagem inteira e o que manda o lojista ao lugar
+         certo — resumi-la aqui desfaria o trabalho do servidor. */
+      setErro(pedido.error)
       setEstado('erro')
       return
     }
 
-    setNota(r.nota)
-    setEstado('emitida')
+    /*
+     * Acompanha ate a SEFAZ responder.
+     *
+     * NFC-e e sincrona no provedor, entao a resposta costuma vir na primeira ou
+     * segunda tentativa — o que se espera aqui e o worker tirar o job da fila.
+     * Doze tentativas de um segundo cobrem uma fila ocupada sem prender a tela
+     * indefinidamente.
+     *
+     * Desistir NAO e erro: a nota pode sair depois, e a venda ja esta
+     * registrada. O que a tela diz e "ainda processando", com o caminho para
+     * conferir mais tarde — dizer "falhou" mandaria o lojista pedir de novo e
+     * arriscar uma segunda.
+     */
+    for (let tentativa = 0; tentativa < 12; tentativa += 1) {
+      const atual = await estadoDaNota(vendaId)
+
+      if (atual !== null && atual.status !== 'pending') {
+        if (atual.status === 'rejected') {
+          setErro(atual.rejection.message)
+          setEstado('erro')
+          return
+        }
+
+        setNota({
+          tipo: 'nfce',
+          numero: String(atual.number),
+          chave: atual.accessKey,
+          url: atual.status === 'authorized' ? atual.danfeUrl : '',
+          impostos: [],
+        })
+        setEstado('emitida')
+        return
+      }
+
+      await new Promise((r) => setTimeout(r, 1000))
+    }
+
+    setErro(
+      'A nota ainda esta sendo processada. A venda esta registrada — confira o estado dela em Vendas daqui a pouco.',
+    )
+    setEstado('erro')
   }
 
   const podeEmitir = certificado === 'valido'
@@ -164,20 +212,20 @@ export default function EtapaFiscal({
             ) : null}
 
             <div className={styles.tiposNota}>
-              <button type="button" className={styles.tipoNota} onClick={() => emitir('nfce')}>
+              {/*
+                So NFC-e.
+                O botao de NFS-e saiu: ela e documento MUNICIPAL, com outro
+                endpoint, outro cadastro e outra regra por cidade — e o emissor
+                que temos (Focus NFe, DEC-004) so faz NFC-e. Oferecer o botao
+                era prometer um documento que nao sairia, e a descoberta viria
+                no pior momento: com o cliente esperando na frente do balcao.
+              */}
+              <button type="button" className={styles.tipoNota} onClick={() => void emitir()}>
                 <span className={styles.tipoNotaIcone}>
                   <IconReceipt size={20} />
                 </span>
                 <strong>NFC-e</strong>
                 <span>Para os produtos vendidos</span>
-              </button>
-
-              <button type="button" className={styles.tipoNota} onClick={() => emitir('nfse')}>
-                <span className={styles.tipoNotaIcone}>
-                  <IconReceipt size={20} />
-                </span>
-                <strong>NFS-e</strong>
-                <span>Para servicos prestados</span>
               </button>
             </div>
 

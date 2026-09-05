@@ -9,7 +9,6 @@
  *  | criarCobrancaVenda  | POST /vendas/:id/cobrancas     | etapa pagamento  |
  *  | statusCobrancaVenda | GET  /vendas/:id/cobrancas/:cid| polling          |
  *  | confirmarDinheiro   | POST /vendas/:id/pagamentos    | recebimento manual|
- *  | emitirNota          | POST /vendas/:id/notas         | etapa fiscal     |
  *  | listarVendas        | GET  /vendas?de=&ate=          | historico        |
  *  | estornarVenda       | POST /vendas/:id/estorno       | estorno          |
  *
@@ -356,52 +355,48 @@ export type NotaEmitida = {
 }
 
 /**
- * Certificado digital da empresa.
+ * Certificado digital da empresa — RF-004.
  *
- * SUBSTITUIR POR: GET /empresa/certificado — a emissao depende de um
- * certificado A1 valido, cadastrado na tela de Empresa.
+ * A emissao depende dele. Esta consulta era `return 'ausente'` fixo: a tela
+ * SEMPRE mandava cadastrar certificado, mesmo com um valido no banco, e o botao
+ * de emitir nunca aparecia. Agora pergunta ao servidor.
  */
 export type SituacaoCertificado = 'ausente' | 'valido' | 'expirado'
 
 export async function situacaoCertificado(): Promise<SituacaoCertificado> {
-  await delay(300)
-  /* Sem backend, nenhum certificado foi enviado — a tela leva o usuario
-     para o cadastro em vez de deixar tentar emitir e falhar. */
-  return 'ausente'
-}
-
-/** SUBSTITUIR POR: POST /vendas/:id/notas */
-export async function emitirNota(
-  vendaId: string,
-  tipo: TipoNotaFiscal,
-  total: number,
-): Promise<{ ok: true; nota: NotaEmitida } | { ok: false; error: string }> {
-  await delay(1800)
-  void vendaId
-
-  const numero = String(4200 + Math.floor(Math.random() * 100))
-
-  return {
-    ok: true,
-    nota: {
-      tipo,
-      numero,
-      chave: `4126 0812 3456 7800 0190 5500 1000 0${numero} 1234 5678 90`,
-      url: '#',
-      impostos:
-        tipo === 'nfce'
-          ? [
-              { nome: 'ICMS', valor: total * 0.18 },
-              { nome: 'PIS', valor: total * 0.0165 },
-              { nome: 'COFINS', valor: total * 0.076 },
-            ]
-          : [
-              { nome: 'ISS', valor: total * 0.05 },
-              { nome: 'PIS', valor: total * 0.0065 },
-              { nome: 'COFINS', valor: total * 0.03 },
-            ],
-    },
+  let resposta: Response
+  try {
+    resposta = await fetch('/api/empresa/credenciais-fiscais', {
+      headers: { 'content-type': 'application/json' },
+      credentials: 'same-origin',
+    })
+  } catch {
+    /* Sem conexao, tratar como ausente leva o lojista a cadastrar de novo um
+       certificado que ja existe. Mas deixar emitir tambem nao serve — a
+       emissao falharia adiante. Ausente e o menos ruim, e a tela de Empresa
+       mostra a verdade. */
+    return 'ausente'
   }
+
+  if (!resposta.ok) return 'ausente'
+
+  const c = (await resposta.json().catch(() => ({}))) as {
+    hasCertificate?: boolean
+    certificateExpiresAt?: string | null
+  }
+
+  if (c.hasCertificate !== true) return 'ausente'
+
+  /*
+   * Comparacao em AAAA-MM-DD, e nao com `Date`: os dois lados sao data pura, e
+   * converter para instante traria o fuso de volta ao problema — um certificado
+   * que vence hoje viraria expirado as 21h no Brasil.
+   */
+  const hoje = new Date()
+  const dois = (n: number) => String(n).padStart(2, '0')
+  const hojeIso = `${hoje.getFullYear()}-${dois(hoje.getMonth() + 1)}-${dois(hoje.getDate())}`
+
+  return (c.certificateExpiresAt ?? '') < hojeIso ? 'expirado' : 'valido'
 }
 
 /* -------------------------------------------------------------------------- */
@@ -603,5 +598,59 @@ export async function carregarCatalogo(
       precoCusto: p.costPriceCents / 100,
       estoque: p.stock,
     })),
+  }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Emissao da nota — NR-042, RF-045, RF-054                                    */
+/* -------------------------------------------------------------------------- */
+
+export type EstadoDaNota =
+  | { status: 'pending' }
+  | { status: 'authorized'; accessKey: string; number: number; danfeUrl: string }
+  | { status: 'contingency'; accessKey: string; number: number; reason: string }
+  | { status: 'rejected'; rejection: { code: string; message: string } }
+
+/**
+ * Pede a nota da venda — RF-045.
+ *
+ * O servidor ENFILEIRA e responde 202: a venda nao espera a SEFAZ (RNF-004).
+ * Por isso o retorno de sucesso e "na fila", e nao "emitida" — dizer emitida
+ * aqui seria afirmar um documento que ainda nao existe.
+ *
+ * A recusa por classificacao (RF-046) chega com o NOME dos produtos que faltam,
+ * e a tela mostra a mensagem inteira: e ela que manda o lojista ao lugar certo.
+ */
+export async function pedirNota(
+  vendaId: string,
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  let resposta: Response
+  try {
+    resposta = await fetch(`/api/vendas/${vendaId}/nota`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      credentials: 'same-origin',
+    })
+  } catch {
+    return { ok: false, error: 'Sem conexao. A venda esta registrada — tente a nota de novo.' }
+  }
+
+  if (resposta.ok) return { ok: true }
+
+  const corpo = (await resposta.json().catch(() => ({}))) as { error?: { message?: string } }
+  return { ok: false, error: corpo.error?.message ?? 'Nao foi possivel pedir a nota.' }
+}
+
+/** O estado fiscal da venda — RF-054. */
+export async function estadoDaNota(vendaId: string): Promise<EstadoDaNota | null> {
+  try {
+    const r = await fetch(`/api/vendas/${vendaId}/nota`, {
+      headers: { 'content-type': 'application/json' },
+      credentials: 'same-origin',
+    })
+    if (!r.ok) return null
+    return (await r.json()) as EstadoDaNota
+  } catch {
+    return null
   }
 }

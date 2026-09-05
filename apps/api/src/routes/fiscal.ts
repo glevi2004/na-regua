@@ -1,4 +1,6 @@
+import type { InvoiceIssueResult } from '@na-regua/contracts'
 import { updateFiscalCredentialsInputSchema } from '@na-regua/contracts'
+import { requestInvoice, type RequestInvoiceDeps } from '@na-regua/core'
 import type { FastifyInstance } from 'fastify'
 import { requireContext } from '../plugins/execution-context.js'
 import { LIMITE_DE_ESCRITA } from '../plugins/rate-limit.js'
@@ -11,6 +13,16 @@ import { validate } from '../plugins/validate.js'
  * entra e cifrado antes de tocar o banco (`secret-box`), e o que sai NUNCA
  * inclui segredo — so se ele existe e ate quando o certificado vale.
  */
+
+export type EmissaoDeps = RequestInvoiceDeps & {
+  /** A nota ja emitida desta venda, para a tela mostrar o estado — RF-054. */
+  readonly store: {
+    findBySale(
+      companyId: string,
+      saleId: string,
+    ): Promise<{ resultado: InvoiceIssueResult } | undefined>
+  }
+}
 
 export type CredenciaisFiscaisDeps = {
   readonly fiscalCredentials: {
@@ -41,6 +53,49 @@ const TETO_DO_CERTIFICADO = 512 * 1024
  * precisa saber que o servidor esta sem a chave de cifragem — a acao de quem
  * le e diferente nos dois casos.
  */
+/**
+ * Emissao da nota de uma venda — NR-042, RF-045, RF-046, RF-054.
+ *
+ * Duas rotas: pedir e consultar. Sao separadas porque respondem perguntas
+ * diferentes em momentos diferentes — pedir e uma escrita que enfileira, e
+ * consultar e o que a tela faz enquanto espera.
+ */
+export function registerEmissaoRoutes(app: FastifyInstance, deps: EmissaoDeps): void {
+  /**
+   * Pede a nota — RF-045.
+   *
+   * `202` e nao `201`: nada foi criado ainda. A SEFAZ nem viu o pedido, e
+   * responder 201 diria a quem integra que existe um documento fiscal.
+   */
+  app.post(
+    '/vendas/:id/nota',
+    { config: { rateLimit: LIMITE_DE_ESCRITA } },
+    async (request, reply) => {
+      const ctx = requireContext(request)
+      const { id } = request.params as { id: string }
+
+      const r = await requestInvoice(deps, ctx, { saleId: id })
+
+      return reply.code(202).send(r)
+    },
+  )
+
+  /**
+   * O estado fiscal da venda — RF-054.
+   *
+   * `queued` quando ainda nao ha nota: a tela precisa distinguir "esperando" de
+   * "nunca pedida", e as duas nao sao a mesma coisa para quem esta olhando.
+   */
+  app.get('/vendas/:id/nota', async (request, reply) => {
+    const ctx = requireContext(request)
+    const { id } = request.params as { id: string }
+
+    const nota = await deps.store.findBySale(ctx.companyId, id)
+
+    return reply.code(200).send(nota === undefined ? { status: 'pending' } : nota.resultado)
+  })
+}
+
 export function registerFiscalRoutes(
   app: FastifyInstance,
   deps: CredenciaisFiscaisDeps | null,
