@@ -56,6 +56,24 @@ export type InvoiceStore = {
    */
   save(nota: NotaGuardada): Promise<NotaGuardada>
 
+  /**
+   * As notas em contingencia desta empresa, DA MAIS ANTIGA para a mais nova —
+   * RF-053.
+   *
+   * A ordem e o contrato, e nao preferencia: a SEFAZ recusa lacuna de
+   * numeracao, e reconciliar fora de ordem deixaria buracos que so aparecem na
+   * proxima emissao.
+   */
+  listContingency(companyId: string): Promise<readonly NotaGuardada[]>
+
+  /**
+   * Troca uma nota em contingencia pela versao autorizada — RF-053.
+   *
+   * A chave e o numero NAO mudam: a nota e a mesma, o que mudou e a SEFAZ ter
+   * confirmado. Por isso e uma atualizacao e nao uma nota nova.
+   */
+  markAuthorized(companyId: string, saleId: string, resultado: InvoiceIssueResult): Promise<void>
+
   /** Marca a nota como cancelada, guardando o XML do evento — RF-050. */
   markCancelled(
     companyId: string,
@@ -100,6 +118,28 @@ export class InMemoryInvoiceStore implements InvoiceStore {
     }
 
     return nota
+  }
+
+  async listContingency(companyId: string): Promise<readonly NotaGuardada[]> {
+    return [...this.porVenda.values()].filter(
+      (n) => n.companyId === companyId && n.resultado.status === 'contingency',
+    )
+  }
+
+  async markAuthorized(
+    companyId: string,
+    saleId: string,
+    resultado: InvoiceIssueResult,
+  ): Promise<void> {
+    const chave = InMemoryInvoiceStore.chaveDaVenda(companyId, saleId)
+    const atual = this.porVenda.get(chave)
+    if (atual === undefined) return
+
+    const nova = { ...atual, resultado }
+    this.porVenda.set(chave, nova)
+    if (resultado.status !== 'rejected') {
+      this.porChave.set(`${companyId}:${resultado.accessKey}`, nova)
+    }
   }
 
   async markCancelled(

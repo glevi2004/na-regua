@@ -81,6 +81,9 @@ importers:
       '@na-regua/env':
         specifier: workspace:*
         version: link:../../packages/env
+      '@na-regua/fiscal':
+        specifier: workspace:*
+        version: link:../../packages/fiscal
       '@na-regua/money':
         specifier: workspace:*
         version: link:../../packages/money

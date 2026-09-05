@@ -140,6 +140,7 @@ const UNIDADE: Record<string, string> = {
 export function criarEmissorFocusNfe(opcoes: FocusNfeOptions): {
   issue(request: IssueInvoiceRequest): Promise<InvoiceIssueResult>
   cancel(request: CancelInvoiceRequest): Promise<InvoiceCancellation>
+  consult(request: { companyId: string; saleId: string }): Promise<InvoiceIssueResult | undefined>
 } {
   const buscar = opcoes.fetch ?? globalThis.fetch
   const base = FOCUS_NFE_URLS[opcoes.ambiente]
@@ -386,6 +387,49 @@ export function criarEmissorFocusNfe(opcoes: FocusNfeOptions): {
       })
 
       return gravada.resultado
+    },
+
+    /**
+     * Consulta o estado atual — RF-053.
+     *
+     * `GET /nfce/{ref}`, com a referencia que e o nosso `saleId`. NAO emite: se
+     * o provedor nao conhece a referencia, isto devolve `undefined` em vez de
+     * criar a nota — confundir consulta com emissao faria uma reconciliacao
+     * gerar documentos fiscais.
+     *
+     * O provedor NAO documenta como uma nota emitida em contingencia chega a
+     * SEFAZ depois; ha um campo `contingencia_offline_efetivada` que sugere que
+     * ele resolve sozinho, e sugerir nao basta para um documento fiscal. Por
+     * isso o que fazemos e PERGUNTAR: se a nota autorizou, a guarda passa a
+     * refletir isso; se nao, ela continua em contingencia, visivel.
+     */
+    async consult(request: {
+      companyId: string
+      saleId: string
+    }): Promise<InvoiceIssueResult | undefined> {
+      const { token } = await credenciais(request.companyId)
+
+      const { status, corpo } = await chamar(`/nfce/${encodeURIComponent(request.saleId)}`, {
+        method: 'GET',
+        token,
+      })
+
+      /* 404: o provedor nao conhece esta referencia. Nao e erro — e "essa venda
+         nunca foi transmitida". */
+      if (status === 404) return undefined
+
+      const resposta = corpo as RespostaDeNota
+
+      /* Ainda processando nao e desfecho: devolver `rejected` aqui marcaria como
+         recusada uma nota que talvez autorize em segundos. */
+      if (resposta.status === 'processando_autorizacao') return undefined
+
+      return paraResultado(resposta, {
+        companyId: request.companyId,
+        saleId: request.saleId,
+        series: Number(resposta.serie) || 1,
+        requestedAt: new Date().toISOString(),
+      } as IssueInvoiceRequest)
     },
 
     async cancel(request: CancelInvoiceRequest): Promise<InvoiceCancellation> {

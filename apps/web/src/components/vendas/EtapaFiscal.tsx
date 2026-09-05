@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import {
   estadoDaNota,
   pedirNota,
+  reconciliarContingencia,
   situacaoCertificado,
   type EstadoEmissao,
   type NotaEmitida,
@@ -36,6 +37,16 @@ export default function EtapaFiscal({
   useEffect(() => {
     let cancelado = false
     async function carregar() {
+      /*
+       * Reconcilia antes de perguntar o certificado — RF-053.
+       *
+       * Este e o momento em que o lojista esta olhando para nota: uma que a
+       * SEFAZ ja aceitou nao pode continuar aparecendo como pendente na frente
+       * dele. Custa nada quando nao ha contingencia — o caso de uso volta sem
+       * consultar o provedor.
+       */
+      await reconciliarContingencia()
+
       const s = await situacaoCertificado()
       if (!cancelado) setCertificado(s)
     }

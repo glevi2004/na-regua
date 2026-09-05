@@ -18,6 +18,7 @@
     "@na-regua/banking": "workspace:*",
     "@na-regua/contracts": "workspace:*",
     "@na-regua/core": "workspace:*",
+    "@na-regua/fiscal": "workspace:*",
     "@na-regua/db": "workspace:*",
     "@na-regua/env": "workspace:*",
     "@na-regua/money": "workspace:*",

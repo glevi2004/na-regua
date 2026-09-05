@@ -92,7 +92,12 @@ describe('emissao fiscal — RNF-004', () => {
         issue: async () => {
           throw new Error('ECONNRESET')
         },
+        /* Este consumidor so emite: cancelar e consultar nao passam por ele, e
+           lancar deixa isso explicito em vez de devolver um valor plausivel. */
         cancel: async () => {
+          throw new Error('nao usado')
+        },
+        consult: async () => {
           throw new Error('nao usado')
         },
       },

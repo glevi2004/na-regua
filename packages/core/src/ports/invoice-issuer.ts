@@ -55,4 +55,23 @@ export type InvoiceIssuer = {
    * e nao 403, porque 403 confirma que a nota existe.
    */
   cancel(request: CancelInvoiceRequest): Promise<InvoiceCancellation>
+
+  /**
+   * Pergunta ao provedor o estado ATUAL da nota — RF-053.
+   *
+   * Existe para a contingencia. Nota emitida offline tem chave e numero e ainda
+   * nao tem protocolo da SEFAZ; quando a SEFAZ volta, ela e autorizada — e a
+   * unica forma de saber e perguntar.
+   *
+   * `undefined` quando o provedor nao conhece a referencia: resultado, e nao
+   * excecao, porque "essa venda nunca foi transmitida" e uma resposta que a
+   * reconciliacao precisa tratar.
+   *
+   * NAO emite. Se a nota nao existe la, este metodo nao a cria — criar e
+   * `issue`, e confundir os dois faria uma consulta virar uma segunda nota.
+   */
+  consult(request: {
+    readonly companyId: string
+    readonly saleId: string
+  }): Promise<InvoiceIssueResult | undefined>
 }

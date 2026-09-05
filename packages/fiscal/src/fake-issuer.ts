@@ -160,6 +160,39 @@ export class FakeInvoiceIssuer {
     return resultado
   }
 
+  /**
+   * Consulta o estado — RF-053.
+   *
+   * O falso devolve o que guardou, e passa a autorizada quando `sefazDisponivel`
+   * volta: e assim que o teste da reconciliacao exercita "a SEFAZ voltou" sem
+   * inventar um segundo mecanismo.
+   */
+  async consult(request: {
+    companyId: string
+    saleId: string
+  }): Promise<InvoiceIssueResult | undefined> {
+    const guardada = this.porVenda.get(`${request.companyId}:${request.saleId}`)
+    if (guardada === undefined) return undefined
+
+    const r = guardada.resultado
+
+    /* Contingencia com a SEFAZ de volta vira autorizada — chave e numero
+       IGUAIS: e a mesma nota, e o que mudou foi a confirmacao. */
+    if (r.status === 'contingency' && this.opcoes.sefazDisponivel !== false) {
+      return {
+        status: 'authorized',
+        accessKey: r.accessKey,
+        number: r.number,
+        series: r.series,
+        danfeUrl: `https://falso.local/danfe/${r.accessKey}.html`,
+        xml: r.xml,
+        issuedAt: r.issuedAt,
+      }
+    }
+
+    return r
+  }
+
   async cancel(request: CancelInvoiceRequest): Promise<InvoiceCancellation> {
     if (this.opcoes.falhaDeInfraestrutura) {
       throw new Error(this.opcoes.falhaDeInfraestrutura)
