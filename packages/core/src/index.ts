@@ -227,3 +227,10 @@ export type {
   ReconcileContingencyDeps,
   ResultadoDaReconciliacao,
 } from './fiscal/reconcile-contingency.js'
+
+/* Relatorios de venda — NR-077, US-041. */
+export { buildRevenueByMonth } from './reports/revenue-by-month.js'
+export type { RevenueReportDeps } from './reports/revenue-by-month.js'
+export { rankCustomers, rankProducts } from './reports/rankings.js'
+export type { RankingDeps } from './reports/rankings.js'
+export type { MesFaturado, Ranking, ReportRepository } from './ports/report-repository.js'
