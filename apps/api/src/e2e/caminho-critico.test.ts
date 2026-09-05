@@ -10,8 +10,9 @@ import { getClient, migrate, withTenant } from '@na-regua/db'
 import Fastify, { type FastifyInstance } from 'fastify'
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest'
 import { registerErrorHandler } from '../plugins/error-handler.js'
-import type { AuthenticatedPrincipal } from '../plugins/execution-context.js'
 import { registerRateLimit } from '../plugins/rate-limit.js'
+import { registerSession } from '../plugins/session.js'
+import { registerAuthRoutes } from '../routes/auth.js'
 import { registerCadastroRoutes } from '../routes/cadastro.js'
 import { registerSaleRoutes } from '../routes/sales.js'
 
@@ -39,12 +40,29 @@ import { registerSaleRoutes } from '../routes/sales.js'
  * `db`. E a camada onde os defeitos desta base tem aparecido: dependencia nao
  * declarada, fiacao errada na composicao, SQL que nunca rodou.
  *
- * ## O que ele NAO cobre, e por que
+ * ## A sessao agora e de verdade
  *
- * A sessao. Nao existe rota de login (so `/auth/me`), entao nao ha como obter
- * um token por HTTP. A identidade e injetada, e o que se prova daqui para baixo
- * e o resto do caminho. Quando a NR-014 fechar, o `onRequest` de teste sai e o
- * fluxo comeca no login.
+ * Ate a NR-014 fechar, este arquivo injetava o `principal` num `onRequest` de
+ * teste — a unica coisa falsa que restava. Ela saiu. O fluxo comeca em
+ * `POST /auth/signup`, guarda o token que a resposta traz e o manda em
+ * `Authorization` em toda chamada seguinte, atravessando o MESMO plugin de
+ * sessao que a api registra.
+ *
+ * A diferenca nao e cosmetica. Com o principal injetado, um plugin de sessao
+ * quebrado — token nao lido, `companyId` nulo virando principal, claims sem
+ * papel — passava despercebido, porque nada neste teste dependia dele. Agora
+ * uma falha ali derruba o primeiro degrau, e o resto cai atras.
+ *
+ * Um caso NEGATIVO acompanha: a mesma chamada sem cabecalho responde 401. Sem
+ * ele, uma sessao que aceitasse qualquer coisa (ou nenhuma) continuaria verde.
+ *
+ * ## O que ele ainda NAO cobre, e por que
+ *
+ * O fluxo 3 do `docs/engenharia/testes.md` — cobranca no WhatsApp, link de
+ * pagamento, baixa por webhook — nao tem NENHUMA rota na api (DEC-003,
+ * DEC-006). E o navegador continua de fora: as listas de produto e de cliente
+ * do web ainda leem `lib/mock-data`, entao um Playwright sobre elas
+ * exercitaria mock. Suite verde que prova nada e pior que suite nenhuma.
  */
 
 const DATABASE_URL = process.env.DATABASE_URL
@@ -76,18 +94,24 @@ const EAN = `789${Date.now()}`.slice(0, 13)
  * reexecucao contra o mesmo banco, e o resultado continua reconhecivelmente
  * falso, como manda docs/engenharia/testes.md.
  */
-const CNPJ = (() => {
+function cnpjValido(base12: string): string {
   const digito = (nums: number[], pesos: number[]): number => {
     const resto = nums.reduce((acc, n, i) => acc + n * pesos[i]!, 0) % 11
     return resto < 2 ? 0 : 11 - resto
   }
 
-  const base = String(Date.now()).slice(-12).split('').map(Number)
+  const base = base12.split('').map(Number)
   const d1 = digito(base, [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2])
   const d2 = digito([...base, d1], [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2])
 
-  return `${base.join('')}${d1}${d2}`
-})()
+  return `${base12}${d1}${d2}`
+}
+
+const CNPJ = cnpjValido(String(Date.now()).slice(-12))
+
+/* A segunda loja do mesmo dono. Base deslocada em um para nao colidir com a
+   primeira nem com a execucao vizinha. */
+const CNPJ_SEGUNDA_LOJA = cnpjValido(String(Date.now() + 1).slice(-12))
 
 /*
  * Os corpos enviados, num lugar so — e conferidos contra os contratos por um
@@ -103,6 +127,23 @@ const EMPRESA = {
   cnpj: CNPJ,
   email: `contato@${CNPJ}.local`,
   phone: '41999990000',
+}
+
+/*
+ * O cadastro de conta — o primeiro degrau do caminho critico.
+ *
+ * O segredo tem oito caracteres porque o contrato exige oito, e e obviamente
+ * falso como manda docs/engenharia/testes.md. Ele nao vai para o nosso banco:
+ * quem o guarda e o provedor de identidade (aqui o falso, por instancia).
+ */
+const SENHA = 'senha-de-teste'
+
+const CADASTRO = {
+  name: 'Operadora do Caminho Critico',
+  email: `dona@${CNPJ}.local`,
+  secret: SENHA,
+  legalName: EMPRESA.legalName,
+  cnpj: CNPJ,
 }
 
 const PRODUTO = {
@@ -143,7 +184,6 @@ const vendaPix = (productId: string) => ({
 
 describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
   let app: FastifyInstance
-  let usuario: string
 
   /*
    * O MESMO cliente que a api usa, e nao uma conexao propria.
@@ -172,11 +212,46 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
    */
 
   /**
-   * Mutavel de proposito: no onboarding ainda nao existe empresa, e a partir
-   * dele toda chamada corre sob a que acabou de nascer. E o que torna o teste
-   * um FLUXO em vez de chamadas soltas com dados montados a mao.
+   * O token e a empresa nascem no primeiro degrau e valem para todos os outros.
+   *
+   * Mutaveis de proposito: antes do cadastro nao existe nem sessao nem loja, e
+   * a partir dele toda chamada corre sob as duas. E o que torna este arquivo um
+   * FLUXO, e nao chamadas soltas com dados montados a mao.
    */
-  let principal: AuthenticatedPrincipal
+  let token: string
+  let empresaId: string
+
+  /**
+   * Toda chamada autenticada passa por aqui — um lugar so para o cabecalho.
+   *
+   * Os cabecalhos do chamador vem DEPOIS do `authorization`, e nao antes: a
+   * venda manda `idempotency-key` junto, e um espalhamento na ordem inversa
+   * apagaria um dos dois em silencio.
+   */
+  const comSessao = (opcoes: {
+    method: 'GET' | 'POST'
+    url: string
+    payload?: object
+    headers?: Record<string, string>
+  }) => {
+    const base = {
+      method: opcoes.method,
+      url: opcoes.url,
+      headers: { authorization: `Bearer ${token}`, ...(opcoes.headers ?? {}) },
+    }
+
+    /*
+     * Dois caminhos, e nao um espalhamento condicional.
+     *
+     * Com `exactOptionalPropertyTypes`, um `payload` que pode ser `undefined`
+     * nao casa com a sobrecarga de `inject`, e o retorno degrada para `void` —
+     * o que faz TODA assercao seguinte falhar com "statusCode nao existe", bem
+     * longe da causa.
+     */
+    return opcoes.payload === undefined
+      ? app.inject(base)
+      : app.inject({ ...base, payload: opcoes.payload })
+  }
 
   beforeAll(async () => {
     /*
@@ -187,10 +262,12 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
      * a maquina de desenvolvimento nem sempre.
      *
      * Preenchidos aqui, e nao no workflow: sao exigencia do VALIDADOR, nao
-     * deste teste. O E2E nao emite nem verifica token (nao ha rota de login),
-     * entao um segredo de mentira e honesto — e por o segredo de verdade no
-     * workflow seria pedir uma variavel de CI para um caminho que ninguem
-     * exercita. O `??` deixa o ambiente real vencer, se algum dia houver um.
+     * deste teste. O `JWT_SECRET` de mentira continua honesto mesmo agora que
+     * ha sessao de verdade — quem emite o token e o `InMemorySessionIssuer`
+     * da ADR-0002, que guarda claims num mapa e nao assina nada. Por o segredo
+     * de producao no workflow seria pedir uma variavel de CI para um caminho
+     * que ninguem exercita. O `??` deixa o ambiente real vencer, se algum dia
+     * houver um.
      */
     vi.stubEnv('API_URL', process.env.API_URL ?? 'http://localhost:3333')
     vi.stubEnv('JWT_SECRET', process.env.JWT_SECRET ?? 'segredo-que-o-e2e-nao-usa')
@@ -203,30 +280,25 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
 
     await migrate(MIGRATION_URL!)
 
-    usuario = randomUUID()
-    const placeholder = randomUUID()
-
-    /* O usuario existe antes da empresa porque `created_by` referencia
-       `users`. Gravado dentro de um tenant, como todo acesso desta base. */
-    await withTenant(
-      sql(),
-      placeholder,
-      (tx) => tx`
-        INSERT INTO users (id, name, email)
-        VALUES (${usuario}, 'Operadora', ${`e2e-${usuario}@local`})
-      `,
-    )
-
-    principal = { companyId: placeholder, userId: usuario, role: 'owner' }
-
     app = Fastify({ logger: false })
     registerErrorHandler(app)
     await registerRateLimit(app)
 
-    /* A unica coisa falsa deste teste. Ver o cabecalho sobre a NR-014. */
-    app.addHook('onRequest', async (request) => {
-      request.principal = principal
-    })
+    /*
+     * UMA instancia de `buildAuthDeps`, e nao duas.
+     *
+     * O provedor de identidade falso guarda as credenciais num mapa proprio.
+     * Duas instancias seriam dois mapas: o cadastro escreveria num, o login
+     * leria do outro, e a pessoa cadastrava sem conseguir entrar. O proprio
+     * `composition.ts` traz esse aviso, e chamar o construtor duas vezes aqui
+     * reproduziria o defeito dentro do teste que existe para pega-lo.
+     */
+    const authDeps = composicao.buildAuthDeps()
+
+    /* O plugin de sessao DE VERDADE. Nao ha mais `onRequest` de mentira: o
+       `principal` desta suite passa a sair do token, como em producao. */
+    registerSession(app, authDeps.sessions)
+    registerAuthRoutes(app, authDeps)
 
     /* Os MESMOS construtores que o `index.ts` usa. E o que faz este teste pegar
        fiacao errada na composicao — o defeito que os testes de rota, com
@@ -243,12 +315,12 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
     /*
      * Guarda para o caso de o `beforeAll` ter falhado.
      *
-     * Sem ela, a limpeza estoura em `principal.companyId` indefinido e o
-     * relatorio mostra ESSE erro no lugar do que realmente quebrou — foi o que
-     * aconteceu aqui: a causa era variavel de ambiente faltando, e a CI acusou
-     * "Cannot read properties of undefined".
+     * Sem ela, a limpeza estoura em `empresaId` indefinido e o relatorio
+     * mostra ESSE erro no lugar do que realmente quebrou — foi o que aconteceu
+     * aqui: a causa era variavel de ambiente faltando, e a CI acusou "Cannot
+     * read properties of undefined".
      */
-    if (composicao === undefined || principal === undefined) {
+    if (composicao === undefined) {
       vi.unstubAllEnvs()
       return
     }
@@ -285,26 +357,66 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
   let vendaNumero: number
 
   describe('fluxo 1 — onboarding ate a primeira venda', () => {
-    it('cadastra a empresa e ela ja nasce com plano de contas', async () => {
+    it('recusa a operacao sem sessao, antes de qualquer cadastro', async () => {
+      /*
+       * O caso negativo vem PRIMEIRO, e de proposito.
+       *
+       * Ele e o que da sentido a todos os seguintes: sem ele, um plugin de
+       * sessao que aceitasse qualquer requisicao — ou o `onRequest` de mentira
+       * que este arquivo tinha ate agora — deixaria a suite inteira verde
+       * provando nada. Depois do cadastro o token existe, e a mesma chamada
+       * passa; aqui ele ainda nao existe, e ela tem de falhar.
+       */
+      const r = await app.inject({ method: 'GET', url: '/produtos' })
+
+      expect(r.statusCode).toBe(401)
+    })
+
+    it('recusa token que nao emitiu', async () => {
+      /*
+       * Sem este caso, o anterior sozinho passaria com um plugin que apenas
+       * exigisse a PRESENCA do cabecalho, sem ler o que vem nele. Os dois
+       * juntos separam "olha o cabecalho" de "valida a sessao".
+       */
+      const r = await app.inject({
+        method: 'GET',
+        url: '/produtos',
+        headers: { authorization: 'Bearer nao-foi-esta-api-que-emitiu' },
+      })
+
+      expect(r.statusCode).toBe(401)
+    })
+
+    it('cadastra a conta e a loja ja nasce com plano de contas', async () => {
       const r = await app.inject({
         method: 'POST',
-        url: '/empresas',
-        payload: EMPRESA,
+        url: '/auth/signup',
+        payload: CADASTRO,
       })
 
       expect(r.statusCode).toBe(201)
 
-      /* Daqui para a frente, tudo corre sob a empresa que acabou de nascer. */
-      principal = { ...principal, companyId: r.json().id }
+      /*
+       * Daqui para a frente, tudo corre sob a sessao que acabou de nascer.
+       *
+       * O cadastro devolve a sessao ABERTA, com a empresa ja escolhida: quem
+       * acabou de se cadastrar quer usar o sistema, e nao digitar tudo de novo.
+       * E o que permite este teste seguir sem passar por `/auth/select-company`.
+       */
+      token = r.json().token
+      empresaId = r.json().memberships[0].companyId
+
+      expect(token).toBeTruthy()
+      expect(empresaId).toBeTruthy()
 
       /* RF-081: o plano padrao e semeado no onboarding. Sem isto o lojista abre
          a tela de classificacao vazia e a resposta pratica dele e nao
          classificar nada — o que reduz o DRE a uma linha so. */
       const contas = await withTenant(
         sql(),
-        principal.companyId,
+        empresaId,
         (tx) => tx<{ total: string }[]>`
-          SELECT count(*) AS total FROM accounts WHERE company_id = ${principal.companyId}
+          SELECT count(*) AS total FROM accounts WHERE company_id = ${empresaId}
         `,
       )
 
@@ -314,8 +426,66 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
       expect(Number(contas[0]!.total)).toBe(PLANO_DE_CONTAS_PADRAO.length)
     })
 
-    it('cadastra o produto que sera vendido', async () => {
+    it('entra de novo com as credenciais que acabou de criar', async () => {
+      /*
+       * O degrau que o `composition.ts` avisa ser o mais facil de quebrar.
+       *
+       * O provedor de identidade falso guarda as credenciais num mapa da
+       * INSTANCIA. Se o cadastro e o login recebessem instancias diferentes, o
+       * cadastro escreveria num mapa e o login leria do outro: a pessoa se
+       * cadastraria e nao conseguiria entrar. E um defeito de FIACAO, invisivel
+       * para os testes de rota — que injetam a dependencia ja pronta — e que ja
+       * apareceu neste projeto, com a tela de cadastro no ar e o login
+       * recusando toda senha.
+       *
+       * O token daqui substitui o do cadastro para o resto do fluxo: e o que a
+       * pessoa realmente carrega no dia seguinte.
+       */
       const r = await app.inject({
+        method: 'POST',
+        url: '/auth/login',
+        payload: { identifier: CADASTRO.email, secret: SENHA },
+      })
+
+      expect(r.statusCode).toBe(200)
+      expect(r.json().token).toBeTruthy()
+
+      token = r.json().token
+    })
+
+    it('abre uma segunda loja, que nasce com o proprio plano de contas', async () => {
+      /*
+       * `POST /empresas` perdeu o lugar de primeiro degrau quando o cadastro
+       * de conta assumiu a criacao da loja, mas a rota continua existindo e o
+       * lojista com duas lojas continua usando-a (RF-119). Deixa-la sem
+       * exercicio E2E trocaria uma cobertura por outra em vez de somar.
+       *
+       * A operacao segue na PRIMEIRA loja: abrir a segunda nao troca a sessao,
+       * e trocar exigiria `/auth/select-company`. Aqui basta provar que ela
+       * nasce inteira.
+       */
+      const r = await comSessao({
+        method: 'POST',
+        url: '/empresas',
+        payload: { ...EMPRESA, cnpj: CNPJ_SEGUNDA_LOJA, email: `filial@${CNPJ}.local` },
+      })
+
+      expect(r.statusCode).toBe(201)
+      expect(r.json().id).not.toBe(empresaId)
+
+      const contas = await withTenant(
+        sql(),
+        r.json().id,
+        (tx) => tx<{ total: string }[]>`
+          SELECT count(*) AS total FROM accounts WHERE company_id = ${r.json().id}
+        `,
+      )
+
+      expect(Number(contas[0]!.total)).toBe(PLANO_DE_CONTAS_PADRAO.length)
+    })
+
+    it('cadastra o produto que sera vendido', async () => {
+      const r = await comSessao({
         method: 'POST',
         url: '/produtos',
         payload: PRODUTO,
@@ -335,7 +505,7 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
     })
 
     it('registra a primeira venda', async () => {
-      const r = await app.inject({
+      const r = await comSessao({
         method: 'POST',
         url: '/sales',
         headers: { 'idempotency-key': randomUUID() },
@@ -362,14 +532,17 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
 
   describe('fluxo 2 — leitura do codigo de barras ate o recebivel', () => {
     it('acha o produto pelo codigo lido no balcao', async () => {
-      const r = await app.inject({ method: 'GET', url: `/produtos/codigo-de-barras/${EAN}` })
+      const r = await comSessao({ method: 'GET', url: `/produtos/codigo-de-barras/${EAN}` })
 
       expect(r.statusCode).toBe(200)
       expect(r.json().id).toBe(produtoId)
     })
 
     it('codigo que nao existe volta 404, e nao lista vazia', async () => {
-      const r = await app.inject({ method: 'GET', url: '/produtos/codigo-de-barras/0000000000000' })
+      const r = await comSessao({
+        method: 'GET',
+        url: '/produtos/codigo-de-barras/0000000000000',
+      })
 
       /* O balcao precisa distinguir "cadastro a fazer" de "cadastro feito e
          zerado". Lista vazia confundiria os dois. */
@@ -377,7 +550,7 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
     })
 
     it('venda no credito parcelado gera os recebiveis', async () => {
-      const r = await app.inject({
+      const r = await comSessao({
         method: 'POST',
         url: '/sales',
         headers: { 'idempotency-key': randomUUID() },
@@ -388,10 +561,10 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
 
       const linhas = await withTenant(
         sql(),
-        principal.companyId,
+        empresaId,
         (tx) => tx<{ amount_cents: string; net_amount_cents: string }[]>`
           SELECT amount_cents, net_amount_cents FROM receivables
-          WHERE company_id = ${principal.companyId} AND sale_id = ${r.json().sale.id}
+          WHERE company_id = ${empresaId} AND sale_id = ${r.json().sale.id}
           ORDER BY due_date
         `,
       )
@@ -416,9 +589,9 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
     it('a venda numerou em sequencia, sem repetir', async () => {
       const linhas = await withTenant(
         sql(),
-        principal.companyId,
+        empresaId,
         (tx) => tx<{ number: string }[]>`
-          SELECT number FROM sales WHERE company_id = ${principal.companyId} ORDER BY number
+          SELECT number FROM sales WHERE company_id = ${empresaId} ORDER BY number
         `,
       )
 
@@ -433,13 +606,13 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
       const chave = randomUUID()
       const corpo = vendaPix(produtoId)
 
-      const primeira = await app.inject({
+      const primeira = await comSessao({
         method: 'POST',
         url: '/sales',
         headers: { 'idempotency-key': chave },
         payload: corpo,
       })
-      const segunda = await app.inject({
+      const segunda = await comSessao({
         method: 'POST',
         url: '/sales',
         headers: { 'idempotency-key': chave },
@@ -459,7 +632,7 @@ describe.skipIf(!DATABASE_URL)('caminho critico — NR-049', () => {
     })
 
     it('sem o cabecalho, a venda e recusada em vez de arriscada', async () => {
-      const r = await app.inject({
+      const r = await comSessao({
         method: 'POST',
         url: '/sales',
         payload: vendaDinheiro(produtoId),
