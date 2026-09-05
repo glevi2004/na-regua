@@ -27,6 +27,7 @@ import {
   createAppointmentRepository,
   createBankTransactionWriter,
   createChartOfAccountsRepository,
+  createReportRepository,
   createCompanyRepository,
   createCustomerRepository,
   createFiscalCredentials,
@@ -49,6 +50,7 @@ import type { InvoiceIssuer } from '@na-regua/core'
 import type { CadastroDeps } from './routes/cadastro.js'
 import type { ConciliacaoDeps } from './routes/conciliacao.js'
 import type { ContabilidadeDeps } from './routes/contabilidade.js'
+import type { RelatoriosDeps } from './routes/relatorios.js'
 import type { ContasDeps } from './routes/contas.js'
 import { createInvoiceQueue } from './invoice-queue.js'
 import type { CredenciaisFiscaisDeps, EmissaoDeps } from './routes/fiscal.js'
@@ -301,6 +303,18 @@ export function buildConciliacaoDeps(): ConciliacaoDeps {
       audit,
     },
   }
+}
+
+/**
+ * Faturamento e rankings — NR-077, US-041.
+ *
+ * O fuso vem da `TZ` do ambiente e nao de uma constante no repositorio: e ele
+ * que decide em qual MES cai a venda das 21h30 do dia 31, e essa decisao tem
+ * de ter uma fonte so no sistema inteiro.
+ */
+export function buildRelatoriosDeps(): RelatoriosDeps {
+  const sql = getClient(env.DATABASE_URL)
+  return { reports: createReportRepository(sql, env.TZ) }
 }
 
 /** Plano de contas, classificacao e DRE — NR-077. */

@@ -54,3 +54,6 @@ export { ChaveDeSegredoInvalida, cifrar, decifrar, lerChaveDeSegredo } from './s
 export { createFiscalCredentials } from './fiscal-credentials-repository.js'
 export type { SituacaoFiscalDaEmpresa } from './fiscal-credentials-repository.js'
 export { createSaleFiscalReader } from './sale-fiscal-repository.js'
+
+/* Faturamento e rankings — NR-077, US-041. */
+export { createReportRepository } from './report-repository.js'
